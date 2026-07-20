@@ -47,6 +47,7 @@ python3 -m proof_factory repo-backfill
 python3 -m proof_factory repo-status
 python3 -m proof_factory repo-sync
 python3 -m proof_factory lab-status
+scripts/bootstrap-formal-conjectures.sh
 python3 scripts/submit_lab.py --problem PROBLEM --name NAME --hypothesis H --expected-signal S -- python3 search.py
 python3 -m proof_factory review --attempt ID --decision reject --reviewer "Proof Factory contribution gate" --note "..."
 scripts/approve-and-publish.sh ATTEMPT_ID "human review note"

@@ -288,6 +288,12 @@ WORK RULES
    findings, negative results, checkers, and write-ups in it. The checkpoint service records the epoch
    under Charlie's ctkrug identity;
    do not rewrite history, change remotes, or claim that a Git commit validates the mathematics.
+   Do not stop solely because a non-secret development dependency is missing: you may provision a
+   project-scoped toolchain/cache from its official pinned source, verify the installed version, and
+   record that setup in the experiment. For a Formal Conjectures target, first run
+   {store.ROOT / 'scripts' / 'bootstrap-formal-conjectures.sh'}; it installs no system packages,
+   changes no shell profile, and serializes the shared Lean cache. Do not install system packages,
+   alter global configuration, or use credentials without explicit authorization.
    For a reproducible computational test, run:
    python3 {EXPERIMENT_RUNNER} --name NAME --hypothesis HYPOTHESIS --expected-signal SIGNAL --timeout SECONDS --memory-mb MB --source-url URL -- COMMAND ARGS...
    It runs argv directly without a shell and stores logs, metadata, seeds, limits, source/script/dependency hashes, git state, and peak memory under .proof-experiments/.
