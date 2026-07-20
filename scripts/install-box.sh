@@ -10,6 +10,7 @@ install -d -m 0755 site research data publications
 
 python3 -m venv .venv
 .venv/bin/pip install --disable-pip-version-check -r requirements.txt
+./scripts/install-lab-tools.sh
 npm ci --no-audit --no-fund
 .venv/bin/python -m proof_factory render
 git config user.name "Proof Factory"

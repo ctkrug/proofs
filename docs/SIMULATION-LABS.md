@@ -31,6 +31,9 @@ python3 /root/proof-factory/scripts/submit_lab.py \
 - Paths cannot escape the workspace. Research, SSH, GitHub, Codex, deployment, and project-factory
   credentials are inaccessible to the lab service.
 - One job runs at a time with low CPU/IO priority, a 60% CPU quota, and explicit memory limits.
+- Python jobs resolve through `.lab-venv`, whose NumPy, SciPy, SymPy, NetworkX, Z3, and PuLP versions
+  are pinned in `requirements-lab.txt`; system packages provide CaDiCaL, MiniSat, nauty, GAP, PARI/GP,
+  Singular, CBC, and the Lean/Lake toolchain.
 - A segment is at most 24 hours; at most seven segments may run. A timed-out job is requeued only when
   its declared checkpoint exists.
 - The underlying experiment runner records command, sources, seed, platform, limits, input hashes,

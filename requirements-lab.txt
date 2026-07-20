@@ -1,0 +1,6 @@
+networkx==3.3
+numpy==1.26.4
+PuLP==2.8.0
+scipy==1.11.4
+sympy==1.12
+z3-solver==4.13.0.0

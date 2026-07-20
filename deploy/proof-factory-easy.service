@@ -7,6 +7,7 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
+Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
 Environment=PROOF_EASY_DELEGATE_TIMEOUT_SEC=600

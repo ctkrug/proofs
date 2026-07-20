@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import subprocess
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -21,12 +22,14 @@ def _doctor() -> dict[str, Any]:
     problems = store.load_problems()
     attempts = store.load_attempts()
     codex_bin = os.environ.get("CODEX_BIN", "codex")
+    lab_python = store.ROOT / ".lab-venv" / "bin" / "python"
     checks: dict[str, Any] = {
         "problems": bool(problems),
         "attempt_log_valid": isinstance(attempts, list),
         "codex_binary": bool(shutil.which(codex_bin)),
         "lab_runner": lab.RUNNER.is_file(),
         "research_brain": bool(brain.build().get("nodes")),
+        "lab_python": lab_python.is_file(),
     }
     if checks["codex_binary"]:
         proc = subprocess.run([codex_bin, "login", "status"], text=True, capture_output=True, timeout=30)
@@ -36,8 +39,18 @@ def _doctor() -> dict[str, Any]:
     checks["simulation_tools"] = {
         name: shutil.which(name) for name in sorted(lab.ALLOWED_EXECUTABLES)
     }
+    if checks["lab_python"]:
+        proc = subprocess.run([
+            str(lab_python), "-c",
+            "import networkx,numpy,scipy,sympy,z3,pulp; assert numpy.__version__=='1.26.4'; assert scipy.__version__=='1.11.4'",
+        ], text=True, capture_output=True, timeout=30)
+        checks["lab_python_imports"] = proc.returncode == 0
+    else:
+        # Local development can use its own Python; production requires the pinned environment.
+        checks["lab_python_imports"] = store.ROOT != Path("/root/proof-factory")
     checks["ok"] = all(bool(checks[key]) for key in (
         "problems", "attempt_log_valid", "codex_binary", "codex_login", "lab_runner", "research_brain",
+        "lab_python_imports",
     ))
     return checks
 
