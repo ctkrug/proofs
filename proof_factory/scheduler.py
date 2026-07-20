@@ -133,16 +133,18 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
     issues: list[str] = []
     if hard:
         last_hard = store.parse_iso(hard[-1].get("finished_at"))
-        if not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 2.5 * 3600:
-            issues.append("hourly hard lane has no completed or active attempt in more than 2.5 hours")
+        if not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 1.5 * 3600:
+            issues.append("twice-hourly Ramsey campaign has no completed or active attempt in more than 1.5 hours")
     elif not hard_in_flight and now.hour >= 2:
-        issues.append("hourly hard lane has not completed its first attempt")
-    if easy:
-        last_easy = store.parse_iso(easy[-1].get("finished_at"))
-        if last_easy and (now - last_easy).total_seconds() > 3 * 3600:
-            issues.append("12-per-day easy lane has no completed attempt in more than 3 hours")
-    elif now.hour >= 3:
-        issues.append("easy lane has not completed its first attempt")
+        issues.append("twice-hourly Ramsey campaign has not completed its first attempt")
+    easy_expected = os.environ.get("PROOF_EASY_EXPECTED", "1").strip().lower() not in {"0", "false", "no", "off"}
+    if easy_expected:
+        if easy:
+            last_easy = store.parse_iso(easy[-1].get("finished_at"))
+            if last_easy and (now - last_easy).total_seconds() > 3 * 3600:
+                issues.append("open-problem program has no completed attempt in more than 3 hours")
+        elif now.hour >= 3:
+            issues.append("open-problem program has not completed its first attempt")
     health = "degraded" if issues else "healthy"
     report = store.update_runtime(health=health, health_issues=issues, watchdog_at=store.now_iso())
     render.build()

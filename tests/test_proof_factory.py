@@ -363,6 +363,20 @@ class ProofFactoryTests(unittest.TestCase):
         problems = [win, similar, unrelated]
         self.assertGreater(scheduler.low_hanging_score(similar, problems), scheduler.low_hanging_score(unrelated, problems))
 
+    def test_watchdog_accepts_paused_open_problem_program(self) -> None:
+        attempts = [
+            {"lane": "hard", "finished_at": store.now_iso()},
+            {"lane": "easy", "finished_at": "2026-01-01T00:00:00+00:00"},
+        ]
+        with patch.object(store, "load_attempts", return_value=attempts), \
+                patch.object(store, "runtime", return_value={}), \
+                patch.object(store, "update_runtime", side_effect=lambda **fields: fields), \
+                patch.object(render, "build"), \
+                patch.dict("os.environ", {"PROOF_EASY_EXPECTED": "0"}):
+            report = scheduler.watchdog()
+        self.assertEqual(report["health"], "healthy")
+        self.assertEqual(report["health_issues"], [])
+
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             site = Path(raw) / "site"
