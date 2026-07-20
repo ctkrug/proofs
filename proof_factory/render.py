@@ -245,7 +245,12 @@ def build() -> Path:
     attempts = store.load_attempts()
     runtime = store.runtime()
     if store.SITE.exists():
-        shutil.rmtree(store.SITE)
+        # Keep the mount-point directory itself intact for systemd ReadWritePaths.
+        for child in store.SITE.iterdir():
+            if child.is_dir() and not child.is_symlink():
+                shutil.rmtree(child)
+            else:
+                child.unlink()
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
     _write(store.SITE / "assets" / "site.css", CSS)
     _write(store.SITE / "assets" / "site.js", JS)
