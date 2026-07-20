@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import html
-import json
 import os
 import shutil
 from collections import Counter, defaultdict
@@ -49,7 +48,7 @@ def _badge(status: str) -> str:
     return f'<span class="badge badge-{h(status)}">{h(label)}</span>'
 
 
-def _layout(title: str, body: str, *, description: str = "Live, transparent AI-assisted mathematics research ledger.") -> str:
+def _layout(title: str, body: str, *, description: str = "Ongoing and planned AI-assisted mathematics research.") -> str:
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -68,10 +67,10 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
   <a class="skip-link" href="#content">Skip to content</a>
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">PF</span><span>Proof Factory</span><small>Research system / 01</small></a>
-    <nav aria-label="Primary"><a href="/#problems">Problems</a><a href="/#attempts">Log</a><a href="/brain/">Brain</a><a href="/strategies/">Methods</a><a href="/method/">Protocol</a><a href="/api/state.json">JSON</a></nav>
+    <nav aria-label="Primary"><a href="/#ongoing">Ongoing</a><a href="/#planned">Planned</a><a href="/#attempts">Attempts</a><a href="/about/">About</a></nav>
   </header>
   <main id="content">{body}</main>
-  <footer><span>Proof Factory / transparent AI-assisted mathematics</span><span>Claims require independent verification</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
+  <footer><span>Proof Factory / AI-assisted mathematics research</span><span>Seeking useful contributions, small or large</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
 </body>
 </html>"""
 
@@ -126,31 +125,19 @@ def _index(
     for review in reviews:
         reviews_by_attempt[str(review.get("attempt_id"))].append(review)
     candidates = [row for row in problems if row.get("status") == "candidate"]
-    hard = next((row for row in problems if row.get("lane") == "hard" and row.get("status") in {"active", "attempted", "candidate"}), None)
-    easy = next(
-        (row for row in problems if row.get("lane") == "easy" and row.get("status") in {"active", "attempted", "candidate"}),
-        None,
-    )
-    accepted = sum(1 for row in problems if row.get("accepted_result") is True)
     health = runtime.get("health", "starting")
     health_issues = runtime.get("health_issues") or []
     running_lanes = [lane for lane in ("hard", "easy") if runtime.get(f"{lane}_running")]
-    hard_run_text = (
-        f"Running now · started {_time(runtime.get('hard_started_at'))}"
-        if runtime.get("hard_running") else f"Last run: {_time((hard or {}).get('last_attempt_at'))}"
-    )
-    easy_run_text = (
-        f"Running now · started {_time(runtime.get('easy_started_at'))}"
-        if runtime.get("easy_running") else f"Last run: {_time((easy or {}).get('last_attempt_at'))}"
-    )
-    ordered = sorted(
-        problems,
+    ordered = lambda rows: sorted(
+        rows,
         key=lambda row: (
             STATUS_ORDER.index(row.get("status")) if row.get("status") in STATUS_ORDER else 99,
             0 if row.get("lane") == "hard" else 1,
             int(row.get("difficulty") or 10),
         ),
     )
+    ongoing = ordered([row for row in problems if row.get("status") in {"active", "attempted", "candidate"}])
+    planned = ordered([row for row in problems if row.get("status") == "queued"])
     candidate_banner = ""
     if candidates:
         candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="#problems">Review records →</a></section>"""
@@ -161,42 +148,26 @@ def _index(
     )
     body = f"""
 <section class="hero">
-  <div class="hero-kicker"><span class="live-dot"></span> LIVE / OPEN MATHEMATICS / UTC</div>
-  <h1>Every attempt<br><em>is evidence.</em></h1>
-  <p class="hero-copy">One famous finite problem. One contribution-first discovery lane. Hypotheses, computations, failures, and certificates stay visible; nothing counts until it survives independent verification.</p>
-  <div class="hero-stats">
-    <div><strong>{len(problems):02d}</strong><span>Problems</span></div>
-    <div><strong>{len(attempts):02d}</strong><span>Attempts</span></div>
-    <div><strong>{len(candidates):02d}</strong><span>Candidates</span></div>
-    <div><strong>{accepted}/2</strong><span>External wins</span></div>
-  </div>
+  <div class="hero-kicker"><span class="live-dot"></span> AI-ASSISTED MATHEMATICS RESEARCH / LIVE</div>
+  <h1>Current<br><em>research.</em></h1>
+  <p class="hero-copy">Proof Factory seeks to contribute useful mathematics, no matter how small or large. This site shows the work underway, what is planned next, and the attempts made so far.</p>
 </section>
 {candidate_banner}
-<section class="lanes">
-  <article class="lane-panel hard-panel">
-    <div class="panel-label">LANE H / FAMOUS / HOURLY / TERRA → SOL XHIGH</div>
-    <h2>{h((hard or {}).get('title') or 'Selecting…')}</h2>
-    <p>{h((hard or {}).get('rationale') or 'The hard lane is being initialized.')}</p>
-    <div class="panel-foot"><span>{h(hard_run_text)}</span>{f'<a href="/problems/{h(hard["id"])}/">Open dossier →</a>' if hard else ''}</div>
-  </article>
-  <article class="lane-panel easy-panel">
-    <div class="panel-label">LANE E / DISCOVERY / 12 DAILY / TERRA → SOL</div>
-    <h2>{h((easy or {}).get('title') or 'Selecting…')}</h2>
-    <p>{h((easy or {}).get('rationale') or 'The discovery lane is being initialized.')}</p>
-    <div class="panel-foot"><span>{h(easy_run_text)}</span>{f'<a href="/problems/{h(easy["id"])}/">Open dossier →</a>' if easy else ''}</div>
-  </article>
-</section>
 <section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
-<section id="problems" class="section-block">
-  <div class="section-heading"><div><span class="overline">TARGET SET / FULL STATE</span><h2>Problem registry</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
-  <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ordered)}</div>
+<section id="ongoing" class="section-block">
+  <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) hourly · discovery 12 times daily</span></div>
+  <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ongoing) or '<p class="empty">No research pass is currently open.</p>'}</div>
+</section>
+<section id="planned" class="section-block planned-block">
+  <div class="section-heading"><div><span class="overline">NEXT IN QUEUE</span><h2>Planned work</h2></div></div>
+  <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in planned) or '<p class="empty">No additional work is queued.</p>'}</div>
 </section>
 <section id="attempts" class="section-block attempts-block">
-  <div class="section-heading"><div><span class="overline">OBSERVATION LOG / APPEND-ONLY</span><h2>Recent attempts</h2></div><a href="/api/state.json">Download JSON →</a></div>
+  <div class="section-heading"><div><span class="overline">RESEARCH RECORD</span><h2>Recent attempts</h2></div></div>
   <div class="attempt-list">{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id']), reviews_by_attempt[str(row.get('id'))]) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
 </section>
 """
-    return _layout("Live ledger", body)
+    return _layout("Research work", body)
 
 
 def _state_items(rows: list[dict[str, Any]], primary: str, secondary: str, *, empty: str) -> str:
@@ -243,7 +214,7 @@ def _problem_page(
   <div class="card-top"><span class="lane lane-{h(problem.get('lane'))}">{h(problem.get('lane'))}</span>{_badge(str(problem.get('status')))}</div>
   <h1>{h(problem['title'])}</h1>
   <p class="statement">{h(problem.get('statement'))}</p>
-  <div class="source-line"><a href="{h(problem.get('source_url'))}" rel="noopener">{h(problem.get('source_name'))} ↗</a>{f'<a href="{h(problem.get("formalization_url"))}" rel="noopener">Formal statement ↗</a>' if problem.get('formalization_url') else ''}<a href="/brain/#problem-{h(problem['id'])}">Research brain ↗</a></div>
+  <div class="source-line"><a href="{h(problem.get('source_url'))}" rel="noopener">{h(problem.get('source_name'))} ↗</a>{f'<a href="{h(problem.get("formalization_url"))}" rel="noopener">Formal statement ↗</a>' if problem.get('formalization_url') else ''}</div>
 </section>
 {candidate}
 <section class="dossier-grid">
@@ -256,6 +227,23 @@ def _problem_page(
 <section class="section-block attempts-block"><div class="section-heading"><div><span class="overline">Complete history</span><h2>Attempts on this problem</h2></div></div><div class="attempt-list">{attempt_html}</div></section>
 """
     return _layout(problem["title"], body, description=str(problem.get("statement")))
+
+
+def _about_page() -> str:
+    body = """
+<section class="method-head about-head">
+  <span class="overline">ABOUT THE PROJECT</span>
+  <h1>Seeking useful<br><em>mathematics.</em></h1>
+  <p>Proof Factory is an AI-assisted research project seeking to make real mathematical contributions, no matter how small or large.</p>
+</section>
+<section class="about-grid">
+  <article><span class="overline">The aim</span><h2>Contribute something useful.</h2><p>A correction, verified computation, dataset, research tool, formalization, narrow lemma, improved bound, counterexample, or complete proof can all matter.</p></article>
+  <article><span class="overline">The work</span><h2>Research in bounded steps.</h2><p>The system studies prior work, records what is known, runs reproducible experiments, and carries promising directions into the next research pass.</p></article>
+  <article><span class="overline">The standard</span><h2>Be precise about the result.</h2><p>An attempt is not a discovery. Any claim must be scoped, reproducible, checked independently, and compared with existing literature before it is presented as a contribution.</p></article>
+</section>
+<section class="about-source"><p>All repositories and research records are public. Commits are attributed to Charlie Krug; AI and computational assistance are disclosed.</p><a href="https://github.com/ctkrug/proofs">View source and repositories →</a></section>
+"""
+    return _layout("About", body, description="About Proof Factory and its goal of contributing useful mathematics at any scale.")
 
 
 def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: list[dict[str, Any]]) -> str:
@@ -495,6 +483,8 @@ main{max-width:1600px;margin:0 auto;border-left:1px solid rgba(36,56,50,.55);bor
 .section-heading{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
 .section-heading h2{margin:6px 0 0;color:var(--ink);font-family:var(--serif);font-size:clamp(34px,4.5vw,58px);font-weight:400;line-height:1;letter-spacing:-.035em}
 .section-heading>a{color:var(--green);font:650 10px var(--mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase}
+.section-note{color:var(--muted);font:550 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.planned-block{border-top:1px solid var(--line);background:rgba(8,19,16,.62)}
 .filters{gap:6px}
 .filter{padding:7px 11px;border:1px solid var(--line);border-radius:2px;background:transparent;color:var(--muted);font:650 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .filter:hover{border-color:var(--line-bright);color:var(--ink)}
@@ -547,24 +537,28 @@ main{max-width:1600px;margin:0 auto;border-left:1px solid rgba(36,56,50,.55);bor
 .method-grid article strong{color:var(--green);font:500 22px var(--mono)}.method-grid h2{color:var(--ink);font-family:var(--serif);font-size:27px;font-weight:400}.method-grid p{color:#aab9b3;font-size:12.5px}
 .principles{margin:20px clamp(22px,6vw,92px) 58px;padding:clamp(26px,4vw,46px);border:1px solid var(--line);background:linear-gradient(145deg,#0b1b16,#06100d);color:var(--ink)}
 .principles h2{margin-top:0;color:var(--ink);font-family:var(--serif);font-size:38px;font-weight:400}.principles p,.principles li{color:#aab9b3;font-size:13px}.principles a{color:var(--green)}
+.about-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:30px clamp(22px,6vw,92px)}
+.about-grid article{min-height:280px;padding:25px;border:1px solid var(--line);background:rgba(12,23,20,.88)}
+.about-grid h2{margin:24px 0 12px;color:var(--ink);font-family:var(--serif);font-size:30px;font-weight:400;line-height:1.08}
+.about-grid p,.about-source p{color:#aab9b3;font-size:13px;line-height:1.65}
+.about-source{margin:0 clamp(22px,6vw,92px) 58px;padding:25px;border:1px solid var(--line);background:linear-gradient(145deg,#0b1b16,#06100d)}
+.about-source p{max-width:820px}.about-source a{font:650 10px var(--mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase}
 .empty{border:1px solid var(--line);background:var(--card);color:var(--muted)}
 code{color:var(--green);font-family:var(--mono);font-size:10px}.muted{color:var(--muted)}
 footer{min-height:78px;padding:22px clamp(22px,4vw,64px);border-color:var(--line);background:var(--black);color:var(--muted);font:500 9px var(--mono);letter-spacing:.06em;text-transform:uppercase}
 @media(max-width:1080px){.problem-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brand small{display:none}}
 @media(max-width:760px){
-  .topbar{height:56px}.topbar nav{gap:15px}.topbar nav a:nth-child(n+4){display:none}
+  .topbar{height:56px}.topbar nav{gap:9px}.topbar nav a{display:inline!important;font-size:8px}.brand span:not(.brand-mark),.brand small{display:none}
   .hero{padding-top:58px}.hero:before{display:none}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero-stats div:nth-child(2){border-right:0}.hero-stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .lanes,.problem-grid,.dossier-grid,.attempt-detail,.method-grid,.research-grid,.strategy-library{grid-template-columns:minmax(0,1fr)}
+  .lanes,.problem-grid,.dossier-grid,.attempt-detail,.method-grid,.research-grid,.strategy-library,.about-grid{grid-template-columns:minmax(0,1fr)}
   .section-heading{align-items:flex-start}.section-heading h2{font-size:38px}.filters{margin-top:4px}
-  .problem-card{min-height:315px}.card-meta,.card-actions{flex-wrap:wrap}.brand span:not(.brand-mark){font-size:11px}footer{align-items:flex-start}
+  .problem-card{min-height:315px}.card-meta,.card-actions{flex-wrap:wrap}footer{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.problem-card:hover{transform:none}}
 """
 
 
-JS = r"""
-document.addEventListener('click',e=>{const b=e.target.closest('.filter');if(!b)return;document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.filter;document.querySelectorAll('.problem-card').forEach(card=>{card.classList.toggle('hidden',!(f==='all'||card.dataset.lane===f||card.dataset.status===f));});});
-"""
+JS = ""
 
 
 def _build_unlocked() -> Path:
@@ -578,18 +572,7 @@ def _build_unlocked() -> Path:
     if not isinstance(validations, list):
         validations = []
     research_states = research_state.load_all(problems)
-    strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
-    brain_graph = brain.refresh()
-    strategy_proposals = []
-    proposals_file = store.DATA / "strategy_proposals.jsonl"
-    if proposals_file.exists():
-        for line in proposals_file.read_text().splitlines():
-            try:
-                row = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(row, dict):
-                strategy_proposals.append(row)
+    brain.refresh()
     if store.SITE.exists():
         # Keep the mount-point directory itself intact for systemd ReadWritePaths.
         for child in store.SITE.iterdir():
@@ -617,36 +600,13 @@ def _build_unlocked() -> Path:
             _write(store.SITE / "attempts" / attempt["id"] / "index.html", _attempt_page(attempt, problem, attempt_reviews))
             if problem.get("publication_attempt_id") == attempt.get("id"):
                 _write(store.SITE / "publications" / attempt["id"] / "index.html", _publication_page(problem, attempt, reviews, validations))
-    _write(store.SITE / "method" / "index.html", _method_page())
-    _write(store.SITE / "strategies" / "index.html", _strategies_page(strategy_library, strategy_proposals))
-    _write(store.SITE / "brain" / "index.html", _brain_page(brain_graph))
-    _write(store.SITE / "api" / "brain.json", json.dumps(brain_graph, indent=2, ensure_ascii=False) + "\n")
-    reviews_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for review in reviews:
-        reviews_by_attempt[str(review.get("attempt_id"))].append(review)
-    public_attempts = [
-        {**attempt, "public_outcome": _effective_outcome(attempt, reviews_by_attempt[str(attempt.get("id"))])}
-        for attempt in attempts
-    ]
-    public_state = {
-        "generated_at": store.now_iso(),
-        "runtime": runtime,
-        "problems": problems,
-        "attempts": public_attempts,
-        "reviews": reviews,
-        "validations": validations,
-        "research_states": research_states,
-        "strategy_library": strategy_library,
-        "strategy_proposals": strategy_proposals,
-        "research_brain": brain_graph,
-    }
-    _write(store.SITE / "api" / "state.json", json.dumps(public_state, indent=2, ensure_ascii=False) + "\n")
+    _write(store.SITE / "about" / "index.html", _about_page())
     _write(store.SITE / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://proofs.charliekrug.com/sitemap.xml\n")
-    urls = ["/", "/method/", "/strategies/", "/brain/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
+    urls = ["/", "/about/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
     urls += [f"/publications/{p['publication_attempt_id']}/" for p in problems if p.get("publication_attempt_id")]
     _write(store.SITE / "sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>https://proofs.charliekrug.com{h(url)}</loc></url>\n" for url in urls) + "</urlset>\n")
     _write(store.SITE / "_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  X-Frame-Options: DENY\n\n/assets/*\n  Cache-Control: public, max-age=3600\n")
-    _write(store.SITE / "404.html", _layout("Not found", '<section class="method-head"><h1>That record does not exist.</h1><p><a href="/">Return to the live ledger →</a></p></section>'))
+    _write(store.SITE / "404.html", _layout("Not found", '<section class="method-head"><h1>That record does not exist.</h1><p><a href="/">Return to the research work →</a></p></section>'))
     return store.SITE
 
 

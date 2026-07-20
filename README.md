@@ -67,10 +67,10 @@ as independent verification.
 - Every problem must complete a source/status baseline before its first technical pass. That baseline
   maps prior work, known facts, ruled-out routes, current leads, tools/artifacts, verification cost,
   and the outside acceptance path; later status changes can explicitly invalidate it.
-- `state/research_brain.json` and `/brain/` are generated knowledge-graph projections over the canonical
-  registry, research maps, append-only attempts, citations, concepts, and strategies. Agents receive
-  the relevant backlinks and neighboring problems in every prompt; a graph link is a transfer
-  hypothesis, never proof.
+- `state/research_brain.json` is an internal generated knowledge graph over the canonical registry,
+  research maps, append-only attempts, citations, concepts, and strategies. It is not published on
+  the public site. Agents receive the relevant backlinks and neighboring problems in every prompt;
+  a graph link is a transfer hypothesis, never proof.
 - `data/strategy_library.json` contains executable cross-problem methods. A daily source-grounded
   strategy lab can add or materially improve one entry; every revision is appended to
   `data/strategy_proposals.jsonl`.
