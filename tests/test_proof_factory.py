@@ -372,6 +372,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn("Ongoing work", index)
                 self.assertIn("Planned work", index)
                 self.assertIn("Current schedule", index)
+                self.assertIn("Next run", index)
                 self.assertIn("Completed research passes", index)
                 self.assertIn("What this run accomplished", index)
                 self.assertIn("/assets/site-v4.css", index)

@@ -116,7 +116,8 @@ def _lane_card(lane: str, payload: dict[str, Any]) -> str:
   <h3 data-role="title">{h(title)}</h3>
   <p class="operation-detail" data-role="detail">{h(detail)}</p>
   <dl>
-    <div><dt>{'Elapsed' if running else 'Next run'}</dt><dd data-role="clock" data-started-at="{h(payload.get('started_at'))}" data-next-at="{h(payload.get('next_at'))}">Calculating…</dd></div>
+    <div><dt>Current pass</dt><dd data-role="current-clock" data-started-at="{h(payload.get('started_at'))}">{'Calculating…' if running else 'Idle'}</dd></div>
+    <div><dt>Next run</dt><dd data-role="next-clock" data-next-at="{h(payload.get('next_at'))}">Calculating…</dd></div>
     <div><dt>Last result</dt><dd data-role="last-result">{h(STATUS_LABELS.get(str(payload.get('last_outcome')), str(payload.get('last_outcome') or 'Not yet').replace('_', ' ').title()))}</dd></div>
   </dl>
 </article>"""
@@ -627,7 +628,7 @@ main{max-width:1480px;border-color:var(--line);background:var(--paper)}
 .operation-card:before{content:"";position:absolute;left:-1px;top:-1px;bottom:-1px;width:4px;background:var(--blue)}.operation-hard:before{background:var(--red)}
 .operation-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.operation-status{color:var(--muted);font:650 10px var(--mono);letter-spacing:.07em;text-transform:uppercase}.operation-status.is-live{color:var(--green)}.operation-status.is-live:before{content:"";display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--green)}
 .operation-card h3{margin:24px 0 7px;color:var(--ink);font-size:clamp(24px,2.5vw,35px);font-weight:400;line-height:1.12}.operation-detail{margin:0;color:var(--muted);font-size:14px}
-.operation-card dl{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:24px 0 0;border-top:1px solid var(--line)}.operation-card dl div{padding-top:14px}.operation-card dl div+div{padding-left:20px;border-left:1px solid var(--line)}.operation-card dt{color:var(--muted);font:650 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.operation-card dd{margin:4px 0 0;color:var(--ink);font:650 13px var(--mono)}
+.operation-card dl{display:grid;grid-template-columns:.75fr 1.35fr 1fr;gap:0;margin:24px 0 0;border-top:1px solid var(--line)}.operation-card dl div{padding-top:14px}.operation-card dl div+div{padding-left:20px;border-left:1px solid var(--line)}.operation-card dt{color:var(--muted);font:650 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.operation-card dd{margin:4px 0 0;color:var(--ink);font:650 12px var(--mono)}
 .problem-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.problem-card{min-height:350px;padding:24px;border-color:var(--line);background:var(--card)}.problem-card:hover{border-color:var(--line-bright)}
 .lane,.badge{border-radius:0;font:700 8px var(--mono)}.lane{border-color:var(--line);background:transparent}.lane-hard{border-color:#b7898c;background:#f1e4e3;color:var(--red)}.lane-easy{border-color:#9eafbc;background:#e7edf0;color:var(--blue)}.lane-calibration{border-color:#aaa4b8;background:#ece9f0;color:var(--violet)}
 .badge{border-color:var(--line);background:#f8f6f0;color:var(--muted)}.badge-candidate{border-color:#c9aa74;background:#f6ecd7;color:#76511a}.badge-active,.badge-progress,.badge-verified,.badge-published{border-color:#91aa9e;background:#e4ece7;color:var(--green)}.badge-attempted,.badge-failed,.badge-no_progress,.badge-error,.badge-internal_result{border-color:#bd9692;background:#f1e5e2;color:var(--red)}
@@ -665,14 +666,14 @@ SITE_JS = r"""
     return hours ? `${hours}h ${minutes}m ${secs}s` : `${minutes}m ${secs}s`;
   };
   const updateClock = card => {
-    const clock = card.querySelector('[data-role="clock"]');
-    if (!clock) return;
+    const current = card.querySelector('[data-role="current-clock"]');
+    const next = card.querySelector('[data-role="next-clock"]');
+    if (!current || !next) return;
     const status = card.querySelector('[data-role="status"]')?.textContent;
-    const value = status === "Running now" ? clock.dataset.startedAt : clock.dataset.nextAt;
-    const date = new Date(value || "");
-    if (Number.isNaN(date.getTime())) { clock.textContent = "Not scheduled"; return; }
-    const delta = status === "Running now" ? (Date.now() - date.getTime()) / 1000 : (date.getTime() - Date.now()) / 1000;
-    clock.textContent = status === "Running now" ? intervalText(delta) : `${dateText(value)} · in ${intervalText(delta)}`;
+    const started = new Date(current.dataset.startedAt || "");
+    current.textContent = status === "Running now" && !Number.isNaN(started.getTime()) ? intervalText((Date.now() - started.getTime()) / 1000) : "Idle";
+    const nextDate = new Date(next.dataset.nextAt || "");
+    next.textContent = Number.isNaN(nextDate.getTime()) ? "Not scheduled" : `${dateText(next.dataset.nextAt)} · in ${intervalText((nextDate.getTime() - Date.now()) / 1000)}`;
   };
   const renderLane = (lane, payload) => {
     const card = document.querySelector(`[data-live-lane="${lane}"]`);
@@ -683,10 +684,8 @@ SITE_JS = r"""
     status.classList.toggle("is-live", running);
     card.querySelector('[data-role="title"]').textContent = payload.running_problem_title || (lane === "hard" ? "Ramsey number R(5,5)" : "Discovery queue");
     card.querySelector('[data-role="detail"]').textContent = running ? "Research pass in progress" : "Next dispatch scheduled";
-    const clock = card.querySelector('[data-role="clock"]');
-    clock.dataset.startedAt = payload.started_at || "";
-    clock.dataset.nextAt = payload.next_at || "";
-    clock.previousElementSibling.textContent = running ? "Elapsed" : "Next run";
+    card.querySelector('[data-role="current-clock"]').dataset.startedAt = payload.started_at || "";
+    card.querySelector('[data-role="next-clock"]').dataset.nextAt = payload.next_at || "";
     card.querySelector('[data-role="last-result"]').textContent = labels[payload.last_outcome] || (payload.last_outcome || "Not yet").replaceAll("_", " ");
     updateClock(card);
   };
