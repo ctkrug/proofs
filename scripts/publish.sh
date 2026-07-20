@@ -20,4 +20,4 @@ if ! git diff --cached --quiet; then
   fi
 fi
 
-./node_modules/.bin/wrangler pages deploy site --project-name=proofs --branch=main --commit-dirty=true
+./node_modules/.bin/wrangler pages deploy site --project-name=proofs --commit-dirty=true

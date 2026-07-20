@@ -5,6 +5,6 @@
     "wrangler": "4.80.0"
   },
   "scripts": {
-    "deploy": "wrangler pages deploy site --project-name=proofs --branch=main"
+    "deploy": "wrangler pages deploy site --project-name=proofs"
   }
 }
