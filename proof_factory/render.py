@@ -48,6 +48,14 @@ def _badge(status: str) -> str:
     return f'<span class="badge badge-{h(status)}">{h(label)}</span>'
 
 
+def _program_label(lane: str | None) -> str:
+    return "Ramsey campaign" if lane == "hard" else "Open-problem program"
+
+
+def _problem_tag(problem: dict[str, Any]) -> str:
+    return str(problem.get("contribution_type") or _program_label(str(problem.get("lane") or "easy")))
+
+
 def _layout(title: str, body: str, *, description: str = "Ongoing and planned AI-assisted mathematics research.") -> str:
     return f"""<!doctype html>
 <html lang="en">
@@ -95,7 +103,7 @@ def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any], reviews: list
 <article class="attempt-row" data-outcome="{h(outcome)}" data-run-id="{h(attempt.get('id'))}">
   <div class="attempt-rail outcome-{h(outcome)}"></div>
   <div class="attempt-copy">
-    <div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(attempt.get('lane'))} lane · {h(duration_text)}</span></div>
+    <div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(_program_label(str(attempt.get('lane'))))} · {h(duration_text)}</span></div>
     <h3><a href="/attempts/{h(attempt['id'])}/">{h(problem['title'])}</a></h3>
     <p class="approach">{h(attempt.get('approach') or 'Research pass')}</p>
     <div class="accomplishment"><span>What this run accomplished</span><p>{h(attempt.get('summary') or 'No accomplishment summary was recorded.')}</p></div>
@@ -112,7 +120,7 @@ def _lane_card(lane: str, payload: dict[str, Any]) -> str:
     detail = "Research pass in progress" if running else "Next dispatch scheduled"
     return f"""
 <article class="operation-card operation-{h(lane)}" data-live-lane="{h(lane)}">
-  <div class="operation-head"><span class="lane lane-{h(lane)}">{h(lane)} lane</span><span class="operation-status{' is-live' if running else ''}" data-role="status">{h(status)}</span></div>
+  <div class="operation-head"><span class="lane lane-{h(lane)}">{h(_program_label(lane))}</span><span class="operation-status{' is-live' if running else ''}" data-role="status">{h(status)}</span></div>
   <h3 data-role="title">{h(title)}</h3>
   <p class="operation-detail" data-role="detail">{h(detail)}</p>
   <dl>
@@ -129,7 +137,7 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state
     lane = str(problem.get("lane") or "easy")
     return f"""
 <article class="problem-card" data-status="{h(status)}" data-lane="{h(lane)}">
-  <div class="card-top"><span class="lane lane-{h(lane)}">{h(lane)}</span>{_badge(status)}</div>
+  <div class="card-top"><span class="lane lane-{h(lane)}">{h(_problem_tag(problem))}</span>{_badge(status)}</div>
   <h3><a href="/problems/{h(problem['id'])}/">{h(problem['title'])}</a></h3>
   <p>{h(problem.get('statement'))}</p>
   <div class="meter"><span style="width:{min(100, int(problem.get('difficulty') or 0) * 10)}%"></span></div>
@@ -167,9 +175,8 @@ def _index(
     if candidates:
         candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="#problems">Review records →</a></section>"""
     issues = "" if not health_issues else " · ".join(h(x) for x in health_issues)
-    live_work = (
-        "No pass currently running" if not running_lanes
-        else f"Active now: {', '.join(running_lanes)} lane{'s' if len(running_lanes) != 1 else ''}"
+    live_work = "No pass currently running" if not running_lanes else "Active now: " + " and ".join(
+        _program_label(lane) for lane in running_lanes
     )
     live_snapshot = live.snapshot(problems, attempts, runtime, reviews)
     body = f"""
@@ -241,7 +248,7 @@ def _problem_page(
     body = f"""
 <section class="dossier-head">
   <a class="back" href="/">← Live ledger</a>
-  <div class="card-top"><span class="lane lane-{h(problem.get('lane'))}">{h(problem.get('lane'))}</span>{_badge(str(problem.get('status')))}</div>
+  <div class="card-top"><span class="lane lane-{h(problem.get('lane'))}">{h(_problem_tag(problem))}</span>{_badge(str(problem.get('status')))}</div>
   <h1>{h(problem['title'])}</h1>
   <p class="statement">{h(problem.get('statement'))}</p>
   <div class="source-line"><a href="{h(problem.get('source_url'))}" rel="noopener">{h(problem.get('source_name'))} ↗</a>{f'<a href="{h(problem.get("formalization_url"))}" rel="noopener">Formal statement ↗</a>' if problem.get('formalization_url') else ''}</div>
@@ -653,6 +660,7 @@ SITE_JS = r"""
     progress: "Progress", no_progress: "No progress", failed: "Failed route", error: "Error",
     candidate: "Candidate — review needed", internal_result: "Internal result", verified: "Verified", published: "Public research note"
   };
+  const programLabels = {hard: "Ramsey campaign", easy: "Open-problem program"};
   const dateText = value => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "Not yet";
@@ -702,7 +710,7 @@ SITE_JS = r"""
       const article = el("article", "attempt-row"); article.dataset.outcome = run.outcome || "unknown"; article.dataset.runId = run.id || "";
       article.append(el("div", `attempt-rail outcome-${run.outcome || "unknown"}`));
       const copy = el("div", "attempt-copy");
-      const eyebrow = el("div", "eyebrow"); eyebrow.append(el("span", "", dateText(run.finished_at)), el("span", "", `${run.lane || "research"} lane · ${run.duration_seconds ? Math.round(run.duration_seconds / 60) + " min" : "duration unavailable"}`));
+      const eyebrow = el("div", "eyebrow"); eyebrow.append(el("span", "", dateText(run.finished_at)), el("span", "", `${programLabels[run.lane] || "Research program"} · ${run.duration_seconds ? Math.round(run.duration_seconds / 60) + " min" : "duration unavailable"}`));
       const h3 = el("h3"); const title = el("a", "", run.problem_title || run.problem_id); title.href = run.href; h3.append(title);
       const approach = el("p", "approach", run.approach || "Research pass");
       const accomplishment = el("div", "accomplishment"); accomplishment.append(el("span", "", "What this run accomplished"), el("p", "", run.accomplishment || "No accomplishment summary was recorded."));
