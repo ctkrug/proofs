@@ -109,7 +109,10 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
         by_problem[str(attempt.get("problem_id"))].append(attempt)
     candidates = [row for row in problems if row.get("status") == "candidate"]
     hard = next((row for row in problems if row.get("lane") == "hard" and row.get("status") in {"active", "attempted", "candidate"}), None)
-    easy = next((row for row in problems if row.get("lane") == "easy" and row.get("status") == "active"), None)
+    easy = next(
+        (row for row in problems if row.get("lane") == "easy" and row.get("status") in {"active", "attempted", "candidate"}),
+        None,
+    )
     accepted = sum(1 for row in problems if row.get("accepted_result") is True)
     health = runtime.get("health", "starting")
     health_issues = runtime.get("health_issues") or []
