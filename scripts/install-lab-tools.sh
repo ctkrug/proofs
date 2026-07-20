@@ -14,7 +14,7 @@ apt-get install -y --no-install-recommends \
   gap pari-gp singular coinor-cbc \
   python3-numpy python3-scipy python3-sympy python3-networkx python3-z3 python3-pulp
 
-for tool in python3 gcc g++ make cmake jq z3 minisat cadical dreadnaut geng gap gp Singular cbc; do
+for tool in python3 gcc g++ make cmake jq z3 minisat cadical dreadnaut nauty-geng nauty-showg gap gp Singular cbc; do
   command -v "$tool" >/dev/null
 done
 

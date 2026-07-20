@@ -17,7 +17,8 @@ RUNNER = store.ROOT / "skills" / "computational-researcher" / "scripts" / "run_e
 ALLOWED_EXECUTABLES = {
     "python", "python3", "pypy3", "julia", "sage", "lean", "lake",
     "z3", "kissat", "cadical", "glucose", "glucose-syrup", "minisat",
-    "gap", "gp", "Singular", "dreadnaut", "geng", "showg", "clingo", "cbc",
+    "gap", "gp", "Singular", "dreadnaut", "geng", "showg", "nauty-geng", "nauty-showg",
+    "clingo", "cbc",
 }
 MAX_SEGMENT_SECONDS = 24 * 3600
 MAX_SEGMENTS = 7
