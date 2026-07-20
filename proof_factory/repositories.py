@@ -15,7 +15,7 @@ from . import store
 SCHEMA_VERSION = 1
 GITHUB_OWNER = os.environ.get("PROOF_REPO_GITHUB_OWNER", "ctkrug")
 MAX_TRACKED_FILE_BYTES = int(os.environ.get("PROOF_REPO_MAX_FILE_BYTES", str(50 * 1024 * 1024)))
-GITIGNORE = """# Reproducible research belongs in Git; local environments and caches do not.
+LEGACY_GITIGNORE = """# Reproducible research belongs in Git; local environments and caches do not.
 .DS_Store
 .venv/
 venv/
@@ -25,6 +25,20 @@ __pycache__/
 .pytest_cache/
 node_modules/
 *.tmp
+"""
+GITIGNORE = """# proof-factory:start
+# Reproducible research belongs in Git; local environments, caches, and in-flight queue names do not.
+.DS_Store
+.venv/
+venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+node_modules/
+*.tmp
+lab-queue/*.running.json
+# proof-factory:end
 """
 
 
@@ -65,6 +79,24 @@ def _write_if_missing(path: Path, content: str) -> None:
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)
+
+
+def _ensure_gitignore(path: Path) -> None:
+    if not path.exists() or path.read_text() == LEGACY_GITIGNORE:
+        path.write_text(GITIGNORE)
+        return
+    kept: list[str] = []
+    in_managed_block = False
+    for line in path.read_text().splitlines():
+        if line == "# proof-factory:start":
+            in_managed_block = True
+            continue
+        if line == "# proof-factory:end":
+            in_managed_block = False
+            continue
+        if not in_managed_block:
+            kept.append(line)
+    path.write_text("\n".join([*kept, GITIGNORE.rstrip()]).lstrip("\n") + "\n")
 
 
 def _readme(problem: dict[str, Any]) -> str:
@@ -180,7 +212,7 @@ def _ensure_unlocked(problem: dict[str, Any]) -> tuple[Path, str]:
             raise RuntimeError(f"git init failed for {problem['id']}: {(proc.stdout + proc.stderr)[-2000:]}")
     _git(repo, "config", "user.name", "Proof Factory")
     _git(repo, "config", "user.email", "proof-factory@charliekrug.com")
-    _write_if_missing(repo / ".gitignore", GITIGNORE)
+    _ensure_gitignore(repo / ".gitignore")
     _write_if_missing(repo / "README.md", _readme(problem))
     store.write_json_atomic(repo / ".proof-repository" / "metadata.json", _metadata(problem))
     head_result = _git(repo, "rev-parse", "HEAD", check=False)
