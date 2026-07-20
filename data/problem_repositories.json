@@ -21,7 +21,7 @@
       "repository": "ctkrug/proofs-ramsey-r55",
       "url": "https://github.com/ctkrug/proofs-ramsey-r55",
       "visibility": "PUBLIC",
-      "commit": "0abf581a8aa8fce8953644c7cacb206ef67ecbac"
+      "commit": "e5167505e412c40fb151619b51cb28249223b403"
     },
     {
       "problem_id": "erdos-647",
@@ -106,14 +106,12 @@
       "url": "https://github.com/ctkrug/proofs-erdos-398",
       "visibility": "PUBLIC",
       "commit": "e02f75297b431349a362be7ad0ab3ed1f8e0af90"
-    },
-    {
-      "problem_id": "scout-bdf77f43574b",
-      "repository": "ctkrug/proofs-scout-bdf77f43574b",
-      "url": "https://github.com/ctkrug/proofs-scout-bdf77f43574b",
-      "visibility": "PUBLIC",
-      "commit": "966b7ce1825c5c2661feede6e3da530da88a4220"
     }
   ],
-  "errors": []
+  "errors": [
+    {
+      "problem_id": "scout-bdf77f43574b",
+      "error": "RuntimeError: git push --set-upstream origin main failed in /root/proof-factory/research/scout-bdf77f43574b/workspace: To https://github.com/ctkrug/proofs-scout-bdf77f43574b\n ! [rejected]        main -> main (fetch first)\nerror: failed to push some refs to 'https://github.com/ctkrug/proofs-scout-bdf77f43574b'\nhint: Updates were rejected because the remote contains work that you do not\nhint: have locally. This is usually caused by another repository pushing to\nhint: the same ref. If you want to integrate the remote changes, use\nhint: 'git pull' before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details."
+    }
+  ]
 }
