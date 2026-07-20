@@ -8,6 +8,7 @@ Type=oneshot
 WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
+Environment=CODEX_BIN=/root/.local/bin/codex
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane easy
 ExecStartPost=/bin/systemctl start --no-block proof-factory-publish.service
 Nice=15

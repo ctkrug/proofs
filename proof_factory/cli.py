@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 from typing import Any
@@ -12,13 +13,14 @@ from . import render, scheduler, store
 def _doctor() -> dict[str, Any]:
     problems = store.load_problems()
     attempts = store.load_attempts()
+    codex_bin = os.environ.get("CODEX_BIN", "codex")
     checks: dict[str, Any] = {
         "problems": bool(problems),
         "attempt_log_valid": isinstance(attempts, list),
-        "codex_binary": bool(shutil.which("codex")),
+        "codex_binary": bool(shutil.which(codex_bin)),
     }
     if checks["codex_binary"]:
-        proc = subprocess.run(["codex", "login", "status"], text=True, capture_output=True, timeout=30)
+        proc = subprocess.run([codex_bin, "login", "status"], text=True, capture_output=True, timeout=30)
         checks["codex_login"] = proc.returncode == 0 and "logged in" in (proc.stdout + proc.stderr).lower()
     else:
         checks["codex_login"] = False
