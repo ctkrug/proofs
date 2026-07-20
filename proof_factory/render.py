@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import brain, research_state, store
+from . import brain, live, research_state, store
 
 
 STATUS_ORDER = ["candidate", "active", "attempted", "internal_result", "failed", "queued", "parked", "verified", "published"]
@@ -54,19 +54,20 @@ def _layout(title: str, body: str, *, description: str = "Ongoing and planned AI
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#07100e">
+  <meta name="theme-color" content="#f4f1e8">
   <title>{h(title)} · Proof Factory</title>
   <meta name="description" content="{h(description)}">
-  <link rel="stylesheet" href="/assets/site-v3.css">
+  <link rel="stylesheet" href="/assets/site-v4.css">
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token":"153bb72472fb49d8863fb2f8f08f6b2b"}}'></script>
   <script>MathJax={{tex:{{inlineMath:[['$','$'],['\\(','\\)']]}}}};</script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script defer src="/assets/site-v4.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#content">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">PF</span><span>Proof Factory</span><small>Research system / 01</small></a>
-    <nav aria-label="Primary"><a href="/#ongoing">Ongoing</a><a href="/#planned">Planned</a><a href="/#attempts">Attempts</a><a href="/about/">About</a></nav>
+    <a class="brand" href="/"><span class="brand-mark">PF</span><span>Proof Factory</span><small>Open mathematics research</small></a>
+    <nav aria-label="Primary"><a href="/#operations">Status</a><a href="/#ongoing">Work</a><a href="/#runs">Runs</a><a href="/about/">About</a></nav>
   </header>
   <main id="content">{body}</main>
   <footer><span>Proof Factory / AI-assisted mathematics research</span><span>Seeking useful contributions, small or large</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
@@ -84,16 +85,40 @@ def _effective_outcome(attempt: dict[str, Any], reviews: list[dict[str, Any]]) -
 def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any], reviews: list[dict[str, Any]] | None = None) -> str:
     outcome = _effective_outcome(attempt, reviews or [])
     label = STATUS_LABELS.get(outcome, outcome.replace("_", " ").title())
+    duration = attempt.get("duration_seconds")
+    duration_text = f"{round(float(duration) / 60)} min" if isinstance(duration, (int, float)) else "Duration unavailable"
+    next_steps = attempt.get("next_steps") or []
+    next_action = next_steps[0] if next_steps else None
+    if isinstance(next_action, dict):
+        next_action = next_action.get("action") or next_action.get("description") or str(next_action)
     return f"""
-<article class="attempt-row" data-outcome="{h(outcome)}">
+<article class="attempt-row" data-outcome="{h(outcome)}" data-run-id="{h(attempt.get('id'))}">
   <div class="attempt-rail outcome-{h(outcome)}"></div>
   <div class="attempt-copy">
-    <div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(attempt.get('model'))} · {h(attempt.get('effort'))}</span></div>
+    <div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(attempt.get('lane'))} lane · {h(duration_text)}</span></div>
     <h3><a href="/attempts/{h(attempt['id'])}/">{h(problem['title'])}</a></h3>
-    <p class="approach">{h(attempt.get('approach'))}</p>
-    <p>{h(attempt.get('summary'))}</p>
-    <div class="row-end"><span class="badge badge-{h(outcome)}">{h(label)}</span><a class="arrow" href="/attempts/{h(attempt['id'])}/">Evidence →</a></div>
+    <p class="approach">{h(attempt.get('approach') or 'Research pass')}</p>
+    <div class="accomplishment"><span>What this run accomplished</span><p>{h(attempt.get('summary') or 'No accomplishment summary was recorded.')}</p></div>
+    {f'<p class="next-action"><strong>Next:</strong> {h(next_action)}</p>' if next_action else ''}
+    <div class="row-end"><span class="badge badge-{h(outcome)}">{h(label)}</span><a class="arrow" href="/attempts/{h(attempt['id'])}/">Open full record →</a></div>
   </div>
+</article>"""
+
+
+def _lane_card(lane: str, payload: dict[str, Any]) -> str:
+    running = payload.get("status") == "running"
+    title = payload.get("running_problem_title") or ("Ramsey number R(5,5)" if lane == "hard" else "Discovery queue")
+    status = "Running now" if running else "Between runs"
+    detail = "Research pass in progress" if running else "Next dispatch scheduled"
+    return f"""
+<article class="operation-card operation-{h(lane)}" data-live-lane="{h(lane)}">
+  <div class="operation-head"><span class="lane lane-{h(lane)}">{h(lane)} lane</span><span class="operation-status{' is-live' if running else ''}" data-role="status">{h(status)}</span></div>
+  <h3 data-role="title">{h(title)}</h3>
+  <p class="operation-detail" data-role="detail">{h(detail)}</p>
+  <dl>
+    <div><dt>{'Elapsed' if running else 'Next run'}</dt><dd data-role="clock" data-started-at="{h(payload.get('started_at'))}" data-next-at="{h(payload.get('next_at'))}">Calculating…</dd></div>
+    <div><dt>Last result</dt><dd data-role="last-result">{h(STATUS_LABELS.get(str(payload.get('last_outcome')), str(payload.get('last_outcome') or 'Not yet').replace('_', ' ').title()))}</dd></div>
+  </dl>
 </article>"""
 
 
@@ -145,14 +170,19 @@ def _index(
         "No pass currently running" if not running_lanes
         else f"Active now: {', '.join(running_lanes)} lane{'s' if len(running_lanes) != 1 else ''}"
     )
+    live_snapshot = live.snapshot(problems, attempts, runtime, reviews)
     body = f"""
 <section class="hero">
-  <div class="hero-kicker"><span class="live-dot"></span> AI-ASSISTED MATHEMATICS RESEARCH / LIVE</div>
-  <h1>Current<br><em>research.</em></h1>
+  <div class="hero-kicker">AI-assisted mathematics research</div>
+  <h1>Mathematical research<br>in progress.</h1>
   <p class="hero-copy">Proof Factory seeks to contribute useful mathematics, no matter how small or large. This site shows the work underway, what is planned next, and the attempts made so far.</p>
 </section>
 {candidate_banner}
-<section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
+<section id="operations" class="operations section-block">
+  <div class="section-heading"><div><span class="overline">RESEARCH OPERATIONS</span><h2>Current schedule</h2></div><span class="section-note" data-live-updated>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span></div>
+  <div class="healthline"><span class="health health-{h(health)}" data-live-health>System {h(health)}</span><span>{h(live_work)}</span><span>{issues}</span></div>
+  <div class="operation-grid">{_lane_card('hard', live_snapshot['lanes']['hard'])}{_lane_card('easy', live_snapshot['lanes']['easy'])}</div>
+</section>
 <section id="ongoing" class="section-block">
   <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) hourly · discovery 12 times daily</span></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ongoing) or '<p class="empty">No research pass is currently open.</p>'}</div>
@@ -161,9 +191,9 @@ def _index(
   <div class="section-heading"><div><span class="overline">NEXT IN QUEUE</span><h2>Planned work</h2></div></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in planned) or '<p class="empty">No additional work is queued.</p>'}</div>
 </section>
-<section id="attempts" class="section-block attempts-block">
-  <div class="section-heading"><div><span class="overline">RESEARCH RECORD</span><h2>Recent attempts</h2></div></div>
-  <div class="attempt-list">{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id']), reviews_by_attempt[str(row.get('id'))]) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
+<section id="runs" class="section-block attempts-block">
+  <div class="section-heading"><div><span class="overline">RUN HISTORY</span><h2>Completed research passes</h2></div><span class="section-note">Newest first · complete records retained</span></div>
+  <div class="attempt-list" data-live-runs>{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id']), reviews_by_attempt[str(row.get('id'))]) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
 </section>
 """
     return _layout("Research work", body)
@@ -557,6 +587,166 @@ footer{min-height:78px;padding:22px clamp(22px,4vw,64px);border-color:var(--line
 """
 
 
+ACADEMIC_CSS = r"""
+/* Academic journal interface / v4 */
+:root{
+  --ink:#1d2625;--muted:#66706e;--paper:#f4f1e8;--card:#fbfaf5;--card-2:#eeeae0;
+  --line:#cec8ba;--line-bright:#969c97;--red:#7c2f36;--amber:#96691e;--green:#315c4f;
+  --blue:#2f4e67;--violet:#554b70;--black:#17211f;
+  --mono:"Avenir Next",Avenir,"Helvetica Neue",Arial,sans-serif;
+  --serif:Charter,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+html{background:var(--paper);scroll-padding-top:70px}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.58}
+a{color:var(--blue)}a:focus-visible,button:focus-visible{outline-color:var(--red)}
+.skip-link{background:var(--ink);color:#fff;font-family:var(--mono)}
+.topbar{height:68px;padding:0 clamp(20px,4.5vw,76px);border-color:var(--line);background:rgba(244,241,232,.96);box-shadow:none}
+.brand{color:var(--ink);font-family:var(--serif);font-size:17px;font-weight:650;letter-spacing:.005em;text-transform:none}
+.brand-mark{width:32px;height:32px;border:1px solid var(--ink);border-radius:50%;background:transparent;color:var(--ink);font:700 10px var(--mono)}
+.brand small{border-color:var(--line);color:var(--muted);font:600 9px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.topbar nav{gap:clamp(13px,2.1vw,30px)}
+.topbar nav a,footer a{color:var(--muted);font:650 10px var(--mono);letter-spacing:.09em;text-transform:uppercase}
+.topbar nav a:hover,footer a:hover{color:var(--red)}
+main{max-width:1480px;border-color:var(--line);background:var(--paper)}
+.hero{padding:clamp(70px,8.5vw,126px) clamp(24px,7vw,108px) clamp(60px,7vw,94px);border-color:var(--line);background:linear-gradient(120deg,#f7f4ec,#eee9de)}
+.hero:before{content:"R(5,5)  ·  GRAPH THEORY  ·  FORMAL METHODS";right:5.5vw;top:48px;color:rgba(47,78,103,.065);font:650 clamp(28px,4vw,58px)/1.05 var(--mono);letter-spacing:-.045em;transform:none}
+.hero-kicker,.overline,.panel-label,.eyebrow{color:var(--red);font:650 10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.hero h1,.dossier-head h1,.attempt-head h1,.method-head h1{max-width:1100px;margin:24px 0 26px;color:var(--ink);font-family:var(--serif);font-size:clamp(48px,7vw,96px);font-weight:400;line-height:1.01;letter-spacing:-.045em}
+.hero h1 em,.method-head h1 em{color:var(--red);font-style:normal}
+.hero-copy{max-width:800px;color:#48514f;font-family:var(--serif);font-size:clamp(18px,1.8vw,24px);line-height:1.55}
+.candidate-alert,.internal-alert{border-color:#c9aa74;background:#f6ecd7;color:var(--ink)}.candidate-alert p{color:#66573f}.pulse{background:var(--amber);box-shadow:none}
+.section-block{padding:clamp(48px,6vw,78px) clamp(24px,7vw,108px)}
+.section-heading{margin-bottom:26px;padding-bottom:17px;border-color:var(--line)}
+.section-heading h2{color:var(--ink);font-family:var(--serif);font-size:clamp(34px,4.3vw,56px);font-weight:400;letter-spacing:-.035em}
+.section-note{color:var(--muted);font:600 9px var(--mono);letter-spacing:.09em}
+.operations{border-bottom:1px solid var(--line);background:#f8f6f0}
+.operations .section-heading{margin-bottom:0}.healthline{margin:0;padding:14px 0;border-top:0;border-color:var(--line);color:var(--muted);font:550 10px var(--mono);letter-spacing:.035em}
+.health{color:var(--ink)}.health:before{background:var(--amber);box-shadow:none}.health-healthy:before{background:var(--green)}.health-degraded:before{background:var(--red)}
+.operation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:18px}
+.operation-card{position:relative;min-width:0;padding:26px 28px 24px;border:1px solid var(--line);background:var(--card)}
+.operation-card:before{content:"";position:absolute;left:-1px;top:-1px;bottom:-1px;width:4px;background:var(--blue)}.operation-hard:before{background:var(--red)}
+.operation-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.operation-status{color:var(--muted);font:650 10px var(--mono);letter-spacing:.07em;text-transform:uppercase}.operation-status.is-live{color:var(--green)}.operation-status.is-live:before{content:"";display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--green)}
+.operation-card h3{margin:24px 0 7px;color:var(--ink);font-size:clamp(24px,2.5vw,35px);font-weight:400;line-height:1.12}.operation-detail{margin:0;color:var(--muted);font-size:14px}
+.operation-card dl{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:24px 0 0;border-top:1px solid var(--line)}.operation-card dl div{padding-top:14px}.operation-card dl div+div{padding-left:20px;border-left:1px solid var(--line)}.operation-card dt{color:var(--muted);font:650 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.operation-card dd{margin:4px 0 0;color:var(--ink);font:650 13px var(--mono)}
+.problem-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.problem-card{min-height:350px;padding:24px;border-color:var(--line);background:var(--card)}.problem-card:hover{border-color:var(--line-bright)}
+.lane,.badge{border-radius:0;font:700 8px var(--mono)}.lane{border-color:var(--line);background:transparent}.lane-hard{border-color:#b7898c;background:#f1e4e3;color:var(--red)}.lane-easy{border-color:#9eafbc;background:#e7edf0;color:var(--blue)}.lane-calibration{border-color:#aaa4b8;background:#ece9f0;color:var(--violet)}
+.badge{border-color:var(--line);background:#f8f6f0;color:var(--muted)}.badge-candidate{border-color:#c9aa74;background:#f6ecd7;color:#76511a}.badge-active,.badge-progress,.badge-verified,.badge-published{border-color:#91aa9e;background:#e4ece7;color:var(--green)}.badge-attempted,.badge-failed,.badge-no_progress,.badge-error,.badge-internal_result{border-color:#bd9692;background:#f1e5e2;color:var(--red)}
+.problem-card h3{font-size:26px}.problem-card p{color:#56605e;font-family:var(--serif);font-size:14px}.meter{background:#ddd7cb}.meter span{background:var(--red)}.card-meta,.card-actions{color:var(--muted);font:550 9px var(--mono)}.last-note{color:#525c59;font-family:var(--serif);font-size:13px}.card-actions{border-color:var(--line)}.card-actions a{color:var(--blue)}
+.planned-block{border-color:var(--line);background:#eeeae0}.attempts-block{background:#e8e4da}.attempt-list{border-color:var(--line)}
+.attempt-row{grid-template-columns:4px minmax(0,1fr);border-color:var(--line);background:rgba(251,250,245,.82)}.attempt-row:hover{background:var(--card)}.attempt-copy{padding:25px 28px}.eyebrow{color:var(--muted)}.attempt-copy h3{font-size:26px}.attempt-copy p{color:#56605e;font-family:var(--serif);font-size:14px}.attempt-copy .approach{color:var(--ink);font-weight:650}
+.accomplishment{max-width:1020px;margin:15px 0 5px;padding:14px 17px;border-left:2px solid var(--blue);background:#f0eee7}.accomplishment>span{color:var(--blue);font:700 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}.accomplishment p{margin:5px 0 0;color:#343d3b}.next-action{max-width:1020px}.arrow{color:var(--blue)}
+.dossier-head,.attempt-head,.method-head{border-color:var(--line);background:linear-gradient(120deg,#f7f4ec,#eee9de)}.back{color:var(--muted)}.statement,.lead{color:#3f4947}.source-line a{color:var(--blue)}
+.dossier-grid article,.attempt-detail article,.method-grid article,.research-grid article,.strategy-library article,.about-grid article{border-color:var(--line);background:var(--card)}.dossier-grid p,.attempt-detail p,.research-grid li,.attempt-detail li,.strategy-library p,.strategy-library li,.method-grid p,.about-grid p,.about-source p{color:#525c59;font-family:var(--serif);font-size:14px}.techniques{border-color:var(--line);background:var(--card)}.techniques>div span{border-color:var(--line);color:var(--muted)}
+.research-grid h3,.strategy-library h2,.method-grid h2,.about-grid h2,.principles h2{color:var(--ink)}.strategy-sources a{color:var(--blue)}
+.principles,.about-source{border-color:var(--line);background:var(--black);color:#f3f0e8}.principles h2,.about-source h2{color:#fff}.principles p,.principles li,.about-source p{color:#d3d7d2}.principles a,.about-source a{color:#e5d6b7}
+.empty{border-color:var(--line);background:var(--card);color:var(--muted)}code{color:var(--red)}
+footer{background:var(--black);color:#acb4b0;border-color:var(--black)}footer a{color:#d8ddd8}
+@media(max-width:1080px){.problem-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.hero:before{display:none}.operation-grid,.problem-grid{grid-template-columns:1fr}.operation-card dl{grid-template-columns:1fr}.operation-card dl div+div{margin-top:12px;padding-left:0;border-left:0}.topbar nav a{font-size:8px}.section-heading{align-items:flex-start}.attempt-copy{padding:20px}.accomplishment{padding:12px 14px}}
+"""
+
+
+SITE_JS = r"""
+(() => {
+  const labels = {
+    progress: "Progress", no_progress: "No progress", failed: "Failed route", error: "Error",
+    candidate: "Candidate — review needed", internal_result: "Internal result", verified: "Verified", published: "Public research note"
+  };
+  const dateText = value => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "Not yet";
+    return new Intl.DateTimeFormat("en-GB", {year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"}).format(date);
+  };
+  const intervalText = seconds => {
+    seconds = Math.max(0, Math.round(seconds));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return hours ? `${hours}h ${minutes}m ${secs}s` : `${minutes}m ${secs}s`;
+  };
+  const updateClock = card => {
+    const clock = card.querySelector('[data-role="clock"]');
+    if (!clock) return;
+    const status = card.querySelector('[data-role="status"]')?.textContent;
+    const value = status === "Running now" ? clock.dataset.startedAt : clock.dataset.nextAt;
+    const date = new Date(value || "");
+    if (Number.isNaN(date.getTime())) { clock.textContent = "Not scheduled"; return; }
+    const delta = status === "Running now" ? (Date.now() - date.getTime()) / 1000 : (date.getTime() - Date.now()) / 1000;
+    clock.textContent = status === "Running now" ? intervalText(delta) : `${dateText(value)} · in ${intervalText(delta)}`;
+  };
+  const renderLane = (lane, payload) => {
+    const card = document.querySelector(`[data-live-lane="${lane}"]`);
+    if (!card || !payload) return;
+    const running = payload.status === "running";
+    const status = card.querySelector('[data-role="status"]');
+    status.textContent = running ? "Running now" : "Between runs";
+    status.classList.toggle("is-live", running);
+    card.querySelector('[data-role="title"]').textContent = payload.running_problem_title || (lane === "hard" ? "Ramsey number R(5,5)" : "Discovery queue");
+    card.querySelector('[data-role="detail"]').textContent = running ? "Research pass in progress" : "Next dispatch scheduled";
+    const clock = card.querySelector('[data-role="clock"]');
+    clock.dataset.startedAt = payload.started_at || "";
+    clock.dataset.nextAt = payload.next_at || "";
+    clock.previousElementSibling.textContent = running ? "Elapsed" : "Next run";
+    card.querySelector('[data-role="last-result"]').textContent = labels[payload.last_outcome] || (payload.last_outcome || "Not yet").replaceAll("_", " ");
+    updateClock(card);
+  };
+  const el = (name, className, text) => {
+    const node = document.createElement(name);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = text;
+    return node;
+  };
+  const renderRuns = runs => {
+    const list = document.querySelector("[data-live-runs]");
+    if (!list || !Array.isArray(runs) || !runs.length) return;
+    list.replaceChildren(...runs.map(run => {
+      const article = el("article", "attempt-row"); article.dataset.outcome = run.outcome || "unknown"; article.dataset.runId = run.id || "";
+      article.append(el("div", `attempt-rail outcome-${run.outcome || "unknown"}`));
+      const copy = el("div", "attempt-copy");
+      const eyebrow = el("div", "eyebrow"); eyebrow.append(el("span", "", dateText(run.finished_at)), el("span", "", `${run.lane || "research"} lane · ${run.duration_seconds ? Math.round(run.duration_seconds / 60) + " min" : "duration unavailable"}`));
+      const h3 = el("h3"); const title = el("a", "", run.problem_title || run.problem_id); title.href = run.href; h3.append(title);
+      const approach = el("p", "approach", run.approach || "Research pass");
+      const accomplishment = el("div", "accomplishment"); accomplishment.append(el("span", "", "What this run accomplished"), el("p", "", run.accomplishment || "No accomplishment summary was recorded."));
+      copy.append(eyebrow, h3, approach, accomplishment);
+      if (run.next_action) { const next = el("p", "next-action"); next.append(el("strong", "", "Next: "), document.createTextNode(run.next_action)); copy.append(next); }
+      const end = el("div", "row-end"); end.append(el("span", `badge badge-${run.outcome || "unknown"}`, labels[run.outcome] || (run.outcome || "unknown").replaceAll("_", " "));
+      const link = el("a", "arrow", "Open full record →"); link.href = run.href; end.append(link); copy.append(end); article.append(copy); return article;
+    }));
+  };
+  const refresh = async () => {
+    try {
+      const response = await fetch("/api/live", {cache:"no-store", headers:{accept:"application/json"}});
+      if (!response.ok) return;
+      const data = await response.json(); if (!data.available) return;
+      renderLane("hard", data.lanes?.hard); renderLane("easy", data.lanes?.easy); renderRuns(data.recent_runs);
+      const updated = document.querySelector("[data-live-updated]"); if (updated) updated.textContent = `Live data · ${dateText(data.generated_at)}`;
+      const health = document.querySelector("[data-live-health]"); if (health) { health.textContent = `System ${data.health || "starting"}`; health.className = `health health-${data.health || "starting"}`; health.dataset.liveHealth = ""; }
+    } catch (_) { /* Static render remains the honest fallback. */ }
+  };
+  document.querySelectorAll("[data-live-lane]").forEach(updateClock);
+  setInterval(() => document.querySelectorAll("[data-live-lane]").forEach(updateClock), 1000);
+  refresh(); setInterval(refresh, 30000);
+})();
+"""
+
+
+WORKER_JS = r"""
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/live") {
+      const value = env.PROOF_RUNTIME ? await env.PROOF_RUNTIME.get("runtime") : null;
+      return new Response(value || JSON.stringify({available:false}), {
+        status: value ? 200 : 503,
+        headers: {"content-type":"application/json; charset=utf-8","cache-control":"no-store"}
+      });
+    }
+    return env.ASSETS.fetch(request);
+  }
+};
+"""
+
+
 def _build_unlocked() -> Path:
     problems = store.load_problems()
     attempts = store.load_attempts()
@@ -577,7 +767,9 @@ def _build_unlocked() -> Path:
             else:
                 child.unlink()
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
-    _write(store.SITE / "assets" / "site-v3.css", CSS)
+    _write(store.SITE / "assets" / "site-v4.css", CSS + ACADEMIC_CSS)
+    _write(store.SITE / "assets" / "site-v4.js", SITE_JS)
+    _write(store.SITE / "_worker.js", WORKER_JS)
     _write(store.SITE / "index.html", _index(problems, attempts, runtime, reviews))
     by_problem: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:

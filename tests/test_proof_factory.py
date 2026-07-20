@@ -6,10 +6,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, cli, contribution_gate, intake, lab, render, repositories, research_state, scheduler, scout, store, strategy_lab
+from proof_factory import agent, brain, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -370,8 +371,11 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn("Current", index)
                 self.assertIn("Ongoing work", index)
                 self.assertIn("Planned work", index)
-                self.assertIn("Recent attempts", index)
-                self.assertIn("/assets/site-v3.css", index)
+                self.assertIn("Current schedule", index)
+                self.assertIn("Completed research passes", index)
+                self.assertIn("What this run accomplished", index)
+                self.assertIn("/assets/site-v4.css", index)
+                self.assertIn("/assets/site-v4.js", index)
                 self.assertIn("Ramsey number R(5,5)", index)
                 self.assertIn("Official source", index)
                 self.assertNotIn("Every attempt", index)
@@ -381,11 +385,37 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertNotIn("/api/", index)
                 self.assertFalse((site / "api").exists())
                 self.assertFalse((site / "brain").exists())
+                self.assertTrue((site / "_worker.js").is_file())
                 redirects = (site / "_redirects").read_text()
                 self.assertIn("/brain/* / 301", redirects)
                 self.assertIn("/api/* / 301", redirects)
                 about = (site / "about" / "index.html").read_text()
                 self.assertIn("no matter how small or large", about)
+
+    def test_live_schedule_and_snapshot(self) -> None:
+        now = datetime(2026, 7, 20, 20, 40, tzinfo=timezone.utc)
+        self.assertEqual(live.next_hard_after(now).isoformat(), "2026-07-20T21:00:00+00:00")
+        self.assertEqual(live.next_easy_after(now).isoformat(), "2026-07-20T22:30:00+00:00")
+        exact = datetime(2026, 7, 20, 22, 30, tzinfo=timezone.utc)
+        self.assertEqual(live.next_easy_after(exact).isoformat(), "2026-07-21T00:30:00+00:00")
+
+        problems = [{"id": "p", "title": "Test problem", "lane": "hard"}]
+        attempts = [{
+            "id": "a", "problem_id": "p", "lane": "hard", "outcome": "progress",
+            "started_at": "2026-07-20T20:00:00+00:00", "finished_at": "2026-07-20T20:10:00+00:00",
+            "duration_seconds": 600, "approach": "Exact search", "summary": "Eliminated two cases.",
+            "next_steps": ["Check the remaining case."], "experiments": [{"name": "checker"}],
+        }]
+        runtime = {
+            "hard_running": "p", "hard_started_at": "2026-07-20T20:35:00+00:00",
+            "hard_last_attempt_at": "2026-07-20T20:10:00+00:00", "hard_last_outcome": "progress",
+            "health": "healthy", "updated_at": "2026-07-20T20:40:00+00:00",
+        }
+        value = live.snapshot(problems, attempts, runtime, now=now)
+        self.assertEqual(value["lanes"]["hard"]["status"], "running")
+        self.assertEqual(value["lanes"]["hard"]["running_problem_title"], "Test problem")
+        self.assertEqual(value["recent_runs"][0]["accomplishment"], "Eliminated two cases.")
+        self.assertEqual(value["recent_runs"][0]["next_action"], "Check the remaining case.")
 
     def test_render_uses_shared_process_lock(self) -> None:
         events: list[str] = []

@@ -1,5 +1,11 @@
 {
   "name": "proofs",
   "pages_build_output_dir": "./site",
-  "compatibility_date": "2026-07-20"
+  "compatibility_date": "2026-07-20",
+  "kv_namespaces": [
+    {
+      "binding": "PROOF_RUNTIME",
+      "id": "4e48b416e03447ac87c86a60c12a3bc4"
+    }
+  ]
 }

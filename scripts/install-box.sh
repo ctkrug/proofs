@@ -32,6 +32,8 @@ install -m 0644 deploy/proof-factory-scout.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-scout.timer /etc/systemd/system/
 install -m 0644 deploy/proof-factory-strategy-lab.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-strategy-lab.timer /etc/systemd/system/
+install -m 0644 deploy/proof-factory-runtime-sync.service /etc/systemd/system/
+install -m 0644 deploy/proof-factory-runtime-sync.timer /etc/systemd/system/
 systemctl daemon-reload
 
 # Safe bring-up: render/watchdog may run; research timers are enabled only after a real canary.
@@ -39,3 +41,4 @@ systemctl enable --now proof-factory-watchdog.timer
 systemctl enable --now proof-factory-intake.timer
 systemctl enable --now proof-factory-publish.timer
 systemctl enable --now proof-factory-lab.timer
+systemctl enable --now proof-factory-runtime-sync.timer
