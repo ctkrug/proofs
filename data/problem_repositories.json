@@ -1,118 +1,118 @@
 {
   "schema_version": 1,
-  "visibility_policy": "private-until-explicit-human-release",
+  "visibility_policy": "public-research-history",
   "repositories": [
     {
       "problem_id": "jacobian-2026-reproduction",
       "repository": "ctkrug/proofs-jacobian-2026-reproduction",
       "url": "https://github.com/ctkrug/proofs-jacobian-2026-reproduction",
-      "visibility": "PRIVATE",
-      "commit": "030357f093b7cdcfba03d7ab6253b319ab2f2c82"
+      "visibility": "PUBLIC",
+      "commit": "e1cc95785d741e6aa8bc3fabade333362ffbd864"
     },
     {
       "problem_id": "erdos-242",
       "repository": "ctkrug/proofs-erdos-242",
       "url": "https://github.com/ctkrug/proofs-erdos-242",
-      "visibility": "PRIVATE",
-      "commit": "7a149c44ab2f4b56bda38aa1a48f4f5450811ba6"
+      "visibility": "PUBLIC",
+      "commit": "f0510569340787bb331db1f18c699c6e1c7498ed"
     },
     {
       "problem_id": "ramsey-r55",
       "repository": "ctkrug/proofs-ramsey-r55",
       "url": "https://github.com/ctkrug/proofs-ramsey-r55",
-      "visibility": "PRIVATE",
-      "commit": "cdd2252975e0f9eb36b07c347e4a19f7a29601e6"
+      "visibility": "PUBLIC",
+      "commit": "0abf581a8aa8fce8953644c7cacb206ef67ecbac"
     },
     {
       "problem_id": "erdos-647",
       "repository": "ctkrug/proofs-erdos-647",
       "url": "https://github.com/ctkrug/proofs-erdos-647",
-      "visibility": "PRIVATE",
-      "commit": "0ef2fe6c70f5ce5cf4a30cf79369a1f70fe62a22"
+      "visibility": "PUBLIC",
+      "commit": "d4ae4180a8f813472be3bd95e120120b8582b427"
     },
     {
       "problem_id": "erdos-307",
       "repository": "ctkrug/proofs-erdos-307",
       "url": "https://github.com/ctkrug/proofs-erdos-307",
-      "visibility": "PRIVATE",
-      "commit": "6c120535096abc067eca64a182cfe89b0ff2f4f6"
+      "visibility": "PUBLIC",
+      "commit": "50a913ca91914984aa21abaf80a96072cf03e3c6"
     },
     {
       "problem_id": "erdos-835",
       "repository": "ctkrug/proofs-erdos-835",
       "url": "https://github.com/ctkrug/proofs-erdos-835",
-      "visibility": "PRIVATE",
-      "commit": "8f1bff90a80c55729174a5cec5fb0a420ba53bc3"
+      "visibility": "PUBLIC",
+      "commit": "b55c1d82698120e50ad165c88dd6a9c029b973b0"
     },
     {
       "problem_id": "erdos-7",
       "repository": "ctkrug/proofs-erdos-7",
       "url": "https://github.com/ctkrug/proofs-erdos-7",
-      "visibility": "PRIVATE",
-      "commit": "b54bef1d005cac5fc9ea34b1f7a461122b23b289"
+      "visibility": "PUBLIC",
+      "commit": "f72aa7633c6bb5e02c8cf1343bab77a81b21ee22"
     },
     {
       "problem_id": "erdos-1041",
       "repository": "ctkrug/proofs-erdos-1041",
       "url": "https://github.com/ctkrug/proofs-erdos-1041",
-      "visibility": "PRIVATE",
-      "commit": "db139dc4d1e42a856a3e68ea28194227bd66c1d9"
+      "visibility": "PUBLIC",
+      "commit": "8cf78ce75d3bdc4e14a9edcd9e72c4f0c22dda46"
     },
     {
       "problem_id": "erdos-1082",
       "repository": "ctkrug/proofs-erdos-1082",
       "url": "https://github.com/ctkrug/proofs-erdos-1082",
-      "visibility": "PRIVATE",
-      "commit": "d5bcaaf8461b0bd938e9e1924dc57cf0036ba82a"
+      "visibility": "PUBLIC",
+      "commit": "5ee11ed7f0c66bf8d03f01b5c3ae161d9d835af9"
     },
     {
       "problem_id": "erdos-23",
       "repository": "ctkrug/proofs-erdos-23",
       "url": "https://github.com/ctkrug/proofs-erdos-23",
-      "visibility": "PRIVATE",
-      "commit": "8d60686b44d10f9aa7274c6c55c1aa4c0081e56f"
+      "visibility": "PUBLIC",
+      "commit": "ebcd84e2cb93d9b56dd2963128ae5f706c04ce57"
     },
     {
       "problem_id": "erdos-287",
       "repository": "ctkrug/proofs-erdos-287",
       "url": "https://github.com/ctkrug/proofs-erdos-287",
-      "visibility": "PRIVATE",
-      "commit": "7070c208514810695dfba0af1ba7ab3d0d19a771"
+      "visibility": "PUBLIC",
+      "commit": "63d7b76ed9531e0e2ae29db3dd0d65633c7ae7a6"
     },
     {
       "problem_id": "erdos-364",
       "repository": "ctkrug/proofs-erdos-364",
       "url": "https://github.com/ctkrug/proofs-erdos-364",
-      "visibility": "PRIVATE",
-      "commit": "25a343062bec60b020069f7cc8f7af2dc0d06a3e"
+      "visibility": "PUBLIC",
+      "commit": "e1128275a56e4722067d6f9c8aeac717fbfa405d"
     },
     {
       "problem_id": "erdos-366",
       "repository": "ctkrug/proofs-erdos-366",
       "url": "https://github.com/ctkrug/proofs-erdos-366",
-      "visibility": "PRIVATE",
-      "commit": "22c4fc900bce814131e32afc3ba1d4edd10e04b9"
+      "visibility": "PUBLIC",
+      "commit": "a277d737318d336930cb4cb1f7fa800e004da16f"
     },
     {
       "problem_id": "erdos-375",
       "repository": "ctkrug/proofs-erdos-375",
       "url": "https://github.com/ctkrug/proofs-erdos-375",
-      "visibility": "PRIVATE",
-      "commit": "99df5ab28ad8a89ced493eef39d0d97963e25215"
+      "visibility": "PUBLIC",
+      "commit": "6f138c9b3828f3638bcb1b04cbe44ee8bdb21d65"
     },
     {
       "problem_id": "erdos-398",
       "repository": "ctkrug/proofs-erdos-398",
       "url": "https://github.com/ctkrug/proofs-erdos-398",
-      "visibility": "PRIVATE",
-      "commit": "e2c8b3a9f5ce603aaf94ee8b6396cda8127b403c"
+      "visibility": "PUBLIC",
+      "commit": "e02f75297b431349a362be7ad0ab3ed1f8e0af90"
     },
     {
       "problem_id": "scout-bdf77f43574b",
       "repository": "ctkrug/proofs-scout-bdf77f43574b",
       "url": "https://github.com/ctkrug/proofs-scout-bdf77f43574b",
-      "visibility": "PRIVATE",
-      "commit": "4ef6b7a3439149e3f070a37863a65414a8f063d4"
+      "visibility": "PUBLIC",
+      "commit": "966b7ce1825c5c2661feede6e3da530da88a4220"
     }
   ],
   "errors": []
