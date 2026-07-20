@@ -59,6 +59,7 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
   <meta name="description" content="{h(description)}">
   <link rel="stylesheet" href="/assets/site.css">
   <script defer src="/assets/site.js"></script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token":"153bb72472fb49d8863fb2f8f08f6b2b"}}'></script>
   <script>MathJax={{tex:{{inlineMath:[['$','$'],['\\(','\\)']]}}}};</script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
