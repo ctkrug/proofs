@@ -38,6 +38,7 @@ systemctl daemon-reload
 
 # Safe bring-up: render/watchdog may run; research timers are enabled only after a real canary.
 systemctl enable --now proof-factory-watchdog.timer
+systemctl enable --now proof-factory-easy.timer
 systemctl enable --now proof-factory-intake.timer
 systemctl enable --now proof-factory-publish.timer
 systemctl enable --now proof-factory-lab.timer
