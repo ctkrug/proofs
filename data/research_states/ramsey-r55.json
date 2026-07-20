@@ -3,88 +3,328 @@
   "problem_id": "ramsey-r55",
   "objective": "Determine the finite exact Ramsey number R(5,5), currently known to lie between 43 and 46, through a compact 43-vertex lower-bound witness or a certificate-carrying finite upper-bound exclusion.",
   "completion_criteria": [
-    "For a lower-bound improvement, emit a 43-vertex adjacency list and a separately written exact checker that finds neither a K5 nor an independent 5-set.",
-    "For an upper-bound improvement, preserve a deterministic encoding, checked SAT/UNSAT leaf certificates, a checked exhaustive cube cover, and an independent generator-to-graph correspondence audit.",
+    "For a lower-bound improvement, emit a 43-vertex adjacency artifact and two independently implemented exact checkers that find neither a K5 nor an independent 5-set.",
+    "For an upper-bound improvement, preserve a deterministic encoding, checked SAT/UNSAT leaf certificates, a checked exhaustive cube cover, checked symmetry coverage, and an independent generator-to-graph correspondence audit.",
     "A candidate remains unaccepted until isolated reproduction, current-literature review, and Charlie's recorded approval."
   ],
   "non_results": [
     "A graph that passes only a shared or heuristic checker is not a Ramsey witness.",
     "A local-search score, a partial SAT cube set, or an unchecked solver result is not a bound.",
-    "A known 42-vertex critical graph, or an unchanged known upper-bound reduction, is not new progress.",
+    "Rediscovering one of the known 656 order-42 graphs is a control result, not frontier progress.",
+    "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
   "epoch_count": 0,
-  "last_updated": "2026-07-20T20:24:00+00:00",
-  "synthesis_summary": "Initialized as the permanent hard lane because it is a famous finite exact problem with short lower-bound witnesses and certificate-carrying upper-bound routes. No research epoch has run yet.",
+  "last_updated": "2026-07-20T12:53:00-06:00",
+  "synthesis_summary": "Deep literature audit complete. Read research/ramsey-r55/DOSSIER.md before opening a new route. The key strategic correction is that any (5,5,43) witness has 43 vertex-deleted (5,5,42) graphs, and none can belong to the known 656 because all 656 are non-extendible. Prioritize audited controls, a genuinely novel 42-vertex basin, and exact repair around the published two-conflict K43 seed. Keep construction and nonexistence tracks separate; every claimed exclusion needs proof logs, checked cover and symmetry obligations, immutable hashes, and independent checking.",
   "established_facts": [
     {
-      "claim": "The maintained 2026 Dynamic Survey records 43 <= R(5,5) <= 46 and strong evidence for R(5,5)=43.",
-      "evidence": "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
-      "scope": "Current published bounds as of target initialization",
+      "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
+      "evidence": "https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf",
+      "scope": "Current published bounds in the 2026 research audit",
+      "status": "sourced"
+    },
+    {
+      "claim": "The full source trail, historical audit, strategy portfolio, and verification architecture are stored in research/ramsey-r55/DOSSIER.md and must be consulted before proposing a new route.",
+      "evidence": "Local audited research dossier dated 2026-07-20",
+      "scope": "Engine operating instruction",
+      "status": "audited"
+    },
+    {
+      "claim": "McKay's public corpus contains 328 (5,5,42) representatives; complements give the 656 known graphs, but completeness is conjectural.",
+      "evidence": "https://users.cecs.anu.edu.au/~bdm/data/ramsey.html and https://users.cecs.anu.edu.au/~bdm/data/r55_42some.g6",
+      "scope": "Known order-42 control corpus",
+      "status": "sourced"
+    },
+    {
+      "claim": "Every one of the known 656 order-42 graphs has been exhaustively shown non-extendible by one vertex.",
+      "evidence": "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+      "scope": "Direct one-vertex extension of the maintained known corpus",
+      "status": "computed"
+    },
+    {
+      "claim": "If an (5,5,43) graph exists, all 43 of its vertex-deleted order-42 graphs are valid and none belongs to the known 656.",
+      "evidence": "Vertex deletion preserves forbidden K5/independent-5 conditions, combined with exhaustive non-extension of the 656",
+      "scope": "Necessary condition for every possible 43-vertex witness",
+      "status": "proved"
+    },
+    {
+      "claim": "The survey reports that any unknown order-42 graph shares no induced 37-vertex subgraph with the known 656; the underlying exhaustive artifact was not located for replay.",
+      "evidence": "https://www.cs.rit.edu/~spr/PUBL/sur14.pdf",
+      "scope": "Reported McKay-Lieby induced-subgraph-distance computation",
+      "status": "reported-not-replayed"
+    },
+    {
+      "claim": "Known order-42 representatives have 423..430 edges, degrees 19..22, mostly trivial automorphism groups, and none is almost regular.",
+      "evidence": "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf and the Dynamic Survey",
+      "scope": "Observed properties of the known corpus, not necessary properties of unknown graphs",
+      "status": "computed"
+    },
+    {
+      "claim": "Every vertex of an (5,5,m) graph has degree between m-25 and 24; a 43-vertex candidate therefore has degrees 18..24.",
+      "evidence": "R(4,5)=25 neighborhood/complement-neighborhood argument",
+      "scope": "All hypothetical (5,5,m) graphs",
+      "status": "proved"
+    },
+    {
+      "claim": "A reproducible near-cyclic K43 construction has 9 monochromatic K5s; a published continuous-time MaxSAT experiment reports a two-conflict K43 whose two bad cliques lie on six vertices.",
+      "evidence": "https://arxiv.org/abs/2212.12630 and https://doi.org/10.1038/s41467-018-07327-2",
+      "scope": "Published K43 optimization controls; neither is a Ramsey witness or global optimum proof",
+      "status": "sourced-needs-artifact-verification"
+    },
+    {
+      "claim": "Pure circulant colorings cannot produce an order-42 or order-43 (5,5) graph because C(5,5)=41.",
+      "evidence": "https://optimization-online.org/wp-content/uploads/2021/09/8578.pdf",
+      "scope": "Exact circulant family only; almost-circulant symmetry-broken repair remains open",
+      "status": "proved-computationally"
+    },
+    {
+      "claim": "The current R(5,5)<=46 theorem used edge-extremal (4,5,n) catalogues, exact excess/counting restrictions, pointed-graph gluing, and two independent implementations consuming roughly 30 plus 50 CPU-years.",
+      "evidence": "https://arxiv.org/abs/2409.15709",
+      "scope": "Published upper-bound architecture",
+      "status": "proved-published"
+    },
+    {
+      "claim": "No public end-to-end CNF/cube/LRAT package or formal theorem was located for the <=46 computation; independent implementations are not equivalent to a proof-carrying replay.",
+      "evidence": "2026 artifact audit of the paper, author data page, and public repositories",
+      "scope": "Artifact availability, not validity of the published theorem",
+      "status": "audited"
+    },
+    {
+      "claim": "Successful exact Ramsey verification precedents include HOL4 R(4,5)=25, SAT+CAS certificates for R(3,8) and R(3,9), and a Lean/LRAT-Catcher R(4,4)=18 demonstration.",
+      "evidence": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2024.16, https://arxiv.org/abs/2502.06055, https://arxiv.org/abs/2607.00815",
+      "scope": "Reusable verification architectures; resource demands differ sharply from R55",
       "status": "sourced"
     }
   ],
   "strategies": [
     {
-      "id": "strategy-r55-witness-search",
-      "family": "evaluator-guided Ramsey graph construction",
-      "fingerprint": "r55witness2026",
-      "title": "Canonical 43-vertex witness search",
-      "mechanism": "Generate symmetry-aware 43-vertex graphs, score exact K5 and independent-5 violations, and retain only candidates checked by a separate adjacency-list verifier.",
+      "id": "strategy-r55-controls",
+      "family": "audited corpus and independent evaluators",
+      "fingerprint": "r55controls2026",
+      "title": "Authenticate the 656 controls and near-miss seeds",
+      "mechanism": "Mirror and hash the 328 representatives, derive complements, verify every graph with transparent combination and independent bitset checkers, canonicalize, reproduce structural statistics, then reconstruct the 13-, 9-, and published 2-conflict K43 controls.",
       "status": "proposed",
-      "hypothesis": "A structural or local-search construction can produce a previously unknown (5,5,43)-graph.",
-      "discriminating_test": "Reproduce a published 42-vertex critical graph with two independent exact checkers, then require any 43-vertex candidate to pass both before considering it a witness.",
-      "blocker": "No audited construction corpus or independent checker has yet been installed.",
+      "hypothesis": "The source corpus and published seeds can be converted into trustworthy immutable controls for every later epoch.",
+      "discriminating_test": "Both non-importing checkers agree on exact violation identities and corpus statistics; stop at the first provenance or count mismatch.",
+      "blocker": "Artifacts have not yet been mirrored, hashed, and dual-checked locally.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
       "parent_ids": [],
-      "updated_at": "2026-07-20T20:24:00+00:00"
+      "updated_at": "2026-07-20T12:53:00-06:00"
     },
     {
-      "id": "strategy-r55-certified-upper-bound",
-      "family": "certificate-carrying cube-and-conquer",
-      "fingerprint": "r55upper2026",
-      "title": "Certified finite upper-bound reduction",
-      "mechanism": "Encode normalized (5,5,n)-graphs deterministically, split a fixed cube cover, independently check every SAT witness or UNSAT proof, and check that the cubes cover the normalized search space.",
+      "id": "strategy-r55-novel42",
+      "family": "novel order-42 basin discovery",
+      "fingerprint": "r55novel42basin2026",
+      "title": "Find a genuinely new 42-vertex component",
+      "mechanism": "Jointly destroy at least six vertices, exact-repair boundaries, canonicalize every valid result, and score explicit induced-subgraph novelty away from all 656; run an almost-regular constrained branch beside an unrestricted branch.",
       "status": "proposed",
-      "hypothesis": "A reproducible reduction can tighten the 46 upper bound or yield a useful formally checked subcase.",
-      "discriminating_test": "On a published toy Ramsey instance, reproduce an exact answer with an independently checked CNF-to-graph encoder, proof-checked leaves, and a checked cover before scaling.",
-      "blocker": "The current 46 proof and its artifact/licensing/reproduction path have not yet been audited.",
+      "hypothesis": "A 43 witness, if it exists, is reachable only through an unknown order-42 basin, and the almost-regular conjecture supplies one sharp search slice.",
+      "discriminating_test": "Produce a dual-verified order-42 graph outside all 656 or certify a precisely bounded branch empty; rediscovery of known classes fails the epoch.",
+      "blocker": "Requires authenticated corpus, canonicalization, novelty metrics, and independent checkers.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": ["strategy-r55-controls"],
+      "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55-conflict-core",
+      "family": "exact destroy-and-repair around a published near-solution",
+      "fingerprint": "r55twocore2026",
+      "title": "Repair the six-vertex two-conflict core",
+      "mechanism": "Recover and verify the published two-conflict K43, freeze edges outside the six-vertex conflict union, optimize internal and incident edges, then expand destroy sets 6,8,10,... using conflict persistence and UNSAT-core information.",
+      "status": "proposed",
+      "hypothesis": "A coordinated boundary repair can escape the best published near-solution more effectively than unrestricted single-edge search.",
+      "discriminating_test": "Certify the optimum inside each bounded neighborhood and compare matched compute with tabu/annealing; only a dual-verified zero is a witness.",
+      "blocker": "The exact supplementary two-conflict graph has not yet been recovered and authenticated.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": ["strategy-r55-controls"],
+      "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55-breakout",
+      "family": "violation-hypergraph tabu and local branching",
+      "fingerprint": "r55breakout2026",
+      "title": "Persistent-conflict breakout search",
+      "mechanism": "Maintain exact per-edge deltas over affected 5-sets, tabu tenure, aspiration, weighted persistent conflicts, restarts, and explicit conflict-union/hitting-set metrics; A/B test concentration versus dispersion scoring.",
+      "status": "proposed",
+      "hypothesis": "Conflict topology carries move information that raw monochromatic-K5 count discards.",
+      "discriminating_test": "Beat basic tabu/annealing under fixed seeds and matched compute on diverse held-out order-42 controls before receiving K43 budget.",
+      "blocker": "Needs trusted controls and benchmark harness.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": ["strategy-r55-controls"],
+      "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55-program-evolution",
+      "family": "evolved search programs with exact evaluator",
+      "fingerprint": "r55programevolve2026",
+      "title": "Evolve repair mechanisms, not graph bitstrings",
+      "mechanism": "Mutate move scoring, restart schedules, destroy-set selection, penalty updates, and seed portfolios across random, algebraic, cyclic, and hybrid families while keeping the exact verifier immutable.",
+      "status": "proposed",
+      "hypothesis": "Executable strategy diversity can discover repair mechanisms missed by one tuned annealer.",
+      "discriminating_test": "Matched-compute improvement on time-to-valid-42, diversity across held-out known classes, and reproducible K43 burden across unseen seeds.",
+      "blocker": "No trusted benchmark suite or baseline portfolio exists yet.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": ["strategy-r55-controls", "strategy-r55-breakout"],
+      "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55-inequality",
+      "family": "exact subgraph-count and SDP-inspired inequality discovery",
+      "fingerprint": "r55inequality2026",
+      "title": "Discover a new structural reduction before scaling upper-bound search",
+      "mechanism": "Mine exact (4,5,n) feature tables for integer subgraph-count inequalities, use LP/SDP only to conjecture coefficients, rationalize them, and prove each candidate by explicit counting or a checked pseudo-Boolean certificate.",
+      "status": "proposed",
+      "hypothesis": "A short new inequality can exclude a nonempty family of hypothetical order-45 neighborhood profiles and make certification finite enough to matter.",
+      "discriminating_test": "The exact inequality holds on all controls, has a human/checkable derivation, and cuts profiles admitted by the current degree and excess constraints.",
+      "blocker": "Feature tables and an exact catalogue-validation pipeline are not installed.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
       "parent_ids": [],
-      "updated_at": "2026-07-20T20:24:00+00:00"
+      "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55-certified-pilot",
+      "family": "proof-carrying SAT and symmetry coverage",
+      "fingerprint": "r55certpilot2026",
+      "title": "Build a certified small-case and bounded-slice pipeline",
+      "mechanism": "Start with R(3,3)=6 using deterministic CNF, checked cube cover, LRAT-Catcher and cake_lpr, then certify one-vertex extensions or bounded K43 repair neighborhoods with explicit symmetry obligations.",
+      "status": "proposed",
+      "hypothesis": "A cold-start replayable pilot can validate the verifier stack and identify which R55 subcases are feasible under the hard-lane resource ceiling.",
+      "discriminating_test": "An isolated replay checks theorem encoding, cover, symmetry, every leaf, hashes, and checker independence without trusting the generating solver.",
+      "blocker": "LRAT/Lean/cake_lpr toolchain and artifact-retention budget have not been benchmarked locally.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T12:53:00-06:00"
     }
   ],
   "open_leads": [
     {
-      "description": "Audit the 2026 Dynamic Survey and the R(5,5)<=46 source paper, then identify an openly reproducible 42-vertex construction and its provenance.",
-      "rationale": "Known controls and current-status verification are required before any original construction search.",
-      "next_experiment": "Write two minimal independent adjacency-list checkers, reproduce the control's K5/independent-5 counts, and hash the input/output.",
+      "description": "Authenticate the 656 order-42 control corpus and reproduce the 13- and 9-conflict K43 constructions.",
+      "rationale": "Every search claim depends on trusted inputs, independent evaluators, and canonical IDs.",
+      "next_experiment": "Mirror and hash r55_42some.g6; write transparent combination and independent bitset checkers; reproduce edge, degree, complement, and violation identities.",
       "priority": "high",
       "status": "open"
     },
     {
-      "description": "Implement a toy certificate-carrying Ramsey SAT pipeline before touching the 43-46 frontier.",
-      "rationale": "It tests encoder, proof logging, independent checking, and cube-cover accounting at low cost.",
-      "next_experiment": "Prove one known small Ramsey instance with a deterministic CNF, at most 16 cubes, checked leaf proofs, and an independently checked cover.",
+      "description": "Recover the exact published two-conflict K43 artifact and its six-vertex conflict core.",
+      "rationale": "It is the strongest located direct seed and supplies at least four valid order-42 deletions plus a sharply bounded repair neighborhood.",
+      "next_experiment": "Obtain the supplementary graph, hash and dual-check it, list both bad K5s, canonicalize all valid vertex deletions against the 656, and archive provenance.",
       "priority": "high",
+      "status": "open"
+    },
+    {
+      "description": "Test the almost-regular order-42 conjectural slice without treating it as a universal property.",
+      "rationale": "None of the 656 is almost regular, so any solution in the slice is automatically a new component and addresses a named expert conjecture.",
+      "next_experiment": "Encode degree spread <=1 at n=42, benchmark SAT/MaxSAT with multiple symmetry regimes, and require proof logs for bounded exclusions.",
+      "priority": "high",
+      "status": "open"
+    },
+    {
+      "description": "Reproduce or obtain the reported induced-subgraph-distance-six exclusion around the 656.",
+      "rationale": "It would prevent wasted search near known basins, but should not become a hard prune from a survey statement alone.",
+      "next_experiment": "Ask for or locate the McKay-Lieby generation code, coverage manifest, and outputs; otherwise formulate the exact distance predicate and reproduce the smallest bounded cases.",
+      "priority": "normal",
+      "status": "open"
+    },
+    {
+      "description": "Build a neutral-network atlas of the 656 under edge flips, switches, and short relabeled Hamming moves.",
+      "rationale": "Landscape position may predict extension quality and reveal productive boundary states without assuming the corpus is complete.",
+      "next_experiment": "Canonicalize the corpus, compute neutral adjacency and best one-vertex MaxSAT extension scores, then test predictors on held-out isomorphism classes.",
+      "priority": "normal",
+      "status": "open"
+    },
+    {
+      "description": "Implement a proof-carrying toy Ramsey pipeline before any frontier-wide nonexistence claim.",
+      "rationale": "Encoding, cube coverage, symmetry soundness, proof checking, and artifact replay are distinct obligations.",
+      "next_experiment": "Prove R(3,3)=6 with deterministic CNF, a checked cover, LRAT-Catcher, cake_lpr, immutable hashes, and a cold-start replay.",
+      "priority": "high",
+      "status": "open"
+    },
+    {
+      "description": "Mine edge-extremal (4,5,n) catalogues for exact count inequalities that strengthen the order-45 profile restrictions.",
+      "rationale": "The <=46 authors judge direct scaling excessive; a new theorem-level reduction is the plausible upper-bound lever.",
+      "next_experiment": "Fetch and verify the public r45extreme data, generate exact feature tables, learn candidate coefficients, rationalize them, and falsify on every control before attempting proof.",
+      "priority": "normal",
       "status": "open"
     }
   ],
-  "ruled_out": [],
+  "ruled_out": [
+    {
+      "claim_or_route": "Directly append one vertex to any of the known 656 order-42 graphs.",
+      "scope": "The maintained known corpus only",
+      "reason": "Every member was exhaustively tested and is non-extendible.",
+      "evidence": "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+      "reopen_condition": "The source corpus/hash is shown wrong or a genuinely new order-42 graph is found."
+    },
+    {
+      "claim_or_route": "Pure circulant search for an order-42 or order-43 witness.",
+      "scope": "Exact circulant colorings only",
+      "reason": "The computationally established circulant Ramsey number C(5,5) is 41.",
+      "evidence": "https://optimization-online.org/wp-content/uploads/2021/09/8578.pdf",
+      "reopen_condition": "Use an almost-circulant seed with symmetry-breaking repair; do not relabel that as pure circulant search."
+    },
+    {
+      "claim_or_route": "Blind ordinary annealing, tabu, or bitstring genetic search counted as progress when it only rediscovers known classes.",
+      "scope": "Unbenchmarked repetitions without novelty or matched-compute improvement",
+      "reason": "Historical searches produced thousands to tens of millions of outputs yet only the known corpus; naive GA was far worse than modern near-solutions.",
+      "evidence": "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf and https://www.micsymposium.org/mics_2003/Kunkel.PDF",
+      "reopen_condition": "A materially different mechanism beats held-out controls and baseline burden under matched compute."
+    },
+    {
+      "claim_or_route": "Treat the 656 as an exhaustive classification.",
+      "scope": "Any global proof or pruning step",
+      "reason": "Completeness is strongly supported but not proved.",
+      "evidence": "Dynamic Survey and 1997 source paper",
+      "reopen_condition": "A replayable exhaustive classification with checked coverage is produced."
+    },
+    {
+      "claim_or_route": "Scale the R(5,5)<=46 gluing computation directly to 45 without a new structural reduction.",
+      "scope": "Production-scale repetition of the same architecture",
+      "reason": "The authors report 30 plus 50 CPU-years at 46 and judge direct improvement computationally excessive.",
+      "evidence": "https://arxiv.org/abs/2409.15709",
+      "reopen_condition": "A proved new inequality, reduction, or benchmarked order-of-magnitude algorithmic gain changes the cost model."
+    },
+    {
+      "claim_or_route": "Accept UNSAT, symmetry pruning, catalogue completeness, or cube coverage without independently checkable artifacts.",
+      "scope": "All nonexistence and exhaustive-subcase claims",
+      "reason": "These are separate soundness obligations; solver success or implementation agreement does not prove coverage.",
+      "evidence": "LRAT/SAT+CAS/HOL4 verification precedents audited in research/ramsey-r55/DOSSIER.md",
+      "reopen_condition": "Proof logs, checked cover, explicit symmetry proof, immutable hashes, and independent replay all pass."
+    },
+    {
+      "claim_or_route": "Use structural similarity, a neural score, floating-point optimization, or LLM judgment as the final evaluator.",
+      "scope": "Witness validity, inequality validity, and proof acceptance",
+      "reason": "Structural transfer can improve similarity while exact Ramsey validity worsens.",
+      "evidence": "https://doi.org/10.3390/math14081367",
+      "reopen_condition": "Use such signals only to propose moves or coefficients, followed by exact checking."
+    }
+  ],
   "unresolved_questions": [
-    "Does an openly reusable artifact set exist for the current 46 upper-bound proof?",
-    "Which 42-vertex critical graph corpus and maintainer should be treated as the primary construction control?",
-    "Can the hard-lane resource ceiling retain and independently verify proof logs at a useful cube granularity?"
+    "Can the two-conflict K43 supplementary graph be recovered in a stable machine-readable form and independently verified?",
+    "Can the reported distance-six exclusion around the 656 be replayed or obtained with a coverage manifest?",
+    "Does the almost-regular order-42 slice contain a new Ramsey graph?",
+    "Which exact subgraph-count or small-graph SDP ideas can be converted into a human/checkable order-45 restriction?",
+    "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55-witness-search",
-    "objective": "Establish audited controls and a pair of independent exact verifiers before searching for a 43-vertex witness.",
-    "first_action": "Read the current survey and source paper, obtain a cited 42-vertex critical graph, and write two non-importing adjacency-list checkers that enumerate all 5-subsets.",
-    "stop_condition": "Stop after the control either passes both checkers with identical counts or the first source/provenance discrepancy is recorded. Do not begin 43-vertex search without a passing control."
+    "recommended_strategy_id": "strategy-r55-controls",
+    "objective": "Turn the historical corpus and strongest K43 near-misses into authenticated, immutable controls before spending frontier search compute.",
+    "first_action": "Mirror and hash r55_42some.g6, derive complements, and run two independent exact 5-subset checkers; then reconstruct the public 13- and 9-conflict K43 seeds and locate the published two-conflict supplementary graph.",
+    "stop_condition": "Stop at the first source, parser, canonicalization, count, or provenance mismatch and preserve it exactly. Do not begin novel-42 or K43 repair search until the control corpus passes both checkers."
   },
   "recent_attempt_ids": []
 }
