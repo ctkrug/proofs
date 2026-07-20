@@ -160,6 +160,9 @@ RULES
 4. Do not declare a proof, disproof, or candidate. Do not edit the durable research map or append-only ledger.
 5. Return a memo under 1,500 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
    reusable artifact; stop condition; and what the Sol principal should reject or verify independently.
+6. This research service has network access and installed lab tools, but no deployment, GitHub, or personal credentials.
+   If a source or tool is practically missing, try the safe, reproducible repair or retrieval first and preserve its URL,
+   command, and hash. Do not end a pass by merely reporting a fixable access restriction.
 """
 
 
@@ -176,7 +179,7 @@ def _minimal_env() -> dict[str, str]:
 def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout: int) -> tuple[str, dict[str, Any]]:
     command = [
         os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
-        "--sandbox", "workspace-write",
+        "--sandbox", os.environ.get("PROOF_CODEX_SANDBOX", "danger-full-access"),
         "-c", 'approval_policy="never"',
         "-c", 'forced_login_method="chatgpt"',
         "-c", f'model_reasoning_effort="{effort}"',
@@ -233,6 +236,11 @@ Known techniques: {', '.join(problem.get('techniques') or [])}
 
 RESEARCH PHASE
 {phase_contract}
+
+LAB AUTHORITY
+You have network access and the installed mathematics toolchain inside a credential-isolated research service. Use them
+to retrieve primary sources and run bounded experiments when necessary. Treat a practical source/tool failure as the
+first task to repair, with reproducible commands and hashes, rather than as a reason to abandon the epoch.
 
 ACCEPTABLE CONTRIBUTIONS
 Terminal success is a concrete proof, counterexample/witness, exact optimum/classification, verified computational bound,

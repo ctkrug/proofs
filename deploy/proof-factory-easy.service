@@ -10,6 +10,7 @@ Environment=HOME=/root
 Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
+Environment=PROOF_CODEX_SANDBOX=danger-full-access
 Environment=PROOF_EASY_DELEGATE_TIMEOUT_SEC=600
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane easy
 Nice=15

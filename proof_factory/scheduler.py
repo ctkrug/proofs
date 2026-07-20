@@ -9,7 +9,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, render, repositories, research_state, store
+from . import agent, brain, render, repositories, research_state, resources, store
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -100,6 +100,21 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         problem = choose_problem(lane, problems)
         phase = "baseline" if research_state.needs_baseline(problem) else "technical"
         repositories.ensure(problem)
+        workspace = store.RESEARCH / problem["id"] / "workspace"
+        try:
+            resources.prepare(problem, workspace)
+        except resources.ResourceProvisionError as exc:
+            blocker = {
+                "title": "Required research source is unavailable",
+                "detail": str(exc),
+                "problem_id": problem["id"],
+                "priority": "urgent",
+                "next_action": "Automatic retrieval will retry on the next scheduled pass; investigate host networking if it persists.",
+            }
+            store.update_runtime(operational_blockers=[blocker])
+            render.build()
+            raise
+        store.update_runtime(operational_blockers=[])
         store.update_runtime(**{f"{lane}_running": problem["id"], f"{lane}_started_at": store.now_iso()})
         brain.refresh()
         render.build()

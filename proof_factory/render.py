@@ -158,6 +158,7 @@ def _index(
     for review in reviews:
         reviews_by_attempt[str(review.get("attempt_id"))].append(review)
     candidates = [row for row in problems if row.get("status") == "candidate"]
+    operational_blockers = runtime.get("operational_blockers") or []
     health = runtime.get("health", "starting")
     health_issues = runtime.get("health_issues") or []
     running_lanes = [lane for lane in ("hard", "easy") if runtime.get(f"{lane}_running")]
@@ -174,6 +175,10 @@ def _index(
     candidate_banner = ""
     if candidates:
         candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="#problems">Review records →</a></section>"""
+    blocker_banner = ""
+    if operational_blockers:
+        blocker = operational_blockers[0] if isinstance(operational_blockers[0], dict) else {"detail": str(operational_blockers[0])}
+        blocker_banner = f"""<section class="candidate-alert operational-alert" data-operational-blockers><div><span class="pulse"></span><strong>Research infrastructure needs attention.</strong><p>{h(blocker.get('detail') or blocker.get('title') or 'A required research dependency is unavailable.')} {h(blocker.get('next_action') or '')}</p></div><a href="#runs">Open run history →</a></section>"""
     issues = "" if not health_issues else " · ".join(h(x) for x in health_issues)
     live_work = "No pass currently running" if not running_lanes else "Active now: " + " and ".join(
         _program_label(lane) for lane in running_lanes
@@ -186,6 +191,7 @@ def _index(
   <p class="hero-copy">Proof Factory seeks to contribute useful mathematics, no matter how small or large. This site shows the work underway, what is planned next, and the attempts made so far.</p>
 </section>
 {candidate_banner}
+{blocker_banner}
 <section id="operations" class="operations section-block">
   <div class="section-heading"><div><span class="overline">RESEARCH OPERATIONS</span><h2>Current schedule</h2></div><span class="section-note" data-live-updated>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span></div>
   <div class="healthline"><span class="health health-{h(health)}" data-live-health>System {h(health)}</span><span>{h(live_work)}</span><span>{issues}</span></div>
@@ -661,6 +667,17 @@ SITE_JS = r"""
     candidate: "Candidate — review needed", internal_result: "Internal result", verified: "Verified", published: "Public research note"
   };
   const programLabels = {hard: "Ramsey campaign", easy: "Open-problem program"};
+  const renderBlockers = blockers => {
+    const existing = document.querySelector("[data-operational-blockers]");
+    if (!blockers?.length) { existing?.remove(); return; }
+    const blocker = typeof blockers[0] === "object" ? blockers[0] : {detail: String(blockers[0])};
+    const detail = blocker.detail || blocker.title || "A required research dependency is unavailable.";
+    if (existing) { const copy = existing.querySelector("p"); if (copy) copy.textContent = `${detail} ${blocker.next_action || ""}`.trim(); return; }
+    const alert = document.createElement("section"); alert.className = "candidate-alert operational-alert"; alert.dataset.operationalBlockers = "";
+    alert.innerHTML = `<div><span class="pulse"></span><strong>Research infrastructure needs attention.</strong><p></p></div><a href="#runs">Open run history →</a>`;
+    alert.querySelector("p").textContent = `${detail} ${blocker.next_action || ""}`.trim();
+    document.querySelector(".hero")?.insertAdjacentElement("afterend", alert);
+  };
   const dateText = value => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "Not yet";
@@ -725,7 +742,7 @@ SITE_JS = r"""
       const response = await fetch("/api/live", {cache:"no-store", headers:{accept:"application/json"}});
       if (!response.ok) return;
       const data = await response.json(); if (!data.available) return;
-      renderLane("hard", data.lanes?.hard); renderLane("easy", data.lanes?.easy); renderRuns(data.recent_runs);
+      renderLane("hard", data.lanes?.hard); renderLane("easy", data.lanes?.easy); renderRuns(data.recent_runs); renderBlockers(data.operational_blockers);
       const updated = document.querySelector("[data-live-updated]"); if (updated) updated.textContent = `Live data · ${dateText(data.generated_at)}`;
       const health = document.querySelector("[data-live-health]"); if (health) { health.textContent = `System ${data.health || "starting"}`; health.className = `health health-${data.health || "starting"}`; health.dataset.liveHealth = ""; }
     } catch (_) { /* Static render remains the honest fallback. */ }

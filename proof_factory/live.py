@@ -96,6 +96,7 @@ def snapshot(
         "generated_at": runtime.get("updated_at") or now.isoformat(),
         "health": runtime.get("health", "starting"),
         "health_issues": runtime.get("health_issues") or [],
+        "operational_blockers": runtime.get("operational_blockers") or [],
         "lanes": lanes,
         "recent_runs": recent_runs,
     }
