@@ -11,8 +11,9 @@ research software, computational bounds, and narrow lemmas.
 The public ledger at `proofs.charliekrug.com` shows every queued, active, failed, progressive,
 candidate, verified, and published attempt. The system separates two research lanes:
 
-- **Hard lane:** one famous problem is always active and receives two GPT-5.6 Sol / xhigh passes
-  every UTC day.
+- **Hard lane:** one famous but finite exact problem is always active and receives two GPT-5.6 Sol / xhigh
+  passes every UTC day. It currently targets `R(5,5)`, where a 43-vertex Ramsey graph is a compact
+  lower-bound witness and upper bounds require checked exhaustive certificates.
 - **Discovery lane:** six daily passes rotate through relatively approachable, objectively
   checkable contributions. A daily source-only intake currently keeps a 12-problem frontier from
   the versioned Erdős Problems database; the schema and selector support broader contribution types.

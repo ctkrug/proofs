@@ -66,10 +66,11 @@ The north star and broader target taxonomy live in `docs/ACADEMIC-CONTRIBUTIONS.
 
 ## Initial lanes
 
-- **Hard:** Erdős–Straus (#242), because it is famous, exact, formally stated, computationally
-  falsifiable, and has concrete congruence/parametric subgoals. It is not expected to be an early win:
-  one exhaustive counterexample would disprove it, while any proof must cover every integer. Two
-  Sol/xhigh runs per UTC day seek smaller publishable subresults instead of blind range extension.
+- **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
+  checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
+  witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,
+  and an exhaustive checked cover. Two Sol/xhigh runs per UTC day alternate construction search with
+  certificate-carrying reduction work rather than extending an open-ended verification range.
 - **Discovery:** Erdős #647 first. A positive answer is one integer and a bounded divisor-count
   certificate. Then rotate through other finite-witness problems using difficulty, source quality,
   formalization availability, and non-duplication of existing AI attempts.

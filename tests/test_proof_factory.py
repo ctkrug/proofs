@@ -15,7 +15,7 @@ from proof_factory import agent, cli, intake, render, research_state, scheduler,
 class ProofFactoryTests(unittest.TestCase):
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
-        self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "erdos-242")
+        self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "ramsey-r55")
         frontier = [
             {"id": "easy-first", "lane": "easy", "status": "queued", "difficulty": 4, "research_attempt_count": 0},
             {"id": "easy-next", "lane": "easy", "status": "queued", "difficulty": 6, "research_attempt_count": 0},
@@ -207,7 +207,7 @@ class ProofFactoryTests(unittest.TestCase):
                 render.build()
                 index = (site / "index.html").read_text()
                 self.assertIn("Every attempt", index)
-                self.assertIn("Erdős–Straus conjecture", index)
+                self.assertIn("Ramsey number R(5,5)", index)
                 self.assertIn("Official source", index)
                 self.assertTrue((site / "api" / "state.json").exists())
                 api = json.loads((site / "api" / "state.json").read_text())

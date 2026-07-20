@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "problem_id": "ramsey-r55",
+  "objective": "Determine the finite exact Ramsey number R(5,5), currently known to lie between 43 and 46, through a compact 43-vertex lower-bound witness or a certificate-carrying finite upper-bound exclusion.",
+  "completion_criteria": [
+    "For a lower-bound improvement, emit a 43-vertex adjacency list and a separately written exact checker that finds neither a K5 nor an independent 5-set.",
+    "For an upper-bound improvement, preserve a deterministic encoding, checked SAT/UNSAT leaf certificates, a checked exhaustive cube cover, and an independent generator-to-graph correspondence audit.",
+    "A candidate remains unaccepted until isolated reproduction, current-literature review, and Charlie's recorded approval."
+  ],
+  "non_results": [
+    "A graph that passes only a shared or heuristic checker is not a Ramsey witness.",
+    "A local-search score, a partial SAT cube set, or an unchecked solver result is not a bound.",
+    "A known 42-vertex critical graph, or an unchanged known upper-bound reduction, is not new progress.",
+    "A candidate is not a solution until independent and human review are recorded."
+  ],
+  "epoch_count": 0,
+  "last_updated": "2026-07-20T20:24:00+00:00",
+  "synthesis_summary": "Initialized as the permanent hard lane because it is a famous finite exact problem with short lower-bound witnesses and certificate-carrying upper-bound routes. No research epoch has run yet.",
+  "established_facts": [
+    {
+      "claim": "The maintained 2026 Dynamic Survey records 43 <= R(5,5) <= 46 and strong evidence for R(5,5)=43.",
+      "evidence": "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
+      "scope": "Current published bounds as of target initialization",
+      "status": "sourced"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-r55-witness-search",
+      "family": "evaluator-guided Ramsey graph construction",
+      "fingerprint": "r55witness2026",
+      "title": "Canonical 43-vertex witness search",
+      "mechanism": "Generate symmetry-aware 43-vertex graphs, score exact K5 and independent-5 violations, and retain only candidates checked by a separate adjacency-list verifier.",
+      "status": "proposed",
+      "hypothesis": "A structural or local-search construction can produce a previously unknown (5,5,43)-graph.",
+      "discriminating_test": "Reproduce a published 42-vertex critical graph with two independent exact checkers, then require any 43-vertex candidate to pass both before considering it a witness.",
+      "blocker": "No audited construction corpus or independent checker has yet been installed.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T20:24:00+00:00"
+    },
+    {
+      "id": "strategy-r55-certified-upper-bound",
+      "family": "certificate-carrying cube-and-conquer",
+      "fingerprint": "r55upper2026",
+      "title": "Certified finite upper-bound reduction",
+      "mechanism": "Encode normalized (5,5,n)-graphs deterministically, split a fixed cube cover, independently check every SAT witness or UNSAT proof, and check that the cubes cover the normalized search space.",
+      "status": "proposed",
+      "hypothesis": "A reproducible reduction can tighten the 46 upper bound or yield a useful formally checked subcase.",
+      "discriminating_test": "On a published toy Ramsey instance, reproduce an exact answer with an independently checked CNF-to-graph encoder, proof-checked leaves, and a checked cover before scaling.",
+      "blocker": "The current 46 proof and its artifact/licensing/reproduction path have not yet been audited.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T20:24:00+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Audit the 2026 Dynamic Survey and the R(5,5)<=46 source paper, then identify an openly reproducible 42-vertex construction and its provenance.",
+      "rationale": "Known controls and current-status verification are required before any original construction search.",
+      "next_experiment": "Write two minimal independent adjacency-list checkers, reproduce the control's K5/independent-5 counts, and hash the input/output.",
+      "priority": "high",
+      "status": "open"
+    },
+    {
+      "description": "Implement a toy certificate-carrying Ramsey SAT pipeline before touching the 43-46 frontier.",
+      "rationale": "It tests encoder, proof logging, independent checking, and cube-cover accounting at low cost.",
+      "next_experiment": "Prove one known small Ramsey instance with a deterministic CNF, at most 16 cubes, checked leaf proofs, and an independently checked cover.",
+      "priority": "high",
+      "status": "open"
+    }
+  ],
+  "ruled_out": [],
+  "unresolved_questions": [
+    "Does an openly reusable artifact set exist for the current 46 upper-bound proof?",
+    "Which 42-vertex critical graph corpus and maintainer should be treated as the primary construction control?",
+    "Can the hard-lane resource ceiling retain and independently verify proof logs at a useful cube granularity?"
+  ],
+  "next_session": {
+    "recommended_strategy_id": "strategy-r55-witness-search",
+    "objective": "Establish audited controls and a pair of independent exact verifiers before searching for a 43-vertex witness.",
+    "first_action": "Read the current survey and source paper, obtain a cited 42-vertex critical graph, and write two non-importing adjacency-list checkers that enumerate all 5-subsets.",
+    "stop_condition": "Stop after the control either passes both checkers with identical counts or the first source/provenance discrepancy is recorded. Do not begin 43-vertex search without a passing control."
+  },
+  "recent_attempt_ids": []
+}

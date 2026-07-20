@@ -32,7 +32,7 @@ trap the portfolio.
 7. Exact solver or research-software improvements on recognized benchmarks.
 8. Narrow questions explicitly left open in recent papers.
 9. Motivated prime/integer records with a certificate and recognized registry.
-10. Famous universal conjectures, confined to the permanent hard lane.
+10. Famous finite exact problems with a construction witness or certificate-carrying exhaustive proof, confined to the permanent hard lane.
 
 Do not target “the next largest prime”: there is no largest prime, and recognized record searches are
 mature compute competitions. Prefer a mathematically motivated prime property, an algorithmic
@@ -55,7 +55,7 @@ improvement, or a gap in a recognized table.
 - 55% finite witnesses, constructions, and adjacent parameter records.
 - 20% exact optimization and classifications.
 - 15% formalization, datasets, and research software.
-- 10% one famous Sol/xhigh moonshot, twice daily.
+- 10% one famous but finite Sol/xhigh moonshot, twice daily. The current flagship is exact `R(5,5)`: a 43-vertex Ramsey graph is a tiny decisive lower-bound certificate, while any upper-bound improvement must carry a checked exhaustive SAT/case certificate.
 
 Every target must have a claim contract: exact statement, source/status date, novelty definition,
 success certificate, independent checker, recognized external channel, likely expert/maintainer,
