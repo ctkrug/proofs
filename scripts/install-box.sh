@@ -12,6 +12,8 @@ python3 -m venv .venv
 .venv/bin/pip install --disable-pip-version-check -r requirements.txt
 npm ci --no-audit --no-fund
 .venv/bin/python -m proof_factory render
+git config user.name "Proof Factory"
+git config user.email "proof-factory@charliekrug.com"
 
 install -m 0644 deploy/proof-factory-hard.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-hard.timer /etc/systemd/system/

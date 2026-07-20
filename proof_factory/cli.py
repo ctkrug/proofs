@@ -40,7 +40,7 @@ def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
             raise ValueError(f"unknown attempt: {attempt_id}")
         problems = store.load_problems()
         problem = next(row for row in problems if row["id"] == attempt["problem_id"])
-        reviews = store.read_json(store.STATE / "reviews.json", [])
+        reviews = store.read_json(store.DATA / "reviews.json", [])
         record = {
             "attempt_id": attempt_id,
             "problem_id": problem["id"],
@@ -50,7 +50,7 @@ def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
             "reviewer": "Charlie Krug",
         }
         reviews.append(record)
-        store.write_json_atomic(store.STATE / "reviews.json", reviews)
+        store.write_json_atomic(store.DATA / "reviews.json", reviews)
         if decision == "accept":
             problem["status"] = "verified"
             problem["accepted_result"] = True

@@ -191,7 +191,7 @@ def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> st
     return _layout(problem["title"], body, description=str(problem.get("statement")))
 
 
-def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any]) -> str:
+def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: list[dict[str, Any]]) -> str:
     def items(name: str) -> str:
         rows = attempt.get(name) or []
         return "<ul>" + "".join(f"<li>{h(x)}</li>" for x in rows) + "</ul>" if rows else '<p class="muted">None recorded.</p>'
@@ -199,6 +199,10 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any]) -> str:
     warning = ""
     if outcome == "candidate":
         warning = '<div class="candidate-alert"><div><strong>Candidate for review — not a solution claim</strong><p>Independent statement checking, criticism, literature review, and verification remain required.</p></div></div>'
+    review_html = "".join(
+        f'<li><strong>{h(row.get("decision"))}</strong> · {h(_time(row.get("reviewed_at")))}<br>{h(row.get("note") or "No note recorded.")}</li>'
+        for row in reviews
+    ) or '<p class="muted">No human review recorded.</p>'
     body = f"""
 <section class="attempt-head"><a class="back" href="/problems/{h(problem['id'])}/">← {h(problem['title'])}</a><div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(attempt.get('model'))} · {h(attempt.get('effort'))}</span></div><h1>{h(attempt.get('approach'))}</h1>{_badge(outcome)}<p class="lead">{h(attempt.get('summary'))}</p></section>
 {warning}
@@ -209,6 +213,7 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any]) -> str:
   <article><span class="overline">Next moves</span>{items('next_steps')}</article>
   <article><span class="overline">Citations</span><ul>{''.join(f'<li><a href="{h(x)}" rel="noopener">{h(x)} ↗</a></li>' for x in attempt.get('citations') or [])}</ul></article>
   <article><span class="overline">Tool disclosure</span><p>{h(attempt.get('tool_disclosure'))}</p><dl><dt>Duration</dt><dd>{h(attempt.get('duration_seconds','—'))}s</dd><dt>Review state</dt><dd>{h(attempt.get('review_status'))}</dd><dt>Attempt ID</dt><dd><code>{h(attempt.get('id'))}</code></dd></dl></article>
+  <article><span class="overline">Human review ledger</span>{f'<ul>{review_html}</ul>' if reviews else review_html}</article>
 </section>
 """
     return _layout(f"Attempt · {problem['title']}", body)
@@ -244,6 +249,9 @@ def build() -> Path:
     problems = store.load_problems()
     attempts = store.load_attempts()
     runtime = store.runtime()
+    reviews = store.read_json(store.DATA / "reviews.json", [])
+    if not isinstance(reviews, list):
+        reviews = []
     if store.SITE.exists():
         # Keep the mount-point directory itself intact for systemd ReadWritePaths.
         for child in store.SITE.iterdir():
@@ -264,13 +272,15 @@ def build() -> Path:
     for attempt in attempts:
         problem = problem_by_id.get(str(attempt.get("problem_id")))
         if problem:
-            _write(store.SITE / "attempts" / attempt["id"] / "index.html", _attempt_page(attempt, problem))
+            attempt_reviews = [row for row in reviews if row.get("attempt_id") == attempt.get("id")]
+            _write(store.SITE / "attempts" / attempt["id"] / "index.html", _attempt_page(attempt, problem, attempt_reviews))
     _write(store.SITE / "method" / "index.html", _method_page())
     public_state = {
         "generated_at": store.now_iso(),
         "runtime": runtime,
         "problems": problems,
         "attempts": attempts,
+        "reviews": reviews,
     }
     _write(store.SITE / "api" / "state.json", json.dumps(public_state, indent=2, ensure_ascii=False) + "\n")
     _write(store.SITE / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://proofs.charliekrug.com/sitemap.xml\n")

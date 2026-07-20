@@ -12,4 +12,12 @@ if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
   exit 1
 fi
 
-./node_modules/.bin/wrangler pages deploy site --project-name=proofs --branch=main
+git add data/attempts.jsonl data/problems.json data/reviews.json
+if ! git diff --cached --quiet; then
+  git commit -m "Record automated research attempt"
+  if ! git push origin main; then
+    echo "Warning: public ledger deployed, but GitHub state sync failed" >&2
+  fi
+fi
+
+./node_modules/.bin/wrangler pages deploy site --project-name=proofs --branch=main --commit-dirty=true
