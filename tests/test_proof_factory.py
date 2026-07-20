@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, cli, contribution_gate, intake, render, research_state, scheduler, scout, store, strategy_lab
+from proof_factory import agent, brain, cli, contribution_gate, intake, lab, render, research_state, scheduler, scout, store, strategy_lab
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -128,10 +128,15 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("reopen_condition", prompt)
         self.assertIn("SOL-TERRA ORCHESTRATION", prompt)
         self.assertIn("Use an exact checker before scaling.", prompt)
+        self.assertIn("CROSS-PROBLEM RESEARCH BRAIN", prompt)
+        self.assertIn("submit_lab.py", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
         self.assertIn("cheapest decisive experiment", delegate)
         self.assertIn("may not promote a result", delegate)
+        baseline = agent.build_prompt(problem, "hard", Path("/tmp/research/workspace"), phase="baseline")
+        self.assertIn("MANDATORY BASELINE PHASE", baseline)
+        self.assertIn("Do not try to solve the problem", baseline)
 
     def test_hard_run_uses_terra_delegates_then_sol_principal(self) -> None:
         problem = {
@@ -188,6 +193,61 @@ class ProofFactoryTests(unittest.TestCase):
                 prompt_state = research_state.compact_for_prompt(problem)
                 self.assertIn("allow degree two", prompt_state)
                 self.assertEqual(first["problem_id"], "p")
+
+    def test_baseline_review_is_required_then_completed(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            data.mkdir()
+            problem = {"id": "p", "statement": "Find x.", "verifiability": "Exact witness", "problem_state": "open"}
+            attempt = {
+                "id": "baseline-1", "finished_at": "2026-01-01T00:01:00+00:00", "outcome": "progress",
+                "phase": "baseline", "approach": "source audit", "summary": "status and literature mapped",
+                "established_facts": [{"claim": "Target is open", "evidence": "primary source"}],
+                "ruled_out": [{"claim_or_route": "known route", "scope": "published case", "reason": "exhausted"}],
+                "open_leads": [{"description": "test a finite case", "status": "open"}],
+            }
+            with patch.multiple(store, ROOT=root, DATA=data):
+                self.assertTrue(research_state.needs_baseline(problem))
+                state = research_state.update_from_attempt(problem, attempt)
+                self.assertEqual(state["baseline_review"]["status"], "complete")
+                self.assertFalse(research_state.needs_baseline(problem))
+
+    def test_brain_links_problems_through_shared_concepts(self) -> None:
+        problems = [
+            {"id": "a", "title": "A", "techniques": ["SAT"], "lane": "easy", "status": "queued"},
+            {"id": "b", "title": "B", "techniques": ["SAT", "graphs"], "lane": "hard", "status": "active"},
+        ]
+        with patch.object(research_state, "load_all", return_value={
+            "a": research_state._initial({"id": "a"}), "b": research_state._initial({"id": "b"}),
+        }):
+            graph = brain.build(problems, [])
+        links = [row for row in graph["edges"] if row["relation"] == "shares_concepts"]
+        self.assertEqual(len(links), 2)
+        self.assertEqual(links[0]["concepts"], ["SAT"])
+
+    def test_simulation_lab_runs_shell_free_bounded_job(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            research = root / "research"
+            state = root / "state"
+            data.mkdir()
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            with patch.multiple(
+                store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
+                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                submitted = lab.submit({
+                    "problem_id": "p", "name": "control", "hypothesis": "six times seven is 42",
+                    "expected_signal": "stdout contains 42", "command": ["python3", "-c", "print(6*7)"],
+                    "segment_seconds": 60, "memory_mb": 128,
+                })
+                self.assertEqual(submitted["status"], "queued")
+                result = lab.worker_once()
+                self.assertEqual(result["status"], "completed", result)
+                self.assertEqual(result["returncode"], 0)
+                self.assertTrue((state / "labs" / "jobs.jsonl").is_file())
 
     def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
         text = '''```strategy_proposal
@@ -314,6 +374,9 @@ class ProofFactoryTests(unittest.TestCase):
                 api = json.loads((site / "api" / "state.json").read_text())
                 self.assertIn("research_states", api)
                 self.assertIn("strategy_library", api)
+                self.assertIn("research_brain", api)
+                self.assertTrue((site / "brain" / "index.html").is_file())
+                self.assertTrue((site / "api" / "brain.json").is_file())
                 adjudicated = next(row for row in api["attempts"] if row["id"] == "erdos-242-20260720-181822-bad8d7")
                 self.assertEqual(adjudicated["outcome"], "candidate")
                 self.assertEqual(adjudicated["public_outcome"], "internal_result")

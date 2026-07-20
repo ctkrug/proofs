@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - poll the simulation lab queue
+
+[Timer]
+OnBootSec=15min
+OnUnitInactiveSec=5min
+Persistent=true
+Unit=proof-factory-lab.service
+
+[Install]
+WantedBy=timers.target

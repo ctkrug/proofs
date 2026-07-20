@@ -42,6 +42,12 @@ def _initial(problem: dict[str, Any]) -> dict[str, Any]:
         ],
         "epoch_count": 0,
         "last_updated": None,
+        "baseline_review": {
+            "status": "required",
+            "reviewed_at": None,
+            "source_attempt_id": None,
+            "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research.",
+        },
         "synthesis_summary": "No completed research epoch yet.",
         "established_facts": [],
         "strategies": [],
@@ -62,7 +68,13 @@ def load(problem: dict[str, Any]) -> dict[str, Any]:
     for key in ("completion_criteria", "non_results", "established_facts", "strategies", "open_leads", "ruled_out", "unresolved_questions", "recent_attempt_ids"):
         if not isinstance(seeded.get(key), list):
             seeded[key] = []
+    if not isinstance(seeded.get("baseline_review"), dict):
+        seeded["baseline_review"] = _initial(problem)["baseline_review"]
     return seeded
+
+
+def needs_baseline(problem: dict[str, Any]) -> bool:
+    return load(problem).get("baseline_review", {}).get("status") != "complete"
 
 
 def load_all(problems: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -128,6 +140,17 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
     state["last_updated"] = now
     state["synthesis_summary"] = _text(attempt.get("summary"), 8000)
     state["recent_attempt_ids"] = (state.get("recent_attempt_ids", []) + [attempt["id"]])[-20:]
+    if attempt.get("phase") == "baseline" and attempt.get("outcome") != "error":
+        state["baseline_review"] = {
+            "status": "complete",
+            "reviewed_at": now,
+            "source_attempt_id": attempt["id"],
+            "source_status": _text(problem.get("problem_state"), 200),
+            "facts_recorded": len(attempt.get("established_facts") or []),
+            "exclusions_recorded": len(attempt.get("ruled_out") or []),
+            "leads_recorded": len(attempt.get("open_leads") or []),
+            "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated.",
+        }
 
     strategy = attempt.get("strategy") if isinstance(attempt.get("strategy"), dict) else {}
     family = _text(strategy.get("family") or attempt.get("strategy_family") or "unspecified", 200)
@@ -212,6 +235,7 @@ def compact_for_prompt(problem: dict[str, Any]) -> str:
     state = load(problem)
     payload = {
         "epoch_count": state.get("epoch_count"),
+        "baseline_review": state.get("baseline_review", {}),
         "synthesis_summary": state.get("synthesis_summary"),
         "established_facts": state.get("established_facts", [])[-20:],
         "strategy_registry": state.get("strategies", [])[-30:],

@@ -23,6 +23,8 @@ install -m 0644 deploy/proof-factory-watchdog.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-watchdog.timer /etc/systemd/system/
 install -m 0644 deploy/proof-factory-publish.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-publish.timer /etc/systemd/system/
+install -m 0644 deploy/proof-factory-lab.service /etc/systemd/system/
+install -m 0644 deploy/proof-factory-lab.timer /etc/systemd/system/
 install -m 0644 deploy/proof-factory-intake.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-intake.timer /etc/systemd/system/
 install -m 0644 deploy/proof-factory-scout.service /etc/systemd/system/
@@ -35,3 +37,4 @@ systemctl daemon-reload
 systemctl enable --now proof-factory-watchdog.timer
 systemctl enable --now proof-factory-intake.timer
 systemctl enable --now proof-factory-publish.timer
+systemctl enable --now proof-factory-lab.timer

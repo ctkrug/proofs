@@ -14,7 +14,11 @@ hashed Terra memos (advisory, never independent validation) → Sol synthesis an
           ↓
 injected computational-researcher skill
           ↓
-bounded, indefinitely resumable epoch → scripts/solvers + reproducibility records + structured result
+mandatory first-pass baseline → linked research brain context → bounded technical epoch
+          ↓
+scripts/solvers + reproducibility records + structured result
+          ├─ short experiment → foreground bounded runner
+          └─ long search → validated cloud lab queue → checkpointed low-priority segments
           ↓
 append-only attempts.jsonl + durable research maps → self-improving selector and next checkpoint
           ↓
@@ -47,6 +51,12 @@ stays available if the content box, Codex login, or an individual attempt fails.
 13. Every research epoch is Sol-Terra: Terra performs bounded reconnaissance in isolated subdirectories;
     Sol owns synthesis, execution, and the structured result. Any delegate artifact used as evidence
     must be promoted into the main workspace and deterministically checked.
+14. A problem cannot enter technical phase until its baseline review is complete. The baseline is
+    durable state, but can be invalidated when authoritative status or closest prior work changes.
+15. The research brain is a disposable projection of canonical records. It may suggest a connection;
+    no inference is accepted because two problems share a tag, citation, or strategy.
+16. Long-running searches enter only through the shell-free lab queue. Multisegment jobs require a
+    workspace checkpoint; no model may create an untracked background process.
 
 ## Availability and cadence
 

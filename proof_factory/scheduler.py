@@ -9,7 +9,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, render, store
+from . import agent, brain, render, research_state, store
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -98,10 +98,13 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
         problem = choose_problem(lane, problems)
+        phase = "baseline" if research_state.needs_baseline(problem) else "technical"
         store.update_runtime(**{f"{lane}_running": problem["id"], f"{lane}_started_at": store.now_iso()})
+        brain.refresh()
         render.build()
-        attempt = agent.run(problem, lane)
+        attempt = agent.run(problem, lane, phase=phase)
         store.record_attempt(attempt)
+        brain.refresh()
         store.update_runtime(**{
             f"{lane}_running": None,
             f"{lane}_last_attempt_at": attempt["finished_at"],

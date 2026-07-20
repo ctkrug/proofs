@@ -74,6 +74,12 @@ immutable record; a gate adjudication controls the public label.
 
 ## Initial lanes
 
+Before either lane performs technical work on a newly selected problem, its first Sol-Terra epoch is
+a mandatory research baseline: verify statement and live status, trace closest prior work, inventory
+facts and artifacts, scope negative results, identify open leads and tools, estimate verification and
+compute cost, and name a legitimate external acceptance path. The resulting facts, exclusions, leads,
+and first discriminator become durable state and feed the cross-problem research brain.
+
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
   checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
   witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,
@@ -85,6 +91,12 @@ immutable record; a gate adjudication controls the public label.
   certificate. Twelve daily Terra-delegate → Sol-principal epochs rotate through other finite-witness
   problems using difficulty, source quality, formalization availability, and non-duplication of
   existing AI attempts.
+
+Long simulations never run through ad hoc `nohup`, `screen`, `tmux`, or shell backgrounding. Agents
+submit an argv-only lab job with a hypothesis, decisive signal, seed, memory/time ceiling, source URLs,
+and—when spanning multiple segments—a workspace checkpoint. The cloud worker runs one job at low
+priority, records hashes and logs through the experiment harness, and automatically resumes only when
+a timed-out segment produced the declared checkpoint.
 
 ## Sources used to design this harness
 

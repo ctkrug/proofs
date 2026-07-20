@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import contribution_gate, research_state, store
+from . import brain, contribution_gate, research_state, store
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -110,7 +110,9 @@ def _prior_context(problem_id: str) -> str:
     return "\n".join(lines)
 
 
-def build_delegate_prompt(problem: dict[str, Any], lane: str, workspace: Path, role: str) -> str:
+def build_delegate_prompt(
+    problem: dict[str, Any], lane: str, workspace: Path, role: str, phase: str = "technical",
+) -> str:
     dossier = store.RESEARCH / problem["id"] / "DOSSIER.md"
     role_job = {
         "literature-strategy": (
@@ -135,6 +137,7 @@ Title: {problem['title']}
 Statement: {problem['statement']}
 Official/current source: {problem['source_url']}
 Lane: {lane}
+Phase: {phase}
 Shared research workspace: {workspace}
 Full project dossier when present: {dossier}
 
@@ -143,6 +146,9 @@ DELEGATE ROLE: {role}
 
 DURABLE CAMPAIGN STATE
 {research_state.compact_for_prompt(problem)}
+
+CROSS-PROBLEM RESEARCH BRAIN
+{brain.context_for_problem(problem)}
 
 RULES
 1. Read relevant files in the shared workspace and consult the full project dossier when it exists.
@@ -187,11 +193,22 @@ def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout
 def build_prompt(
     problem: dict[str, Any], lane: str, workspace: Path,
     delegate_memos: list[dict[str, Any]] | None = None,
+    phase: str = "technical",
 ) -> str:
     hard = lane == "hard"
     epoch_minutes = 120 if hard else 60
     strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
     delegated = delegate_memos or []
+    phase_contract = (
+        "MANDATORY BASELINE PHASE. Do not try to solve the problem or launch a frontier search. Audit the exact statement "
+        "and current status from authoritative sources; map historical/current methods; record established facts, scoped "
+        "negative results, live leads, closest prior work, reusable datasets/software, verification tooling, compute scale, "
+        "and a credible external acceptance path. Populate the structured memory fields and leave one first technical "
+        "experiment with controls and a stop condition. Use outcome progress unless the source is invalid or the audit fails."
+        if phase == "baseline" else
+        "TECHNICAL PHASE. The source/status baseline is complete. Start from its live leads and exclusions; execute one "
+        "bounded discriminator and update the durable map with exact evidence."
+    )
     return f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
 The campaign has no preset final number of epochs. This process has a {epoch_minutes}-minute safety ceiling, so leave a
 precise checkpoint that lets a future session continue without rediscovering your work. Never interpret the long horizon
@@ -210,6 +227,9 @@ Formalization: {problem.get('formalization_url') or '(none known)'}
 Why selected: {problem.get('rationale')}
 Verification contract: {problem.get('verifiability')}
 Known techniques: {', '.join(problem.get('techniques') or [])}
+
+RESEARCH PHASE
+{phase_contract}
 
 ACCEPTABLE CONTRIBUTIONS
 Terminal success is a concrete proof, counterexample/witness, exact optimum/classification, verified computational bound,
@@ -242,6 +262,9 @@ TERRA DELEGATE MEMOS
 DURABLE RESEARCH STATE (claims/evidence/decisions, never private chain-of-thought)
 {research_state.compact_for_prompt(problem)}
 
+CROSS-PROBLEM RESEARCH BRAIN (links are transfer hypotheses, not evidence)
+{brain.context_for_problem(problem)}
+
 REUSABLE STRATEGY LIBRARY
 {json.dumps(strategy_library, indent=2, ensure_ascii=False)[:18000]}
 
@@ -261,6 +284,14 @@ WORK RULES
    For a reproducible computational test, run:
    python3 {EXPERIMENT_RUNNER} --name NAME --hypothesis HYPOTHESIS --expected-signal SIGNAL --timeout SECONDS --memory-mb MB --source-url URL -- COMMAND ARGS...
    It runs argv directly without a shell and stores logs, metadata, seeds, limits, source/script/dependency hashes, git state, and peak memory under .proof-experiments/.
+   For a checkpointed search that needs longer than this epoch, submit it to the cloud simulation lab instead of using
+   nohup, screen, tmux, `&`, or an untracked background process:
+   python3 {store.ROOT / 'scripts' / 'submit_lab.py'} --problem {problem['id']} --name NAME --hypothesis HYPOTHESIS \
+     --expected-signal SIGNAL --segment-seconds SECONDS --max-segments SEGMENTS --memory-mb MB \
+     --checkpoint-path RELATIVE_CHECKPOINT -- COMMAND ARGS...
+   The lab is shell-free, low-priority, hash-recorded, limited to 24-hour segments and seven resumable segments, and accepts
+   only allowlisted math runtimes/solvers or executables inside this problem workspace. A multisegment job must actually
+   write its checkpoint. Queueing compute is not evidence; a later epoch must inspect its exact record and artifacts.
 3. Choose the cheapest discriminating test first. Use programs for enumeration and repetition; reserve reasoning for models,
    invariants, decompositions, experiment design, and interpreting failures. Record negative controls and exact bounds.
 4. Test examples and edge cases. Try to falsify every central lemma. A computation is evidence only for the exact range checked.
@@ -319,7 +350,7 @@ Do not include a confidence score. Correct uncertainty is part of the result.
 """
 
 
-def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
+def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict[str, Any]:
     model = SOL_MODEL
     effort = "xhigh" if lane == "hard" else "high"
     ceiling = int(os.environ.get("PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
@@ -340,7 +371,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         delegate_workspace.mkdir(parents=True, exist_ok=True)
         try:
             memo, delegate_usage = _run_codex(
-                build_delegate_prompt(problem, lane, workspace, role),
+                build_delegate_prompt(problem, lane, workspace, role, phase),
                 model=TERRA_MODEL, effort="high", workspace=delegate_workspace, timeout=delegate_ceiling,
             )
             memo = memo.strip()[:12000]
@@ -358,7 +389,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
             "memo_path": str(memo_file.relative_to(workspace)), "memo_sha256": store.sha256_file(memo_file),
             "memo": memo, "usage": delegate_usage, "error": error_note,
         })
-    prompt = build_prompt(problem, lane, workspace, delegate_records)
+    prompt = build_prompt(problem, lane, workspace, delegate_records, phase)
     try:
         text, usage = _run_codex(prompt, model=model, effort=effort, workspace=workspace, timeout=ceiling)
         result = extract_result(text)
@@ -416,6 +447,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         "finished_at": finished,
         "duration_seconds": round(time.monotonic() - start, 1),
         "lane": lane,
+        "phase": phase,
         "model": model,
         "effort": effort,
         "orchestration": {

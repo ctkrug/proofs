@@ -8,7 +8,7 @@ import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
-from . import intake, publication, render, research_state, scheduler, scout, store, strategy_lab
+from . import brain, intake, lab, publication, render, research_state, scheduler, scout, store, strategy_lab
 
 
 EXTERNAL_STATES = {
@@ -25,13 +25,20 @@ def _doctor() -> dict[str, Any]:
         "problems": bool(problems),
         "attempt_log_valid": isinstance(attempts, list),
         "codex_binary": bool(shutil.which(codex_bin)),
+        "lab_runner": lab.RUNNER.is_file(),
+        "research_brain": bool(brain.build().get("nodes")),
     }
     if checks["codex_binary"]:
         proc = subprocess.run([codex_bin, "login", "status"], text=True, capture_output=True, timeout=30)
         checks["codex_login"] = proc.returncode == 0 and "logged in" in (proc.stdout + proc.stderr).lower()
     else:
         checks["codex_login"] = False
-    checks["ok"] = all(bool(value) for key, value in checks.items() if key != "ok")
+    checks["simulation_tools"] = {
+        name: shutil.which(name) for name in sorted(lab.ALLOWED_EXECUTABLES)
+    }
+    checks["ok"] = all(bool(checks[key]) for key in (
+        "problems", "attempt_log_valid", "codex_binary", "codex_login", "lab_runner", "research_brain",
+    ))
     return checks
 
 
@@ -163,6 +170,21 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("scout")
     sub.add_parser("strategy-lab")
     sub.add_parser("backfill-state")
+    sub.add_parser("brain-build")
+    sub.add_parser("lab-status")
+    sub.add_parser("lab-worker")
+    lab_submit = sub.add_parser("lab-submit")
+    lab_submit.add_argument("--problem", required=True)
+    lab_submit.add_argument("--name", required=True)
+    lab_submit.add_argument("--hypothesis", required=True)
+    lab_submit.add_argument("--expected-signal", required=True)
+    lab_submit.add_argument("--source-url", action="append", default=[])
+    lab_submit.add_argument("--segment-seconds", type=int, default=3600)
+    lab_submit.add_argument("--max-segments", type=int, default=1)
+    lab_submit.add_argument("--memory-mb", type=int, default=512)
+    lab_submit.add_argument("--seed", type=int, default=0)
+    lab_submit.add_argument("--checkpoint-path", default="")
+    lab_submit.add_argument("argv", nargs=argparse.REMAINDER)
     return root
 
 
@@ -212,6 +234,30 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "backfill-state":
         result = research_state.backfill()
         render.build()
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "brain-build":
+        graph = brain.refresh()
+        render.build()
+        print(json.dumps(brain.summary(graph), indent=2))
+        return 0
+    if args.command == "lab-status":
+        print(json.dumps(lab.status(), indent=2))
+        return 0
+    if args.command == "lab-worker":
+        print(json.dumps(lab.worker_once(), indent=2))
+        return 0
+    if args.command == "lab-submit":
+        command = list(args.argv)
+        if command[:1] == ["--"]:
+            command = command[1:]
+        result = lab.submit({
+            "problem_id": args.problem, "name": args.name, "hypothesis": args.hypothesis,
+            "expected_signal": args.expected_signal, "source_urls": args.source_url,
+            "segment_seconds": args.segment_seconds, "max_segments": args.max_segments,
+            "memory_mb": args.memory_mb, "seed": args.seed,
+            "checkpoint_path": args.checkpoint_path, "command": command,
+        })
         print(json.dumps(result, indent=2))
         return 0
     return 2

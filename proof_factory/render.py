@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import research_state, store
+from . import brain, research_state, store
 
 
 STATUS_ORDER = ["candidate", "active", "attempted", "internal_result", "failed", "queued", "parked", "verified", "published"]
@@ -65,7 +65,7 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">∎</span><span>Proof Factory</span></a>
-    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/strategies/">Strategies</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
+    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/brain/">Brain</a><a href="/strategies/">Strategies</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
   </header>
   <main>{body}</main>
   <footer><span>AI-assisted research, disclosed per attempt.</span><span>Human responsibility: Charlie Krug.</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
@@ -240,7 +240,7 @@ def _problem_page(
   <div class="card-top"><span class="lane lane-{h(problem.get('lane'))}">{h(problem.get('lane'))}</span>{_badge(str(problem.get('status')))}</div>
   <h1>{h(problem['title'])}</h1>
   <p class="statement">{h(problem.get('statement'))}</p>
-  <div class="source-line"><a href="{h(problem.get('source_url'))}" rel="noopener">{h(problem.get('source_name'))} ↗</a>{f'<a href="{h(problem.get("formalization_url"))}" rel="noopener">Formal statement ↗</a>' if problem.get('formalization_url') else ''}</div>
+  <div class="source-line"><a href="{h(problem.get('source_url'))}" rel="noopener">{h(problem.get('source_name'))} ↗</a>{f'<a href="{h(problem.get("formalization_url"))}" rel="noopener">Formal statement ↗</a>' if problem.get('formalization_url') else ''}<a href="/brain/#problem-{h(problem['id'])}">Research brain ↗</a></div>
 </section>
 {candidate}
 <section class="dossier-grid">
@@ -373,6 +373,40 @@ def _strategies_page(library: list[dict[str, Any]], proposals: list[dict[str, An
     return _layout("Strategies", body)
 
 
+def _brain_page(graph: dict[str, Any]) -> str:
+    nodes = {row["id"]: row for row in graph.get("nodes", [])}
+    outgoing: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for edge in graph.get("edges", []):
+        outgoing[str(edge.get("source"))].append(edge)
+    problems = [row for row in graph.get("nodes", []) if row.get("type") == "problem"]
+    cards = []
+    for problem in problems:
+        links = []
+        concepts = []
+        for edge in outgoing.get(problem["id"], []):
+            target = nodes.get(str(edge.get("target")), {})
+            if edge.get("relation") == "shares_concepts":
+                links.append(
+                    f'<li><a href="/problems/{h(target.get("problem_id"))}/">{h(target.get("label"))}</a><br>'
+                    f'{h(", ".join(edge.get("concepts") or []))}</li>'
+                )
+            elif edge.get("relation") == "uses_concept":
+                concepts.append(str(target.get("label") or ""))
+        cards.append(f"""
+<article id="problem-{h(problem.get('problem_id'))}"><span class="overline">{h(problem.get('baseline_status'))} baseline · {h(problem.get('lane'))}</span>
+<h2><a href="{h(problem.get('url'))}">{h(problem.get('label'))}</a></h2><p>{h(problem.get('summary'))}</p>
+<p><strong>Concepts:</strong> {h(', '.join(concepts[:12]) or 'Awaiting baseline.')}</p>
+<p><strong>Linked problems:</strong></p><ul>{''.join(links[:8]) or '<li>No shared concept edge yet.</li>'}</ul></article>""")
+    counts = brain.summary(graph)
+    body = f"""
+<section class="method-head"><span class="overline">Generated research wiki</span><h1>Problems remember.<br><em>Ideas connect.</em></h1>
+<p>This graph is rebuilt from the canonical problem registry, per-problem research maps, append-only attempts, and strategy library. Links propose transfers; they never serve as mathematical evidence.</p>
+<div class="source-line"><a href="/api/brain.json">Download graph JSON ↗</a><span>{h(counts.get('nodes'))} nodes · {h(counts.get('edges'))} edges · {h(counts.get('concept', 0))} concepts</span></div></section>
+<section class="strategy-library">{''.join(cards)}</section>
+"""
+    return _layout("Research brain", body)
+
+
 CSS = r"""
 :root{--ink:#151716;--muted:#6b716d;--paper:#f4f1e8;--card:#fffdf7;--line:#d8d3c7;--red:#b64232;--amber:#c77b22;--green:#2b7254;--blue:#345f86;--black:#181a19}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}.topbar{height:72px;padding:0 clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(244,241,232,.94);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20}.brand{display:flex;align-items:center;gap:11px;color:var(--ink);font-weight:760;text-decoration:none;letter-spacing:-.02em}.brand-mark{width:30px;height:30px;display:grid;place-items:center;background:var(--black);color:#fff;border-radius:50%;font-size:14px}.topbar nav{display:flex;gap:26px}.topbar nav a,footer a{color:var(--ink);text-decoration:none;font-size:14px}.topbar nav a:hover{text-decoration:underline}main{max-width:1440px;margin:auto}.hero{padding:clamp(74px,10vw,150px) clamp(20px,7vw,110px) 74px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 82% 18%,rgba(198,123,34,.13),transparent 28%),linear-gradient(135deg,#f7f4eb 0,#eee9dc 100%)}.hero-kicker,.overline,.panel-label,.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:750;color:var(--muted)}.live-dot,.pulse{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green);margin-right:8px;box-shadow:0 0 0 5px rgba(43,114,84,.12)}.hero h1,.dossier-head h1,.attempt-head h1,.method-head h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(48px,8vw,112px);line-height:.93;letter-spacing:-.055em;font-weight:400;margin:23px 0 30px;max-width:1060px}.hero h1 em,.method-head h1 em{color:var(--red);font-weight:400}.hero-copy{max-width:770px;font-size:clamp(18px,2vw,25px);color:#444943}.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:62px;max-width:900px}.hero-stats div{background:rgba(255,253,247,.74);padding:22px}.hero-stats strong{font-family:Georgia,serif;font-size:36px;font-weight:400;display:block}.hero-stats span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.candidate-alert{margin:28px clamp(20px,7vw,110px);padding:20px 24px;background:#fff3dc;border:1px solid #dca85d;display:flex;justify-content:space-between;align-items:center;gap:20px}.candidate-alert p{margin:3px 0 0;color:#6b512f}.candidate-alert a{color:var(--ink);font-weight:700}.pulse{background:var(--amber);margin-right:12px}.lanes{padding:55px clamp(20px,7vw,110px);display:grid;grid-template-columns:1fr 1fr;gap:24px}.lane-panel{min-height:280px;padding:34px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}.hard-panel{border-top:5px solid var(--red)}.easy-panel{border-top:5px solid var(--blue)}.lane-panel h2{font-family:Georgia,serif;font-size:36px;line-height:1.1;font-weight:400;margin:26px 0 12px}.lane-panel p{color:#545a55;max-width:650px}.panel-foot{margin-top:auto;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:13px}.panel-foot a{color:var(--ink);font-weight:700}.healthline{margin:0 clamp(20px,7vw,110px) 35px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.health{color:var(--ink);font-weight:750}.health:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:8px}.health-healthy:before{background:var(--green)}.health-degraded:before{background:var(--red)}.section-block{padding:72px clamp(20px,7vw,110px)}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:30px}.section-heading h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(35px,5vw,60px);line-height:1;margin:8px 0 0}.section-heading>a{color:var(--ink);font-weight:700}.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:transparent;padding:9px 14px;border-radius:100px;cursor:pointer}.filter.active{background:var(--black);color:#fff;border-color:var(--black)}.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.problem-card{background:var(--card);border:1px solid var(--line);padding:25px;min-height:390px;display:flex;flex-direction:column}.problem-card.hidden{display:none}.card-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.lane,.badge{display:inline-flex;align-items:center;border-radius:100px;padding:5px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}.lane{background:#ece8dc}.lane-hard{color:var(--red);background:#f8e5df}.lane-easy{color:var(--blue);background:#e3edf5}.lane-calibration{color:#64548c;background:#ece7f5}.badge{border:1px solid var(--line);background:#fff}.badge-candidate{background:#fff0d2;border-color:#dea750;color:#7a4c0d}.badge-active,.badge-progress{background:#e3f1ea;border-color:#9bc4af;color:#1f6348}.badge-attempted,.badge-failed,.badge-no_progress,.badge-error{background:#f2e7e2;border-color:#d5ada1;color:#8b392d}.badge-verified,.badge-published{background:#e2eee7;border-color:#8bb89e;color:#235e45}.problem-card h3{font-family:Georgia,serif;font-size:28px;line-height:1.1;font-weight:400;margin:22px 0 14px}.problem-card h3 a,.attempt-row h3 a{color:var(--ink);text-decoration:none}.problem-card p{font-size:14px;color:#4f5551}.meter{height:4px;background:#e5e0d5;margin-top:auto}.meter span{display:block;height:100%;background:var(--red)}.card-meta,.card-actions{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:9px}.last-note{font-size:13px;padding:17px 0;margin-top:18px;border-top:1px solid var(--line);color:#555b57}.card-actions{margin-top:auto;padding-top:13px}.card-actions a{color:var(--ink);font-weight:700;text-decoration:none}.attempts-block{background:#ebe6da}.attempt-list{border-top:1px solid #c9c2b4}.attempt-row{display:grid;grid-template-columns:5px 1fr;border-bottom:1px solid #c9c2b4;background:rgba(255,253,247,.45)}.attempt-rail{background:var(--muted)}.outcome-candidate{background:var(--amber)}.outcome-progress,.outcome-verified,.outcome-published{background:var(--green)}.outcome-failed,.outcome-no_progress,.outcome-error{background:var(--red)}.attempt-copy{padding:24px 28px}.eyebrow{display:flex;gap:25px}.attempt-copy h3{font-family:Georgia,serif;font-size:26px;font-weight:400;margin:11px 0}.attempt-copy p{margin:6px 0;color:#515753}.attempt-copy .approach{color:var(--ink);font-weight:700}.row-end{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.arrow{color:var(--ink);font-weight:700;text-decoration:none}.dossier-head,.attempt-head,.method-head{padding:70px clamp(20px,7vw,110px) 55px;border-bottom:1px solid var(--line)}.dossier-head h1,.attempt-head h1,.method-head h1{font-size:clamp(48px,7vw,90px);margin-top:30px}.back{color:var(--ink);text-decoration:none;font-size:14px}.statement,.lead{font-family:Georgia,serif;font-size:clamp(20px,2.2vw,30px);max-width:1000px}.source-line{display:flex;gap:22px;margin-top:28px;flex-wrap:wrap}.source-line a{color:var(--ink);font-weight:700}.dossier-grid,.attempt-detail,.method-grid{padding:44px clamp(20px,7vw,110px);display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.dossier-grid article,.attempt-detail article,.method-grid article{background:var(--card);border:1px solid var(--line);padding:26px}.dossier-grid p,.attempt-detail p{color:#4d534e}.dossier-grid dl,.attempt-detail dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 0}.dossier-grid dt,.attempt-detail dt{color:var(--muted)}.dossier-grid dd,.attempt-detail dd{margin:0;text-align:right}.techniques{margin:0 clamp(20px,7vw,110px);padding:26px;border:1px solid var(--line);background:var(--card)}.techniques>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.techniques>div span{background:#ebe7dc;padding:7px 11px;border-radius:4px;font-size:13px}.empty{padding:34px;background:var(--card)}.attempt-detail{grid-template-columns:repeat(2,1fr)}.attempt-detail ul{padding-left:20px}.attempt-detail li{margin:8px 0}.attempt-detail a{overflow-wrap:anywhere;color:var(--blue)}code{font-size:11px;overflow-wrap:anywhere}.muted{color:var(--muted)}.method-head p{font-size:22px;max-width:750px}.method-grid{grid-template-columns:repeat(3,1fr)}.method-grid article strong{font-family:Georgia,serif;font-size:32px;color:var(--red);font-weight:400}.method-grid h2{font-family:Georgia,serif;font-size:32px;font-weight:400;margin:20px 0 10px}.principles{margin:20px clamp(20px,7vw,110px) 80px;background:var(--black);color:#fff;padding:clamp(30px,5vw,65px)}.principles h2{font-family:Georgia,serif;font-size:45px;font-weight:400}.principles p{max-width:900px;color:#d5d7d5;font-size:18px}.principles div{display:flex;flex-wrap:wrap;gap:20px;margin-top:30px}.principles a{color:#fff}footer{min-height:100px;border-top:1px solid var(--line);padding:28px clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--muted);font-size:12px}@media(max-width:980px){.problem-grid,.method-grid{grid-template-columns:repeat(2,1fr)}.hero-stats{grid-template-columns:repeat(2,1fr)}.dossier-grid{grid-template-columns:1fr 1fr}}@media(max-width:720px){.topbar nav a:not(:first-child){display:none}.lanes,.problem-grid,.dossier-grid,.attempt-detail,.method-grid{grid-template-columns:1fr}.section-heading{align-items:start;flex-direction:column}.hero{padding-top:70px}.hero-stats{grid-template-columns:1fr 1fr}.panel-foot,.card-actions,footer{align-items:flex-start;flex-direction:column}.eyebrow{flex-direction:column;gap:3px}.candidate-alert{align-items:flex-start;flex-direction:column}}
 """
@@ -403,6 +437,7 @@ def build() -> Path:
         validations = []
     research_states = research_state.load_all(problems)
     strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
+    brain_graph = brain.refresh()
     strategy_proposals = []
     proposals_file = store.DATA / "strategy_proposals.jsonl"
     if proposals_file.exists():
@@ -442,6 +477,8 @@ def build() -> Path:
                 _write(store.SITE / "publications" / attempt["id"] / "index.html", _publication_page(problem, attempt, reviews, validations))
     _write(store.SITE / "method" / "index.html", _method_page())
     _write(store.SITE / "strategies" / "index.html", _strategies_page(strategy_library, strategy_proposals))
+    _write(store.SITE / "brain" / "index.html", _brain_page(brain_graph))
+    _write(store.SITE / "api" / "brain.json", json.dumps(brain_graph, indent=2, ensure_ascii=False) + "\n")
     reviews_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for review in reviews:
         reviews_by_attempt[str(review.get("attempt_id"))].append(review)
@@ -459,10 +496,11 @@ def build() -> Path:
         "research_states": research_states,
         "strategy_library": strategy_library,
         "strategy_proposals": strategy_proposals,
+        "research_brain": brain_graph,
     }
     _write(store.SITE / "api" / "state.json", json.dumps(public_state, indent=2, ensure_ascii=False) + "\n")
     _write(store.SITE / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://proofs.charliekrug.com/sitemap.xml\n")
-    urls = ["/", "/method/", "/strategies/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
+    urls = ["/", "/method/", "/strategies/", "/brain/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
     urls += [f"/publications/{p['publication_attempt_id']}/" for p in problems if p.get("publication_attempt_id")]
     _write(store.SITE / "sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>https://proofs.charliekrug.com{h(url)}</loc></url>\n" for url in urls) + "</urlset>\n")
     _write(store.SITE / "_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  X-Frame-Options: DENY\n\n/assets/*\n  Cache-Control: public, max-age=3600\n")

@@ -41,6 +41,9 @@ python3 -m proof_factory intake --target 12
 python3 -m proof_factory scout
 python3 -m proof_factory strategy-lab
 python3 -m proof_factory backfill-state
+python3 -m proof_factory brain-build
+python3 -m proof_factory lab-status
+python3 scripts/submit_lab.py --problem PROBLEM --name NAME --hypothesis H --expected-signal S -- python3 search.py
 python3 -m proof_factory review --attempt ID --decision reject --reviewer "Proof Factory contribution gate" --note "..."
 scripts/approve-and-publish.sh ATTEMPT_ID "human review note"
 python3 -m proof_factory validate --attempt ATTEMPT_ID --state expert-confirmed --source-url URL --note "..."
@@ -57,6 +60,13 @@ as independent verification.
 - `data/attempts.jsonl` is append-only research history.
 - `data/research_states/<problem>.json` is the durable, resumable research map: strategy fingerprints,
   established facts, scoped negative results, reopen conditions, open leads, and the next first action.
+- Every problem must complete a source/status baseline before its first technical pass. That baseline
+  maps prior work, known facts, ruled-out routes, current leads, tools/artifacts, verification cost,
+  and the outside acceptance path; later status changes can explicitly invalidate it.
+- `state/research_brain.json` and `/brain/` are generated knowledge-graph projections over the canonical
+  registry, research maps, append-only attempts, citations, concepts, and strategies. Agents receive
+  the relevant backlinks and neighboring problems in every prompt; a graph link is a transfer
+  hypothesis, never proof.
 - `data/strategy_library.json` contains executable cross-problem methods. A daily source-grounded
   strategy lab can add or materially improve one entry; every revision is appended to
   `data/strategy_proposals.jsonl`.
@@ -67,6 +77,9 @@ as independent verification.
   status and novelty again before doing technical work.
 - `state/runtime.json` is an atomic operational projection.
 - `research/<problem>/` holds literature notes, code, formalizations, and certificates.
+- `research/<problem>/workspace/lab-queue/` accepts validated shell-free simulation jobs. The cloud lab
+  runs one low-priority job at a time in hash-recorded segments, requires checkpoints for multisegment
+  searches, and can resume for at most seven 24-hour segments.
 - `skills/computational-researcher/` is the injected principal-investigator operating contract and
   deterministic experiment recorder.
 - `publications/<attempt>/` is generated only after human approval and contains a research note,
