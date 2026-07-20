@@ -82,8 +82,16 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
     hard_today = [row for row in attempts if row.get("lane") == "hard" and str(row.get("finished_at", "")).startswith(today)]
     easy = [row for row in attempts if row.get("lane") == "easy"]
     due_hard = sum(1 for hour in (6, 18) if now.hour >= hour + 2)
+    current_runtime = store.runtime()
+    hard_started = store.parse_iso(current_runtime.get("hard_started_at"))
+    hard_in_flight = bool(
+        current_runtime.get("hard_running")
+        and hard_started
+        and (now - hard_started).total_seconds() < 3 * 3600
+    )
     issues: list[str] = []
-    if len(hard_today) < due_hard:
+    hard_credited = len(hard_today) + (1 if hard_in_flight else 0)
+    if hard_credited < due_hard:
         issues.append(f"hard lane missed cadence: {len(hard_today)}/{due_hard} due runs")
     if easy:
         last_easy = store.parse_iso(easy[-1].get("finished_at"))
