@@ -130,13 +130,22 @@ def record_attempt(attempt: dict[str, Any]) -> None:
         problem["attempt_count"] = int(problem.get("attempt_count") or 0) + 1
         problem["last_attempt_at"] = attempt["finished_at"]
         outcome = attempt["outcome"]
+        if outcome != "error":
+            problem["research_attempt_count"] = int(problem.get("research_attempt_count") or 0) + 1
         if outcome == "candidate":
             problem["status"] = "candidate"
             problem["candidate_attempt_id"] = attempt["id"]
         elif outcome == "progress":
             problem["status"] = "active"
         elif outcome in {"failed", "error", "no_progress"}:
-            problem["status"] = "attempted"
+            if (
+                problem.get("lane") == "easy"
+                and outcome != "error"
+                and int(problem.get("research_attempt_count") or 0) >= 3
+            ):
+                problem["status"] = "parked"
+            else:
+                problem["status"] = "attempted"
         elif outcome in {"verified", "published"}:
             problem["status"] = outcome
         save_problems(problems)

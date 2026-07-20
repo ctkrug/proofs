@@ -12,11 +12,12 @@ from typing import Any
 from . import store
 
 
-STATUS_ORDER = ["candidate", "active", "attempted", "failed", "queued", "verified", "published"]
+STATUS_ORDER = ["candidate", "active", "attempted", "failed", "queued", "parked", "verified", "published"]
 STATUS_LABELS = {
     "queued": "Queued",
     "active": "Active / ongoing",
     "attempted": "Tried — still open",
+    "parked": "Paused after 3 passes",
     "failed": "Failed route",
     "candidate": "Candidate — review needed",
     "verified": "Verified",

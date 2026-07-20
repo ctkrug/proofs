@@ -39,6 +39,9 @@ stays available if the content box, Codex login, or an individual attempt fails.
 - Research services never receive Cloudflare or social credentials. A separate, serialized publisher
   service loads deployment credentials only after the research process exits; the research model runs
   with a minimal environment and a workspace-write sandbox.
+- Discovery problems receive at most three bounded non-error passes before being parked. A daily,
+  deterministic intake job refills the active frontier to 12 from the versioned `teorth/erdosproblems`
+  catalog and exact statement HTML on erdosproblems.com; easier and formalized metadata rank first.
 - Persistent timers catch up after a reboot. The watchdog reports missed hard-lane cadence rather
   than silently backfilling fake work.
 - Services run at low CPU/IO priority with memory ceilings on the shared content box.

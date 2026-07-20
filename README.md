@@ -8,7 +8,8 @@ candidate, verified, and published attempt. The system separates two research la
 - **Hard lane:** one famous problem is always active and receives two GPT-5.6 Sol / xhigh passes
   every UTC day.
 - **Discovery lane:** six daily passes rotate through relatively approachable, objectively
-  checkable problems, initially weighted toward the Erdős Problems database.
+  checkable problems. A daily source-only intake keeps a 12-problem frontier from the versioned
+  Erdős Problems database; three bounded non-error passes park a problem and open space for another.
 
 The system never equates model confidence with proof. A candidate is a review request. A result may
 be called solved only after statement validation, independent criticism, literature review,
@@ -23,6 +24,7 @@ python3 -m proof_factory tick --lane easy
 python3 -m proof_factory tick --lane hard
 python3 -m proof_factory watchdog
 python3 -m proof_factory doctor
+python3 -m proof_factory intake --target 12
 ```
 
 `tick` launches Codex headlessly with ChatGPT subscription authentication. API-key variables are

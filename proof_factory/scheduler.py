@@ -27,18 +27,19 @@ def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
 
     solved = accepted_original_results(problems)
     if solved < 2:
-        # Demonstrate the loop on the easiest certificate-first work before scaling.
+        # Cycle the whole discovery frontier; difficulty breaks ties toward easier work.
         return min(
             candidates,
             key=lambda row: (
+                int(row.get("research_attempt_count") or 0),
                 int(row.get("difficulty") or 10),
-                int(row.get("attempt_count") or 0),
                 -(int(row.get("priority") or 0)),
             ),
         )
 
     # Afterwards keep a strong easy bias without starving more ambitious discovery work.
-    rng = random.Random(datetime.now(timezone.utc).date().isoformat())
+    attempt_total = sum(int(row.get("research_attempt_count") or 0) for row in candidates)
+    rng = random.Random(f"{datetime.now(timezone.utc).date().isoformat()}-{attempt_total}")
     weights = [max(1, (11 - int(row.get("difficulty") or 10)) ** 2) for row in candidates]
     return rng.choices(candidates, weights=weights, k=1)[0]
 

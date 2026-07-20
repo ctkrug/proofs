@@ -7,7 +7,7 @@ import shutil
 import subprocess
 from typing import Any
 
-from . import render, scheduler, store
+from . import intake, render, scheduler, store
 
 
 def _doctor() -> dict[str, Any]:
@@ -83,6 +83,8 @@ def parser() -> argparse.ArgumentParser:
     review.add_argument("--attempt", required=True)
     review.add_argument("--decision", choices=("accept", "reject", "needs-work"), required=True)
     review.add_argument("--note", default="")
+    intake_parser = sub.add_parser("intake")
+    intake_parser.add_argument("--target", type=int, default=12)
     return root
 
 
@@ -106,5 +108,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "review":
         print(json.dumps(_review(args.attempt, args.decision, args.note), indent=2))
+        return 0
+    if args.command == "intake":
+        result = intake.replenish(target=args.target)
+        if result["added"]:
+            render.build()
+        print(json.dumps(result, indent=2))
         return 0
     return 2

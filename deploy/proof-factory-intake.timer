@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - daily sourced discovery intake
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 UTC
+Persistent=true
+AccuracySec=5min
+Unit=proof-factory-intake.service
+
+[Install]
+WantedBy=timers.target

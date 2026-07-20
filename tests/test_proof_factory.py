@@ -6,14 +6,23 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, cli, render, scheduler, store
+from proof_factory import agent, cli, intake, render, scheduler, store
 
 
 class ProofFactoryTests(unittest.TestCase):
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
         self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "erdos-242")
+        for row in problems:
+            if row.get("lane") == "easy":
+                row["research_attempt_count"] = 0
         self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "erdos-647")
+        next(row for row in problems if row["id"] == "erdos-647")["research_attempt_count"] = 1
+        self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "erdos-307")
+
+    def test_parse_official_statement(self) -> None:
+        page = '<div id="content">Is there an $n&gt;2$?<br>Exactly.</div>'
+        self.assertEqual(intake.parse_statement(page), "Is there an $n>2$? Exactly.")
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
