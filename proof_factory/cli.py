@@ -38,6 +38,10 @@ def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
         attempt = next((row for row in attempts if row.get("id") == attempt_id), None)
         if not attempt:
             raise ValueError(f"unknown attempt: {attempt_id}")
+        if decision == "accept" and attempt.get("outcome") != "candidate":
+            raise ValueError("only a candidate attempt can be accepted as a result")
+        if decision == "accept" and not note.strip():
+            raise ValueError("accepting a result requires a human review note")
         problems = store.load_problems()
         problem = next(row for row in problems if row["id"] == attempt["problem_id"])
         reviews = store.read_json(store.DATA / "reviews.json", [])

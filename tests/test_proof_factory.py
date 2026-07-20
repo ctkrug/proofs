@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, render, scheduler, store
+from proof_factory import agent, cli, render, scheduler, store
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -28,6 +28,24 @@ class ProofFactoryTests(unittest.TestCase):
 ```'''
         with self.assertRaises(ValueError):
             agent.extract_result(text)
+
+    def test_human_gate_cannot_accept_non_candidate(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            state = root / "state"
+            data.mkdir()
+            (data / "problems.json").write_text(json.dumps([{"id": "p", "status": "attempted"}]))
+            (data / "attempts.jsonl").write_text(json.dumps({
+                "id": "a", "problem_id": "p", "outcome": "no_progress",
+            }) + "\n")
+            (data / "reviews.json").write_text("[]\n")
+            with patch.multiple(
+                store, ROOT=root, DATA=data, STATE=state, SITE=root / "site",
+                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                with self.assertRaises(ValueError):
+                    cli._review("a", "accept", "reviewed")
 
     def test_record_attempt_is_append_only_and_updates_projection(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
