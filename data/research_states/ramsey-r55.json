@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 0,
-  "last_updated": "2026-07-20T12:53:00-06:00",
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T19:46:11.008003+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "Deep literature audit complete. Read research/ramsey-r55/DOSSIER.md before opening a new route. The key strategic correction is that any (5,5,43) witness has 43 vertex-deleted (5,5,42) graphs, and none can belong to the known 656 because all 656 are non-extendible. Prioritize audited controls, a genuinely novel 42-vertex basin, and exact repair around the published two-conflict K43 seed. Keep construction and nonexistence tracks separate; every claimed exclusion needs proof logs, checked cover and symmetry obligations, immutable hashes, and independent checking.",
+  "synthesis_summary": "The exact corpus bytes could not be acquired in the managed environment. The source preflight therefore failed closed and no corpus graph was checked. Separately, the provisional K43 matrix control passed both exact checkers and all mutation/rejection tests, and graph6 plumbing passed an exhaustive 1,044-class order-7 adversarial suite against nauty and NetworkX. No Ramsey bound, witness, classification, or exclusion is claimed.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -105,25 +105,33 @@
       "evidence": "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2024.16, https://arxiv.org/abs/2502.06055, https://arxiv.org/abs/2607.00815",
       "scope": "Reusable verification architectures; resource demands differ sharply from R55",
       "status": "sourced"
+    },
+    {
+      "claim": "The maintained published range remains 43 <= R(5,5) <= 46.",
+      "evidence": "2026 Dynamic Survey and Angeltveit-McKay journal publication",
+      "scope": "Published global R(5,5) bounds as checked on 2026-07-20",
+      "status": "proved",
+      "source_attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+    },
+    {
+      "claim": "The custom short-graph6 parsing and complement plumbing agrees with nauty and NetworkX on every unlabeled order-7 graph class.",
+      "evidence": "artifacts/graph6_plumbing_report.json",
+      "scope": "The 1,044 unlabeled simple graph isomorphism classes at order 7",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+    },
+    {
+      "claim": "The two exact checkers agree on the violation identities and four valid deletions in the provisional K43 transcription.",
+      "evidence": "artifacts/provisional_k43_control_report.json",
+      "scope": "Only input SHA-256 3beebde4f3120337029bb24de1f737f72eab567cbe92c77f79e7206ce4c304e9; publisher equivalence unverified",
+      "status": "conditional",
+      "source_attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
     }
   ],
   "strategies": [
-    {
-      "id": "strategy-r55-controls",
-      "family": "audited corpus and independent evaluators",
-      "fingerprint": "r55controls2026",
-      "title": "Authenticate the 656 controls and near-miss seeds",
-      "mechanism": "Mirror and hash the 328 representatives, derive complements, verify every graph with transparent combination and independent bitset checkers, canonicalize, reproduce structural statistics, then reconstruct the 13-, 9-, and published 2-conflict K43 controls.",
-      "status": "proposed",
-      "hypothesis": "The source corpus and published seeds can be converted into trustworthy immutable controls for every later epoch.",
-      "discriminating_test": "Both non-importing checkers agree on exact violation identities and corpus statistics; stop at the first provenance or count mismatch.",
-      "blocker": "Artifacts have not yet been mirrored, hashed, and dual-checked locally.",
-      "reopen_condition": "",
-      "last_attempt_id": "",
-      "attempts": 0,
-      "parent_ids": [],
-      "updated_at": "2026-07-20T12:53:00-06:00"
-    },
     {
       "id": "strategy-r55-novel42",
       "family": "novel order-42 basin discovery",
@@ -137,7 +145,9 @@
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
-      "parent_ids": ["strategy-r55-controls"],
+      "parent_ids": [
+        "strategy-r55-controls"
+      ],
       "updated_at": "2026-07-20T12:53:00-06:00"
     },
     {
@@ -153,7 +163,9 @@
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
-      "parent_ids": ["strategy-r55-controls"],
+      "parent_ids": [
+        "strategy-r55-controls"
+      ],
       "updated_at": "2026-07-20T12:53:00-06:00"
     },
     {
@@ -169,7 +181,9 @@
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
-      "parent_ids": ["strategy-r55-controls"],
+      "parent_ids": [
+        "strategy-r55-controls"
+      ],
       "updated_at": "2026-07-20T12:53:00-06:00"
     },
     {
@@ -185,7 +199,10 @@
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
-      "parent_ids": ["strategy-r55-controls", "strategy-r55-breakout"],
+      "parent_ids": [
+        "strategy-r55-controls",
+        "strategy-r55-breakout"
+      ],
       "updated_at": "2026-07-20T12:53:00-06:00"
     },
     {
@@ -219,6 +236,25 @@
       "attempts": 0,
       "parent_ids": [],
       "updated_at": "2026-07-20T12:53:00-06:00"
+    },
+    {
+      "id": "strategy-r55controls2026",
+      "family": "audited corpus and independent evaluators",
+      "fingerprint": "r55controls2026",
+      "title": "Fail-closed authentication and independent validation of the R(5,5) order-42 control corpus and provisional two-conflict K43 seed",
+      "mechanism": "Freeze exact source-byte discriminators, require them before computation, compare independent Python/direct-combination and C/recursive-bitset evaluators, and cross-check graph6 plumbing with nauty and NetworkX",
+      "status": "blocked",
+      "hypothesis": "The authoritative McKay corpus is locally available with the frozen 47,888-byte SHA-256 discriminator and can then reproduce 656 valid, canonically distinct controls under two independent exact checkers.",
+      "discriminating_test": "Require the local corpus to have SHA-256 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb, size 47,888, and 328 records before running any graph check; otherwise record source_preflight_failed with downstream_checks_run=false.",
+      "blocker": "The managed environment cannot retrieve the authoritative McKay or Springer raw bytes, and neither raw artifact is present locally.",
+      "reopen_condition": "Provide or retrieve the unchanged McKay corpus with full provenance; it must match the frozen 47,888-byte SHA-256 discriminator before downstream checks run.",
+      "reopen_evidence": "",
+      "last_attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55-controls"
+      ],
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
     }
   ],
   "open_leads": [
@@ -270,6 +306,36 @@
       "next_experiment": "Fetch and verify the public r45extreme data, generate exact feature tables, learn candidate coefficients, rationalize them, and falsify on every control before attempting proof.",
       "priority": "normal",
       "status": "open"
+    },
+    {
+      "description": "Authenticate the 328 McKay source records and their complements.",
+      "rationale": "Every novelty and canonical-comparison claim depends on this immutable control set.",
+      "next_experiment": "Place unchanged bytes at sources/r55_42some.g6 and run the authenticated-corpus command in CHECKPOINT.md.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-3637dfa055",
+      "strategy_id": "strategy-r55controls2026",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+    },
+    {
+      "description": "Authenticate Springer Supplementary Data 4.",
+      "rationale": "It is the strongest published K43 repair seed, but the current transcription cannot establish publisher provenance.",
+      "next_experiment": "Retrieve the unchanged supplementary TXT, hash it, determine its color convention, and compare exact violation identities under both checkers.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-3a1dd469bb",
+      "strategy_id": "strategy-r55controls2026",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+    },
+    {
+      "description": "Enter the unknown-order-42 basin only after controls pass.",
+      "rationale": "Every deletion of a hypothetical K43 witness must lie outside the historically supplied 656.",
+      "next_experiment": "Canonicalize authenticated seed deletions against the 656, then execute a bounded nonlocal destroy-and-repair discriminator.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-9be315bbd4",
+      "strategy_id": "strategy-r55controls2026",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
     }
   ],
   "ruled_out": [
@@ -321,6 +387,24 @@
       "reason": "Structural transfer can improve similarity while exact Ramsey validity worsens.",
       "evidence": "https://doi.org/10.3390/math14081367",
       "reopen_condition": "Use such signals only to propose moves or coefficients, followed by exact checking."
+    },
+    {
+      "claim_or_route": "Treat the visible third-party K43 transcription as the authenticated Springer supplementary seed.",
+      "scope": "The current local input artifact",
+      "reason": "Checker agreement proves properties of supplied bytes but not their publisher provenance.",
+      "evidence": "publisher_authentication=false in artifacts/provisional_k43_control_report.json",
+      "reopen_condition": "Recover unchanged Springer Supplementary Data 4 and establish an exact transformation or byte correspondence.",
+      "attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+    },
+    {
+      "claim_or_route": "Start novel-42 or K43 repair search from the current control packet.",
+      "scope": "This epoch and any continuation lacking the raw corpus",
+      "reason": "The required source preflight failed before any corpus validation or canonical comparison.",
+      "evidence": "artifacts/corpus_source_preflight_report.json",
+      "reopen_condition": "The authoritative corpus passes the complete dual-check, complement, histogram, degree, and canonical-label gate.",
+      "attempt_id": "ramsey-r55-20260720-194611-f14832",
+      "updated_at": "2026-07-20T19:46:11.008003+00:00"
     }
   ],
   "unresolved_questions": [
@@ -331,10 +415,13 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55-controls",
-    "objective": "Turn the historical corpus and strongest K43 near-misses into authenticated, immutable controls before spending frontier search compute.",
-    "first_action": "Mirror and hash r55_42some.g6, derive complements, and run two independent exact 5-subset checkers; then reconstruct the public 13- and 9-conflict K43 seeds and locate the published two-conflict supplementary graph.",
-    "stop_condition": "Stop at the first source, parser, canonicalization, count, or provenance mismatch and preserve it exactly. Do not begin novel-42 or K43 repair search until the control corpus passes both checkers."
+    "recommended_strategy_id": "strategy-r55controls2026",
+    "objective": "Close the authoritative order-42 corpus control gate.",
+    "first_action": "Acquire sources/r55_42some.g6 unchanged, then execute the r55-authenticated-corpus-gate command recorded verbatim in CHECKPOINT.md.",
+    "stop_condition": "Stop at any source hash, record count, parser output, forbidden-set identity, histogram, degree, complement, or canonical-label mismatch; otherwise proceed to the Springer source gate.",
+    "source_attempt_id": "ramsey-r55-20260720-194611-f14832"
   },
-  "recent_attempt_ids": []
+  "recent_attempt_ids": [
+    "ramsey-r55-20260720-194611-f14832"
+  ]
 }
