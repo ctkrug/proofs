@@ -57,6 +57,11 @@ stays available if the content box, Codex login, or an individual attempt fails.
     no inference is accepted because two problems share a tag, citation, or strategy.
 16. Long-running searches enter only through the shell-free lab queue. Multisegment jobs require a
     workspace checkpoint; no model may create an untracked background process.
+17. Every problem workspace is an independent Git repository. Agent epochs and lab segments create
+    local commits containing structured records plus substantive notes, code, proof files, checkers,
+    and bounded artifacts. Research services have no GitHub credentials; the publisher alone creates
+    and pushes private `ctkrug/proofs-<problem>` remotes. A commit proves provenance, not correctness.
+    Files above the tracked-size ceiling are retained on the host and hash-manifested.
 
 ## Availability and cadence
 

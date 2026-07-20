@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, cli, contribution_gate, intake, lab, render, research_state, scheduler, scout, store, strategy_lab
+from proof_factory import agent, brain, cli, contribution_gate, intake, lab, render, repositories, research_state, scheduler, scout, store, strategy_lab
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -398,6 +398,64 @@ class ProofFactoryTests(unittest.TestCase):
 
         lock.assert_called_once_with("render")
         self.assertEqual(events, ["enter", "exit"])
+
+    def test_problem_repository_checkpoints_attempt_and_large_artifact_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            research = root / "research"
+            state = root / "state"
+            data.mkdir()
+            (data / "research_states").mkdir()
+            problem = {
+                "id": "test-problem", "title": "Test problem", "statement": "Find x.",
+                "source_url": "https://example.test/problem", "lane": "easy", "status": "active",
+            }
+            problems_file = data / "problems.json"
+            attempts_file = data / "attempts.jsonl"
+            problems_file.write_text(json.dumps([problem]))
+            attempts_file.write_text("")
+            store.write_json_atomic(data / "research_states" / "test-problem.json", {
+                "schema_version": 1, "problem_id": "test-problem", "epoch_count": 1,
+            })
+            dossier = research / "test-problem" / "DOSSIER.md"
+            dossier.parent.mkdir(parents=True)
+            dossier.write_text("# Prior work\n")
+            attempt = {
+                "id": "test-problem-20260720-000000-abc123", "problem_id": "test-problem",
+                "started_at": "2026-07-20T00:00:00+00:00", "finished_at": "2026-07-20T00:01:00+00:00",
+                "lane": "easy", "phase": "baseline", "outcome": "progress", "approach": "Exact check",
+                "summary": "Recorded one bounded fact.", "claims": ["x=1 in the checked case"],
+                "evidence": ["checker.py"], "citations": ["https://example.test/problem"],
+                "tool_disclosure": "Python", "orchestration": {"architecture": "sol-principal-terra-delegates"},
+            }
+            with patch.multiple(
+                store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
+                PROBLEMS_FILE=problems_file, ATTEMPTS_FILE=attempts_file,
+            ), patch.object(repositories, "MAX_TRACKED_FILE_BYTES", 10_000):
+                info = repositories.ensure(problem)
+                repo = Path(info["path"])
+                (repo / "checker.py").write_text("print(1)\n")
+                (repo / "raw.bin").write_bytes(b"x" * 20_000)
+                result = repositories.record_attempt(problem, attempt)
+                self.assertEqual(len(result["commit"]), 40)
+                self.assertTrue((repo / "records" / "attempts" / f"{attempt['id']}.json").is_file())
+                self.assertTrue((repo / "records" / "attempts" / f"{attempt['id']}.md").is_file())
+                self.assertEqual((repo / "docs" / "DOSSIER.md").read_text(), "# Prior work\n")
+                manifest = json.loads((repo / ".proof-repository" / "LARGE_ARTIFACTS.json").read_text())
+                self.assertEqual(manifest["files"][0]["path"], "raw.bin")
+                self.assertEqual(
+                    subprocess.run(
+                        ["git", "-C", str(repo), "rev-list", "--count", "HEAD"],
+                        text=True, capture_output=True, check=True,
+                    ).stdout.strip(),
+                    "2",
+                )
+                tracked = subprocess.run(
+                    ["git", "-C", str(repo), "ls-files"], text=True, capture_output=True, check=True,
+                ).stdout.splitlines()
+                self.assertIn("checker.py", tracked)
+                self.assertNotIn("raw.bin", tracked)
 
 
 if __name__ == "__main__":

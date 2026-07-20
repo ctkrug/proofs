@@ -12,6 +12,12 @@ if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
   exit 1
 fi
 
+# Research services create local commits without credentials. Only this publisher
+# may provision and push the private per-problem GitHub repositories.
+if ! .venv/bin/python -m proof_factory repo-sync; then
+  echo "Warning: one or more private problem repositories did not sync" >&2
+fi
+
 git add data publications
 if ! git diff --cached --quiet; then
   git commit -m "Record automated research attempt"

@@ -42,6 +42,10 @@ python3 -m proof_factory scout
 python3 -m proof_factory strategy-lab
 python3 -m proof_factory backfill-state
 python3 -m proof_factory brain-build
+python3 -m proof_factory repo-init --all
+python3 -m proof_factory repo-backfill
+python3 -m proof_factory repo-status
+python3 -m proof_factory repo-sync
 python3 -m proof_factory lab-status
 python3 scripts/submit_lab.py --problem PROBLEM --name NAME --hypothesis H --expected-signal S -- python3 search.py
 python3 -m proof_factory review --attempt ID --decision reject --reviewer "Proof Factory contribution gate" --note "..."
@@ -77,6 +81,11 @@ as independent verification.
   status and novelty again before doing technical work.
 - `state/runtime.json` is an atomic operational projection.
 - `research/<problem>/` holds literature notes, code, formalizations, and certificates.
+- `research/<problem>/workspace/` is also an isolated Git repository. Every agent epoch and lab
+  segment commits its structured record, current research-state projection, notes, code, checkers,
+  and ordinary-sized artifacts. The credential-free research services commit locally; only the
+  publisher creates and pushes a private `ctkrug/proofs-<problem>` GitHub remote. Oversized raw files
+  remain on the host and are represented by path, size, and SHA-256 rather than being silently lost.
 - `research/<problem>/workspace/lab-queue/` accepts validated shell-free simulation jobs. The cloud lab
   runs one low-priority job at a time in hash-recorded segments, requires checkpoints for multisegment
   searches, and can resume for at most seven 24-hour segments.

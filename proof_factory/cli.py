@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import brain, intake, lab, publication, render, research_state, scheduler, scout, store, strategy_lab
+from . import brain, intake, lab, publication, render, repositories, research_state, scheduler, scout, store, strategy_lab
 
 
 EXTERNAL_STATES = {
@@ -23,6 +23,8 @@ def _doctor() -> dict[str, Any]:
     attempts = store.load_attempts()
     codex_bin = os.environ.get("CODEX_BIN", "codex")
     lab_python = store.ROOT / ".lab-venv" / "bin" / "python"
+    repo_status = repositories.status()
+    repo_registry = store.read_json(store.DATA / "problem_repositories.json", {})
     checks: dict[str, Any] = {
         "problems": bool(problems),
         "attempt_log_valid": isinstance(attempts, list),
@@ -30,6 +32,11 @@ def _doctor() -> dict[str, Any]:
         "lab_runner": lab.RUNNER.is_file(),
         "research_brain": bool(brain.build().get("nodes")),
         "lab_python": lab_python.is_file(),
+        "problem_repositories": repo_status["initialized"] == repo_status["problems"],
+        "problem_repository_remotes": (
+            repo_status["remotes"] == repo_status["problems"]
+            and isinstance(repo_registry, dict) and not repo_registry.get("errors")
+        ),
     }
     if checks["codex_binary"]:
         proc = subprocess.run([codex_bin, "login", "status"], text=True, capture_output=True, timeout=30)
@@ -50,7 +57,7 @@ def _doctor() -> dict[str, Any]:
         checks["lab_python_imports"] = store.ROOT != Path("/root/proof-factory")
     checks["ok"] = all(bool(checks[key]) for key in (
         "problems", "attempt_log_valid", "codex_binary", "codex_login", "lab_runner", "research_brain",
-        "lab_python_imports",
+        "lab_python_imports", "problem_repositories", "problem_repository_remotes",
     ))
     return checks
 
@@ -184,6 +191,12 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("strategy-lab")
     sub.add_parser("backfill-state")
     sub.add_parser("brain-build")
+    repo_init = sub.add_parser("repo-init")
+    repo_init.add_argument("--problem")
+    repo_init.add_argument("--all", action="store_true")
+    sub.add_parser("repo-backfill")
+    sub.add_parser("repo-status")
+    sub.add_parser("repo-sync")
     sub.add_parser("lab-status")
     sub.add_parser("lab-worker")
     lab_submit = sub.add_parser("lab-submit")
@@ -254,6 +267,24 @@ def main(argv: list[str] | None = None) -> int:
         render.build()
         print(json.dumps(brain.summary(graph), indent=2))
         return 0
+    if args.command == "repo-init":
+        if args.all == bool(args.problem):
+            raise ValueError("repo-init requires exactly one of --all or --problem")
+        result = repositories.initialize_all() if args.all else repositories.ensure(
+            next(row for row in store.load_problems() if row["id"] == args.problem)
+        )
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "repo-status":
+        print(json.dumps(repositories.status(), indent=2))
+        return 0
+    if args.command == "repo-backfill":
+        print(json.dumps(repositories.backfill(), indent=2))
+        return 0
+    if args.command == "repo-sync":
+        result = repositories.sync_all()
+        print(json.dumps(result, indent=2))
+        return 1 if result["errors"] else 0
     if args.command == "lab-status":
         print(json.dumps(lab.status(), indent=2))
         return 0

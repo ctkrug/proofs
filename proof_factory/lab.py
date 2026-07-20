@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import store
+from . import repositories, store
 
 
 SCHEMA_VERSION = 1
@@ -112,6 +112,7 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
     if destination.exists():
         raise ValueError(f"duplicate lab job: {normalized['id']}")
     store.write_json_atomic(destination, normalized)
+    repositories.record_lab(normalized["problem_id"], "submitted", normalized)
     return {"status": "queued", "spec": str(destination), **normalized}
 
 
@@ -180,6 +181,7 @@ def worker_once() -> dict[str, Any]:
                 archive.mkdir(parents=True, exist_ok=True)
                 store.write_json_atomic(archive / f"{spec['id']}.json", {**spec, "final_record": record})
                 status = "completed" if proc.returncode == 0 else "stopped"
+            repositories.record_lab(spec["problem_id"], status, {**spec, **record})
             return {"status": status, **record}
         except Exception as exc:
             record = {
