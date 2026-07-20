@@ -296,7 +296,7 @@
     "problem_state": "verifiable",
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/364.lean",
     "lane": "easy",
-    "status": "queued",
+    "status": "active",
     "difficulty": 5,
     "priority": 20,
     "rationale": "Added from the versioned Erdős Problems community database to keep the discovery frontier broad. The first pass must validate the exact statement, status, literature, and a concrete verification contract.",
@@ -304,11 +304,12 @@
     "techniques": [
       "number theory"
     ],
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-20T16:52:57.810650+00:00",
-    "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml"
+    "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml",
+    "last_attempt_at": "2026-07-20T20:49:12.329818+00:00"
   },
   {
     "id": "erdos-366",

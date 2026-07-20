@@ -10,14 +10,151 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T20:49:12.329818+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-20T20:49:12.329818+00:00",
+    "source_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+    "source_status": "verifiable",
+    "facts_recorded": 4,
+    "exclusions_recorded": 3,
+    "leads_recorded": 2,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The problem remains open. Two exact encodings agreed on 2,027 powerful integers through 10^6, with distance-two starts 25 and 70225 and no triple. Exact factorizations validate all 13 displayed OEIS pairs and reject every displayed middle. No search code, exhaustive domain, or completeness certificate was found, so the reported 7.38e28 exclusion was not independently reproduced.",
+  "established_facts": [
+    {
+      "claim": "Any hypothetical triple start n is congruent to 7, 27, or 35 modulo 36.",
+      "evidence": "Elementary mod-4/mod-9 proof; published by Beckon in 2019.",
+      "scope": "all positive integer starts",
+      "status": "proved",
+      "source_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "claim": "The two independent implementations find 2,027 powerful numbers, pair starts 25 and 70225, and no triple through 10^6.",
+      "evidence": ".proof-experiments/20260720-203815-fbb4dd and .proof-experiments/20260720-203822-2f8c58",
+      "scope": "1 <= n <= 1000000 inclusive",
+      "status": "computed",
+      "source_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "claim": "All 13 displayed A076445 values are valid distance-two powerful-pair starts and each displayed middle is non-powerful.",
+      "evidence": ".proof-experiments/20260720-204059-94e77d",
+      "scope": "the 13 displayed b-file values only",
+      "status": "computed",
+      "source_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "claim": "The abc conjecture implies only finitely many powerful triples.",
+      "evidence": "Nitaj 1996, Proposition 3.8.3, and the official source summary.",
+      "scope": "conditional on abc",
+      "status": "conditional",
+      "source_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-erdos364-oeis-a076445-completeness-v1",
+      "family": "isolated adversarial reconstruction",
+      "fingerprint": "erdos364-oeis-a076445-completeness-v1",
+      "title": "Mandatory source/status audit, two-encoding bounded harness validation, adversarial audit of the 13 displayed OEIS A076445 terms, and construction of a fail-closed witness checker.",
+      "mechanism": "Separate membership and factorization checks from exhaustive completeness; reconstruct finite claims using materially different exact encodings and reject the OEIS interval inference without a cover artifact.",
+      "status": "promising",
+      "hypothesis": "The canonical a^2*b^3 generator and an independent prime-exponent classifier agree on every powerful integer through 10^6, while exact factor audits validate the 13 displayed A076445 terms but cannot certify that the displayed prefix is complete.",
+      "discriminating_test": "Require exact list equality on [1,10^6], known controls, and exact prime-factor checks of all displayed OEIS endpoints and middles; separately inspect the source trail for a completeness artifact.",
+      "blocker": "No checkable completeness argument was located for the A076445 13-term prefix, and the universal theorem remains beyond the bounded harness.",
+      "reopen_condition": "For the reported interval bound, obtain an exhaustive parameter cover or search artifact and independently replay it. For a witness, provide complete factor certificates.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search",
+        "isolated-adversarial-reconstruction"
+      ],
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "family": "formal proof with premise retrieval",
+      "mechanism": "Prove the residue restriction and source/formalization domain equivalence in Lean, then use them as checked normalization lemmas.",
+      "hypothesis": "Existing Powerful and modular-arithmetic lemmas suffice for a short sorry-free proof of the mod-36 restriction.",
+      "discriminating_test": "Pin the upstream repository and require the lemma to compile in CI without sorry or admit.",
+      "rationale": "This may yield a small accepted research artifact even if computational provenance is blocked.",
+      "id": "strategy-64f74e70484e",
+      "fingerprint": "64f74e70484e",
+      "status": "proposed",
+      "title": "Prove the residue restriction and source/formalization domain equivalence in Lean, then use them as checked normalization lemmas.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-erdos364-oeis-a076445-completeness-v1"
+      ],
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Reconstruct the completeness evidence for the A076445 prefix.",
+      "rationale": "This is the cheapest discriminator for whether the official headline computational bound is reproducible.",
+      "next_experiment": "Encode the Sentance/Mollin-Walsh Pell-kernel cover on [1,10^6] and compare exact pair starts with the baseline artifact.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-68305491ab",
+      "strategy_id": "strategy-erdos364-oeis-a076445-completeness-v1",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "description": "Formalize the mod-36 restriction and Nat/positive equivalence.",
+      "rationale": "A compact formal artifact would validate later symmetry restrictions and has a clear upstream path.",
+      "next_experiment": "Compile a sorry-free Lean lemma against a pinned formal-conjectures checkout.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-6d821708b2",
+      "strategy_id": "strategy-erdos364-oeis-a076445-completeness-v1",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Infer the no-triple-below-7.38e28 claim solely from the audited 13 displayed terms.",
+      "scope": "completeness of A076445 below its 13th displayed term",
+      "reason": "Membership and factorization checks do not exclude omitted distance-two pairs.",
+      "evidence": ".proof-experiments/20260720-204059-94e77d records completeness_certificate=false; OEIS history supplies attribution but no exhaustive artifact.",
+      "reopen_condition": "Obtain a complete search program with a proven domain or an independently checkable exhaustive certificate.",
+      "attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "claim_or_route": "Naively enumerate a^2*b^3 values to 7.38e28.",
+      "scope": "direct canonical generation",
+      "reason": "The b=1 branch alone exceeds 2.7e14 iterations and would merely replay an arbitrary cutoff.",
+      "evidence": "scripts/enumerate_powerful.py loop bounds and the integer square root of the reported bound.",
+      "reopen_condition": "A proven sublinear pair enumerator or kernel bound making certified exhaustive coverage tractable.",
+      "attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    },
+    {
+      "claim_or_route": "Transfer van Doorn's growing-difference progressions directly to consecutive integers.",
+      "scope": "common difference 1",
+      "reason": "The construction has common difference 2*sqrt(N)+1 and addresses a different adjacency question.",
+      "evidence": "https://arxiv.org/abs/2605.06697",
+      "reopen_condition": "A powerfulness-preserving transformation that provably reduces the difference to 1.",
+      "attempt_id": "erdos-364-20260720-204912-aa8f3d",
+      "updated_at": "2026-07-20T20:49:12.329818+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-erdos364-oeis-a076445-completeness-v1",
+    "objective": "Audit and reconstruct the completeness provenance of the A076445 13-term prefix without extending an arbitrary cutoff.",
+    "first_action": "Start from https://oeis.org/history?seq=A076445&start=20 and the historical thread linked at https://mathoverflow.net/questions/33037; recover the Noe/Reynolds algorithm and encode Sentance's Pell cover for comparison with artifacts/baseline_powerful_1e6.json.",
+    "stop_condition": "Stop if the cover cannot be proved exhaustive, no source artifact exists, or the toy implementation misses 25/70225 or disagrees with the exact baseline. If a complete artifact is found, switch immediately to independent replay.",
+    "source_attempt_id": "erdos-364-20260720-204912-aa8f3d"
+  },
+  "recent_attempt_ids": [
+    "erdos-364-20260720-204912-aa8f3d"
+  ]
 }
