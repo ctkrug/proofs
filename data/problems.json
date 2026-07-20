@@ -340,5 +340,47 @@
     "accepted_result": false,
     "added_at": "2026-07-20T16:52:59.968924+00:00",
     "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml"
+  },
+  {
+    "id": "scout-bdf77f43574b",
+    "outcome": "candidate",
+    "title": "Lean formalization of Erdős Problem #530 (largest guaranteed Sidon subset)",
+    "statement": "Add a scoped Lean declaration for: letting ℓ(N) be the largest k such that every finite A ⊆ ℝ with |A| = N has a Sidon subset S ⊆ A of size k, conjecturally ℓ(N) ~ √N. The contribution is the precise formal statement and supporting definitions, not a claimed proof.",
+    "source_url": "https://www.erdosproblems.com/530",
+    "source_name": "Erdős Problems (Thomas F. Bloom, maintained database)",
+    "problem_state": "open",
+    "contribution_type": "formalization",
+    "verifiability": "A self-contained Lean file defining the Sidon predicate and extremal function, with the conjecture declaration typechecked by Lean’s kernel; CI and an independent local `lake build` reproduce the check.",
+    "rationale": "The maintained page was edited 8 April 2026, labels the problem OPEN, says it is not formalised, and records no one currently formalising it. The linked formal-conjectures issue is open, explicitly up for grabs, unassigned, and has no branch or PR. This is unusually small because it is one exact research-conjecture interface with finite-set and additive-equality primitives already standard in Lean, yet it contributes a reusable machine-checkable target without pretending to solve the conjecture.",
+    "external_channel": "google-deepmind/formal-conjectures — open issue #773 in the ‘All open Erdős problems formalized’ milestone",
+    "external_url": "https://github.com/google-deepmind/formal-conjectures/issues/773",
+    "estimated_success_probability": 0.72,
+    "difficulty": 2,
+    "verification_score": 5,
+    "contribution_score": 3,
+    "review_cost": 2,
+    "novelty_risk": 1,
+    "techniques": [
+      "Lean 4 formalization",
+      "finite-set extremal definitions",
+      "Sidon-set predicate",
+      "asymptotic notation"
+    ],
+    "lane": "easy",
+    "status": "queued",
+    "priority": 40,
+    "attempt_count": 0,
+    "research_attempt_count": 0,
+    "accepted_result": false,
+    "added_at": "2026-07-20T17:25:05.376727+00:00",
+    "source_checked_at": "2026-07-20T17:25:05.376753+00:00",
+    "intake_source": "agentic academic contribution scout",
+    "scout_model": "gpt-5.6-terra",
+    "scout_usage": {
+      "input_tokens": 283498,
+      "cached_input_tokens": 225024,
+      "output_tokens": 2010,
+      "reasoning_output_tokens": 1031
+    }
   }
 ]
