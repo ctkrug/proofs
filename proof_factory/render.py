@@ -709,7 +709,7 @@ SITE_JS = r"""
       const accomplishment = el("div", "accomplishment"); accomplishment.append(el("span", "", "What this run accomplished"), el("p", "", run.accomplishment || "No accomplishment summary was recorded."));
       copy.append(eyebrow, h3, approach, accomplishment);
       if (run.next_action) { const next = el("p", "next-action"); next.append(el("strong", "", "Next: "), document.createTextNode(run.next_action)); copy.append(next); }
-      const end = el("div", "row-end"); end.append(el("span", `badge badge-${run.outcome || "unknown"}`, labels[run.outcome] || (run.outcome || "unknown").replaceAll("_", " "));
+      const end = el("div", "row-end"); end.append(el("span", `badge badge-${run.outcome || "unknown"}`, labels[run.outcome] || (run.outcome || "unknown").replaceAll("_", " ")));
       const link = el("a", "arrow", "Open full record →"); link.href = run.href; end.append(link); copy.append(end); article.append(copy); return article;
     }));
   };
