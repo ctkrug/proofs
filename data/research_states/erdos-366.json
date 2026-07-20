@@ -10,14 +10,174 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T23:11:57.650140+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-20T23:11:57.650140+00:00",
+    "source_attempt_id": "erdos-366-20260720-231157-f9a691",
+    "source_status": "verifiable",
+    "facts_recorded": 4,
+    "exclusions_recorded": 3,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The official and original statements agree on the target orientation: n is 2-full and n+1 is 3-full. The maintained source remains open. A dense oracle and sparse generator agreed on exactly 307 3-full values through 10^6, with identical canonical SHA-256 hashes and no duplicates. The sparse search then examined 1,645 3-full values through 10^8 and found no target. No universal claim or candidate solution is made.",
+  "established_facts": [
+    {
+      "claim": "The target orientation is n 2-full followed by n+1 3-full; n=8 is reverse-oriented.",
+      "evidence": "Erdős–Graham 1980, printed p. 68; scan SHA-256 0cbf0c32f0ab1e1c71db5121a88bac905bf976c4a6ab6bb6d7d9cf9ddd184ed3",
+      "scope": "Exact statement and orientation",
+      "status": "proved",
+      "source_attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "claim": "The two independent encodings agree on all 307 3-full integers through 10^6 and find no target.",
+      "evidence": ".proof-experiments/20260720-225425-8b9ae9",
+      "scope": "All m=n+1 with 1<=m<=1000000",
+      "status": "computed",
+      "source_attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "claim": "No target occurs with n+1<=100000000.",
+      "evidence": ".proof-experiments/20260720-225435-3a467c; 1,645 generated values and target_hits=[]",
+      "scope": "All positive n with n+1<=100000000",
+      "status": "computed",
+      "source_attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "claim": "Only finitely many target pairs exist if abc is true.",
+      "evidence": "Official discussion's radical argument with epsilon<1/5",
+      "scope": "Conditional on abc",
+      "status": "conditional",
+      "source_attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-counterexample-certificate-search/sparse-three-full-v1",
+      "family": "counterexample and witness search",
+      "fingerprint": "counterexample-certificate-search/sparse-three-full-v1",
+      "title": "Mandatory source/status baseline followed by a bounded counterexample search that enumerates 3-full m=n+1, with a separate dense smallest-prime-factor oracle and reverse-orientation controls.",
+      "mechanism": "Generate every 3-full m in the bounded domain exactly once from increasing prime supports and exponents at least three, factor m-1 exactly, and independently compare the generated set with a dense sieve oracle.",
+      "status": "active",
+      "hypothesis": "The sparse generator is complete and duplicate-free on a nontrivial audited overlap, and either finds a target witness with n+1<=100000000 or certifies an empty hit list only on that bounded domain.",
+      "discriminating_test": "Compare the complete generated 3-full set against a dense smallest-prime-factor scan through 10^6, exercise reversed examples, then enumerate all 3-full m through 10^8.",
+      "blocker": "No witness is known, and no unconditional theorem reduces universal nonexistence to a finite certified computation. General consecutive-powerful classifications do not enforce the asymmetric 3-full successor condition.",
+      "reopen_condition": "Resume undifferentiated bound extension only with a recognized target bound, an explicit request, a completeness-certificate objective, or a new structural pruning result.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-366-20260720-231157-f9a691",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "family": "symbolic and congruence family discovery",
+      "mechanism": "Decompose p^e-1 into cyclotomic factors, exploit their controlled gcds, and test whether the powerfulness requirement forces forbidden exponent-one prime divisors.",
+      "hypothesis": "At least one exponent or residue class in the single-prime n+1 branch admits a provable local obstruction or a sharply reduced finite set.",
+      "discriminating_test": "Compare a symbolic residue/gcd filter with the complete single-prime cases through 10^6 and require exact out-of-sample agreement.",
+      "rationale": "A structural pruning lemma would carry more information than another arbitrary global cutoff.",
+      "id": "strategy-7bf25e859705",
+      "fingerprint": "7bf25e859705",
+      "status": "proposed",
+      "title": "Decompose p^e-1 into cyclotomic factors, exploit their controlled gcds, and test whether the powerfulness requirement forces forbidden exponent-one prime divisors.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-counterexample-certificate-search/sparse-three-full-v1"
+      ],
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "family": "isolated adversarial reconstruction",
+      "mechanism": "Recover or independently rebuild the A060355 enumeration and verify both its coverage and every listed factorization without using the present sparse target code.",
+      "hypothesis": "The reported consecutive-powerful table below 10^22 can be converted into a reproducible exhaustive certificate.",
+      "discriminating_test": "Locate executable provenance or reproduce a smaller published prefix with a complete independent generator before attempting the full range.",
+      "rationale": "This could turn an unverified superset report into a rigorous bounded target exclusion.",
+      "id": "strategy-cf3635b42cb2",
+      "fingerprint": "cf3635b42cb2",
+      "status": "proposed",
+      "title": "Recover or independently rebuild the A060355 enumeration and verify both its coverage and every listed factorization without using the present sparse target code.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-counterexample-certificate-search/sparse-three-full-v1"
+      ],
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Analyze n+1=p^e using the factorization of p^e-1.",
+      "rationale": "Cyclotomic factor coprimality may yield a genuine obstruction or materially prune a witness branch.",
+      "next_experiment": "Derive gcd conditions, implement a bounded certified shell, and compare with all single-prime-support cases through 10^6.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-db85a6f373",
+      "strategy_id": "strategy-counterexample-certificate-search/sparse-three-full-v1",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "description": "Reconstruct the A060355 computation below 10^22.",
+      "rationale": "A certificate-bearing complete powerful-pair list could be filtered into a rigorous problem-366 exclusion.",
+      "next_experiment": "Audit OEIS history and Donovan Johnson table provenance for code and completeness arguments.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-7f0bcdad16",
+      "strategy_id": "strategy-counterexample-certificate-search/sparse-three-full-v1",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "description": "Formalize a future explicit witness in Lean.",
+      "rationale": "The existing reverse example shows numeral instances of Nat.Full can be discharged by normalization.",
+      "next_experiment": "After a witness exists, instantiate the existential and compile with no sorry or admit.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-e90029687f",
+      "strategy_id": "strategy-counterexample-certificate-search/sparse-three-full-v1",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use (8,9), (12167,12168), or generic Pell-generated powerful pairs as target evidence without checking orientation and exponent three.",
+      "scope": "Known reverse examples and unfiltered consecutive-powerful families",
+      "reason": "They prove 3-full then 2-full, or only 2-full then 2-full.",
+      "evidence": ".proof-experiments/20260720-225442-7f669d and the original p. 68 statement",
+      "reopen_condition": "Produce a family member whose first number independently passes 2-full and whose successor passes 3-full.",
+      "attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "claim_or_route": "Routine extension of the same arbitrary search cutoff as a contribution.",
+      "scope": "Larger bounds without a recognized benchmark, structural theorem, or certificate-bearing reproduction",
+      "reason": "A finite null search cannot settle universal nonexistence and would not improve a verified best-known result.",
+      "evidence": ".proof-experiments/20260720-225435-3a467c",
+      "reopen_condition": "A predeclared recognized bound, explicit expert request, or new structural pruning theorem.",
+      "attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    },
+    {
+      "claim_or_route": "Treat OEIS A060355 alone as a certified target exclusion through 10^22.",
+      "scope": "The current b-file without retained exhaustive-search code",
+      "reason": "It is a superset table and lacks an independently checked completeness certificate for the reported range.",
+      "evidence": "https://oeis.org/A060355/b060355.txt",
+      "reopen_condition": "Recover or reproduce the enumeration with a complete generator and independent certificate.",
+      "attempt_id": "erdos-366-20260720-231157-f9a691",
+      "updated_at": "2026-07-20T23:11:57.650140+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-counterexample-certificate-search/sparse-three-full-v1",
+    "objective": "Test the single-prime-support successor branch for structural information.",
+    "first_action": "Write the exact factor/gcd decomposition of p^e-1 for n+1=p^e, then enumerate e>=3 and p^e<=10^6 as a regression fixture against tools/erdos366_discriminator.py.",
+    "stop_condition": "Stop immediately on a verified witness; otherwise stop after the declared shell and retain the route only if it proves a local obstruction or material pruning rule.",
+    "source_attempt_id": "erdos-366-20260720-231157-f9a691"
+  },
+  "recent_attempt_ids": [
+    "erdos-366-20260720-231157-f9a691"
+  ]
 }

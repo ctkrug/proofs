@@ -58,7 +58,7 @@
     "title": "Ramsey number R(5,5)",
     "lane": "hard",
     "difficulty": 9,
-    "status": "attempted",
+    "status": "active",
     "problem_state": "open finite exact value",
     "statement": "Determine R(5,5), the least n such that every graph on n vertices contains either a 5-clique or an independent set of size 5. The current range is 43 <= R(5,5) <= 46. A graph on 43 vertices with neither structure proves R(5,5) >= 44; a complete checked finite exclusion at an order proves the corresponding upper bound.",
     "source_url": "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
@@ -83,10 +83,10 @@
     "contribution_score": 5,
     "review_cost": 5,
     "novelty_risk": 3,
-    "attempt_count": 3,
-    "research_attempt_count": 3,
+    "attempt_count": 4,
+    "research_attempt_count": 4,
     "created_at": "2026-07-20T20:24:00+00:00",
-    "last_attempt_at": "2026-07-20T21:17:02.574731+00:00",
+    "last_attempt_at": "2026-07-20T22:46:31.902547+00:00",
     "accepted_result": false,
     "priority": 100
   },
@@ -320,7 +320,7 @@
     "problem_state": "verifiable",
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/366.lean",
     "lane": "easy",
-    "status": "queued",
+    "status": "active",
     "difficulty": 5,
     "priority": 20,
     "rationale": "Added from the versioned Erdős Problems community database to keep the discovery frontier broad. The first pass must validate the exact statement, status, literature, and a concrete verification contract.",
@@ -328,11 +328,12 @@
     "techniques": [
       "number theory"
     ],
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-20T16:52:58.308007+00:00",
-    "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml"
+    "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml",
+    "last_attempt_at": "2026-07-20T23:11:57.650140+00:00"
   },
   {
     "id": "erdos-375",
