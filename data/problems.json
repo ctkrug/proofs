@@ -12,7 +12,11 @@
     "formalization_url": "",
     "verifiability": "Exact symbolic identity and three rational witness evaluations",
     "rationale": "A small, decisive, independently reproducible calibration of the entire evidence pipeline. This is prior work, not a Proof Factory discovery.",
-    "techniques": ["symbolic differentiation", "exact rational arithmetic", "collision witness"],
+    "techniques": [
+      "symbolic differentiation",
+      "exact rational arithmetic",
+      "collision witness"
+    ],
     "attempt_count": 1,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": "2026-07-20T15:20:00+00:00",
@@ -32,7 +36,13 @@
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/tree/main/FormalConjectures/ErdosProblems",
     "verifiability": "A counterexample is finite; proposed parametric families and congruence covers can be checked exactly; the statement has a third-party Lean formalization.",
     "rationale": "The initial famous lane: genuinely hard, widely known, precisely stated, computationally grounded, and decomposable into congruence and parametric subproblems.",
-    "techniques": ["unit fractions", "congruence covers", "parametric identities", "sieve methods", "exact search"],
+    "techniques": [
+      "unit fractions",
+      "congruence covers",
+      "parametric identities",
+      "sieve methods",
+      "exact search"
+    ],
     "attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
@@ -44,7 +54,7 @@
     "title": "A divisor-function record beyond 24",
     "lane": "easy",
     "difficulty": 4,
-    "status": "active",
+    "status": "attempted",
     "problem_state": "verifiable",
     "statement": "Let τ(n) count the positive divisors of n. Is there some n > 24 such that max over m < n of (m + τ(m)) is at most n + 2?",
     "source_url": "https://www.erdosproblems.com/647",
@@ -52,10 +62,15 @@
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/tree/main/FormalConjectures/ErdosProblems",
     "verifiability": "A positive answer is one explicit integer plus a bounded exact divisor-count check.",
     "rationale": "The first genuine discovery target: a short statement with a compact deterministic witness and a natural optimized-search harness.",
-    "techniques": ["divisor sieve", "record sequence search", "branch and bound", "OEIS cross-check"],
-    "attempt_count": 0,
+    "techniques": [
+      "divisor sieve",
+      "record sequence search",
+      "branch and bound",
+      "OEIS cross-check"
+    ],
+    "attempt_count": 2,
     "created_at": "2026-07-20T15:00:00+00:00",
-    "last_attempt_at": null,
+    "last_attempt_at": "2026-07-20T16:26:07.624575+00:00",
     "accepted_result": false,
     "priority": 95
   },
@@ -72,7 +87,11 @@
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/tree/main/FormalConjectures/ErdosProblems",
     "verifiability": "A positive answer is a pair of finite prime sets checked by exact rational arithmetic.",
     "rationale": "Finite certificates are decisive, though the known lower bound of 60 total primes makes search engineering nontrivial.",
-    "techniques": ["exact rational subset search", "meet in the middle", "modular pruning"],
+    "techniques": [
+      "exact rational subset search",
+      "meet in the middle",
+      "modular pruning"
+    ],
     "attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
@@ -92,7 +111,12 @@
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/tree/main/FormalConjectures/ErdosProblems",
     "verifiability": "A coloring is a finite certificate; SAT/CP-SAT encodings can be independently checked.",
     "rationale": "A clean finite combinatorics search with reusable SAT certificates; known false for 3 ≤ k ≤ 8 narrows the first unknown cases.",
-    "techniques": ["SAT", "symmetry breaking", "Johnson graphs", "certificate checking"],
+    "techniques": [
+      "SAT",
+      "symmetry breaking",
+      "Johnson graphs",
+      "certificate checking"
+    ],
     "attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
@@ -112,7 +136,12 @@
     "formalization_url": "https://github.com/google-deepmind/formal-conjectures/tree/main/FormalConjectures/ErdosProblems",
     "verifiability": "An explicit finite covering system can be checked over one least-common-multiple period.",
     "rationale": "A finite witness would settle the existence direction, but structural lower bounds make it a later discovery-lane target.",
-    "techniques": ["exact cover", "covering congruences", "SAT", "LCM-period verification"],
+    "techniques": [
+      "exact cover",
+      "covering congruences",
+      "SAT",
+      "LCM-period verification"
+    ],
     "attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
