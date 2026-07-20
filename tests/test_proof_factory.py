@@ -13,12 +13,13 @@ class ProofFactoryTests(unittest.TestCase):
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
         self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "erdos-242")
-        for row in problems:
-            if row.get("lane") == "easy":
-                row["research_attempt_count"] = 0
-        self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "erdos-647")
-        next(row for row in problems if row["id"] == "erdos-647")["research_attempt_count"] = 1
-        self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "erdos-307")
+        frontier = [
+            {"id": "easy-first", "lane": "easy", "status": "queued", "difficulty": 4, "research_attempt_count": 0},
+            {"id": "easy-next", "lane": "easy", "status": "queued", "difficulty": 6, "research_attempt_count": 0},
+        ]
+        self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-first")
+        frontier[0]["research_attempt_count"] = 1
+        self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-next")
 
     def test_parse_official_statement(self) -> None:
         page = '<div id="content">Is there an $n&gt;2$?<br>Exactly.</div>'

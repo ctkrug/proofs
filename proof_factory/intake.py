@@ -52,8 +52,9 @@ def _problem(row: dict[str, Any], statement: str) -> dict[str, Any]:
     state = str((row.get("status") or {}).get("state") or "open")
     formalized = str((row.get("formalized") or {}).get("state") or "no") == "yes"
     prize = str(row.get("prize") or "no").lower() not in {"", "no", "none"}
+    witness_friendly = statement.lower().startswith(("are there any", "does there exist", "is there some"))
     difficulty = (
-        (5 if state in {"verifiable", "falsifiable", "decidable"} else 7)
+        (5 if state in {"verifiable", "falsifiable", "decidable"} and witness_friendly else 7)
         + (0 if formalized else 1)
         + (1 if prize else 0)
     )
