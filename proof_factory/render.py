@@ -113,6 +113,15 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
     accepted = sum(1 for row in problems if row.get("accepted_result") is True)
     health = runtime.get("health", "starting")
     health_issues = runtime.get("health_issues") or []
+    running_lanes = [lane for lane in ("hard", "easy") if runtime.get(f"{lane}_running")]
+    hard_run_text = (
+        f"Running now · started {_time(runtime.get('hard_started_at'))}"
+        if runtime.get("hard_running") else f"Last run: {_time((hard or {}).get('last_attempt_at'))}"
+    )
+    easy_run_text = (
+        f"Running now · started {_time(runtime.get('easy_started_at'))}"
+        if runtime.get("easy_running") else f"Last run: {_time((easy or {}).get('last_attempt_at'))}"
+    )
     ordered = sorted(
         problems,
         key=lambda row: (
@@ -125,6 +134,10 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
     if candidates:
         candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="#problems">Review records →</a></section>"""
     issues = "" if not health_issues else " · ".join(h(x) for x in health_issues)
+    live_work = (
+        "No pass currently running" if not running_lanes
+        else f"Active now: {', '.join(running_lanes)} lane{'s' if len(running_lanes) != 1 else ''}"
+    )
     body = f"""
 <section class="hero">
   <div class="hero-kicker"><span class="live-dot"></span> Always-on research ledger</div>
@@ -143,16 +156,16 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
     <div class="panel-label">Hard / famous lane · 2× daily · Sol xhigh</div>
     <h2>{h((hard or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((hard or {}).get('rationale') or 'The hard lane is being initialized.')}</p>
-    <div class="panel-foot"><span>Last run: {_time((hard or {}).get('last_attempt_at'))}</span>{f'<a href="/problems/{h(hard["id"])}/">Open dossier →</a>' if hard else ''}</div>
+    <div class="panel-foot"><span>{h(hard_run_text)}</span>{f'<a href="/problems/{h(hard["id"])}/">Open dossier →</a>' if hard else ''}</div>
   </article>
   <article class="lane-panel easy-panel">
     <div class="panel-label">Discovery lane · easier-first · 6× daily</div>
     <h2>{h((easy or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((easy or {}).get('rationale') or 'The discovery lane is being initialized.')}</p>
-    <div class="panel-foot"><span>Last run: {_time((easy or {}).get('last_attempt_at'))}</span>{f'<a href="/problems/{h(easy["id"])}/">Open dossier →</a>' if easy else ''}</div>
+    <div class="panel-foot"><span>{h(easy_run_text)}</span>{f'<a href="/problems/{h(easy["id"])}/">Open dossier →</a>' if easy else ''}</div>
   </article>
 </section>
-<section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
+<section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
 <section id="problems" class="section-block">
   <div class="section-heading"><div><span class="overline">Problem registry</span><h2>Active, tried, failed, and past work</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']]) for row in ordered)}</div>
