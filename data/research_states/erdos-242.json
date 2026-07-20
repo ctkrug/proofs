@@ -10,39 +10,114 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 1,
-  "last_updated": "2026-07-20T16:44:38.319463+00:00",
-  "synthesis_summary": "Derived an exhaustive tame criterion p=4abt-a-b with gcd(a,b)=1, reproduced Xu's two published checkpoints, and extended the tame/wild classification from m<=30000 to m<=1000000. Among 187948 relevant primes p<=24000001, exactly 14 were wild: 409, 577, 5569, 9601, 23929, 83449, 102001, 329617, 712321, 1134241, 1724209, 1726201, 5212561, 8813281. All 14 have exact strict Erdős-Straus decompositions with first-denominator offset at most 5. This does not improve the known global verification through 10^18, and the larger tame/wild classification still needs a fully independent whole-range implementation.",
-  "established_facts": [],
+  "epoch_count": 2,
+  "last_updated": "2026-07-20T18:18:22.062611+00:00",
+  "synthesis_summary": "The independent generator produced 187948 prime records: 187934 tame and 14 wild. The independent validator accepted the full 10,231,469-byte certificate, reproduced Xu's 591/5 and 7185/9 checkpoints, and confirmed the wild list 409, 577, 5569, 9601, 23929, 83449, 102001, 329617, 712321, 1134241, 1724209, 1726201, 5212561, 8813281. This does not improve the known global verification through 10^18.",
+  "established_facts": [
+    {
+      "claim": "For a prime p=24m+1, Xu-tameness is equivalent to p=4abt-a-b with coprime positive a,b and t>=1.",
+      "evidence": "Algebraic derivation in research_note.md, with a definition-level computational audit through p<=25000.",
+      "scope": "All prime p=24m+1 under Xu's definition.",
+      "status": "proved",
+      "source_attempt_id": "erdos-242-20260720-181822-bad8d7",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    },
+    {
+      "claim": "Exactly 14 relevant primes are wild through p<=24000001.",
+      "evidence": "Full certificate plus successful independent validation in experiment 20260720-180833-c9cacb.",
+      "scope": "Primes p=24m+1, 0<=m<=1000000.",
+      "status": "computed",
+      "source_attempt_id": "erdos-242-20260720-181822-bad8d7",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    }
+  ],
   "strategies": [
     {
       "id": "strategy-a48c750033a1",
-      "family": "unspecified",
+      "family": "certificate-carrying bounded enumeration",
       "fingerprint": "a48c750033a1",
-      "title": "Exact classification of the primes p=24m+1 lacking Xu's restricted 'tame' solutions, followed by factor-pair certificates for the residual wild primes.",
-      "mechanism": "Exact classification of the primes p=24m+1 lacking Xu's restricted 'tame' solutions, followed by factor-pair certificates for the residual wild primes.",
+      "title": "Independent streaming certificate and whole-range validation of Xu-tame primes p=24m+1 for 0<=m<=1000000.",
+      "mechanism": "Emit one exact (a,b,t) witness for every tame prime and complete factorizations of p+a across the forced a-range for every wild prime; validate coverage and all algebra with a separate implementation.",
       "status": "promising",
-      "hypothesis": "",
-      "discriminating_test": "",
-      "blocker": "",
+      "hypothesis": "Exactly 14 primes p=24m+1 with 0<=m<=1000000 fail p=4abt-a-b for coprime integers 1<=a<=b and t>=1.",
+      "discriminating_test": "A separate validator must reconstruct every progression prime, verify all tame identities, exhaust every divisor b|p+a for every wild row, and reproduce the claimed counts and list.",
+      "blocker": "External independent reconstruction and author/priority checking have not occurred; moreover, the finite tame classification supplies no theorem controlling all future wild primes.",
       "reopen_condition": "",
-      "last_attempt_id": "erdos-242-20260720-164438-51ba99",
-      "attempts": 1,
+      "reopen_evidence": "The full certificate and independent validator satisfy the prior epoch's requirement for a whole-range reconstruction.",
+      "last_attempt_id": "erdos-242-20260720-181822-bad8d7",
+      "attempts": 2,
       "parent_ids": [],
-      "updated_at": "2026-07-20T16:44:38.319463+00:00"
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    },
+    {
+      "family": "formal proof with premise retrieval",
+      "mechanism": "Formalize the tame-equivalence reduction and strict reconstructed identity in Lean, then connect a small certificate checker to the finite data.",
+      "hypothesis": "The general tame-equivalence lemma can be proved in Lean without assumptions stronger than primality, p=1 mod 24, and Xu's divisor definition.",
+      "discriminating_test": "Produce a compiling minimal lemma with no sorry that derives the rational identity and strict denominators from coprime a,b,t satisfying p=4abt-a-b.",
+      "rationale": "This attacks theorem-translation risk rather than merely extending the same enumeration.",
+      "id": "strategy-d7d6a8ef7118",
+      "fingerprint": "d7d6a8ef7118",
+      "status": "proposed",
+      "title": "Formalize the tame-equivalence reduction and strict reconstructed identity in Lean, then connect a small certificate checker to the finite data.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-a48c750033a1"
+      ],
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
     }
   ],
-  "open_leads": [],
-  "ruled_out": [],
+  "open_leads": [
+    {
+      "description": "Isolated reconstruction in a language distinct from Python.",
+      "rationale": "It directly attacks the remaining shared-session and shared-runtime risk at modest computational cost.",
+      "next_experiment": "Write a Rust or C checker without reading the Python implementations, then validate tame_m1000000_certificate.jsonl and preserve the first discrepancy or matching counts.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-af9844a7d2",
+      "strategy_id": "strategy-a48c750033a1",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    },
+    {
+      "description": "Formalize the tame-equivalence lemma in Lean.",
+      "rationale": "The certificate relies on a short general reduction whose hypotheses and strict-denominator conclusion are suitable for formal checking.",
+      "next_experiment": "Create a minimal Lean statement deriving the tame denominators from p=4*a*b*t-a-b and prove positivity, distinctness, and the rational identity without sorry.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-d279b92cb8",
+      "strategy_id": "strategy-a48c750033a1",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "The Epoch 1 classification remained dependent on only one whole-range implementation.",
+      "scope": "The complete range 0<=m<=1000000.",
+      "reason": "A separate certificate generator and non-importing validator now agree over the full range.",
+      "evidence": ".proof-experiments/20260720-180723-e5b2b9 and .proof-experiments/20260720-180833-c9cacb.",
+      "reopen_condition": "A third implementation finds a specific discrepant prime, witness, factorization, or coverage gap.",
+      "attempt_id": "erdos-242-20260720-181822-bad8d7",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    },
+    {
+      "claim_or_route": "Presenting p<=24000001 as an improved global Erdős–Straus verification bound.",
+      "scope": "Full conjecture verification bounds.",
+      "reason": "The conjecture is already reported verified through 10^18; this result concerns only Xu's restricted tame classification.",
+      "evidence": "https://arxiv.org/abs/2509.00128",
+      "reopen_condition": "An independently verified full-conjecture computation beyond the current published bound.",
+      "attempt_id": "erdos-242-20260720-181822-bad8d7",
+      "updated_at": "2026-07-20T18:18:22.062611+00:00"
+    }
+  ],
   "unresolved_questions": [],
   "next_session": {
     "recommended_strategy_id": "strategy-a48c750033a1",
-    "objective": "Write an independently implemented streaming certificate and validator for nonexistence of tame parameters for all 14 wild rows across the full p<=24000001 enumeration.",
-    "first_action": "Write an independently implemented streaming certificate and validator for nonexistence of tame parameters for all 14 wild rows across the full p<=24000001 enumeration.",
-    "stop_condition": "",
-    "source_attempt_id": "erdos-242-20260720-164438-51ba99"
+    "objective": "Obtain an isolated, different-language reconstruction of the complete certificate and criterion.",
+    "first_action": "Without reading either Python implementation, specify the JSON-lines schema from the certificate itself and write validate_tame_certificate.rs to reconstruct progression-prime coverage, check tame equations, and exhaust wild divisor rows.",
+    "stop_condition": "Stop with success only on counts 187948/187934/14 and the exact 14-prime list; otherwise stop immediately at and preserve the first discrepant record.",
+    "source_attempt_id": "erdos-242-20260720-181822-bad8d7"
   },
   "recent_attempt_ids": [
-    "erdos-242-20260720-164438-51ba99"
+    "erdos-242-20260720-164438-51ba99",
+    "erdos-242-20260720-181822-bad8d7"
   ]
 }

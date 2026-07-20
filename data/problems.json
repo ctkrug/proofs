@@ -29,7 +29,7 @@
     "title": "Erdős–Straus conjecture",
     "lane": "hard",
     "difficulty": 10,
-    "status": "active",
+    "status": "candidate",
     "problem_state": "falsifiable",
     "statement": "For every integer n > 2, do there exist distinct integers 1 ≤ x < y < z such that 4/n = 1/x + 1/y + 1/z?",
     "source_url": "https://www.erdosproblems.com/242",
@@ -44,12 +44,13 @@
       "sieve methods",
       "exact search"
     ],
-    "attempt_count": 1,
-    "research_attempt_count": 1,
+    "attempt_count": 2,
+    "research_attempt_count": 2,
     "created_at": "2026-07-20T15:00:00+00:00",
-    "last_attempt_at": "2026-07-20T16:44:38.319463+00:00",
+    "last_attempt_at": "2026-07-20T18:18:22.062611+00:00",
     "accepted_result": false,
-    "priority": 100
+    "priority": 100,
+    "candidate_attempt_id": "erdos-242-20260720-181822-bad8d7"
   },
   {
     "id": "erdos-647",
