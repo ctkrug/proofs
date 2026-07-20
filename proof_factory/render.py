@@ -55,6 +55,7 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07100e">
   <title>{h(title)} · Proof Factory</title>
   <meta name="description" content="{h(description)}">
   <link rel="stylesheet" href="/assets/site.css">
@@ -64,12 +65,13 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#content">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">∎</span><span>Proof Factory</span></a>
-    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/brain/">Brain</a><a href="/strategies/">Strategies</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
+    <a class="brand" href="/"><span class="brand-mark">PF</span><span>Proof Factory</span><small>Research system / 01</small></a>
+    <nav aria-label="Primary"><a href="/#problems">Problems</a><a href="/#attempts">Log</a><a href="/brain/">Brain</a><a href="/strategies/">Methods</a><a href="/method/">Protocol</a><a href="/api/state.json">JSON</a></nav>
   </header>
-  <main>{body}</main>
-  <footer><span>AI-assisted research, disclosed per attempt.</span><span>Human responsibility: Charlie Krug.</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
+  <main id="content">{body}</main>
+  <footer><span>Proof Factory / transparent AI-assisted mathematics</span><span>Claims require independent verification</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
 </body>
 </html>"""
 
@@ -159,26 +161,26 @@ def _index(
     )
     body = f"""
 <section class="hero">
-  <div class="hero-kicker"><span class="live-dot"></span> Always-on research ledger</div>
-  <h1>Every attempt.<br><em>Including the failures.</em></h1>
-  <p class="hero-copy">A headless academic contribution system working one famous problem deeply while optimizing the discovery lane for the smallest legitimate, independently verifiable new result. Progress is public; claims are not trusted until independently checked.</p>
+  <div class="hero-kicker"><span class="live-dot"></span> LIVE / OPEN MATHEMATICS / UTC</div>
+  <h1>Every attempt<br><em>is evidence.</em></h1>
+  <p class="hero-copy">One famous finite problem. One contribution-first discovery lane. Hypotheses, computations, failures, and certificates stay visible; nothing counts until it survives independent verification.</p>
   <div class="hero-stats">
-    <div><strong>{len(problems)}</strong><span>tracked problems</span></div>
-    <div><strong>{len(attempts)}</strong><span>recorded attempts</span></div>
-    <div><strong>{len(candidates)}</strong><span>candidates to review</span></div>
-    <div><strong>{accepted}/2</strong><span>external wins before scaling</span></div>
+    <div><strong>{len(problems):02d}</strong><span>Problems</span></div>
+    <div><strong>{len(attempts):02d}</strong><span>Attempts</span></div>
+    <div><strong>{len(candidates):02d}</strong><span>Candidates</span></div>
+    <div><strong>{accepted}/2</strong><span>External wins</span></div>
   </div>
 </section>
 {candidate_banner}
 <section class="lanes">
   <article class="lane-panel hard-panel">
-    <div class="panel-label">Hard / famous lane · hourly · Terra delegates → Sol xhigh</div>
+    <div class="panel-label">LANE H / FAMOUS / HOURLY / TERRA → SOL XHIGH</div>
     <h2>{h((hard or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((hard or {}).get('rationale') or 'The hard lane is being initialized.')}</p>
     <div class="panel-foot"><span>{h(hard_run_text)}</span>{f'<a href="/problems/{h(hard["id"])}/">Open dossier →</a>' if hard else ''}</div>
   </article>
   <article class="lane-panel easy-panel">
-    <div class="panel-label">Discovery lane · easier-first · 12× daily · Terra → Sol</div>
+    <div class="panel-label">LANE E / DISCOVERY / 12 DAILY / TERRA → SOL</div>
     <h2>{h((easy or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((easy or {}).get('rationale') or 'The discovery lane is being initialized.')}</p>
     <div class="panel-foot"><span>{h(easy_run_text)}</span>{f'<a href="/problems/{h(easy["id"])}/">Open dossier →</a>' if easy else ''}</div>
@@ -186,11 +188,11 @@ def _index(
 </section>
 <section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
 <section id="problems" class="section-block">
-  <div class="section-heading"><div><span class="overline">Contribution registry</span><h2>Active, tried, failed, and past work</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
+  <div class="section-heading"><div><span class="overline">TARGET SET / FULL STATE</span><h2>Problem registry</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ordered)}</div>
 </section>
 <section id="attempts" class="section-block attempts-block">
-  <div class="section-heading"><div><span class="overline">Append-only history</span><h2>Recent research attempts</h2></div><a href="/api/state.json">Download JSON →</a></div>
+  <div class="section-heading"><div><span class="overline">OBSERVATION LOG / APPEND-ONLY</span><h2>Recent attempts</h2></div><a href="/api/state.json">Download JSON →</a></div>
   <div class="attempt-list">{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id']), reviews_by_attempt[str(row.get('id'))]) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
 </section>
 """
@@ -418,6 +420,145 @@ CSS += r"""
 .strategy-library{padding:44px clamp(20px,7vw,110px);display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.strategy-library article{background:var(--card);border:1px solid var(--line);padding:28px}.strategy-library h2{font-family:Georgia,serif;font-size:32px;font-weight:400;line-height:1.1}.strategy-sources{display:flex;gap:14px;flex-wrap:wrap}.strategy-sources a{color:var(--blue);font-weight:700}
 .internal-alert{margin:28px clamp(20px,7vw,110px);padding:20px 24px;background:#f2e7e2;border:1px solid #d5ada1;color:#6f3126}.badge-internal_result{background:#f2e7e2;border-color:#d5ada1;color:#8b392d}.outcome-internal_result{background:var(--red)}
 @media(max-width:720px){.research-grid,.strategy-library{grid-template-columns:1fr}}
+"""
+
+
+CSS += r"""
+/* Scientific instrument interface / v2 */
+:root{
+  --ink:#e8f1ed;--muted:#8fa39b;--paper:#07100e;--card:#0c1714;--card-2:#101d19;
+  --line:#243832;--line-bright:#3d5d53;--red:#ff746c;--amber:#f0c36a;--green:#65e1b8;
+  --blue:#79bfff;--violet:#b8a4ff;--black:#030806;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+html{background:var(--black);scroll-padding-top:72px}
+body{
+  min-height:100vh;background:
+    linear-gradient(rgba(101,225,184,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(101,225,184,.025) 1px,transparent 1px),
+    var(--paper);
+  background-size:32px 32px;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow-x:hidden;font-size:15px;line-height:1.55;
+}
+a{color:var(--green);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.skip-link{position:fixed;left:16px;top:-60px;z-index:100;background:var(--green);color:var(--black);padding:9px 12px;font:700 12px var(--mono)}
+.skip-link:focus{top:12px}
+.topbar{
+  height:62px;padding:0 clamp(18px,4vw,64px);border-bottom:1px solid var(--line);background:rgba(3,8,6,.92);
+  backdrop-filter:blur(18px);box-shadow:0 10px 36px rgba(0,0,0,.18)
+}
+.brand{gap:10px;color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:760;letter-spacing:.02em;text-transform:uppercase}
+.brand-mark{width:30px;height:30px;border:1px solid var(--green);border-radius:2px;background:rgba(101,225,184,.08);color:var(--green);font-size:10px;letter-spacing:.05em}
+.brand small{padding-left:10px;border-left:1px solid var(--line);color:var(--muted);font-size:9px;font-weight:500;letter-spacing:.12em}
+.topbar nav{gap:clamp(12px,2vw,28px)}
+.topbar nav a,footer a{color:var(--muted);font:600 10px var(--mono);letter-spacing:.1em;text-decoration:none;text-transform:uppercase}
+.topbar nav a:hover,footer a:hover{color:var(--green);text-decoration:none}
+main{max-width:1600px;margin:0 auto;border-left:1px solid rgba(36,56,50,.55);border-right:1px solid rgba(36,56,50,.55);background:rgba(7,16,14,.84)}
+.hero{
+  position:relative;overflow:hidden;padding:clamp(64px,8vw,116px) clamp(22px,6vw,92px) clamp(42px,5vw,72px);
+  border-bottom:1px solid var(--line);background:
+    radial-gradient(circle at 82% 25%,rgba(101,225,184,.09),transparent 22%),
+    linear-gradient(140deg,rgba(12,28,23,.98),rgba(7,16,14,.96) 62%);
+}
+.hero:before{
+  content:"R(5,5)   SAT / LEAN   Σ   GRAPH THEORY";position:absolute;right:-34px;top:76px;max-width:520px;
+  color:rgba(101,225,184,.07);font:700 clamp(42px,6vw,90px)/.94 var(--mono);letter-spacing:-.08em;text-align:right;white-space:pre-wrap;transform:rotate(-2deg)
+}
+.hero>*{position:relative;z-index:1}
+.hero-kicker,.overline,.panel-label,.eyebrow{color:var(--green);font:650 10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.live-dot,.pulse{width:7px;height:7px;background:var(--green);box-shadow:0 0 0 4px rgba(101,225,184,.1),0 0 18px rgba(101,225,184,.55)}
+.hero h1,.dossier-head h1,.attempt-head h1,.method-head h1{
+  max-width:980px;margin:20px 0 22px;color:var(--ink);font-family:var(--serif);font-size:clamp(48px,7vw,100px);font-weight:400;line-height:.92;letter-spacing:-.055em
+}
+.hero h1 em,.method-head h1 em{color:var(--green);font-weight:400}
+.hero-copy{max-width:720px;color:#b7c8c1;font-size:clamp(16px,1.7vw,21px);line-height:1.55}
+.hero-stats{max-width:920px;margin-top:44px;grid-template-columns:repeat(4,1fr);gap:0;background:transparent;border:1px solid var(--line)}
+.hero-stats div{position:relative;padding:18px 20px;background:rgba(3,8,6,.42);border-right:1px solid var(--line)}
+.hero-stats div:last-child{border-right:0}
+.hero-stats strong{color:var(--ink);font:500 30px/1 var(--mono);font-variant-numeric:tabular-nums}
+.hero-stats span{display:block;margin-top:9px;color:var(--muted);font:600 9px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.candidate-alert,.internal-alert{margin:0;padding:17px clamp(22px,6vw,92px);border:0;border-bottom:1px solid var(--amber);background:rgba(240,195,106,.08);color:var(--ink)}
+.candidate-alert p{color:#c8b98f}.candidate-alert a{color:var(--amber);font:700 10px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.internal-alert{border-color:var(--red);background:rgba(255,116,108,.08);color:var(--ink)}
+.lanes{padding:32px clamp(22px,6vw,92px);gap:14px;border-bottom:1px solid var(--line)}
+.lane-panel{min-height:236px;padding:25px;border:1px solid var(--line);border-top:1px solid var(--line);background:linear-gradient(150deg,rgba(16,29,25,.98),rgba(8,18,15,.98));box-shadow:0 14px 40px rgba(0,0,0,.14)}
+.lane-panel:before{content:"";display:block;width:42px;height:2px;margin-bottom:18px;background:var(--red)}
+.easy-panel:before{background:var(--blue)}
+.lane-panel h2{margin:14px 0 10px;color:var(--ink);font-family:var(--serif);font-size:clamp(27px,3vw,38px);font-weight:400;line-height:1.08}
+.lane-panel p{margin:0;color:#9fb0aa;font-size:13px;line-height:1.55}
+.panel-foot{padding-top:17px;border-color:var(--line);color:var(--muted);font:550 10px/1.5 var(--mono)}
+.panel-foot a{color:var(--green);text-decoration:none}
+.healthline{margin:0;padding:12px clamp(22px,6vw,92px);border:0;border-bottom:1px solid var(--line);background:rgba(3,8,6,.42);color:var(--muted);font:550 9px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.health{color:var(--ink)}.health:before{background:var(--amber)}.health-healthy:before{background:var(--green)}.health-degraded:before{background:var(--red)}
+.section-block{padding:clamp(46px,6vw,78px) clamp(22px,6vw,92px)}
+.section-heading{margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.section-heading h2{margin:6px 0 0;color:var(--ink);font-family:var(--serif);font-size:clamp(34px,4.5vw,58px);font-weight:400;line-height:1;letter-spacing:-.035em}
+.section-heading>a{color:var(--green);font:650 10px var(--mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase}
+.filters{gap:6px}
+.filter{padding:7px 11px;border:1px solid var(--line);border-radius:2px;background:transparent;color:var(--muted);font:650 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.filter:hover{border-color:var(--line-bright);color:var(--ink)}
+.filter.active{border-color:var(--green);background:rgba(101,225,184,.1);color:var(--green)}
+.problem-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.problem-card{min-width:0;min-height:342px;padding:20px;border:1px solid var(--line);background:linear-gradient(155deg,rgba(16,29,25,.96),rgba(9,19,16,.98));box-shadow:none}
+.problem-card:hover{border-color:var(--line-bright);transform:translateY(-1px);transition:border-color .15s ease,transform .15s ease}
+.card-top{align-items:flex-start}.lane,.badge{border-radius:2px;padding:5px 7px;font:700 8px var(--mono);letter-spacing:.09em}
+.lane{border:1px solid var(--line);background:transparent;color:var(--muted)}
+.lane-hard{border-color:rgba(255,116,108,.45);background:rgba(255,116,108,.07);color:var(--red)}
+.lane-easy{border-color:rgba(121,191,255,.4);background:rgba(121,191,255,.07);color:var(--blue)}
+.lane-calibration{border-color:rgba(184,164,255,.4);background:rgba(184,164,255,.07);color:var(--violet)}
+.badge{border-color:var(--line);background:rgba(255,255,255,.025);color:var(--muted)}
+.badge-candidate{border-color:rgba(240,195,106,.52);background:rgba(240,195,106,.08);color:var(--amber)}
+.badge-active,.badge-progress,.badge-verified,.badge-published{border-color:rgba(101,225,184,.42);background:rgba(101,225,184,.08);color:var(--green)}
+.badge-attempted,.badge-failed,.badge-no_progress,.badge-error,.badge-internal_result{border-color:rgba(255,116,108,.4);background:rgba(255,116,108,.07);color:var(--red)}
+.problem-card h3{margin:18px 0 10px;font-family:var(--serif);font-size:25px;font-weight:400;line-height:1.08;overflow-wrap:anywhere}
+.problem-card h3 a,.attempt-row h3 a{display:block;max-width:100%;color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
+.problem-card mjx-container{display:inline-block!important;width:100%!important;max-width:100%;overflow-x:auto;overflow-y:hidden}
+.problem-card mjx-container>mjx-math{max-width:100%}
+.problem-card p{margin:0;color:#9fb0aa;font-size:12.5px;line-height:1.55}
+.meter{height:2px;margin-top:auto;background:var(--line)}.meter span{background:var(--green)}
+.card-meta,.card-actions{color:var(--muted);font:500 9px/1.4 var(--mono)}
+.last-note{max-height:74px;overflow:hidden;margin-top:14px;padding:13px 0 0;border-color:var(--line);color:#aebdb7;font-size:11.5px;line-height:1.5}
+.card-actions{padding-top:13px;border-top:1px solid var(--line)}.card-actions a{color:var(--green);text-decoration:none}
+.attempts-block{background:rgba(3,8,6,.48)}
+.attempt-list{border-color:var(--line)}
+.attempt-row{max-width:100%;grid-template-columns:3px minmax(0,1fr);border-color:var(--line);background:rgba(12,23,20,.72)}
+.attempt-row:hover{background:rgba(16,31,26,.88)}
+.attempt-rail{background:var(--muted)}.outcome-candidate{background:var(--amber)}.outcome-progress,.outcome-verified,.outcome-published{background:var(--green)}.outcome-failed,.outcome-no_progress,.outcome-error,.outcome-internal_result{background:var(--red)}
+.attempt-copy{min-width:0;padding:19px 22px;overflow-wrap:anywhere}.eyebrow{gap:18px;color:var(--muted)}
+.attempt-copy h3{margin:8px 0 6px;font-family:var(--serif);font-size:23px;font-weight:400}
+.attempt-copy p{margin:4px 0;color:#9fb0aa;font-size:12.5px}.attempt-copy .approach{color:var(--ink);font-weight:620}
+.row-end{margin-top:12px}.arrow{color:var(--green);font:650 9px var(--mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase}
+.dossier-head,.attempt-head,.method-head{padding:clamp(52px,7vw,92px) clamp(22px,6vw,92px) 44px;border-color:var(--line);background:linear-gradient(145deg,rgba(13,28,23,.98),rgba(7,16,14,.96))}
+.dossier-head h1,.attempt-head h1,.method-head h1{margin:22px 0 18px;font-size:clamp(45px,6vw,78px)}
+.back{color:var(--muted);font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.statement,.lead{max-width:960px;color:#c3d0cb;font-family:var(--serif);font-size:clamp(18px,2vw,25px);line-height:1.45}
+.source-line{gap:18px;margin-top:22px}.source-line a{color:var(--green);font:650 9px var(--mono);letter-spacing:.07em;text-decoration:none;text-transform:uppercase}
+.dossier-grid,.attempt-detail,.method-grid{padding:30px clamp(22px,6vw,92px);gap:10px}
+.dossier-grid article,.attempt-detail article,.method-grid article,.research-grid article,.strategy-library article{border:1px solid var(--line);background:rgba(12,23,20,.88);padding:21px}
+.dossier-grid p,.attempt-detail p{color:#aab9b3;font-size:12.5px}
+.dossier-grid dl,.attempt-detail dl{font:500 10px/1.5 var(--mono)}
+.dossier-grid dt,.attempt-detail dt{color:var(--muted)}.dossier-grid dd,.attempt-detail dd{color:var(--ink)}
+.techniques{margin:0 clamp(22px,6vw,92px);padding:19px;border-color:var(--line);background:rgba(12,23,20,.78)}
+.techniques>div span{border:1px solid var(--line);border-radius:2px;background:transparent;color:var(--muted);font:550 9px var(--mono)}
+.research-map{padding:38px clamp(22px,6vw,92px)}
+.research-grid{gap:10px}.research-grid h3{color:var(--ink);font-family:var(--serif);font-size:25px;font-weight:400}.research-grid li,.attempt-detail li{margin:8px 0;color:#aab9b3;font-size:12px}
+.strategy-library{padding:30px clamp(22px,6vw,92px);gap:10px}.strategy-library h2{color:var(--ink);font-family:var(--serif);font-size:28px}.strategy-library p,.strategy-library li{color:#aab9b3;font-size:12.5px}.strategy-sources a{color:var(--green)}
+.method-grid article strong{color:var(--green);font:500 22px var(--mono)}.method-grid h2{color:var(--ink);font-family:var(--serif);font-size:27px;font-weight:400}.method-grid p{color:#aab9b3;font-size:12.5px}
+.principles{margin:20px clamp(22px,6vw,92px) 58px;padding:clamp(26px,4vw,46px);border:1px solid var(--line);background:linear-gradient(145deg,#0b1b16,#06100d);color:var(--ink)}
+.principles h2{margin-top:0;color:var(--ink);font-family:var(--serif);font-size:38px;font-weight:400}.principles p,.principles li{color:#aab9b3;font-size:13px}.principles a{color:var(--green)}
+.empty{border:1px solid var(--line);background:var(--card);color:var(--muted)}
+code{color:var(--green);font-family:var(--mono);font-size:10px}.muted{color:var(--muted)}
+footer{min-height:78px;padding:22px clamp(22px,4vw,64px);border-color:var(--line);background:var(--black);color:var(--muted);font:500 9px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+@media(max-width:1080px){.problem-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brand small{display:none}}
+@media(max-width:760px){
+  .topbar{height:56px}.topbar nav{gap:15px}.topbar nav a:nth-child(n+4){display:none}
+  .hero{padding-top:58px}.hero:before{display:none}.hero-stats{grid-template-columns:repeat(2,1fr)}.hero-stats div:nth-child(2){border-right:0}.hero-stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .lanes,.problem-grid,.dossier-grid,.attempt-detail,.method-grid,.research-grid,.strategy-library{grid-template-columns:minmax(0,1fr)}
+  .section-heading{align-items:flex-start}.section-heading h2{font-size:38px}.filters{margin-top:4px}
+  .problem-card{min-height:315px}.card-meta,.card-actions{flex-wrap:wrap}.brand span:not(.brand-mark){font-size:11px}footer{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.problem-card:hover{transform:none}}
 """
 
 

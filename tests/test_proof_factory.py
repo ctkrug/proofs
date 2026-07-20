@@ -442,6 +442,15 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertTrue((repo / "records" / "attempts" / f"{attempt['id']}.json").is_file())
                 self.assertTrue((repo / "records" / "attempts" / f"{attempt['id']}.md").is_file())
                 self.assertEqual((repo / "docs" / "DOSSIER.md").read_text(), "# Prior work\n")
+                self.assertEqual(
+                    subprocess.run(
+                        ["git", "-C", str(repo), "config", "user.name"],
+                        text=True, capture_output=True, check=True,
+                    ).stdout.strip(),
+                    "ctkrug",
+                )
+                metadata = json.loads((repo / ".proof-repository" / "metadata.json").read_text())
+                self.assertEqual(metadata["visibility_policy"], "public-research-history")
                 manifest = json.loads((repo / ".proof-repository" / "LARGE_ARTIFACTS.json").read_text())
                 self.assertEqual(manifest["files"][0]["path"], "raw.bin")
                 self.assertEqual(

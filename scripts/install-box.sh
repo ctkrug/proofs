@@ -13,8 +13,8 @@ python3 -m venv .venv
 ./scripts/install-lab-tools.sh
 npm ci --no-audit --no-fund
 .venv/bin/python -m proof_factory render
-git config user.name "Proof Factory"
-git config user.email "proof-factory@charliekrug.com"
+git config user.name "ctkrug"
+git config user.email "ctkrug4501@gmail.com"
 
 install -m 0644 deploy/proof-factory-hard.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-hard.timer /etc/systemd/system/

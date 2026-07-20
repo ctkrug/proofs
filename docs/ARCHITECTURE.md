@@ -60,7 +60,8 @@ stays available if the content box, Codex login, or an individual attempt fails.
 17. Every problem workspace is an independent Git repository. Agent epochs and lab segments create
     local commits containing structured records plus substantive notes, code, proof files, checkers,
     and bounded artifacts. Research services have no GitHub credentials; the publisher alone creates
-    and pushes private `ctkrug/proofs-<problem>` remotes. A commit proves provenance, not correctness.
+    and pushes public `ctkrug/proofs-<problem>` remotes. Every author and committer is Charlie's
+    `ctkrug` identity; the research record separately discloses AI/tool assistance. A commit proves provenance, not correctness.
     Files above the tracked-size ceiling are retained on the host and hash-manifested.
 
 ## Availability and cadence

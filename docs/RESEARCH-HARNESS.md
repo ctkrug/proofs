@@ -98,10 +98,11 @@ and—when spanning multiple segments—a workspace checkpoint. The cloud worker
 priority, records hashes and logs through the experiment harness, and automatically resumes only when
 a timed-out segment produced the declared checkpoint.
 
-Each problem workspace is a standalone private Git repository. The system commits the readable and
+Each problem workspace is a standalone public Git repository. The system commits the readable and
 machine-readable attempt record, current research state, notes, programs, formalizations, checkers,
 and lab-segment outputs after bounded work completes. GitHub credentials remain outside the research
-sandbox: the serialized publisher provisions and pushes the private remote. Large raw artifacts are
+sandbox: the serialized publisher provisions and pushes the public remote. Git author and committer
+identity is always Charlie's `ctkrug` account; each record separately discloses AI/tool assistance. Large raw artifacts are
 kept on the research host with a SHA-256 manifest rather than pushed into ordinary Git.
 
 ## Sources used to design this harness

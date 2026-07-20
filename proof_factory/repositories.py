@@ -14,6 +14,8 @@ from . import store
 
 SCHEMA_VERSION = 1
 GITHUB_OWNER = os.environ.get("PROOF_REPO_GITHUB_OWNER", "ctkrug")
+GIT_AUTHOR_NAME = os.environ.get("PROOF_REPO_GIT_NAME", "ctkrug")
+GIT_AUTHOR_EMAIL = os.environ.get("PROOF_REPO_GIT_EMAIL", "ctkrug4501@gmail.com")
 MAX_TRACKED_FILE_BYTES = int(os.environ.get("PROOF_REPO_MAX_FILE_BYTES", str(50 * 1024 * 1024)))
 LEGACY_GITIGNORE = """# Reproducible research belongs in Git; local environments and caches do not.
 .DS_Store
@@ -105,7 +107,8 @@ def _readme(problem: dict[str, Any]) -> str:
     source = str(problem.get("source_url") or "")
     return f"""# {title}
 
-This is the private, problem-scoped research repository maintained by Proof Factory.
+This is the public, problem-scoped research repository maintained by Charlie Krug with AI and
+computational assistance disclosed in each attempt record.
 
 ## Problem
 
@@ -136,7 +139,7 @@ def _metadata(problem: dict[str, Any]) -> dict[str, Any]:
         "lane": problem.get("lane"),
         "github_owner": GITHUB_OWNER,
         "github_repository": repo_name(problem["id"]),
-        "visibility_policy": "private-until-explicit-human-release",
+        "visibility_policy": "public-research-history",
         "canonical_engine": "https://github.com/ctkrug/proofs",
     }
 
@@ -210,8 +213,8 @@ def _ensure_unlocked(problem: dict[str, Any]) -> tuple[Path, str]:
         )
         if proc.returncode != 0:
             raise RuntimeError(f"git init failed for {problem['id']}: {(proc.stdout + proc.stderr)[-2000:]}")
-    _git(repo, "config", "user.name", "Proof Factory")
-    _git(repo, "config", "user.email", "proof-factory@charliekrug.com")
+    _git(repo, "config", "user.name", GIT_AUTHOR_NAME)
+    _git(repo, "config", "user.email", GIT_AUTHOR_EMAIL)
     _ensure_gitignore(repo / ".gitignore")
     _write_if_missing(repo / "README.md", _readme(problem))
     store.write_json_atomic(repo / ".proof-repository" / "metadata.json", _metadata(problem))
@@ -400,14 +403,18 @@ def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
     created = False
     if view.returncode != 0:
         _gh(
-            "repo", "create", full_name, "--private",
-            "--description", f"Private Proof Factory research for {problem.get('title') or problem['id']}",
+            "repo", "create", full_name, "--public",
+            "--description", f"Transparent Proof Factory research for {problem.get('title') or problem['id']}",
         )
         created = True
         view = _gh("repo", "view", full_name, "--json", "url,visibility")
     remote = json.loads(view.stdout)
-    if str(remote.get("visibility", "")).upper() != "PRIVATE":
-        raise RuntimeError(f"refusing to sync research into non-private repository: {full_name}")
+    if str(remote.get("visibility", "")).upper() != "PUBLIC":
+        _gh("repo", "edit", full_name, "--visibility", "public", "--accept-visibility-change-consequences")
+        view = _gh("repo", "view", full_name, "--json", "url,visibility")
+        remote = json.loads(view.stdout)
+    if str(remote.get("visibility", "")).upper() != "PUBLIC":
+        raise RuntimeError(f"repository did not become public: {full_name}")
     url = str(remote["url"])
     existing = _git(repo, "remote", "get-url", "origin", check=False)
     if existing.returncode == 0 and existing.stdout.strip() != url:
@@ -416,7 +423,7 @@ def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
         _git(repo, "remote", "add", "origin", url)
     _git(repo, "push", "--set-upstream", "origin", "main")
     return {
-        "problem_id": problem["id"], "repository": full_name, "url": url, "visibility": "PRIVATE",
+        "problem_id": problem["id"], "repository": full_name, "url": url, "visibility": "PUBLIC",
         "created": created, "commit": _git(repo, "rev-parse", "HEAD").stdout.strip(),
     }
 
@@ -431,7 +438,7 @@ def sync_all() -> dict[str, Any]:
             errors.append({"problem_id": problem["id"], "error": f"{type(exc).__name__}: {exc}"})
     registry = {
         "schema_version": SCHEMA_VERSION,
-        "visibility_policy": "private-until-explicit-human-release",
+        "visibility_policy": "public-research-history",
         "repositories": [{key: value for key, value in row.items() if key != "created"} for row in synced],
         "errors": errors,
     }
@@ -448,7 +455,7 @@ def status() -> dict[str, Any]:
         head = _git(repo, "rev-parse", "HEAD", check=False).stdout.strip() if initialized else ""
         rows.append({
             "problem_id": problem["id"], "initialized": initialized, "commit": head,
-            "remote": remote, "private_expected": True,
+            "remote": remote, "public_expected": True,
         })
     return {
         "problems": len(rows),

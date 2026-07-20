@@ -84,7 +84,8 @@ as independent verification.
 - `research/<problem>/workspace/` is also an isolated Git repository. Every agent epoch and lab
   segment commits its structured record, current research-state projection, notes, code, checkers,
   and ordinary-sized artifacts. The credential-free research services commit locally; only the
-  publisher creates and pushes a private `ctkrug/proofs-<problem>` GitHub remote. Oversized raw files
+  publisher creates and pushes a public `ctkrug/proofs-<problem>` GitHub remote. All commits use
+  Charlie's `ctkrug` identity; AI/tool assistance remains disclosed in the records. Oversized raw files
   remain on the host and are represented by path, size, and SHA-256 rather than being silently lost.
 - `research/<problem>/workspace/lab-queue/` accepts validated shell-free simulation jobs. The cloud lab
   runs one low-priority job at a time in hash-recorded segments, requires checkpoints for multisegment

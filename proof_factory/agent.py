@@ -139,8 +139,8 @@ Official/current source: {problem['source_url']}
 Lane: {lane}
 Phase: {phase}
 Shared research workspace: {workspace}
-This workspace is its own private Git repository. Preserve substantive literature notes, code, proof
-files, checkers, findings, negative results, and write-ups here. Proof Factory commits the complete
+This workspace is its own public Git repository. Preserve substantive literature notes, code, proof
+files, checkers, findings, negative results, and write-ups here. The checkpoint service records the complete
 epoch automatically; do not rewrite Git history, change remotes, or treat a commit as validation.
 Full project dossier when present: {dossier}
 
@@ -284,8 +284,9 @@ STRATEGY PORTFOLIO RULES
 WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
 2. Work concretely. You may create code, notes, Lean files, and certificates only under {workspace}.
-   This workspace is a standalone private Git repository. Keep substantive research notes, code,
-   findings, negative results, checkers, and write-ups in it. Proof Factory checkpoints the epoch;
+   This workspace is a standalone public Git repository. Keep substantive research notes, code,
+   findings, negative results, checkers, and write-ups in it. The checkpoint service records the epoch
+   under Charlie's ctkrug identity;
    do not rewrite history, change remotes, or claim that a Git commit validates the mathematics.
    For a reproducible computational test, run:
    python3 {EXPERIMENT_RUNNER} --name NAME --hypothesis HYPOTHESIS --expected-signal SIGNAL --timeout SECONDS --memory-mb MB --source-url URL -- COMMAND ARGS...
