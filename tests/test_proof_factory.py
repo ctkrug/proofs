@@ -380,6 +380,9 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertNotIn("/api/", index)
                 self.assertFalse((site / "api").exists())
                 self.assertFalse((site / "brain").exists())
+                redirects = (site / "_redirects").read_text()
+                self.assertIn("/brain/* / 301", redirects)
+                self.assertIn("/api/* / 301", redirects)
                 about = (site / "about" / "index.html").read_text()
                 self.assertIn("no matter how small or large", about)
 
