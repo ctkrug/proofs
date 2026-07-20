@@ -192,7 +192,7 @@ def _index(
   <div class="operation-grid">{_lane_card('hard', live_snapshot['lanes']['hard'])}{_lane_card('easy', live_snapshot['lanes']['easy'])}</div>
 </section>
 <section id="ongoing" class="section-block">
-  <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) hourly · discovery 12 times daily</span></div>
+  <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) twice hourly · open-problem rotation paused</span></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ongoing) or '<p class="empty">No research pass is currently open.</p>'}</div>
 </section>
 <section id="planned" class="section-block planned-block">

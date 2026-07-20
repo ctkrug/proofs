@@ -7,11 +7,11 @@ from . import store
 
 
 def next_hard_after(now: datetime) -> datetime:
-    """Return the next hourly hard-lane dispatch strictly after *now*."""
+    """Return the next half-hour hard-lane dispatch strictly after *now*."""
     now = now.astimezone(timezone.utc)
-    candidate = now.replace(minute=0, second=0, microsecond=0)
+    candidate = now.replace(minute=30 if now.minute >= 30 else 0, second=0, microsecond=0)
     if candidate <= now:
-        candidate += timedelta(hours=1)
+        candidate += timedelta(minutes=30)
     return candidate
 
 

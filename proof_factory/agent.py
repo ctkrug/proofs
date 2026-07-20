@@ -365,7 +365,7 @@ Do not include a confidence score. Correct uncertainty is part of the result.
 
 def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict[str, Any]:
     model = SOL_MODEL
-    effort = "xhigh" if lane == "hard" else "high"
+    effort = "high"
     ceiling = int(os.environ.get("PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
                                  "7200" if lane == "hard" else "3600"))
     workspace = store.RESEARCH / problem["id"] / "workspace"

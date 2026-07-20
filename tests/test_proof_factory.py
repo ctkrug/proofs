@@ -161,6 +161,7 @@ class ProofFactoryTests(unittest.TestCase):
             attempt = agent.run(problem, "hard")
 
         self.assertEqual([row[0] for row in calls], [agent.TERRA_MODEL, agent.TERRA_MODEL, agent.SOL_MODEL])
+        self.assertEqual(calls[-1][1], "high")
         self.assertEqual(attempt["orchestration"]["architecture"], "sol-principal-terra-delegates")
         self.assertEqual(attempt["orchestration"]["delegate_statuses"], {
             "literature-strategy": "completed", "experiment-verification": "completed",
@@ -402,6 +403,10 @@ class ProofFactoryTests(unittest.TestCase):
     def test_live_schedule_and_snapshot(self) -> None:
         now = datetime(2026, 7, 20, 20, 40, tzinfo=timezone.utc)
         self.assertEqual(live.next_hard_after(now).isoformat(), "2026-07-20T21:00:00+00:00")
+        self.assertEqual(
+            live.next_hard_after(datetime(2026, 7, 20, 20, 10, tzinfo=timezone.utc)).isoformat(),
+            "2026-07-20T20:30:00+00:00",
+        )
         self.assertEqual(live.next_easy_after(now).isoformat(), "2026-07-20T22:30:00+00:00")
         exact = datetime(2026, 7, 20, 22, 30, tzinfo=timezone.utc)
         self.assertEqual(live.next_easy_after(exact).isoformat(), "2026-07-21T00:30:00+00:00")

@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - hourly R(5,5) Sol principal with Terra delegates
+Description=Proof Factory - R(5,5) Sol/high principal with Terra/high delegates
 After=network-online.target
 Wants=network-online.target
 
