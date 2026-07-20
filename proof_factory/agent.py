@@ -14,6 +14,8 @@ from . import store
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
 OUTCOMES = {"failed", "no_progress", "progress", "candidate"}
+RESEARCH_SKILL = store.ROOT / "skills" / "computational-researcher" / "SKILL.md"
+EXPERIMENT_RUNNER = store.ROOT / "skills" / "computational-researcher" / "scripts" / "run_experiment.py"
 
 
 def _codex_text(raw: str) -> tuple[str, dict[str, Any], bool]:
@@ -50,10 +52,36 @@ def extract_result(text: str) -> dict[str, Any]:
     for key in ("approach", "summary", "rationale"):
         if not isinstance(result.get(key), str) or not result[key].strip():
             raise ValueError(f"missing result field: {key}")
-    for key in ("claims", "evidence", "next_steps", "citations", "techniques"):
+    for key in ("claims", "evidence", "next_steps", "citations", "techniques", "experiments", "transfer_insights"):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
     return result
+
+
+def _research_contract() -> str:
+    try:
+        return RESEARCH_SKILL.read_text()
+    except OSError as exc:
+        raise RuntimeError(f"computational researcher skill unavailable: {exc}") from exc
+
+
+def _workspace_artifacts(workspace: Path) -> dict[str, str]:
+    """Hash bounded, research-created artifacts without archiving environments or caches."""
+    hashes: dict[str, str] = {}
+    ignored = {".git", ".venv", "venv", "__pycache__", "node_modules", ".mypy_cache", ".pytest_cache"}
+    for path in sorted(workspace.rglob("*")):
+        if not path.is_file() or any(part in ignored for part in path.relative_to(workspace).parts):
+            continue
+        try:
+            if path.stat().st_size > 50 * 1024 * 1024:
+                continue
+            relative = path.relative_to(workspace).as_posix()
+            hashes[relative] = store.sha256_file(path)
+        except OSError:
+            continue
+        if len(hashes) >= 250:
+            break
+    return hashes
 
 
 def _prior_context(problem_id: str) -> str:
@@ -71,10 +99,14 @@ def _prior_context(problem_id: str) -> str:
 
 def build_prompt(problem: dict[str, Any], lane: str, workspace: Path) -> str:
     hard = lane == "hard"
-    return f"""You are running one bounded, headless research-mathematics attempt.
+    return f"""You are running one bounded, headless research attempt.
+
+OPERATING SKILL
+{_research_contract()}
 
 PROBLEM
 Title: {problem['title']}
+Contribution type: {problem.get('contribution_type') or 'open-problem research'}
 Statement: {problem['statement']}
 Official/current source: {problem['source_url']}
 Source status: {problem.get('problem_state')}
@@ -93,11 +125,15 @@ WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
 2. Choose one approach that is materially different from failed fingerprints above. State why it is worth this run.
 3. Work concretely. You may create code, notes, Lean files, and certificates only under {workspace}.
+   For a reproducible computational test, run:
+   python3 {EXPERIMENT_RUNNER} --name NAME --hypothesis HYPOTHESIS --expected-signal SIGNAL --timeout SECONDS --memory-mb MB --source-url URL -- COMMAND ARGS...
+   It runs argv directly without a shell and stores logs, metadata, seeds, limits, source/script/dependency hashes, git state, and peak memory under .proof-experiments/.
 4. Test examples and edge cases. Try to falsify every central lemma. A computation is evidence only for the exact range checked.
 5. A suspiciously short proof, unused hypothesis, stronger-than-requested conclusion, or mismatch with the source is a red flag, not a breakthrough.
 6. `candidate` means only “worth independent human/skeptic review.” Never write that the problem is solved or disproved.
 7. Cite prior human work and disclose every automated tool used. Do not optimize for publicity.
-8. End with exactly one fenced JSON block in this schema:
+8. Spend reasoning on selecting information-rich experiments; use programs for enumeration and repetition. Record failed controls.
+9. End with exactly one fenced JSON block in this schema:
 
 ```proof_result
 {{
@@ -110,6 +146,10 @@ WORK RULES
   "next_steps": ["specific next move"],
   "citations": ["direct URL"],
   "techniques": ["technique used"],
+  "research_mode": "theoretical|computational|hybrid",
+  "experiments": ["experiment directory and decisive observation"],
+  "independent_checker": "separate checker or materially different encoding, or why not yet applicable",
+  "transfer_insights": ["source domain -> operational prediction -> observed result"],
   "tool_disclosure": "models, CAS, proof assistants, solvers, and code used"
 }}
 ```
@@ -189,9 +229,13 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         "next_steps": [str(x)[:2000] for x in result.get("next_steps", [])][:20],
         "citations": [str(x)[:1000] for x in result.get("citations", [])][:30],
         "techniques": [str(x)[:200] for x in result.get("techniques", [])][:30],
+        "research_mode": str(result.get("research_mode") or "unspecified")[:100],
+        "experiments": [str(x)[:2000] for x in result.get("experiments", [])][:30],
+        "independent_checker": str(result.get("independent_checker") or "not provided")[:4000],
+        "transfer_insights": [str(x)[:2000] for x in result.get("transfer_insights", [])][:20],
         "tool_disclosure": str(result.get("tool_disclosure") or "")[:4000],
         "review_status": "needs Charlie review" if outcome == "candidate" else "not a result claim",
         "usage": usage,
         "error": error,
-        "artifact_hashes": {},
+        "artifact_hashes": _workspace_artifacts(workspace),
     }

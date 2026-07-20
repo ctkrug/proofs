@@ -1,0 +1,4 @@
+interface:
+  display_name: "Computational Researcher"
+  short_description: "Design reproducible experiments for research"
+  default_prompt: "Use $computational-researcher to turn this open question into a falsifiable, reproducible research program."

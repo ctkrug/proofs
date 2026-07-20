@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Recent papers with explicit narrow open questions",
+    "url": "https://arxiv.org/",
+    "instruction": "Search recent primary papers, then verify status through citations and author pages; prefer one bounded parameter case."
+  },
+  {
+    "name": "House of Graphs",
+    "url": "https://houseofgraphs.org/help",
+    "instruction": "Look for an interesting extremal graph, missing order, or counterexample with a compact graph6 witness and independent invariant checker."
+  },
+  {
+    "name": "La Jolla Combinatorics Repository",
+    "url": "https://dmgordo.github.io/",
+    "instruction": "Look for one missing or improvable exact construction with an accepted repository route."
+  },
+  {
+    "name": "Mathlib",
+    "url": "https://github.com/leanprover-community/mathlib4",
+    "instruction": "Prefer a small research-connected formalization gap or reusable lemma with a scoped upstream PR."
+  },
+  {
+    "name": "OEIS",
+    "url": "https://oeis.org/wiki/Use_of_AI_for_OEIS_Submissions",
+    "instruction": "Only consider a sequence contribution tied to real research and suitable for one careful human submission; never bulk-generate."
+  },
+  {
+    "name": "Erdős Problems",
+    "url": "https://github.com/teorth/erdosproblems",
+    "instruction": "Prefer finite-witness or decidable entries whose exact current page confirms the status."
+  }
+]

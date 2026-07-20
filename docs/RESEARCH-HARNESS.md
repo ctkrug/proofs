@@ -29,6 +29,13 @@ The approach archive follows the useful part of AlphaEvolve's pattern: preserve 
 and strategies, score them only through objective evaluators, and let future runs mutate the most
 promising artifacts. Eloquence is never an evaluator.
 
+The injected `computational-researcher` skill makes the agent behave as a principal investigator:
+translate a claim into one falsifiable hypothesis, choose a discriminating test, write a deterministic
+harness, and use exact computation for repetition. `scripts/run_experiment.py` runs argv without a
+shell and records seeds, limits, stdout/stderr, platform data, and hashes under the problem workspace.
+
+The north star and broader target taxonomy live in `docs/ACADEMIC-CONTRIBUTIONS.md`.
+
 ## Verification ladder
 
 1. **Statement check:** compare natural language, original source, and third-party formalization.
@@ -47,7 +54,9 @@ promising artifacts. Eloquence is never an evaluator.
 ## Initial lanes
 
 - **Hard:** Erdős–Straus (#242), because it is famous, exact, formally stated, computationally
-  falsifiable, and has concrete congruence/parametric subgoals. Two Sol/xhigh runs per UTC day.
+  falsifiable, and has concrete congruence/parametric subgoals. It is not expected to be an early win:
+  one exhaustive counterexample would disprove it, while any proof must cover every integer. Two
+  Sol/xhigh runs per UTC day seek smaller publishable subresults instead of blind range extension.
 - **Discovery:** Erdős #647 first. A positive answer is one integer and a bounded divisor-count
   certificate. Then rotate through other finite-witness problems using difficulty, source quality,
   formalization availability, and non-duplication of existing AI attempts.

@@ -70,9 +70,14 @@ def _problem(row: dict[str, Any], statement: str) -> dict[str, Any]:
             if formalized else None
         ),
         "lane": "easy",
+        "contribution_type": "finite witness" if witness_friendly else "open-problem subresult",
         "status": "queued",
         "difficulty": min(9, difficulty),
         "priority": 20,
+        "verification_score": 5 if witness_friendly or formalized else 3,
+        "contribution_score": 3,
+        "review_cost": max(2, difficulty // 2),
+        "novelty_risk": 3,
         "rationale": (
             "Added from the versioned Erdős Problems community database to keep the discovery frontier broad. "
             "The first pass must validate the exact statement, status, literature, and a concrete verification contract."

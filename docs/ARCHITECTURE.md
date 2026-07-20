@@ -6,11 +6,14 @@
 systemd timers
   ├─ hard lane: 06:00 + 18:00 UTC → GPT-5.6 Sol / xhigh
   ├─ discovery lane: every four hours → GPT-5.6 Terra / high
+  ├─ broad scout: daily → one sourced cross-field contribution candidate
   └─ watchdog: every six hours → cadence and state checks
           ↓
-bounded attempt runner → research workspace + structured result
+injected computational-researcher skill
           ↓
-append-only attempts.jsonl → atomic problems/runtime projections
+bounded attempt runner → scripts/solvers + reproducibility records + structured result
+          ↓
+append-only attempts.jsonl → self-improving low-hanging-fruit selector
           ↓
 static renderer → Cloudflare Pages → proofs.charliekrug.com
 ```
@@ -28,6 +31,10 @@ stays available if the content box, Codex login, or an individual attempt fails.
 6. The hard problem remains selected across runs; the discovery lane is easier-first until two
    original results have passed the full gate.
 7. Every model run clears metered API credentials and forces ChatGPT subscription login.
+8. The discovery selector optimizes expected verifiable contribution per compute/review cost and
+   increases priors for techniques behind accepted results while retaining exploration.
+9. An approved release must contain hashed artifacts; website/GitHub publication is mechanical, while
+   expert outreach and third-party venue submission remain separate human actions.
 
 ## Availability and cadence
 

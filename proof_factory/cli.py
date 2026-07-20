@@ -6,8 +6,15 @@ import os
 import shutil
 import subprocess
 from typing import Any
+from urllib.parse import urlparse
 
-from . import intake, render, scheduler, store
+from . import intake, publication, render, scheduler, scout, store
+
+
+EXTERNAL_STATES = {
+    "expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed",
+    "duplicate", "rejected", "corrected",
+}
 
 
 def _doctor() -> dict[str, Any]:
@@ -28,7 +35,7 @@ def _doctor() -> dict[str, Any]:
     return checks
 
 
-def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
+def _review(attempt_id: str, decision: str, note: str, *, release: bool = False) -> dict[str, Any]:
     if decision not in {"accept", "reject", "needs-work"}:
         raise ValueError("decision must be accept, reject, or needs-work")
     with store.lock("state") as acquired:
@@ -42,6 +49,8 @@ def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
             raise ValueError("only a candidate attempt can be accepted as a result")
         if decision == "accept" and not note.strip():
             raise ValueError("accepting a result requires a human review note")
+        if release and decision != "accept":
+            raise ValueError("only an accepted candidate can be released")
         problems = store.load_problems()
         problem = next(row for row in problems if row["id"] == attempt["problem_id"])
         reviews = store.read_json(store.DATA / "reviews.json", [])
@@ -54,15 +63,60 @@ def _review(attempt_id: str, decision: str, note: str) -> dict[str, Any]:
             "reviewer": "Charlie Krug",
         }
         reviews.append(record)
-        store.write_json_atomic(store.DATA / "reviews.json", reviews)
         if decision == "accept":
-            problem["status"] = "verified"
-            problem["accepted_result"] = True
+            packet = publication.build_packet(problem, attempt, record)
+            problem["status"] = "published" if release else "verified"
+            problem["human_approved"] = True
+            problem["accepted_result"] = False
+            problem["approved_packet"] = str(packet.relative_to(store.ROOT))
+            if release:
+                problem["publication_attempt_id"] = attempt_id
+                problem["publication_packet"] = str(packet.relative_to(store.ROOT))
+                problem["publication_state"] = "public research note"
         elif decision == "reject":
             problem["status"] = "attempted"
             problem.pop("candidate_attempt_id", None)
         else:
             problem["status"] = "candidate"
+        store.write_json_atomic(store.DATA / "reviews.json", reviews)
+        store.save_problems(problems)
+    render.build()
+    return record
+
+
+def _external_validation(attempt_id: str, state: str, source_url: str, note: str) -> dict[str, Any]:
+    if state not in EXTERNAL_STATES:
+        raise ValueError(f"invalid external validation state: {state}")
+    positive = {"expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed"}
+    if state in positive and not source_url.strip():
+        raise ValueError("positive external validation requires a public source URL")
+    if source_url and urlparse(source_url).scheme not in {"http", "https"}:
+        raise ValueError("external validation URL must use http or https")
+    if not note.strip():
+        raise ValueError("external validation requires a note")
+    with store.lock("state") as acquired:
+        if not acquired:
+            raise RuntimeError("state lock unavailable")
+        attempt = next((row for row in store.load_attempts() if row.get("id") == attempt_id), None)
+        if not attempt:
+            raise ValueError(f"unknown attempt: {attempt_id}")
+        problems = store.load_problems()
+        problem = next(row for row in problems if row["id"] == attempt["problem_id"])
+        record = {
+            "attempt_id": attempt_id,
+            "problem_id": problem["id"],
+            "state": state,
+            "source_url": source_url,
+            "note": note,
+            "recorded_at": store.now_iso(),
+            "recorded_by": "Charlie Krug",
+        }
+        validations = store.read_json(store.DATA / "validations.json", [])
+        validations.append(record)
+        store.write_json_atomic(store.DATA / "validations.json", validations)
+        problem["external_validation_state"] = state
+        problem["external_validation_url"] = source_url
+        problem["accepted_result"] = state in positive
         store.save_problems(problems)
     render.build()
     return record
@@ -83,8 +137,15 @@ def parser() -> argparse.ArgumentParser:
     review.add_argument("--attempt", required=True)
     review.add_argument("--decision", choices=("accept", "reject", "needs-work"), required=True)
     review.add_argument("--note", default="")
+    review.add_argument("--release", action="store_true", help="publish the approved research-note packet")
+    validate = sub.add_parser("validate")
+    validate.add_argument("--attempt", required=True)
+    validate.add_argument("--state", choices=sorted(EXTERNAL_STATES), required=True)
+    validate.add_argument("--source-url", default="")
+    validate.add_argument("--note", required=True)
     intake_parser = sub.add_parser("intake")
     intake_parser.add_argument("--target", type=int, default=12)
+    sub.add_parser("scout")
     return root
 
 
@@ -107,11 +168,20 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(scheduler.tick(args.lane, publish=args.publish), indent=2))
         return 0
     if args.command == "review":
-        print(json.dumps(_review(args.attempt, args.decision, args.note), indent=2))
+        print(json.dumps(_review(args.attempt, args.decision, args.note, release=args.release), indent=2))
+        return 0
+    if args.command == "validate":
+        print(json.dumps(_external_validation(args.attempt, args.state, args.source_url, args.note), indent=2))
         return 0
     if args.command == "intake":
         result = intake.replenish(target=args.target)
         if result["added"]:
+            render.build()
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "scout":
+        result = scout.run()
+        if result.get("added"):
             render.build()
         print(json.dumps(result, indent=2))
         return 0

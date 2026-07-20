@@ -21,7 +21,7 @@ STATUS_LABELS = {
     "failed": "Failed route",
     "candidate": "Candidate — review needed",
     "verified": "Verified",
-    "published": "Published result",
+    "published": "Public research note",
 }
 
 
@@ -64,7 +64,7 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">∎</span><span>Proof Factory</span></a>
-    <nav><a href="/#problems">Problems</a><a href="/#attempts">Attempts</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
+    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
   </header>
   <main>{body}</main>
   <footer><span>AI-assisted research, disclosed per attempt.</span><span>Human responsibility: Charlie Krug.</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
@@ -146,12 +146,12 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
 <section class="hero">
   <div class="hero-kicker"><span class="live-dot"></span> Always-on research ledger</div>
   <h1>Every attempt.<br><em>Including the failures.</em></h1>
-  <p class="hero-copy">A headless research system working one famous problem deeply and rotating through certificate-friendly open questions. Progress is public; claims are not trusted until independently checked.</p>
+  <p class="hero-copy">A headless academic contribution system working one famous problem deeply while optimizing the discovery lane for the smallest legitimate, independently verifiable new result. Progress is public; claims are not trusted until independently checked.</p>
   <div class="hero-stats">
     <div><strong>{len(problems)}</strong><span>tracked problems</span></div>
     <div><strong>{len(attempts)}</strong><span>recorded attempts</span></div>
     <div><strong>{len(candidates)}</strong><span>candidates to review</span></div>
-    <div><strong>{accepted}/2</strong><span>results before scaling</span></div>
+    <div><strong>{accepted}/2</strong><span>external wins before scaling</span></div>
   </div>
 </section>
 {candidate_banner}
@@ -171,7 +171,7 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
 </section>
 <section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
 <section id="problems" class="section-block">
-  <div class="section-heading"><div><span class="overline">Problem registry</span><h2>Active, tried, failed, and past work</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
+  <div class="section-heading"><div><span class="overline">Contribution registry</span><h2>Active, tried, failed, and past work</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']]) for row in ordered)}</div>
 </section>
 <section id="attempts" class="section-block attempts-block">
@@ -200,7 +200,7 @@ def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> st
 <section class="dossier-grid">
   <article><span class="overline">Why this problem</span><p>{h(problem.get('rationale'))}</p></article>
   <article><span class="overline">Verification contract</span><p>{h(problem.get('verifiability'))}</p></article>
-  <article><span class="overline">Tracking</span><dl><dt>Difficulty</dt><dd>{h(problem.get('difficulty'))}/10</dd><dt>Attempts</dt><dd>{h(problem.get('attempt_count',0))}</dd><dt>Last attempt</dt><dd>{h(_time(problem.get('last_attempt_at')))}</dd><dt>Source status</dt><dd>{h(problem.get('problem_state'))}</dd></dl></article>
+  <article><span class="overline">Tracking</span><dl><dt>Difficulty</dt><dd>{h(problem.get('difficulty'))}/10</dd><dt>Attempts</dt><dd>{h(problem.get('attempt_count',0))}</dd><dt>Last attempt</dt><dd>{h(_time(problem.get('last_attempt_at')))}</dd><dt>Source status</dt><dd>{h(problem.get('problem_state'))}</dd><dt>External validation</dt><dd>{h(problem.get('external_validation_state') or 'none')}</dd></dl></article>
 </section>
 <section class="techniques"><span class="overline">Techniques and harnesses</span><div>{technique_tags}</div></section>
 <section class="section-block attempts-block"><div class="section-heading"><div><span class="overline">Complete history</span><h2>Attempts on this problem</h2></div></div><div class="attempt-list">{attempt_html}</div></section>
@@ -216,6 +216,8 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
     warning = ""
     if outcome == "candidate":
         warning = '<div class="candidate-alert"><div><strong>Candidate for review — not a solution claim</strong><p>Independent statement checking, criticism, literature review, and verification remain required.</p></div></div>'
+    if problem.get("publication_attempt_id") == attempt.get("id"):
+        warning += f'<div class="candidate-alert"><div><strong>{h(problem.get("publication_state"))}</strong><p>Human-approved research note; external acceptance and peer review are separate states.</p></div><a href="/publications/{h(attempt["id"])}/">Publication packet →</a></div>'
     review_html = "".join(
         f'<li><strong>{h(row.get("decision"))}</strong> · {h(_time(row.get("reviewed_at")))}<br>{h(row.get("note") or "No note recorded.")}</li>'
         for row in reviews
@@ -227,6 +229,9 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
   <article><span class="overline">Rationale</span><p>{h(attempt.get('rationale'))}</p></article>
   <article><span class="overline">Claims requiring scrutiny</span>{items('claims')}</article>
   <article><span class="overline">Evidence and scope</span>{items('evidence')}</article>
+  <article><span class="overline">Computational experiments</span>{items('experiments')}</article>
+  <article><span class="overline">Independent checker</span><p>{h(attempt.get('independent_checker') or 'Not provided.')}</p></article>
+  <article><span class="overline">Cross-domain transfers tested</span>{items('transfer_insights')}</article>
   <article><span class="overline">Next moves</span>{items('next_steps')}</article>
   <article><span class="overline">Citations</span><ul>{''.join(f'<li><a href="{h(x)}" rel="noopener">{h(x)} ↗</a></li>' for x in attempt.get('citations') or [])}</ul></article>
   <article><span class="overline">Tool disclosure</span><p>{h(attempt.get('tool_disclosure'))}</p><dl><dt>Duration</dt><dd>{h(attempt.get('duration_seconds','—'))}s</dd><dt>Review state</dt><dd>{h(attempt.get('review_status'))}</dd><dt>Attempt ID</dt><dd><code>{h(attempt.get('id'))}</code></dd></dl></article>
@@ -236,16 +241,40 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
     return _layout(f"Attempt · {problem['title']}", body)
 
 
+def _publication_page(problem: dict[str, Any], attempt: dict[str, Any], reviews: list[dict[str, Any]], validations: list[dict[str, Any]]) -> str:
+    review = next((row for row in reversed(reviews) if row.get("attempt_id") == attempt.get("id") and row.get("decision") == "accept"), {})
+    claims = "".join(f"<li>{h(value)}</li>" for value in attempt.get("claims") or [])
+    evidence = "".join(f"<li>{h(value)}</li>" for value in attempt.get("evidence") or [])
+    packet = str(problem.get("publication_packet") or f"publications/{attempt['id']}")
+    github = f"https://github.com/ctkrug/proofs/tree/main/{packet}"
+    validation = next((row for row in reversed(validations) if row.get("attempt_id") == attempt.get("id")), {})
+    external = (
+        f'<a href="{h(validation.get("source_url"))}">{h(validation.get("state"))} ↗</a>'
+        if validation.get("source_url") else h(validation.get("state") or "none")
+    )
+    body = f"""
+<section class="method-head"><span class="overline">Charlie-approved public research note</span><h1>{h(problem['title'])}</h1><p>{h(attempt.get('summary'))}</p></section>
+<div class="candidate-alert"><div><strong>Not peer-reviewed</strong><p>Release records provenance and invites external checking. It does not itself establish novelty or journal acceptance.</p></div><a href="{h(github)}">Packet and hashes ↗</a></div>
+<section class="attempt-detail">
+  <article><span class="overline">Precise contribution</span><ul>{claims}</ul></article>
+  <article><span class="overline">Evidence</span><ul>{evidence}</ul></article>
+  <article><span class="overline">Human approval</span><p>{h(review.get('note'))}</p><dl><dt>Reviewer</dt><dd>{h(review.get('reviewer'))}</dd><dt>Date</dt><dd>{h(_time(review.get('reviewed_at')))}</dd></dl></article>
+  <article><span class="overline">Disclosure</span><p>{h(attempt.get('tool_disclosure'))}</p><p>{len(attempt.get('artifact_hashes') or {})} hashed artifacts are recorded in the packet manifest.</p><p>External validation: {external}</p></article>
+</section>
+"""
+    return _layout(f"Publication · {problem['title']}", body)
+
+
 def _method_page() -> str:
     body = """
-<section class="method-head"><span class="overline">Operating contract</span><h1>A model can propose.<br><em>It cannot certify itself.</em></h1><p>Proof Factory is optimized for transparent, falsifiable progress rather than impressive-sounding output.</p></section>
+<section class="method-head"><span class="overline">North star</span><h1>Find the low-hanging fruit.<br><em>Prove it is real.</em></h1><p>Maximize independently verifiable, net-new scholarly contribution value per unit of compute and human review. Fame is a tie-breaker, not the objective.</p></section>
 <section class="method-grid">
   <article><strong>01</strong><h2>Source</h2><p>Every problem has a current status page, original-source trail, precise statement, and explicit verification contract.</p></article>
-  <article><strong>02</strong><h2>Attempt</h2><p>One bounded route per run. Prior failures are retrieved so the system does not endlessly rediscover the same dead end.</p></article>
-  <article><strong>03</strong><h2>Falsify</h2><p>Edge cases, exact computation, independent checkers, and formal kernels are preferred to prose agreement.</p></article>
+  <article><strong>02</strong><h2>Select</h2><p>Finite witnesses, exact optima, classifications, sequence contributions, formalizations, and narrow lemmas outrank famous narratives when they have a credible external acceptance path.</p></article>
+  <article><strong>03</strong><h2>Experiment</h2><p>Sol designs theories and discriminating tests. Deterministic scripts, Terra, exact solvers, and proof tools do repetition, parameter sweeps, and falsification with recorded seeds and hashes.</p></article>
   <article><strong>04</strong><h2>Label</h2><p>Failed, no progress, progress, and candidate are distinct states. Candidate never means solved.</p></article>
   <article><strong>05</strong><h2>Review</h2><p>A candidate needs statement validation, isolated criticism, post-candidate literature search, reproducible evidence, and Charlie's approval.</p></article>
-  <article><strong>06</strong><h2>Publish</h2><p>Accepted results include the argument, artifacts, source citations, limitations, and complete tool disclosure. Community review still matters.</p></article>
+  <article><strong>06</strong><h2>Release</h2><p>One human approval action creates and publishes a versioned research packet with claims, artifacts, hashes, citations, limitations, and AI disclosure. Expert and peer-review states remain separate.</p></article>
 </section>
 <section class="principles"><h2>Research integrity</h2><p>This project follows the practical direction of the Leiden Declaration: disclose automated tools, preserve attribution, support independent verification, retain human responsibility, and do not substitute a website post for peer review.</p><div><a href="https://leidendeclaration.ai/">Leiden Declaration ↗</a><a href="https://github.com/teorth/erdosproblems/wiki/What-to-do-when-I-think-I-managed-to-get-AI-to-solve-an-Erd%C5%91s-problem%3F">Erdős AI review guidance ↗</a><a href="https://github.com/google-deepmind/formal-conjectures">Formal Conjectures ↗</a></div></section>
 """
@@ -269,6 +298,9 @@ def build() -> Path:
     reviews = store.read_json(store.DATA / "reviews.json", [])
     if not isinstance(reviews, list):
         reviews = []
+    validations = store.read_json(store.DATA / "validations.json", [])
+    if not isinstance(validations, list):
+        validations = []
     if store.SITE.exists():
         # Keep the mount-point directory itself intact for systemd ReadWritePaths.
         for child in store.SITE.iterdir():
@@ -291,6 +323,8 @@ def build() -> Path:
         if problem:
             attempt_reviews = [row for row in reviews if row.get("attempt_id") == attempt.get("id")]
             _write(store.SITE / "attempts" / attempt["id"] / "index.html", _attempt_page(attempt, problem, attempt_reviews))
+            if problem.get("publication_attempt_id") == attempt.get("id"):
+                _write(store.SITE / "publications" / attempt["id"] / "index.html", _publication_page(problem, attempt, reviews, validations))
     _write(store.SITE / "method" / "index.html", _method_page())
     public_state = {
         "generated_at": store.now_iso(),
@@ -298,10 +332,12 @@ def build() -> Path:
         "problems": problems,
         "attempts": attempts,
         "reviews": reviews,
+        "validations": validations,
     }
     _write(store.SITE / "api" / "state.json", json.dumps(public_state, indent=2, ensure_ascii=False) + "\n")
     _write(store.SITE / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://proofs.charliekrug.com/sitemap.xml\n")
     urls = ["/", "/method/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
+    urls += [f"/publications/{p['publication_attempt_id']}/" for p in problems if p.get("publication_attempt_id")]
     _write(store.SITE / "sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>https://proofs.charliekrug.com{h(url)}</loc></url>\n" for url in urls) + "</urlset>\n")
     _write(store.SITE / "_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  X-Frame-Options: DENY\n\n/assets/*\n  Cache-Control: public, max-age=3600\n")
     _write(store.SITE / "404.html", _layout("Not found", '<section class="method-head"><h1>That record does not exist.</h1><p><a href="/">Return to the live ledger →</a></p></section>'))

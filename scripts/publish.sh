@@ -12,7 +12,7 @@ if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
   exit 1
 fi
 
-git add data/attempts.jsonl data/problems.json data/reviews.json
+git add data/attempts.jsonl data/problems.json data/reviews.json data/validations.json publications
 if ! git diff --cached --quiet; then
   git commit -m "Record automated research attempt"
   if ! git push origin main; then

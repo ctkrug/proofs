@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import random
 import shlex
@@ -15,7 +16,43 @@ ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
 
 
 def accepted_original_results(problems: list[dict[str, Any]]) -> int:
-    return sum(1 for row in problems if row.get("accepted_result") is True)
+    return sum(1 for row in problems if row.get("external_validation_state") in {
+        "expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed",
+    })
+
+
+def low_hanging_score(problem: dict[str, Any], problems: list[dict[str, Any]]) -> float:
+    """Estimate verifiable contribution value per unit effort, then learn from accepted wins."""
+    difficulty = min(10, max(1, int(problem.get("difficulty") or 10)))
+    success = float(problem.get("estimated_success_probability") or (11 - difficulty) / 12)
+    verification = float(problem.get("verification_score") or (
+        5 if any(word in str(problem.get("verifiability", "")).lower()
+                 for word in ("finite", "exact", "certificate", "witness", "formal")) else 2
+    ))
+    contribution = float(problem.get("contribution_score") or 3)
+    review_cost = float(problem.get("review_cost") or max(1, difficulty / 2))
+    novelty_risk = float(problem.get("novelty_risk") or 2)
+
+    accepted = [row for row in problems if row.get("accepted_result") is True]
+    techniques = set(problem.get("techniques") or [])
+    transfer_bonus = 0.0
+    for win in accepted:
+        shared = techniques.intersection(win.get("techniques") or [])
+        transfer_bonus += min(0.6, 0.15 * len(shared))
+        if problem.get("contribution_type") and problem.get("contribution_type") == win.get("contribution_type"):
+            transfer_bonus += 0.35
+
+    attempts = int(problem.get("research_attempt_count") or 0)
+    exploration = math.sqrt(math.log2(2 + sum(int(row.get("research_attempt_count") or 0) for row in problems)) / (1 + attempts))
+    return (
+        6.0 * success
+        + 0.7 * verification
+        + 0.45 * contribution
+        - 0.8 * review_cost
+        - 0.55 * novelty_risk
+        + transfer_bonus
+        + 0.35 * exploration
+    )
 
 
 def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
@@ -27,20 +64,20 @@ def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
 
     solved = accepted_original_results(problems)
     if solved < 2:
-        # Cycle the whole discovery frontier; difficulty breaks ties toward easier work.
+        # Cycle the frontier while breaking ties by expected verifiable contribution per effort.
         return min(
             candidates,
             key=lambda row: (
                 int(row.get("research_attempt_count") or 0),
-                int(row.get("difficulty") or 10),
-                -(int(row.get("priority") or 0)),
+                -low_hanging_score(row, problems),
             ),
         )
 
-    # Afterwards keep a strong easy bias without starving more ambitious discovery work.
-    attempt_total = sum(int(row.get("research_attempt_count") or 0) for row in candidates)
+    # Afterwards exploit patterns behind accepted wins while retaining an exploration chance.
+    attempt_total = sum(int(row.get("research_attempt_count") or 0) for row in problems)
     rng = random.Random(f"{datetime.now(timezone.utc).date().isoformat()}-{attempt_total}")
-    weights = [max(1, (11 - int(row.get("difficulty") or 10)) ** 2) for row in candidates]
+    floor = min(low_hanging_score(row, problems) for row in candidates)
+    weights = [max(0.25, low_hanging_score(row, problems) - floor + 0.25) ** 2 for row in candidates]
     return rng.choices(candidates, weights=weights, k=1)[0]
 
 
