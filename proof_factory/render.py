@@ -57,8 +57,7 @@ def _layout(title: str, body: str, *, description: str = "Ongoing and planned AI
   <meta name="theme-color" content="#07100e">
   <title>{h(title)} · Proof Factory</title>
   <meta name="description" content="{h(description)}">
-  <link rel="stylesheet" href="/assets/site.css">
-  <script defer src="/assets/site.js"></script>
+  <link rel="stylesheet" href="/assets/site-v3.css">
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token":"153bb72472fb49d8863fb2f8f08f6b2b"}}'></script>
   <script>MathJax={{tex:{{inlineMath:[['$','$'],['\\(','\\)']]}}}};</script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -558,9 +557,6 @@ footer{min-height:78px;padding:22px clamp(22px,4vw,64px);border-color:var(--line
 """
 
 
-JS = ""
-
-
 def _build_unlocked() -> Path:
     problems = store.load_problems()
     attempts = store.load_attempts()
@@ -581,8 +577,7 @@ def _build_unlocked() -> Path:
             else:
                 child.unlink()
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
-    _write(store.SITE / "assets" / "site.css", CSS)
-    _write(store.SITE / "assets" / "site.js", JS)
+    _write(store.SITE / "assets" / "site-v3.css", CSS)
     _write(store.SITE / "index.html", _index(problems, attempts, runtime, reviews))
     by_problem: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:

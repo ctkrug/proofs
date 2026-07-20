@@ -371,6 +371,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn("Ongoing work", index)
                 self.assertIn("Planned work", index)
                 self.assertIn("Recent attempts", index)
+                self.assertIn("/assets/site-v3.css", index)
                 self.assertIn("Ramsey number R(5,5)", index)
                 self.assertIn("Official source", index)
                 self.assertNotIn("Every attempt", index)
