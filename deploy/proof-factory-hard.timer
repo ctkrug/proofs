@@ -1,8 +1,8 @@
 [Unit]
-Description=Proof Factory - twice-daily hard/famous research
+Description=Proof Factory - hourly around-the-clock R(5,5) research
 
 [Timer]
-OnCalendar=*-*-* 06,18:00:00 UTC
+OnCalendar=*-*-* *:00:00 UTC
 Persistent=true
 AccuracySec=1min
 Unit=proof-factory-hard.service

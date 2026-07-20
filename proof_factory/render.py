@@ -171,13 +171,13 @@ def _index(
 {candidate_banner}
 <section class="lanes">
   <article class="lane-panel hard-panel">
-    <div class="panel-label">Hard / famous lane · 2× daily · Sol xhigh</div>
+    <div class="panel-label">Hard / famous lane · hourly · Terra delegates → Sol xhigh</div>
     <h2>{h((hard or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((hard or {}).get('rationale') or 'The hard lane is being initialized.')}</p>
     <div class="panel-foot"><span>{h(hard_run_text)}</span>{f'<a href="/problems/{h(hard["id"])}/">Open dossier →</a>' if hard else ''}</div>
   </article>
   <article class="lane-panel easy-panel">
-    <div class="panel-label">Discovery lane · easier-first · 6× daily</div>
+    <div class="panel-label">Discovery lane · easier-first · 12× daily · Terra → Sol</div>
     <h2>{h((easy or {}).get('title') or 'Selecting…')}</h2>
     <p>{h((easy or {}).get('rationale') or 'The discovery lane is being initialized.')}</p>
     <div class="panel-foot"><span>{h(easy_run_text)}</span>{f'<a href="/problems/{h(easy["id"])}/">Open dossier →</a>' if easy else ''}</div>

@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - twelve daily batched ledger publications
+
+[Timer]
+OnCalendar=*-*-* 01,03,05,07,09,11,13,15,17,19,21,23:50:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=proof-factory-publish.service
+
+[Install]
+WantedBy=timers.target

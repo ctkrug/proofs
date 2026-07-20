@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - hard/famous Sol xhigh research pass
+Description=Proof Factory - hourly R(5,5) Sol principal with Terra delegates
 After=network-online.target
 Wants=network-online.target
 
@@ -9,8 +9,8 @@ WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
+Environment=PROOF_HARD_DELEGATE_TIMEOUT_SEC=1200
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane hard
-ExecStartPost=/bin/systemctl start --no-block proof-factory-publish.service
 Nice=15
 CPUWeight=2
 IOWeight=10

@@ -11,10 +11,11 @@ research software, computational bounds, and narrow lemmas.
 The public ledger at `proofs.charliekrug.com` shows every queued, active, failed, progressive,
 candidate, verified, and published attempt. The system separates two research lanes:
 
-- **Hard lane:** one famous but finite exact problem is always active and receives two GPT-5.6 Sol / xhigh
-  passes every UTC day. It currently targets `R(5,5)`, where a 43-vertex Ramsey graph is a compact
-  lower-bound witness and upper bounds require checked exhaustive certificates.
-- **Discovery lane:** six daily passes rotate through relatively approachable, objectively
+- **Hard lane:** one famous finite exact problem receives an hourly launch opportunity around the clock.
+  It currently targets `R(5,5)`. Each epoch uses two GPT-5.6 Terra/high reconnaissance delegates and
+  one GPT-5.6 Sol/xhigh principal; a 43-vertex Ramsey graph is a compact lower-bound witness and upper
+  bounds require checked exhaustive certificates.
+- **Discovery lane:** twelve daily Sol/high + Terra/high delegated passes rotate through approachable, objectively
   checkable contributions. A daily source-only intake currently keeps a 12-problem frontier from
   the versioned Erdős Problems database; the schema and selector support broader contribution types.
   Three bounded non-error passes park a target only when no actionable lead or untried strategy remains.
@@ -46,7 +47,9 @@ python3 -m proof_factory validate --attempt ATTEMPT_ID --state expert-confirmed 
 ```
 
 `tick` launches Codex headlessly with ChatGPT subscription authentication. API-key variables are
-cleared before every model run, so there is no metered model fallback.
+cleared before every model run, so there is no metered model fallback. Terra reconnaissance is stored
+as a hashed advisory memo, then injected into the Sol principal prompt; model agreement never counts
+as independent verification.
 
 ## Evidence model
 

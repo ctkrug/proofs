@@ -77,11 +77,14 @@ immutable record; a gate adjudication controls the public label.
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
   checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
   witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,
-  and an exhaustive checked cover. Two Sol/xhigh runs per UTC day alternate construction search with
-  certificate-carrying reduction work rather than extending an open-ended verification range.
+  and an exhaustive checked cover. Hourly Sol/xhigh principal runs, each preceded by two bounded
+  Terra/high delegate memos, continue the audited research map around the clock. Locks prevent overlap
+  within the lane; missed starts are not fabricated. Construction and certificate-carrying reduction
+  work remain distinct rather than extending an open-ended verification range.
 - **Discovery:** Erdős #647 first. A positive answer is one integer and a bounded divisor-count
-  certificate. Then rotate through other finite-witness problems using difficulty, source quality,
-  formalization availability, and non-duplication of existing AI attempts.
+  certificate. Twelve daily Terra-delegate → Sol-principal epochs rotate through other finite-witness
+  problems using difficulty, source quality, formalization availability, and non-duplication of
+  existing AI attempts.
 
 ## Sources used to design this harness
 

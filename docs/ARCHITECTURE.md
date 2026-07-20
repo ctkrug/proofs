@@ -4,11 +4,13 @@
 
 ```text
 systemd timers
-  ├─ hard lane: 06:00 + 18:00 UTC → GPT-5.6 Sol / xhigh
-  ├─ discovery lane: every four hours → GPT-5.6 Terra / high
+  ├─ hard lane: hourly → 2× GPT-5.6 Terra/high delegates → GPT-5.6 Sol/xhigh principal
+  ├─ discovery lane: every two hours → GPT-5.6 Terra/high delegate → GPT-5.6 Sol/high principal
   ├─ broad scout: daily → one sourced cross-field contribution candidate
   ├─ strategy lab: daily → one sourced, executable method addition or improvement
-  └─ watchdog: every six hours → cadence and state checks
+  └─ watchdog: every two hours → cadence and state checks
+          ↓
+hashed Terra memos (advisory, never independent validation) → Sol synthesis and experiment choice
           ↓
 injected computational-researcher skill
           ↓
@@ -42,14 +44,17 @@ stays available if the content box, Codex login, or an individual attempt fails.
     private chain-of-thought is neither requested nor stored.
 12. A blocked or ruled-out strategy can be retried only after its explicit reopen condition is met
     or materially new evidence is recorded.
+13. Every research epoch is Sol-Terra: Terra performs bounded reconnaissance in isolated subdirectories;
+    Sol owns synthesis, execution, and the structured result. Any delegate artifact used as evidence
+    must be promoted into the main workspace and deterministically checked.
 
 ## Availability and cadence
 
 - The public ledger is a Cloudflare Pages deployment.
-- Each completed attempt publishes once. At eight scheduled runs/day, that is at most 248 deployments
-  in a 31-day month, leaving room under the documented 500 monthly Pages deployments for manual
-  reviews and exceptional repairs. A future dynamic state endpoint should be considered before
-  adding more lanes.
+- Research produces up to 36 launch opportunities/day, but publication is batched twelve times/day.
+  The daily scout and strategy lab may each trigger one additional publication, for at most 434
+  scheduled Pages deployments in a 31-day month, leaving 66 for manual reviews and repairs under the
+  documented 500-deployment allowance.
 - Research services never receive Cloudflare or social credentials. A separate, serialized publisher
   service loads deployment credentials only after the research process exits; the research model runs
   with a minimal environment and a workspace-write sandbox.
@@ -57,6 +62,6 @@ stays available if the content box, Codex login, or an individual attempt fails.
   no live lead, promising route, or untried proposal. A daily,
   deterministic intake job refills the active frontier to 12 from the versioned `teorth/erdosproblems`
   catalog and exact statement HTML on erdosproblems.com; easier and formalized metadata rank first.
-- Persistent timers catch up after a reboot. The watchdog reports missed hard-lane cadence rather
+- Persistent timers catch up after a reboot. The watchdog runs every two hours and reports missed hard-lane cadence rather
   than silently backfilling fake work.
 - Services run at low CPU/IO priority with memory ceilings on the shared content box.

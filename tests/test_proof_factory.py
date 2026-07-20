@@ -115,7 +115,10 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_prompt_injects_computational_researcher_contract(self) -> None:
         problem = store.load_problems()[1]
-        prompt = agent.build_prompt(problem, "hard", Path("/tmp/research/workspace"))
+        prompt = agent.build_prompt(problem, "hard", Path("/tmp/research/workspace"), [{
+            "role": "experiment-verification", "model": "gpt-5.6-terra",
+            "status": "completed", "memo": "Use an exact checker before scaling.",
+        }])
         self.assertIn("Maximize independently verifiable, net-new contribution", prompt)
         self.assertIn("run_experiment.py", prompt)
         self.assertIn("research_mode", prompt)
@@ -123,6 +126,41 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("STRATEGY PORTFOLIO RULES", prompt)
         self.assertIn("indefinitely continuing", prompt)
         self.assertIn("reopen_condition", prompt)
+        self.assertIn("SOL-TERRA ORCHESTRATION", prompt)
+        self.assertIn("Use an exact checker before scaling.", prompt)
+        delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
+        self.assertIn("GPT-5.6 Terra delegate", delegate)
+        self.assertIn("cheapest decisive experiment", delegate)
+        self.assertIn("may not promote a result", delegate)
+
+    def test_hard_run_uses_terra_delegates_then_sol_principal(self) -> None:
+        problem = {
+            "id": "delegation-test", "title": "Finite test", "statement": "Find an exact witness.",
+            "source_url": "https://example.test/problem", "problem_state": "open",
+            "rationale": "Compact certificate", "verifiability": "Exact checker", "techniques": [],
+        }
+        principal = '''```proof_result
+{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+```'''
+        calls = []
+
+        def fake_run(prompt, *, model, effort, workspace, timeout):
+            calls.append((model, effort, workspace.name))
+            if model == agent.TERRA_MODEL:
+                return "Delegate memo with one falsifiable test.", {"output_tokens": 10}
+            return principal, {"output_tokens": 20}
+
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "RESEARCH", Path(raw)), \
+                patch.object(agent, "_run_codex", side_effect=fake_run):
+            attempt = agent.run(problem, "hard")
+
+        self.assertEqual([row[0] for row in calls], [agent.TERRA_MODEL, agent.TERRA_MODEL, agent.SOL_MODEL])
+        self.assertEqual(attempt["orchestration"]["architecture"], "sol-principal-terra-delegates")
+        self.assertEqual(attempt["orchestration"]["delegate_statuses"], {
+            "literature-strategy": "completed", "experiment-verification": "completed",
+        })
+        self.assertEqual(attempt["model"], agent.SOL_MODEL)
+        self.assertTrue(all(row["memo_sha256"] for row in attempt["delegates"]))
 
     def test_research_state_is_resumable_and_deduplicates_strategy(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - certificate-first discovery pass
+Description=Proof Factory - Sol principal with Terra delegate easier-problem pass
 After=network-online.target
 Wants=network-online.target
 
@@ -9,8 +9,8 @@ WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
+Environment=PROOF_EASY_DELEGATE_TIMEOUT_SEC=600
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane easy
-ExecStartPost=/bin/systemctl start --no-block proof-factory-publish.service
 Nice=15
 CPUWeight=2
 IOWeight=10

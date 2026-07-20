@@ -40,9 +40,11 @@ improvement, or a gap in a recognized table.
 
 ## Model and compute roles
 
-- Sol/xhigh is the research lead for theorem synthesis, representations, cross-domain transfer,
-  experiment design, and diagnosing why promising routes fail.
-- Terra/high is the default discovery researcher and implementation engineer.
+- Sol is the principal on every research epoch: xhigh for `R(5,5)`, high for the easier lane. It owns
+  theorem synthesis, representations, experiment choice, and the final structured result.
+- Terra/high delegates reconnaissance, source/status auditing, strategy alternatives, experiment design,
+  and adversarial verification before Sol begins. Hard epochs use two specialized delegates; easier
+  epochs use one. Their memos are leads, never independent validation.
 - Deterministic scripts, exact solvers, CAS, proof assistants, and independent checkers perform
   enumeration and validation. The model should spend tokens choosing discriminating experiments,
   not manually simulating them.
@@ -50,12 +52,14 @@ improvement, or a gap in a recognized table.
   it preserves statement and citation accuracy. “Fable” is not a documented current OpenAI model
   role and is not hard-coded.
 
-## Portfolio
+## Easier-lane portfolio
 
-- 55% finite witnesses, constructions, and adjacent parameter records.
-- 20% exact optimization and classifications.
-- 15% formalization, datasets, and research software.
-- 10% one famous but finite Sol/xhigh moonshot, twice daily. The current flagship is exact `R(5,5)`: a 43-vertex Ramsey graph is a tiny decisive lower-bound certificate, while any upper-bound improvement must carry a checked exhaustive SAT/case certificate.
+- 60% finite witnesses, constructions, and adjacent parameter records.
+- 22% exact optimization and classifications.
+- 18% formalization, datasets, and research software.
+- Dedicated flagship outside the percentages above: exact `R(5,5)` receives hourly launch opportunities
+  around the clock. A 43-vertex Ramsey graph is a tiny decisive lower-bound certificate, while any
+  upper-bound improvement must carry a checked exhaustive SAT/case certificate.
 
 Every target must have a claim contract: exact statement, source/status date, novelty definition,
 success certificate, independent checker, recognized external channel, likely expert/maintainer,

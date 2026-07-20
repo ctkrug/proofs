@@ -116,10 +116,8 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
 def watchdog(*, publish: bool = False) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     attempts = store.load_attempts()
-    today = now.date().isoformat()
-    hard_today = [row for row in attempts if row.get("lane") == "hard" and str(row.get("finished_at", "")).startswith(today)]
+    hard = [row for row in attempts if row.get("lane") == "hard"]
     easy = [row for row in attempts if row.get("lane") == "easy"]
-    due_hard = sum(1 for hour in (6, 18) if now.hour >= hour + 2)
     current_runtime = store.runtime()
     hard_started = store.parse_iso(current_runtime.get("hard_started_at"))
     hard_in_flight = bool(
@@ -128,14 +126,17 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         and (now - hard_started).total_seconds() < 3 * 3600
     )
     issues: list[str] = []
-    hard_credited = len(hard_today) + (1 if hard_in_flight else 0)
-    if hard_credited < due_hard:
-        issues.append(f"hard lane missed cadence: {len(hard_today)}/{due_hard} due runs")
+    if hard:
+        last_hard = store.parse_iso(hard[-1].get("finished_at"))
+        if not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 2.5 * 3600:
+            issues.append("hourly hard lane has no completed or active attempt in more than 2.5 hours")
+    elif not hard_in_flight and now.hour >= 2:
+        issues.append("hourly hard lane has not completed its first attempt")
     if easy:
         last_easy = store.parse_iso(easy[-1].get("finished_at"))
-        if last_easy and (now - last_easy).total_seconds() > 6 * 3600:
-            issues.append("easy lane has no completed attempt in more than 6 hours")
-    elif now.hour >= 6:
+        if last_easy and (now - last_easy).total_seconds() > 3 * 3600:
+            issues.append("12-per-day easy lane has no completed attempt in more than 3 hours")
+    elif now.hour >= 3:
         issues.append("easy lane has not completed its first attempt")
     health = "degraded" if issues else "healthy"
     report = store.update_runtime(health=health, health_issues=issues, watchdog_at=store.now_iso())

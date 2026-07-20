@@ -1,8 +1,8 @@
 [Unit]
-Description=Proof Factory - six daily easier-problem passes
+Description=Proof Factory - twelve daily easier-problem passes
 
 [Timer]
-OnCalendar=*-*-* 00,04,08,12,16,20:30:00 UTC
+OnCalendar=*-*-* 00,02,04,06,08,10,12,14,16,18,20,22:30:00 UTC
 Persistent=true
 AccuracySec=1min
 Unit=proof-factory-easy.service

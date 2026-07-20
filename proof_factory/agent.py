@@ -16,6 +16,12 @@ RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
 OUTCOMES = {"failed", "no_progress", "progress", "candidate"}
 RESEARCH_SKILL = store.ROOT / "skills" / "computational-researcher" / "SKILL.md"
 EXPERIMENT_RUNNER = store.ROOT / "skills" / "computational-researcher" / "scripts" / "run_experiment.py"
+TERRA_MODEL = "gpt-5.6-terra"
+SOL_MODEL = "gpt-5.6-sol"
+DELEGATE_ROLES = {
+    "hard": ("literature-strategy", "experiment-verification"),
+    "easy": ("source-discriminator",),
+}
 
 
 def _codex_text(raw: str) -> tuple[str, dict[str, Any], bool]:
@@ -74,7 +80,7 @@ def _research_contract() -> str:
 def _workspace_artifacts(workspace: Path) -> dict[str, str]:
     """Hash bounded, research-created artifacts without archiving environments or caches."""
     hashes: dict[str, str] = {}
-    ignored = {".git", ".venv", "venv", "__pycache__", "node_modules", ".mypy_cache", ".pytest_cache"}
+    ignored = {".git", ".venv", "venv", ".delegates", "__pycache__", "node_modules", ".mypy_cache", ".pytest_cache"}
     for path in sorted(workspace.rglob("*")):
         if path.is_symlink() or not path.is_file() or any(part in ignored for part in path.relative_to(workspace).parts):
             continue
@@ -104,10 +110,88 @@ def _prior_context(problem_id: str) -> str:
     return "\n".join(lines)
 
 
-def build_prompt(problem: dict[str, Any], lane: str, workspace: Path) -> str:
+def build_delegate_prompt(problem: dict[str, Any], lane: str, workspace: Path, role: str) -> str:
+    dossier = store.RESEARCH / problem["id"] / "DOSSIER.md"
+    role_job = {
+        "literature-strategy": (
+            "Audit the durable state and cited literature, identify the strongest live route, and expose any historical "
+            "duplication, missing premise, or combination with another recorded strategy."
+        ),
+        "experiment-verification": (
+            "Design the cheapest decisive experiment and its independent verification plan. Inspect existing artifacts, "
+            "name exact controls and stop conditions, and attack the likely failure modes."
+        ),
+        "source-discriminator": (
+            "Verify the target's exact source/status and propose the cheapest executable discriminator, including the "
+            "artifact and outside acceptance path that would make a positive result matter."
+        ),
+    }.get(role, "Produce a bounded research memo that helps the principal choose and falsify one route.")
+    return f"""You are a GPT-5.6 Terra delegate in a Sol-Terra computational-research team.
+You are not the principal investigator and may not promote a result. Your job is compact reconnaissance that makes the
+upcoming Sol pass more concrete, less duplicative, and easier to falsify.
+
+TARGET
+Title: {problem['title']}
+Statement: {problem['statement']}
+Official/current source: {problem['source_url']}
+Lane: {lane}
+Shared research workspace: {workspace}
+Full project dossier when present: {dossier}
+
+DELEGATE ROLE: {role}
+{role_job}
+
+DURABLE CAMPAIGN STATE
+{research_state.compact_for_prompt(problem)}
+
+RULES
+1. Read relevant files in the shared workspace and consult the full project dossier when it exists.
+2. Do not repeat a blocked or ruled-out route without satisfying its recorded reopen condition.
+3. Distinguish sourced fact, reported computation, inference, and proposal. Preserve direct source URLs.
+4. Do not declare a proof, disproof, or candidate. Do not edit the durable research map or append-only ledger.
+5. Return a memo under 1,500 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
+   reusable artifact; stop condition; and what the Sol principal should reject or verify independently.
+"""
+
+
+def _minimal_env() -> dict[str, str]:
+    allowed = {
+        "HOME", "PATH", "LANG", "LC_ALL", "TERM", "SSL_CERT_FILE", "SSL_CERT_DIR",
+        "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
+    }
+    env = {key: value for key, value in os.environ.items() if key in allowed}
+    env.setdefault("HOME", "/root")
+    return env
+
+
+def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout: int) -> tuple[str, dict[str, Any]]:
+    command = [
+        os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
+        "--sandbox", "workspace-write",
+        "-c", 'approval_policy="never"',
+        "-c", 'forced_login_method="chatgpt"',
+        "-c", f'model_reasoning_effort="{effort}"',
+        "--ignore-user-config", "--ignore-rules", "--model", model, "-",
+    ]
+    proc = subprocess.run(
+        command, input=prompt, text=True, capture_output=True, cwd=workspace,
+        env=_minimal_env(), timeout=timeout, start_new_session=True,
+    )
+    text, usage, stream_failed = _codex_text(proc.stdout)
+    if proc.returncode != 0 or stream_failed or not text.strip():
+        detail = (proc.stderr or proc.stdout)[-1000:]
+        raise RuntimeError(f"Codex {model} failed rc={proc.returncode}: {detail}")
+    return text, usage
+
+
+def build_prompt(
+    problem: dict[str, Any], lane: str, workspace: Path,
+    delegate_memos: list[dict[str, Any]] | None = None,
+) -> str:
     hard = lane == "hard"
     epoch_minutes = 120 if hard else 60
     strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
+    delegated = delegate_memos or []
     return f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
 The campaign has no preset final number of epochs. This process has a {epoch_minutes}-minute safety ceiling, so leave a
 precise checkpoint that lets a future session continue without rediscovering your work. Never interpret the long horizon
@@ -143,6 +227,17 @@ WHAT DOES NOT COUNT
 
 LANE AND THIS EPOCH'S JOB
 {('Hard/famous lane. Seek one genuinely new lemma, reduction, parametric family, computational bound, or falsifiable route. Do not spend the run narrating the whole famous problem.' if hard else 'Discovery lane. Prefer a concrete witness, executable search, exact identity, formal lemma, or rigorous elimination of a bounded route.')}
+
+SOL-TERRA ORCHESTRATION
+You are the GPT-5.6 Sol principal. Terra delegates performed bounded reconnaissance before this pass. Their memos are
+advisory leads, not evidence and not votes. Audit every claim against primary sources or deterministic artifacts, use the
+best concrete discriminator when it survives scrutiny, and explicitly reject misleading suggestions. Do not count model
+agreement as independent validation. Promote any delegate artifact you rely on into the main workspace with provenance;
+ephemeral delegate directories are not part of the accepted artifact set. Disclose the Sol principal and Terra delegate
+roles in the final tool disclosure.
+
+TERRA DELEGATE MEMOS
+{json.dumps(delegated, indent=2, ensure_ascii=False)[:28000] if delegated else '(No delegate memo survived; proceed, but record the orchestration failure.)'}
 
 DURABLE RESEARCH STATE (claims/evidence/decisions, never private chain-of-thought)
 {research_state.compact_for_prompt(problem)}
@@ -225,39 +320,47 @@ Do not include a confidence score. Correct uncertainty is part of the result.
 
 
 def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
-    model = "gpt-5.6-sol" if lane == "hard" else "gpt-5.6-terra"
+    model = SOL_MODEL
     effort = "xhigh" if lane == "hard" else "high"
     ceiling = int(os.environ.get("PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
                                  "7200" if lane == "hard" else "3600"))
     workspace = store.RESEARCH / problem["id"] / "workspace"
     workspace.mkdir(parents=True, exist_ok=True)
-    prompt = build_prompt(problem, lane, workspace)
     started = store.now_iso()
     start = time.monotonic()
-    command = [
-        os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
-        "--sandbox", "workspace-write",
-        "-c", 'approval_policy="never"',
-        "-c", 'forced_login_method="chatgpt"',
-        "-c", f'model_reasoning_effort="{effort}"',
-        "--ignore-user-config", "--ignore-rules", "--model", model, "-",
-    ]
-    # The research model gets the minimum process environment needed to run Codex.
-    # Deployment, social, and other service credentials must never enter its context.
-    allowed_env = {
-        "HOME", "PATH", "LANG", "LC_ALL", "TERM", "SSL_CERT_FILE", "SSL_CERT_DIR",
-        "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
-    }
-    env = {key: value for key, value in os.environ.items() if key in allowed_env}
-    env.setdefault("HOME", "/root")
+    delegate_ceiling = int(os.environ.get(
+        "PROOF_HARD_DELEGATE_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_DELEGATE_TIMEOUT_SEC",
+        "1200" if lane == "hard" else "600",
+    ))
+    epoch_key = f"{started[:19].replace(':', '').replace('-', '').replace('T', '-')}-{uuid.uuid4().hex[:6]}"
+    delegate_root = workspace / ".delegates" / epoch_key
+    delegate_records: list[dict[str, Any]] = []
+    for role in DELEGATE_ROLES[lane]:
+        delegate_workspace = delegate_root / role
+        delegate_workspace.mkdir(parents=True, exist_ok=True)
+        try:
+            memo, delegate_usage = _run_codex(
+                build_delegate_prompt(problem, lane, workspace, role),
+                model=TERRA_MODEL, effort="high", workspace=delegate_workspace, timeout=delegate_ceiling,
+            )
+            memo = memo.strip()[:12000]
+            status = "completed"
+            error_note = ""
+        except (OSError, subprocess.SubprocessError, RuntimeError) as exc:
+            memo = f"Delegate failed before a usable memo: {type(exc).__name__}: {exc}"
+            delegate_usage = {}
+            status = "error"
+            error_note = str(exc)[:2000]
+        memo_file = delegate_workspace / "memo.md"
+        memo_file.write_text(memo + "\n")
+        delegate_records.append({
+            "role": role, "model": TERRA_MODEL, "effort": "high", "status": status,
+            "memo_path": str(memo_file.relative_to(workspace)), "memo_sha256": store.sha256_file(memo_file),
+            "memo": memo, "usage": delegate_usage, "error": error_note,
+        })
+    prompt = build_prompt(problem, lane, workspace, delegate_records)
     try:
-        proc = subprocess.run(
-            command, input=prompt, text=True, capture_output=True, cwd=workspace,
-            env=env, timeout=ceiling, start_new_session=True,
-        )
-        text, usage, stream_failed = _codex_text(proc.stdout)
-        if proc.returncode != 0 or stream_failed:
-            raise RuntimeError(f"Codex failed rc={proc.returncode}: {proc.stderr[-1000:]}")
+        text, usage = _run_codex(prompt, model=model, effort=effort, workspace=workspace, timeout=ceiling)
         result = extract_result(text)
         outcome = result["outcome"]
         policy_flags: list[str] = []
@@ -290,7 +393,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
             "rationale": "Infrastructure or output-contract failure is not mathematical progress.",
             "claims": [], "evidence": [], "next_steps": ["Repair the failed pass and rerun."],
             "citations": [problem["source_url"]], "techniques": [],
-            "tool_disclosure": f"Codex {model}; run failed before a valid disclosure was returned.",
+            "tool_disclosure": f"Codex {model} principal with {TERRA_MODEL} delegates; run failed before a valid disclosure was returned.",
         }
         outcome = "error"
         error = str(exc)
@@ -302,6 +405,9 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
     attempt_id = f"{problem['id']}-{stamp}-{uuid.uuid4().hex[:6]}"
     def objects(name: str, limit: int = 30) -> list[dict[str, Any]]:
         return [row for row in result.get(name, []) if isinstance(row, dict)][:limit]
+    disclosure = str(result.get("tool_disclosure") or "")[:3200]
+    if TERRA_MODEL not in disclosure:
+        disclosure = (disclosure + f"; orchestration: {model} principal with {TERRA_MODEL} delegates.").lstrip("; ")
 
     return {
         "id": attempt_id,
@@ -312,6 +418,19 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         "lane": lane,
         "model": model,
         "effort": effort,
+        "orchestration": {
+            "architecture": "sol-principal-terra-delegates",
+            "principal_model": model,
+            "delegate_model": TERRA_MODEL,
+            "delegate_roles": [row["role"] for row in delegate_records],
+            "delegate_statuses": {row["role"]: row["status"] for row in delegate_records},
+        },
+        "delegates": [{
+            "role": row["role"], "model": row["model"], "effort": row["effort"],
+            "status": row["status"], "memo_path": row["memo_path"], "memo_sha256": row["memo_sha256"],
+            "usage": row["usage"],
+            "error": row["error"],
+        } for row in delegate_records],
         "outcome": outcome,
         "approach": result["approach"].strip()[:4000],
         "strategy": result.get("strategy") if isinstance(result.get("strategy"), dict) else {},
@@ -341,7 +460,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         "contribution_status": "candidate_eligible" if outcome == "candidate" else ("internal_result" if result.get("outcome") == "candidate" else "research_attempt"),
         "continuation": result.get("continuation") if isinstance(result.get("continuation"), dict) else {},
         "strategy_proposals": objects("strategy_proposals", 10),
-        "tool_disclosure": str(result.get("tool_disclosure") or "")[:4000],
+        "tool_disclosure": disclosure[:4000],
         "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),
         "usage": usage,
         "error": error,
