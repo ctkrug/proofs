@@ -10,14 +10,161 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T19:52:51.807779+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
+    "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+    "source_status": "open",
+    "facts_recorded": 3,
+    "exclusions_recorded": 4,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The mandatory baseline was completed. A May 2026 preprint postdating the official page's last edit was identified and incorporated. A Lean candidate defines IsSidon, GuaranteedSidonSize, ell via Nat.findGreatest, maximality API lemmas, three controls, and the answer(sorry)-scoped asymptotic declaration. Two independent semantic encodings agreed on all 512 subsets of {-4,...,4}; all seven adversarial controls passed. The Lean candidate was not elaborated because this environment lacks FormalConjectures and Mathlib. Two low-memory diagnostics also failed while creating a Lean thread; a controlled 4096 MB single-thread run reached the actual unknown-module error.",
+  "established_facts": [
+    {
+      "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
+      "evidence": ".proof-experiments/20260720-194758-ee6344/stdout.txt",
+      "scope": "Exactly 512 subsets of the nine-element integer domain",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim": "The maintained source marks Problem #530 open and not formalised.",
+      "evidence": "https://www.erdosproblems.com/530 accessed 2026-07-20",
+      "scope": "Maintained-site status, which explicitly disclaims literature completeness",
+      "status": "conditional",
+      "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim": "The May 2026 preprint reports a 1/(3 sqrt 3) asymptotic lower-bound constant over arbitrary finite subsets of R^d.",
+      "evidence": "https://arxiv.org/abs/2605.03181",
+      "scope": "Claim of arXiv v1; proof not independently reconstructed this epoch",
+      "status": "conditional",
+      "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-formal-premise-retrieval",
+      "family": "formal proof with premise retrieval",
+      "fingerprint": "formal-premise-retrieval",
+      "title": "Mandatory source/literature baseline followed by a scoped Lean interface draft and bounded independent semantic controls",
+      "mechanism": "Translate the maintained min-max statement using Finset, Nat.findGreatest, and Mathlib asymptotic equivalence; test the Sidon semantics independently before repository-pinned elaboration.",
+      "status": "blocked",
+      "hypothesis": "The proposed four-variable Sidon predicate represents uniqueness of unordered pair sums with repetition, and the resulting bounded extremal interface can express the explicit conjecture ell(N) ~ sqrt(N).",
+      "discriminating_test": "Compare the four-variable predicate with an independently implemented unordered-pair-sum encoding on every subset of {-4,...,4}, then attempt Lean elaboration far enough to identify whether the local environment contains the required repository dependencies.",
+      "blocker": "The current workspace has Lean 4.32.0 but no Formal Conjectures or Mathlib checkout, shell network access cannot resolve GitHub, and the target repository pins Lean 4.27.0 with Mathlib commit a3a10db0e9d66acbebf76c5e6a135066525ac900. No kernel build or external review is therefore available.",
+      "reopen_condition": "A network-enabled or prepopulated current Formal Conjectures checkout at the pinned dependency versions, followed by target and full builds.",
+      "reopen_evidence": "",
+      "last_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "attempts": 1,
+      "parent_ids": [
+        "formal-premise-retrieval"
+      ],
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "family": "isolated adversarial reconstruction",
+      "mechanism": "Give a reviewer only the official source and compiled candidate, asking them to reconstruct the meaning of IsSidon, GuaranteedSidonSize, ell, and the asymptotic declaration without the design narrative.",
+      "hypothesis": "An independent reviewer will recover the same unordered-pair, exact-cardinality, and asymptotic semantics.",
+      "discriminating_test": "Record the first discrepancy in a pull-request review; absence of a discrepancy is not accepted until the kernel build also passes.",
+      "rationale": "This directly attacks informal-to-formal mismatch, which finite controls and the Lean kernel cannot fully detect.",
+      "id": "strategy-7603cdb38bd3",
+      "fingerprint": "7603cdb38bd3",
+      "status": "proposed",
+      "title": "Give a reviewer only the official source and compiled candidate, asking them to reconstruct the meaning of IsSidon, GuaranteedSidonSize, ell, and the asymptotic declaration without the design narrative.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-formal-premise-retrieval"
+      ],
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Pinned Lean elaboration and full repository build",
+      "rationale": "This is the cheapest decisive verification of the drafted artifact.",
+      "next_experiment": "Run the exact build command recorded in CHECKPOINT.md inside a current Formal Conjectures checkout.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-195e69657a",
+      "strategy_id": "strategy-formal-premise-retrieval",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "description": "Repository review of informal-to-formal equivalence",
+      "rationale": "Kernel checking cannot establish that the declaration faithfully translates the English source.",
+      "next_experiment": "Request issue #773 assignment and submit a linked PR with the semantic-review checklist.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-8165298562",
+      "strategy_id": "strategy-formal-premise-retrieval",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "description": "Abbott constant discrepancy",
+      "rationale": "The abstract says c < 2/25 while the new preprint reports 0.0805; propagating an unexplained value would weaken the audit.",
+      "next_experiment": "Compare the relevant proof optimization and exact citation passage in the two papers.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-a4b0bba2bc",
+      "strategy_id": "strategy-formal-premise-retrieval",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Formalize weak Sidon uniqueness while ignoring repeated summands.",
+      "scope": "Statement design for Problem #530",
+      "reason": "It wrongly accepts {0,1,2}, despite 0+2=1+1.",
+      "evidence": ".proof-experiments/20260720-194758-ee6344/stdout.txt",
+      "reopen_condition": "An authoritative source explicitly changes the target to weak Sidon sets.",
+      "attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim_or_route": "Demand uniqueness of ordered pair representations.",
+      "scope": "Statement design for Problem #530",
+      "reason": "It wrongly rejects swapped representations (a,b) and (b,a).",
+      "evidence": ".proof-experiments/20260720-194758-ee6344/stdout.txt",
+      "reopen_condition": "None for the present source statement.",
+      "attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim_or_route": "Treat the official page's April 2026 literature summary as current-complete.",
+      "scope": "Baseline literature audit",
+      "reason": "arXiv:2605.03181 was submitted after the page edit and improves the lower-bound constant.",
+      "evidence": "https://arxiv.org/abs/2605.03181",
+      "reopen_condition": "Not applicable; future audits must search beyond the page edit date.",
+      "attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim_or_route": "Increase the finite checker cutoff as a contribution.",
+      "scope": "Bounded semantic testing",
+      "reason": "A larger arbitrary cutoff would neither validate Lean nor advance the mathematical bound.",
+      "evidence": "The successful 512-case test already meets its control purpose.",
+      "reopen_condition": "Only a newly identified semantic ambiguity requiring a specifically targeted finite control.",
+      "attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
+      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-formal-premise-retrieval",
+    "objective": "Convert the drafted interface into a kernel-checked, externally reviewed Formal Conjectures contribution.",
+    "first_action": "Execute the erdos530-lean-build command in CHECKPOINT.md from a current repository checkout.",
+    "stop_condition": "Stop successfully when target and full builds pass and a repository reviewer confirms statement equivalence; otherwise stop at and preserve the first elaboration or semantic discrepancy.",
+    "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4"
+  },
+  "recent_attempt_ids": [
+    "scout-bdf77f43574b-20260720-195251-a9f2d4"
+  ]
 }

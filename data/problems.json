@@ -406,10 +406,10 @@
       "asymptotic notation"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "active",
     "priority": 40,
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-20T17:25:05.376727+00:00",
     "source_checked_at": "2026-07-20T17:25:05.376753+00:00",
@@ -420,6 +420,7 @@
       "cached_input_tokens": 225024,
       "output_tokens": 2010,
       "reasoning_output_tokens": 1031
-    }
+    },
+    "last_attempt_at": "2026-07-20T19:52:51.807779+00:00"
   }
 ]
