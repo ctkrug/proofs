@@ -127,6 +127,11 @@ def record_attempt(attempt: dict[str, Any]) -> None:
             handle.flush()
             os.fsync(handle.fileno())
 
+        # Imported here to avoid a module cycle: research_state deliberately uses store's
+        # atomic JSON primitives. This projection is public research memory, not chain-of-thought.
+        from . import research_state
+        durable_state = research_state.update_from_attempt(problem, attempt)
+
         problem["attempt_count"] = int(problem.get("attempt_count") or 0) + 1
         problem["last_attempt_at"] = attempt["finished_at"]
         outcome = attempt["outcome"]
@@ -138,10 +143,15 @@ def record_attempt(attempt: dict[str, Any]) -> None:
         elif outcome == "progress":
             problem["status"] = "active"
         elif outcome in {"failed", "error", "no_progress"}:
+            actionable = any(
+                row.get("status") in {"proposed", "promising", "active"} and row.get("last_attempt_id") != attempt["id"]
+                for row in durable_state.get("strategies", [])
+            ) or any(row.get("status", "open") == "open" for row in durable_state.get("open_leads", []))
             if (
                 problem.get("lane") == "easy"
                 and outcome != "error"
                 and int(problem.get("research_attempt_count") or 0) >= 3
+                and not actionable
             ):
                 problem["status"] = "parked"
             else:

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "problem_id": "scout-bdf77f43574b",
+  "objective": "Add a scoped Lean declaration for: letting ℓ(N) be the largest k such that every finite A ⊆ ℝ with |A| = N has a Sidon subset S ⊆ A of size k, conjecturally ℓ(N) ~ √N. The contribution is the precise formal statement and supporting definitions, not a claimed proof.",
+  "completion_criteria": [
+    "A self-contained Lean file defining the Sidon predicate and extremal function, with the conjecture declaration typechecked by Lean’s kernel; CI and an independent local `lake build` reproduce the check."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 0,
+  "last_updated": null,
+  "synthesis_summary": "No completed research epoch yet.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": []
+}

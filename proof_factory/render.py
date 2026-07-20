@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import store
+from . import research_state, store
 
 
 STATUS_ORDER = ["candidate", "active", "attempted", "failed", "queued", "parked", "verified", "published"]
@@ -64,7 +64,7 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-mark">∎</span><span>Proof Factory</span></a>
-    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
+    <nav><a href="/#problems">Targets</a><a href="/#attempts">Attempts</a><a href="/strategies/">Strategies</a><a href="/method/">Method</a><a href="/api/state.json">Data</a></nav>
   </header>
   <main>{body}</main>
   <footer><span>AI-assisted research, disclosed per attempt.</span><span>Human responsibility: Charlie Krug.</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
@@ -88,7 +88,7 @@ def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any]) -> str:
 </article>"""
 
 
-def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> str:
+def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state: dict[str, Any]) -> str:
     last = attempts[-1] if attempts else None
     status = str(problem.get("status") or "queued")
     lane = str(problem.get("lane") or "easy")
@@ -98,13 +98,14 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> st
   <h3><a href="/problems/{h(problem['id'])}/">{h(problem['title'])}</a></h3>
   <p>{h(problem.get('statement'))}</p>
   <div class="meter"><span style="width:{min(100, int(problem.get('difficulty') or 0) * 10)}%"></span></div>
-  <div class="card-meta"><span>Difficulty {h(problem.get('difficulty'))}/10</span><span>{h(problem.get('attempt_count', 0))} attempts</span></div>
+  <div class="card-meta"><span>Difficulty {h(problem.get('difficulty'))}/10</span><span>{h(problem.get('attempt_count', 0))} attempts · {h(research_state.summary_counts(state)['open_leads'])} open leads</span></div>
   <div class="last-note"><strong>Latest:</strong> {h((last or {}).get('summary') or 'No research pass yet.')}</div>
   <div class="card-actions"><a href="{h(problem.get('source_url'))}" rel="noopener">Official source ↗</a><a href="/problems/{h(problem['id'])}/">Full record →</a></div>
 </article>"""
 
 
 def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runtime: dict[str, Any]) -> str:
+    states = research_state.load_all(problems)
     by_problem: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:
         by_problem[str(attempt.get("problem_id"))].append(attempt)
@@ -172,7 +173,7 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
 <section class="healthline"><span class="health health-{h(health)}">System {h(health)}</span><span>{h(live_work)}</span><span>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span><span>{issues}</span></section>
 <section id="problems" class="section-block">
   <div class="section-heading"><div><span class="overline">Contribution registry</span><h2>Active, tried, failed, and past work</h2></div><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="hard">Hard</button><button class="filter" data-filter="easy">Discovery</button><button class="filter" data-filter="candidate">Candidates</button></div></div>
-  <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']]) for row in ordered)}</div>
+  <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ordered)}</div>
 </section>
 <section id="attempts" class="section-block attempts-block">
   <div class="section-heading"><div><span class="overline">Append-only history</span><h2>Recent research attempts</h2></div><a href="/api/state.json">Download JSON →</a></div>
@@ -182,12 +183,37 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
     return _layout("Live ledger", body)
 
 
-def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> str:
+def _state_items(rows: list[dict[str, Any]], primary: str, secondary: str, *, empty: str) -> str:
+    if not rows:
+        return f"<li>{h(empty)}</li>"
+    result = []
+    for row in rows:
+        reopen = f'<br><em>Reopen only if:</em> {h(row.get("reopen_condition"))}' if row.get("reopen_condition") else ""
+        result.append(f'<li><strong>{h(row.get(primary))}</strong><br>{h(row.get(secondary))}{reopen}</li>')
+    return "".join(result)
+
+
+def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]], state: dict[str, Any]) -> str:
     technique_tags = "".join(f"<span>{h(x)}</span>" for x in problem.get("techniques") or [])
     attempt_html = "".join(_attempt_row(row, problem) for row in reversed(attempts)) or '<div class="empty">No attempt has completed yet. The problem is queued transparently.</div>'
     candidate = ""
     if problem.get("status") == "candidate":
         candidate = '<div class="candidate-alert"><div><strong>Unverified candidate finding</strong><p>Read the attempt and evidence below. This is not an accepted solution.</p></div></div>'
+    counts = research_state.summary_counts(state)
+    strategies = list(reversed(state.get("strategies", [])[-12:]))
+    ruled = list(reversed(state.get("ruled_out", [])[-10:]))
+    leads = [row for row in state.get("open_leads", [])[-10:] if row.get("status", "open") == "open"]
+    checkpoint = state.get("next_session", {})
+    research_map = f"""
+<section class="research-map">
+  <div class="section-heading"><div><span class="overline">Resumable campaign memory</span><h2>Research map</h2></div><span>{h(state.get('epoch_count', 0))} epochs · {counts['promising']} promising · {counts['blocked']} blocked · {counts['ruled_out']} ruled out</span></div>
+  <div class="research-grid">
+    <article><span class="overline">Next session checkpoint</span><h3>{h(checkpoint.get('objective') or 'Select the cheapest new discriminator.')}</h3><p><strong>First action:</strong> {h(checkpoint.get('first_action') or 'Review the source and strategy registry.')}</p><p><strong>Stop or redirect when:</strong> {h(checkpoint.get('stop_condition') or 'The planned discriminator resolves the route.')}</p></article>
+    <article><span class="overline">Open leads</span><ul>{_state_items(leads, 'description', 'next_experiment', empty='No open lead is checkpointed.')}</ul></article>
+    <article><span class="overline">Strategy registry</span><ul>{_state_items(strategies, 'family', 'mechanism', empty='No strategy has completed an epoch yet.')}</ul></article>
+    <article><span class="overline">Ruled out, with scope</span><ul>{_state_items(ruled, 'claim_or_route', 'reason', empty='Nothing has been rigorously ruled out yet.')}</ul></article>
+  </div>
+</section>"""
     body = f"""
 <section class="dossier-head">
   <a class="back" href="/">← Live ledger</a>
@@ -203,6 +229,7 @@ def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]]) -> st
   <article><span class="overline">Tracking</span><dl><dt>Difficulty</dt><dd>{h(problem.get('difficulty'))}/10</dd><dt>Attempts</dt><dd>{h(problem.get('attempt_count',0))}</dd><dt>Last attempt</dt><dd>{h(_time(problem.get('last_attempt_at')))}</dd><dt>Source status</dt><dd>{h(problem.get('problem_state'))}</dd><dt>External validation</dt><dd>{h(problem.get('external_validation_state') or 'none')}</dd></dl></article>
 </section>
 <section class="techniques"><span class="overline">Techniques and harnesses</span><div>{technique_tags}</div></section>
+{research_map}
 <section class="section-block attempts-block"><div class="section-heading"><div><span class="overline">Complete history</span><h2>Attempts on this problem</h2></div></div><div class="attempt-list">{attempt_html}</div></section>
 """
     return _layout(problem["title"], body, description=str(problem.get("statement")))
@@ -212,10 +239,21 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
     def items(name: str) -> str:
         rows = attempt.get(name) or []
         return "<ul>" + "".join(f"<li>{h(x)}</li>" for x in rows) + "</ul>" if rows else '<p class="muted">None recorded.</p>'
+    def object_items(name: str, primary: str) -> str:
+        rows = [row for row in attempt.get(name, []) if isinstance(row, dict)]
+        if not rows:
+            return '<p class="muted">None recorded.</p>'
+        rendered = []
+        for row in rows:
+            details = " · ".join(str(value) for key, value in row.items() if key != primary and value)
+            rendered.append(f'<li><strong>{h(row.get(primary))}</strong><br>{h(details)}</li>')
+        return "<ul>" + "".join(rendered) + "</ul>"
     outcome = str(attempt.get("outcome") or "unknown")
     warning = ""
     if outcome == "candidate":
         warning = '<div class="candidate-alert"><div><strong>Candidate for review — not a solution claim</strong><p>Independent statement checking, criticism, literature review, and verification remain required.</p></div></div>'
+    if attempt.get("policy_flags"):
+        warning += f'<div class="candidate-alert"><div><strong>Research-policy redirect</strong><p>{h(" · ".join(attempt.get("policy_flags") or []))}</p></div></div>'
     if problem.get("publication_attempt_id") == attempt.get("id"):
         warning += f'<div class="candidate-alert"><div><strong>{h(problem.get("publication_state"))}</strong><p>Human-approved research note; external acceptance and peer review are separate states.</p></div><a href="/publications/{h(attempt["id"])}/">Publication packet →</a></div>'
     review_html = "".join(
@@ -226,12 +264,17 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
 <section class="attempt-head"><a class="back" href="/problems/{h(problem['id'])}/">← {h(problem['title'])}</a><div class="eyebrow"><span>{h(_time(attempt.get('finished_at')))}</span><span>{h(attempt.get('model'))} · {h(attempt.get('effort'))}</span></div><h1>{h(attempt.get('approach'))}</h1>{_badge(outcome)}<p class="lead">{h(attempt.get('summary'))}</p></section>
 {warning}
 <section class="attempt-detail">
+  <article><span class="overline">Strategy and discriminator</span><p><strong>{h((attempt.get('strategy') or {}).get('family') or 'Legacy attempt')}</strong></p><p>{h((attempt.get('strategy') or {}).get('mechanism') or attempt.get('approach'))}</p><p><strong>Hypothesis:</strong> {h(attempt.get('hypothesis') or 'Not recorded.')}</p><p><strong>Test:</strong> {h(attempt.get('discriminating_test') or 'Not recorded.')}</p></article>
   <article><span class="overline">Rationale</span><p>{h(attempt.get('rationale'))}</p></article>
   <article><span class="overline">Claims requiring scrutiny</span>{items('claims')}</article>
   <article><span class="overline">Evidence and scope</span>{items('evidence')}</article>
   <article><span class="overline">Computational experiments</span>{items('experiments')}</article>
   <article><span class="overline">Independent checker</span><p>{h(attempt.get('independent_checker') or 'Not provided.')}</p></article>
   <article><span class="overline">Cross-domain transfers tested</span>{items('transfer_insights')}</article>
+  <article><span class="overline">Established facts</span>{object_items('established_facts', 'claim')}</article>
+  <article><span class="overline">Ruled out in this epoch</span>{object_items('ruled_out', 'claim_or_route')}</article>
+  <article><span class="overline">Open leads</span>{object_items('open_leads', 'description')}</article>
+  <article><span class="overline">Continuation checkpoint</span><p><strong>Objective:</strong> {h((attempt.get('continuation') or {}).get('objective'))}</p><p><strong>First action:</strong> {h((attempt.get('continuation') or {}).get('first_action'))}</p><p><strong>Stop condition:</strong> {h((attempt.get('continuation') or {}).get('stop_condition'))}</p></article>
   <article><span class="overline">Next moves</span>{items('next_steps')}</article>
   <article><span class="overline">Citations</span><ul>{''.join(f'<li><a href="{h(x)}" rel="noopener">{h(x)} ↗</a></li>' for x in attempt.get('citations') or [])}</ul></article>
   <article><span class="overline">Tool disclosure</span><p>{h(attempt.get('tool_disclosure'))}</p><dl><dt>Duration</dt><dd>{h(attempt.get('duration_seconds','—'))}s</dd><dt>Review state</dt><dd>{h(attempt.get('review_status'))}</dd><dt>Attempt ID</dt><dd><code>{h(attempt.get('id'))}</code></dd></dl></article>
@@ -271,18 +314,50 @@ def _method_page() -> str:
 <section class="method-grid">
   <article><strong>01</strong><h2>Source</h2><p>Every problem has a current status page, original-source trail, precise statement, and explicit verification contract.</p></article>
   <article><strong>02</strong><h2>Select</h2><p>Finite witnesses, exact optima, classifications, sequence contributions, formalizations, and narrow lemmas outrank famous narratives when they have a credible external acceptance path.</p></article>
-  <article><strong>03</strong><h2>Experiment</h2><p>Sol designs theories and discriminating tests. Deterministic scripts, Terra, exact solvers, and proof tools do repetition, parameter sweeps, and falsification with recorded seeds and hashes.</p></article>
-  <article><strong>04</strong><h2>Label</h2><p>Failed, no progress, progress, and candidate are distinct states. Candidate never means solved.</p></article>
-  <article><strong>05</strong><h2>Review</h2><p>A candidate needs statement validation, isolated criticism, post-candidate literature search, reproducible evidence, and Charlie's approval.</p></article>
-  <article><strong>06</strong><h2>Release</h2><p>One human approval action creates and publishes a versioned research packet with claims, artifacts, hashes, citations, limitations, and AI disclosure. Expert and peer-review states remain separate.</p></article>
+  <article><strong>03</strong><h2>Portfolio</h2><p>Every problem keeps a durable registry of distinct mechanisms, live leads, theorem-strength blockers, scoped negative results, and explicit conditions for reopening a route.</p></article>
+  <article><strong>04</strong><h2>Experiment</h2><p>Sol designs theories and discriminating tests. Deterministic scripts, Terra, exact solvers, and proof tools do repetition, parameter sweeps, and falsification with recorded seeds and hashes.</p></article>
+  <article><strong>05</strong><h2>Resume</h2><p>The campaign can continue indefinitely through bounded safety-controlled epochs. Each epoch must leave an objective, first action, and stop condition for the next one.</p></article>
+  <article><strong>06</strong><h2>Challenge</h2><p>Failed, no progress, progress, and candidate are distinct. Candidates get isolated reconstruction, source and novelty checks, reproducible evidence, and Charlie's approval.</p></article>
+  <article><strong>07</strong><h2>Improve</h2><p>A separate strategy lab studies current primary research and may add or revise only concrete, testable methods with evaluators and named failure modes.</p></article>
+  <article><strong>08</strong><h2>Release</h2><p>One human approval action creates and publishes a versioned packet with claims, artifacts, hashes, citations, limitations, and AI disclosure. External acceptance remains separate.</p></article>
 </section>
 <section class="principles"><h2>Research integrity</h2><p>This project follows the practical direction of the Leiden Declaration: disclose automated tools, preserve attribution, support independent verification, retain human responsibility, and do not substitute a website post for peer review.</p><div><a href="https://leidendeclaration.ai/">Leiden Declaration ↗</a><a href="https://github.com/teorth/erdosproblems/wiki/What-to-do-when-I-think-I-managed-to-get-AI-to-solve-an-Erd%C5%91s-problem%3F">Erdős AI review guidance ↗</a><a href="https://github.com/google-deepmind/formal-conjectures">Formal Conjectures ↗</a></div></section>
 """
     return _layout("Method", body)
 
 
+def _strategies_page(library: list[dict[str, Any]], proposals: list[dict[str, Any]]) -> str:
+    cards = []
+    for row in library:
+        failures = "".join(f"<li>{h(value)}</li>" for value in row.get("failure_modes", [])) or "<li>Not recorded.</li>"
+        sources = "".join(f'<a href="{h(url)}" rel="noopener">Source ↗</a>' for url in row.get("sources", []))
+        cards.append(f"""
+<article><span class="overline">Version {h(row.get('version') or 1)}</span><h2>{h(row.get('family'))}</h2>
+<p><strong>Use when:</strong> {h(row.get('use_when'))}</p><p><strong>Mechanism:</strong> {h(row.get('mechanism'))}</p>
+<p><strong>First discriminator:</strong> {h(row.get('first_discriminator'))}</p>
+{f'<p><strong>Executable template:</strong> {h(row.get("experiment_template"))}</p>' if row.get('experiment_template') else ''}
+<p><strong>Known failure modes:</strong></p><ul>{failures}</ul><div class="strategy-sources">{sources}</div></article>""")
+    recent = "".join(
+        f'<li><strong>{h(row.get("action"))}: {h(row.get("family"))}</strong> · {_time(row.get("recorded_at"))}<br>{h(row.get("change_rationale"))}</li>'
+        for row in reversed(proposals[-20:])
+    ) or '<li>No autonomous revisions have completed yet. The seeded library is active.</li>'
+    body = f"""
+<section class="method-head"><span class="overline">Self-improving method registry</span><h1>Strategies must earn<br><em>their compute.</em></h1><p>The daily strategy lab studies primary research and can add or revise a method only when it specifies an applicability condition, information-generating mechanism, cheap discriminator, executable experiment, sources, and failure modes.</p></section>
+<section class="strategy-library">{''.join(cards)}</section>
+<section class="principles"><h2>Revision ledger</h2><ul>{recent}</ul><p>No revision silently rewrites a past attempt. Immutable attempt records and problem-specific research maps remain available in the public data export.</p></section>
+"""
+    return _layout("Strategies", body)
+
+
 CSS = r"""
 :root{--ink:#151716;--muted:#6b716d;--paper:#f4f1e8;--card:#fffdf7;--line:#d8d3c7;--red:#b64232;--amber:#c77b22;--green:#2b7254;--blue:#345f86;--black:#181a19}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}.topbar{height:72px;padding:0 clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(244,241,232,.94);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20}.brand{display:flex;align-items:center;gap:11px;color:var(--ink);font-weight:760;text-decoration:none;letter-spacing:-.02em}.brand-mark{width:30px;height:30px;display:grid;place-items:center;background:var(--black);color:#fff;border-radius:50%;font-size:14px}.topbar nav{display:flex;gap:26px}.topbar nav a,footer a{color:var(--ink);text-decoration:none;font-size:14px}.topbar nav a:hover{text-decoration:underline}main{max-width:1440px;margin:auto}.hero{padding:clamp(74px,10vw,150px) clamp(20px,7vw,110px) 74px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 82% 18%,rgba(198,123,34,.13),transparent 28%),linear-gradient(135deg,#f7f4eb 0,#eee9dc 100%)}.hero-kicker,.overline,.panel-label,.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:750;color:var(--muted)}.live-dot,.pulse{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green);margin-right:8px;box-shadow:0 0 0 5px rgba(43,114,84,.12)}.hero h1,.dossier-head h1,.attempt-head h1,.method-head h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(48px,8vw,112px);line-height:.93;letter-spacing:-.055em;font-weight:400;margin:23px 0 30px;max-width:1060px}.hero h1 em,.method-head h1 em{color:var(--red);font-weight:400}.hero-copy{max-width:770px;font-size:clamp(18px,2vw,25px);color:#444943}.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:62px;max-width:900px}.hero-stats div{background:rgba(255,253,247,.74);padding:22px}.hero-stats strong{font-family:Georgia,serif;font-size:36px;font-weight:400;display:block}.hero-stats span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.candidate-alert{margin:28px clamp(20px,7vw,110px);padding:20px 24px;background:#fff3dc;border:1px solid #dca85d;display:flex;justify-content:space-between;align-items:center;gap:20px}.candidate-alert p{margin:3px 0 0;color:#6b512f}.candidate-alert a{color:var(--ink);font-weight:700}.pulse{background:var(--amber);margin-right:12px}.lanes{padding:55px clamp(20px,7vw,110px);display:grid;grid-template-columns:1fr 1fr;gap:24px}.lane-panel{min-height:280px;padding:34px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}.hard-panel{border-top:5px solid var(--red)}.easy-panel{border-top:5px solid var(--blue)}.lane-panel h2{font-family:Georgia,serif;font-size:36px;line-height:1.1;font-weight:400;margin:26px 0 12px}.lane-panel p{color:#545a55;max-width:650px}.panel-foot{margin-top:auto;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;font-size:13px}.panel-foot a{color:var(--ink);font-weight:700}.healthline{margin:0 clamp(20px,7vw,110px) 35px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.health{color:var(--ink);font-weight:750}.health:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-right:8px}.health-healthy:before{background:var(--green)}.health-degraded:before{background:var(--red)}.section-block{padding:72px clamp(20px,7vw,110px)}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:30px}.section-heading h2{font-family:Georgia,serif;font-weight:400;font-size:clamp(35px,5vw,60px);line-height:1;margin:8px 0 0}.section-heading>a{color:var(--ink);font-weight:700}.filters{display:flex;gap:8px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:transparent;padding:9px 14px;border-radius:100px;cursor:pointer}.filter.active{background:var(--black);color:#fff;border-color:var(--black)}.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.problem-card{background:var(--card);border:1px solid var(--line);padding:25px;min-height:390px;display:flex;flex-direction:column}.problem-card.hidden{display:none}.card-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.lane,.badge{display:inline-flex;align-items:center;border-radius:100px;padding:5px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}.lane{background:#ece8dc}.lane-hard{color:var(--red);background:#f8e5df}.lane-easy{color:var(--blue);background:#e3edf5}.lane-calibration{color:#64548c;background:#ece7f5}.badge{border:1px solid var(--line);background:#fff}.badge-candidate{background:#fff0d2;border-color:#dea750;color:#7a4c0d}.badge-active,.badge-progress{background:#e3f1ea;border-color:#9bc4af;color:#1f6348}.badge-attempted,.badge-failed,.badge-no_progress,.badge-error{background:#f2e7e2;border-color:#d5ada1;color:#8b392d}.badge-verified,.badge-published{background:#e2eee7;border-color:#8bb89e;color:#235e45}.problem-card h3{font-family:Georgia,serif;font-size:28px;line-height:1.1;font-weight:400;margin:22px 0 14px}.problem-card h3 a,.attempt-row h3 a{color:var(--ink);text-decoration:none}.problem-card p{font-size:14px;color:#4f5551}.meter{height:4px;background:#e5e0d5;margin-top:auto}.meter span{display:block;height:100%;background:var(--red)}.card-meta,.card-actions{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);margin-top:9px}.last-note{font-size:13px;padding:17px 0;margin-top:18px;border-top:1px solid var(--line);color:#555b57}.card-actions{margin-top:auto;padding-top:13px}.card-actions a{color:var(--ink);font-weight:700;text-decoration:none}.attempts-block{background:#ebe6da}.attempt-list{border-top:1px solid #c9c2b4}.attempt-row{display:grid;grid-template-columns:5px 1fr;border-bottom:1px solid #c9c2b4;background:rgba(255,253,247,.45)}.attempt-rail{background:var(--muted)}.outcome-candidate{background:var(--amber)}.outcome-progress,.outcome-verified,.outcome-published{background:var(--green)}.outcome-failed,.outcome-no_progress,.outcome-error{background:var(--red)}.attempt-copy{padding:24px 28px}.eyebrow{display:flex;gap:25px}.attempt-copy h3{font-family:Georgia,serif;font-size:26px;font-weight:400;margin:11px 0}.attempt-copy p{margin:6px 0;color:#515753}.attempt-copy .approach{color:var(--ink);font-weight:700}.row-end{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.arrow{color:var(--ink);font-weight:700;text-decoration:none}.dossier-head,.attempt-head,.method-head{padding:70px clamp(20px,7vw,110px) 55px;border-bottom:1px solid var(--line)}.dossier-head h1,.attempt-head h1,.method-head h1{font-size:clamp(48px,7vw,90px);margin-top:30px}.back{color:var(--ink);text-decoration:none;font-size:14px}.statement,.lead{font-family:Georgia,serif;font-size:clamp(20px,2.2vw,30px);max-width:1000px}.source-line{display:flex;gap:22px;margin-top:28px;flex-wrap:wrap}.source-line a{color:var(--ink);font-weight:700}.dossier-grid,.attempt-detail,.method-grid{padding:44px clamp(20px,7vw,110px);display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.dossier-grid article,.attempt-detail article,.method-grid article{background:var(--card);border:1px solid var(--line);padding:26px}.dossier-grid p,.attempt-detail p{color:#4d534e}.dossier-grid dl,.attempt-detail dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 0}.dossier-grid dt,.attempt-detail dt{color:var(--muted)}.dossier-grid dd,.attempt-detail dd{margin:0;text-align:right}.techniques{margin:0 clamp(20px,7vw,110px);padding:26px;border:1px solid var(--line);background:var(--card)}.techniques>div{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.techniques>div span{background:#ebe7dc;padding:7px 11px;border-radius:4px;font-size:13px}.empty{padding:34px;background:var(--card)}.attempt-detail{grid-template-columns:repeat(2,1fr)}.attempt-detail ul{padding-left:20px}.attempt-detail li{margin:8px 0}.attempt-detail a{overflow-wrap:anywhere;color:var(--blue)}code{font-size:11px;overflow-wrap:anywhere}.muted{color:var(--muted)}.method-head p{font-size:22px;max-width:750px}.method-grid{grid-template-columns:repeat(3,1fr)}.method-grid article strong{font-family:Georgia,serif;font-size:32px;color:var(--red);font-weight:400}.method-grid h2{font-family:Georgia,serif;font-size:32px;font-weight:400;margin:20px 0 10px}.principles{margin:20px clamp(20px,7vw,110px) 80px;background:var(--black);color:#fff;padding:clamp(30px,5vw,65px)}.principles h2{font-family:Georgia,serif;font-size:45px;font-weight:400}.principles p{max-width:900px;color:#d5d7d5;font-size:18px}.principles div{display:flex;flex-wrap:wrap;gap:20px;margin-top:30px}.principles a{color:#fff}footer{min-height:100px;border-top:1px solid var(--line);padding:28px clamp(20px,5vw,72px);display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--muted);font-size:12px}@media(max-width:980px){.problem-grid,.method-grid{grid-template-columns:repeat(2,1fr)}.hero-stats{grid-template-columns:repeat(2,1fr)}.dossier-grid{grid-template-columns:1fr 1fr}}@media(max-width:720px){.topbar nav a:not(:first-child){display:none}.lanes,.problem-grid,.dossier-grid,.attempt-detail,.method-grid{grid-template-columns:1fr}.section-heading{align-items:start;flex-direction:column}.hero{padding-top:70px}.hero-stats{grid-template-columns:1fr 1fr}.panel-foot,.card-actions,footer{align-items:flex-start;flex-direction:column}.eyebrow{flex-direction:column;gap:3px}.candidate-alert{align-items:flex-start;flex-direction:column}}
+"""
+
+
+CSS += r"""
+.research-map{padding:55px clamp(20px,7vw,110px)}.research-map>.section-heading>span{color:var(--muted);font-size:13px}.research-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.research-grid article{background:var(--card);border:1px solid var(--line);padding:26px}.research-grid h3{font-family:Georgia,serif;font-size:28px;font-weight:400;line-height:1.15;margin:16px 0}.research-grid ul{padding-left:20px}.research-grid li{margin:11px 0}.research-grid em{color:var(--red)}
+.strategy-library{padding:44px clamp(20px,7vw,110px);display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.strategy-library article{background:var(--card);border:1px solid var(--line);padding:28px}.strategy-library h2{font-family:Georgia,serif;font-size:32px;font-weight:400;line-height:1.1}.strategy-sources{display:flex;gap:14px;flex-wrap:wrap}.strategy-sources a{color:var(--blue);font-weight:700}
+@media(max-width:720px){.research-grid,.strategy-library{grid-template-columns:1fr}}
 """
 
 
@@ -301,6 +376,18 @@ def build() -> Path:
     validations = store.read_json(store.DATA / "validations.json", [])
     if not isinstance(validations, list):
         validations = []
+    research_states = research_state.load_all(problems)
+    strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
+    strategy_proposals = []
+    proposals_file = store.DATA / "strategy_proposals.jsonl"
+    if proposals_file.exists():
+        for line in proposals_file.read_text().splitlines():
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(row, dict):
+                strategy_proposals.append(row)
     if store.SITE.exists():
         # Keep the mount-point directory itself intact for systemd ReadWritePaths.
         for child in store.SITE.iterdir():
@@ -317,7 +404,7 @@ def build() -> Path:
         by_problem[str(attempt.get("problem_id"))].append(attempt)
     problem_by_id = {row["id"]: row for row in problems}
     for problem in problems:
-        _write(store.SITE / "problems" / problem["id"] / "index.html", _problem_page(problem, by_problem[problem["id"]]))
+        _write(store.SITE / "problems" / problem["id"] / "index.html", _problem_page(problem, by_problem[problem["id"]], research_states[problem["id"]]))
     for attempt in attempts:
         problem = problem_by_id.get(str(attempt.get("problem_id")))
         if problem:
@@ -326,6 +413,7 @@ def build() -> Path:
             if problem.get("publication_attempt_id") == attempt.get("id"):
                 _write(store.SITE / "publications" / attempt["id"] / "index.html", _publication_page(problem, attempt, reviews, validations))
     _write(store.SITE / "method" / "index.html", _method_page())
+    _write(store.SITE / "strategies" / "index.html", _strategies_page(strategy_library, strategy_proposals))
     public_state = {
         "generated_at": store.now_iso(),
         "runtime": runtime,
@@ -333,10 +421,13 @@ def build() -> Path:
         "attempts": attempts,
         "reviews": reviews,
         "validations": validations,
+        "research_states": research_states,
+        "strategy_library": strategy_library,
+        "strategy_proposals": strategy_proposals,
     }
     _write(store.SITE / "api" / "state.json", json.dumps(public_state, indent=2, ensure_ascii=False) + "\n")
     _write(store.SITE / "robots.txt", "User-agent: *\nAllow: /\nSitemap: https://proofs.charliekrug.com/sitemap.xml\n")
-    urls = ["/", "/method/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
+    urls = ["/", "/method/", "/strategies/"] + [f"/problems/{p['id']}/" for p in problems] + [f"/attempts/{a['id']}/" for a in attempts]
     urls += [f"/publications/{p['publication_attempt_id']}/" for p in problems if p.get("publication_attempt_id")]
     _write(store.SITE / "sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "".join(f"<url><loc>https://proofs.charliekrug.com{h(url)}</loc></url>\n" for url in urls) + "</urlset>\n")
     _write(store.SITE / "_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  X-Frame-Options: DENY\n\n/assets/*\n  Cache-Control: public, max-age=3600\n")

@@ -16,7 +16,7 @@ candidate, verified, and published attempt. The system separates two research la
 - **Discovery lane:** six daily passes rotate through relatively approachable, objectively
   checkable contributions. A daily source-only intake currently keeps a 12-problem frontier from
   the versioned Erdős Problems database; the schema and selector support broader contribution types.
-  Three bounded non-error passes park a target and open space for another.
+  Three bounded non-error passes park a target only when no actionable lead or untried strategy remains.
 
 The system never equates model confidence with proof. A candidate is a review request. A result may
 be called solved only after statement validation, independent criticism, literature review,
@@ -33,6 +33,8 @@ python3 -m proof_factory watchdog
 python3 -m proof_factory doctor
 python3 -m proof_factory intake --target 12
 python3 -m proof_factory scout
+python3 -m proof_factory strategy-lab
+python3 -m proof_factory backfill-state
 scripts/approve-and-publish.sh ATTEMPT_ID "human review note"
 python3 -m proof_factory validate --attempt ATTEMPT_ID --state expert-confirmed --source-url URL --note "..."
 ```
@@ -44,6 +46,11 @@ cleared before every model run, so there is no metered model fallback.
 
 - `data/problems.json` is the versioned problem registry.
 - `data/attempts.jsonl` is append-only research history.
+- `data/research_states/<problem>.json` is the durable, resumable research map: strategy fingerprints,
+  established facts, scoped negative results, reopen conditions, open leads, and the next first action.
+- `data/strategy_library.json` contains executable cross-problem methods. A daily source-grounded
+  strategy lab can add or materially improve one entry; every revision is appended to
+  `data/strategy_proposals.jsonl`.
 - `data/validations.json` records externally observable outcomes; only positive external validation
   teaches the selector that a contribution family is a win.
 - `data/source_registry.json` routes a daily Terra scout across current papers and maintained

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "problem_id": "erdos-307",
+  "objective": "Are there finite sets of primes P and Q such that 1 = (sum over p in P of 1/p)(sum over q in Q of 1/q)?",
+  "completion_criteria": [
+    "A positive answer is a pair of finite prime sets checked by exact rational arithmetic."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 0,
+  "last_updated": null,
+  "synthesis_summary": "No completed research epoch yet.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": []
+}

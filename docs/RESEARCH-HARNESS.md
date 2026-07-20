@@ -15,8 +15,10 @@ but invalid prose, and publicity before community evaluation.
 
 ## Attempt design
 
-Each run pursues one bounded route. The prompt retrieves prior approach summaries and requires the
-new route to differ materially. Useful outputs include:
+The project has no preset endpoint, but each run is a bounded, restartable epoch. The prompt loads a
+compact durable map rather than a shallow chat transcript. Every epoch identifies a stable strategy
+family and mechanism, chooses the cheapest discriminator, and leaves an objective, exact first action,
+and stop condition. Useful outputs include:
 
 - a finite witness with an independent checker;
 - a smaller equivalent search space;
@@ -28,6 +30,17 @@ new route to differ materially. Useful outputs include:
 The approach archive follows the useful part of AlphaEvolve's pattern: preserve candidate programs
 and strategies, score them only through objective evaluators, and let future runs mutate the most
 promising artifacts. Eloquence is never an evaluator.
+
+The portfolio also borrows concrete mechanisms from FunSearch (executable candidates plus an objective
+evaluator and diverse archive), the AI co-scientist system (independent generation, reflection, ranking,
+evolution, proximity checks, and synthesis), and LeanDojo/LeanAgent (retrieval-guided formal work and a
+continuing curriculum). These are method templates, not evidence that any mathematical claim is true.
+
+The problem-specific map distinguishes `proposed`, `active`, `promising`, `blocked`, `ruled_out`,
+`exhausted`, and `superseded`. Negative results always carry their exact scope; dead routes carry an
+explicit reopen condition. A daily strategy lab browses current primary sources and can change the
+global library only by supplying an executable experiment, evaluator/discriminator, applicability
+condition, and named failure modes.
 
 The injected `computational-researcher` skill makes the agent behave as a principal investigator:
 translate a claim into one falsifiable hypothesis, choose a discriminating test, write a deterministic
@@ -69,4 +82,9 @@ The north star and broader target taxonomy live in `docs/ACADEMIC-CONTRIBUTIONS.
 - <https://github.com/google-deepmind/formal-conjectures>
 - <https://lean-lang.org/doc/reference/latest/>
 - <https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/>
+- <https://doi.org/10.1038/s41586-023-06924-6>
+- <https://arxiv.org/abs/2506.13131>
+- <https://doi.org/10.1038/s41586-026-10644-y>
+- <https://arxiv.org/abs/2306.15626>
+- <https://leandojo.org/leanagent.html>
 - <https://leidendeclaration.ai/>

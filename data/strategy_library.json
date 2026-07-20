@@ -1,0 +1,65 @@
+[
+  {
+    "id": "evaluator-guided-program-evolution",
+    "family": "evaluator-guided program evolution",
+    "use_when": "A candidate object can be generated as code and scored cheaply, exactly, and repeatedly.",
+    "mechanism": "Maintain a diverse archive of executable candidates; have models mutate programs, run a deterministic evaluator, retain improvements and informative novelties, and periodically recombine distinct lineages.",
+    "first_discriminator": "Implement a tiny evaluator and verify that it ranks known good, bad, and adversarial controls correctly before spending on generation.",
+    "failure_modes": ["proxy score diverges from the mathematical objective", "archive collapses to one lineage", "floating-point or timeout artifacts look like improvements"],
+    "sources": ["https://doi.org/10.1038/s41586-023-06924-6", "https://arxiv.org/abs/2506.13131"]
+  },
+  {
+    "id": "generate-reflect-rank-evolve",
+    "family": "generate-reflect-rank-evolve",
+    "use_when": "The space is conceptual and several hypotheses or mechanisms can be compared by explicit criteria.",
+    "mechanism": "Generate initially independent hypotheses, subject them to reflection and pairwise ranking, evolve the survivors, test proximity to established facts, then produce a synthesis that redirects the portfolio.",
+    "first_discriminator": "Define a rubric with novelty, falsifiability, source consistency, cheapest test, and theorem-strength-blocker penalties; rank a small independent batch.",
+    "failure_modes": ["agents converge through shared wording rather than evidence", "ranking rewards fluency", "meta-review launders a repeated assumption"],
+    "sources": ["https://doi.org/10.1038/s41586-026-10644-y"]
+  },
+  {
+    "id": "formal-premise-retrieval",
+    "family": "formal proof with premise retrieval",
+    "use_when": "The target or useful supporting lemmas exist in Lean, or a narrow formalization is itself a contribution.",
+    "mechanism": "Translate the exact statement, retrieve nearby declarations and premises from the repository, attempt short proof states programmatically, and preserve compilable partial lemmas as curriculum for later epochs.",
+    "first_discriminator": "Create the minimal compiling statement and retrieve ten semantically and structurally nearby declarations; test whether one closes or materially simplifies a proof state.",
+    "failure_modes": ["formal statement is not equivalent to the source", "premise search memorizes repository artifacts", "a sorry/admit survives unnoticed"],
+    "sources": ["https://arxiv.org/abs/2306.15626", "https://leandojo.org/leanagent.html"]
+  },
+  {
+    "id": "counterexample-certificate-search",
+    "family": "counterexample and witness search",
+    "use_when": "One explicit object refutes the universal claim or establishes a finite existence claim.",
+    "mechanism": "Derive necessary constraints, enumerate canonical representatives, use exact arithmetic, minimize any witness, and emit a small independent certificate/checker.",
+    "first_discriminator": "Check known controls and exhaust the smallest nontrivial parameter shell under two independent encodings.",
+    "failure_modes": ["symmetry breaking removes real witnesses", "numeric tolerances create false witnesses", "search scope is reported as universal"],
+    "sources": []
+  },
+  {
+    "id": "sat-smt-ilp-exact-encoding",
+    "family": "SAT SMT ILP exact encoding",
+    "use_when": "The claim has finite combinatorial structure, an exact optimization target, or a bounded obstruction.",
+    "mechanism": "Encode the bounded problem twice, solve for witnesses or UNSAT, extract a certificate when supported, and validate it with an implementation independent of the generating model.",
+    "first_discriminator": "Encode the first published known-positive and known-negative instances and require both results before extending the frontier.",
+    "failure_modes": ["encoding omits a constraint", "solver status is mistaken for a certificate", "optimization bound lacks an independent lower-bound proof"],
+    "sources": []
+  },
+  {
+    "id": "symbolic-congruence-family",
+    "family": "symbolic and congruence family discovery",
+    "use_when": "Small exact data may expose residue classes, parametric identities, invariants, or algebraic factorization patterns.",
+    "mechanism": "Generate exact examples, infer candidate partitions or identities, symbolically verify each proposed family, and isolate the finite residue set left uncovered.",
+    "first_discriminator": "Fit the simplest candidate family on half the data and require exact out-of-sample validation on the other half plus boundary cases.",
+    "failure_modes": ["interpolation is mistaken for explanation", "residue classes overlap but do not cover", "division-by-zero or positivity conditions are lost"],
+    "sources": []
+  },
+  {
+    "id": "isolated-adversarial-reconstruction",
+    "family": "isolated adversarial reconstruction",
+    "use_when": "A route claims progress or a candidate result and needs a genuinely independent attack.",
+    "mechanism": "Give a skeptic only the source statement and claimed artifact, require reconstruction with a different representation, and log the first irreducible discrepancy rather than asking for agreement.",
+    "first_discriminator": "Reproduce the smallest claimed lemma or witness from the source and certificate without reading the proposing agent's narrative.",
+    "failure_modes": ["reviewer inherits the same prompt assumptions", "checker shares implementation code", "absence of a found flaw is reported as proof"],
+    "sources": []
+  }
+]

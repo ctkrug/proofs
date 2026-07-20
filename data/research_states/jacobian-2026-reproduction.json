@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "problem_id": "jacobian-2026-reproduction",
+  "objective": "Reproduce the announced polynomial map in three variables, verify that its Jacobian determinant is the nonzero constant -2, and verify that three distinct rational points have the same image.",
+  "completion_criteria": [
+    "Exact symbolic identity and three rational witness evaluations"
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T15:20:00+00:00",
+  "synthesis_summary": "Independent reproduction returned determinant -2 and the same image (-1/4, 0, 0) for all three distinct inputs.",
+  "established_facts": [],
+  "strategies": [
+    {
+      "id": "strategy-7691e86fd1f5",
+      "family": "unspecified",
+      "fingerprint": "7691e86fd1f5",
+      "title": "Differentiate the three displayed coordinate polynomials symbolically, factor the determinant, then evaluate the map at the three announced rational points using exact arithmetic.",
+      "mechanism": "Differentiate the three displayed coordinate polynomials symbolically, factor the determinant, then evaluate the map at the three announced rational points using exact arithmetic.",
+      "status": "blocked",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "last_attempt_id": "jacobian-2026-reproduction-001",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T15:20:00+00:00"
+    }
+  ],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {
+    "recommended_strategy_id": "strategy-7691e86fd1f5",
+    "objective": "Package the script and dependency lock as the calibration certificate.",
+    "first_action": "Package the script and dependency lock as the calibration certificate.",
+    "stop_condition": "",
+    "source_attempt_id": "jacobian-2026-reproduction-001"
+  },
+  "recent_attempt_ids": [
+    "jacobian-2026-reproduction-001"
+  ]
+}

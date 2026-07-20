@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "problem_id": "erdos-835",
+  "objective": "Does some k > 2 admit a coloring of the k-subsets of {1,…,2k} with k+1 colors such that every (k+1)-subset sees all k+1 colors?",
+  "completion_criteria": [
+    "A coloring is a finite certificate; SAT/CP-SAT encodings can be independently checked."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 0,
+  "last_updated": null,
+  "synthesis_summary": "No completed research epoch yet.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": []
+}

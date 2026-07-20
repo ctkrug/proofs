@@ -1,0 +1,29 @@
+[Unit]
+Description=Proof Factory - research and improve executable research strategies
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/proof-factory
+Environment=HOME=/root
+Environment=PROOF_FACTORY_ROOT=/root/proof-factory
+Environment=CODEX_BIN=/root/.local/bin/codex
+ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory strategy-lab
+ExecStartPost=/bin/systemctl start --no-block proof-factory-publish.service
+Nice=18
+CPUWeight=1
+IOWeight=5
+MemoryHigh=500M
+MemoryMax=900M
+OOMScoreAdjust=750
+TimeoutStartSec=75min
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/root/proof-factory/data /root/proof-factory/state /root/proof-factory/site /root/proof-factory/research /root/.codex
+InaccessiblePaths=/root/project-factory /root/.ssh /root/.config/gh
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

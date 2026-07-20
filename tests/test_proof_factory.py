@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, cli, intake, render, scheduler, scout, store
+from proof_factory import agent, cli, intake, render, research_state, scheduler, scout, store, strategy_lab
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -56,6 +56,43 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("Maximize independently verifiable, net-new contribution", prompt)
         self.assertIn("run_experiment.py", prompt)
         self.assertIn("research_mode", prompt)
+        self.assertIn("DURABLE RESEARCH STATE", prompt)
+        self.assertIn("STRATEGY PORTFOLIO RULES", prompt)
+        self.assertIn("indefinitely continuing", prompt)
+        self.assertIn("reopen_condition", prompt)
+
+    def test_research_state_is_resumable_and_deduplicates_strategy(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            data.mkdir()
+            problem = {"id": "p", "statement": "Find x.", "verifiability": "Exact witness"}
+            attempt = {
+                "id": "a1", "finished_at": "2026-01-01T00:01:00+00:00", "outcome": "progress",
+                "approach": "Exact residue search", "summary": "Three classes remain.",
+                "strategy": {"family": "congruences", "mechanism": "partition residue classes"},
+                "strategy_status": "promising", "established_facts": [{"claim": "Covers class 0", "scope": "mod 6", "evidence": "identity"}],
+                "ruled_out": [{"claim_or_route": "linear family", "scope": "degree one", "reason": "coefficient contradiction", "reopen_condition": "allow degree two"}],
+                "open_leads": [{"description": "try mod 12", "next_experiment": "enumerate exact residues", "status": "open"}],
+                "continuation": {"objective": "cover the remainder", "first_action": "run residues.py", "stop_condition": "all classes covered or witness fails"},
+            }
+            with patch.multiple(store, ROOT=root, DATA=data):
+                first = research_state.update_from_attempt(problem, attempt)
+                attempt["id"] = "a2"
+                second = research_state.update_from_attempt(problem, attempt)
+                self.assertEqual(second["epoch_count"], 2)
+                self.assertEqual(len(second["strategies"]), 1)
+                self.assertEqual(second["strategies"][0]["attempts"], 2)
+                self.assertEqual(second["next_session"]["first_action"], "run residues.py")
+                prompt_state = research_state.compact_for_prompt(problem)
+                self.assertIn("allow degree two", prompt_state)
+                self.assertEqual(first["problem_id"], "p")
+
+    def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
+        text = '''```strategy_proposal
+{"outcome":"proposal","action":"add","target_id":"","family":"finite model finding","use_when":"a bounded structure decides a lemma","mechanism":"enumerate canonical models and emit certificates","first_discriminator":"reproduce one known model","experiment_template":"p -> H -> SAT -> model -> first UNSAT","failure_modes":["bad encoding","shared checker"],"sources":["https://example.test/paper"],"change_rationale":"new exact evaluator"}
+```'''
+        self.assertEqual(strategy_lab.extract_proposal(text)["action"], "add")
 
     def test_experiment_runner_records_reproducible_result(self) -> None:
         runner = Path(__file__).parents[1] / "skills" / "computational-researcher" / "scripts" / "run_experiment.py"
@@ -173,6 +210,9 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn("Erdős–Straus conjecture", index)
                 self.assertIn("Official source", index)
                 self.assertTrue((site / "api" / "state.json").exists())
+                api = json.loads((site / "api" / "state.json").read_text())
+                self.assertIn("research_states", api)
+                self.assertIn("strategy_library", api)
 
 
 if __name__ == "__main__":

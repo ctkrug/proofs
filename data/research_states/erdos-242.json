@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "problem_id": "erdos-242",
+  "objective": "For every integer n > 2, do there exist distinct integers 1 ≤ x < y < z such that 4/n = 1/x + 1/y + 1/z?",
+  "completion_criteria": [
+    "A counterexample is finite; proposed parametric families and congruence covers can be checked exactly; the statement has a third-party Lean formalization."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-20T16:44:38.319463+00:00",
+  "synthesis_summary": "Derived an exhaustive tame criterion p=4abt-a-b with gcd(a,b)=1, reproduced Xu's two published checkpoints, and extended the tame/wild classification from m<=30000 to m<=1000000. Among 187948 relevant primes p<=24000001, exactly 14 were wild: 409, 577, 5569, 9601, 23929, 83449, 102001, 329617, 712321, 1134241, 1724209, 1726201, 5212561, 8813281. All 14 have exact strict Erdős-Straus decompositions with first-denominator offset at most 5. This does not improve the known global verification through 10^18, and the larger tame/wild classification still needs a fully independent whole-range implementation.",
+  "established_facts": [],
+  "strategies": [
+    {
+      "id": "strategy-a48c750033a1",
+      "family": "unspecified",
+      "fingerprint": "a48c750033a1",
+      "title": "Exact classification of the primes p=24m+1 lacking Xu's restricted 'tame' solutions, followed by factor-pair certificates for the residual wild primes.",
+      "mechanism": "Exact classification of the primes p=24m+1 lacking Xu's restricted 'tame' solutions, followed by factor-pair certificates for the residual wild primes.",
+      "status": "promising",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "last_attempt_id": "erdos-242-20260720-164438-51ba99",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T16:44:38.319463+00:00"
+    }
+  ],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {
+    "recommended_strategy_id": "strategy-a48c750033a1",
+    "objective": "Write an independently implemented streaming certificate and validator for nonexistence of tame parameters for all 14 wild rows across the full p<=24000001 enumeration.",
+    "first_action": "Write an independently implemented streaming certificate and validator for nonexistence of tame parameters for all 14 wild rows across the full p<=24000001 enumeration.",
+    "stop_condition": "",
+    "source_attempt_id": "erdos-242-20260720-164438-51ba99"
+  },
+  "recent_attempt_ids": [
+    "erdos-242-20260720-164438-51ba99"
+  ]
+}

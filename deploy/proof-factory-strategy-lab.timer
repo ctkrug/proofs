@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - daily research-strategy improvement pass
+
+[Timer]
+OnCalendar=*-*-* 01:15:00 UTC
+Persistent=true
+RandomizedDelaySec=10m
+Unit=proof-factory-strategy-lab.service
+
+[Install]
+WantedBy=timers.target

@@ -7,13 +7,14 @@ systemd timers
   ├─ hard lane: 06:00 + 18:00 UTC → GPT-5.6 Sol / xhigh
   ├─ discovery lane: every four hours → GPT-5.6 Terra / high
   ├─ broad scout: daily → one sourced cross-field contribution candidate
+  ├─ strategy lab: daily → one sourced, executable method addition or improvement
   └─ watchdog: every six hours → cadence and state checks
           ↓
 injected computational-researcher skill
           ↓
-bounded attempt runner → scripts/solvers + reproducibility records + structured result
+bounded, indefinitely resumable epoch → scripts/solvers + reproducibility records + structured result
           ↓
-append-only attempts.jsonl → self-improving low-hanging-fruit selector
+append-only attempts.jsonl + durable research maps → self-improving selector and next checkpoint
           ↓
 static renderer → Cloudflare Pages → proofs.charliekrug.com
 ```
@@ -35,6 +36,12 @@ stays available if the content box, Codex login, or an individual attempt fails.
    increases priors for techniques behind accepted results while retaining exploration.
 9. An approved release must contain hashed artifacts; website/GitHub publication is mechanical, while
    expert outreach and third-party venue submission remain separate human actions.
+10. “Unbounded horizon” means no preset number of bounded epochs, never an immortal process. Each
+    epoch has a resource ceiling and must record its objective, first action, and stop condition.
+11. Research maps contain only claims, evidence, scoped decisions, and continuation instructions;
+    private chain-of-thought is neither requested nor stored.
+12. A blocked or ruled-out strategy can be retried only after its explicit reopen condition is met
+    or materially new evidence is recorded.
 
 ## Availability and cadence
 
@@ -46,7 +53,8 @@ stays available if the content box, Codex login, or an individual attempt fails.
 - Research services never receive Cloudflare or social credentials. A separate, serialized publisher
   service loads deployment credentials only after the research process exits; the research model runs
   with a minimal environment and a workspace-write sandbox.
-- Discovery problems receive at most three bounded non-error passes before being parked. A daily,
+- Discovery problems receive three bounded non-error passes before being parked only if their map has
+  no live lead, promising route, or untried proposal. A daily,
   deterministic intake job refills the active frontier to 12 from the versioned `teorth/erdosproblems`
   catalog and exact statement HTML on erdosproblems.com; easier and formalized metadata rank first.
 - Persistent timers catch up after a reboot. The watchdog reports missed hard-lane cadence rather

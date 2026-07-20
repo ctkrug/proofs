@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "problem_id": "erdos-364",
+  "objective": "Are there any triples of consecutive positive integers all of which are powerful (i.e. if $p\\mid n$ then $p^2\\mid n$)?",
+  "completion_criteria": [
+    "Official database status is verifiable; refine the exact certificate contract before any candidate claim."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 0,
+  "last_updated": null,
+  "synthesis_summary": "No completed research epoch yet.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": []
+}

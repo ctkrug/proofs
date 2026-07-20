@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "problem_id": "erdos-647",
+  "objective": "Let τ(n) count the positive divisors of n. Is there some n > 24 such that max over m < n of (m + τ(m)) is at most n + 2?",
+  "completion_criteria": [
+    "A positive answer is one explicit integer plus a bounded exact divisor-count check."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 2,
+  "last_updated": "2026-07-20T16:26:07.624575+00:00",
+  "synthesis_summary": "No candidate was found. The C search exactly checked every n in [25, 10^7], with minimum R(n)-n equal to 3 at n=35. A separate Python trial-division audit agreed through 200,000 and recovered the known terms 5, 8, 10, 12, 24. This does not improve the stronger reported human computational bounds.",
+  "established_facts": [],
+  "strategies": [
+    {
+      "id": "strategy-0d0ea8626daf",
+      "family": "unspecified",
+      "fingerprint": "0d0ea8626daf",
+      "title": "Headless research pass",
+      "mechanism": "Headless research pass",
+      "status": "blocked",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "last_attempt_id": "erdos-647-20260720-162134-fd027a",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T16:21:34.234740+00:00"
+    },
+    {
+      "id": "strategy-ac5aa432225c",
+      "family": "unspecified",
+      "fingerprint": "ac5aa432225c",
+      "title": "Exact divisor-incidence sieve with the recurrence R(n+1)=max(R(n), n+tau(n)), independently audited by trial-division factorization and direct maximization.",
+      "mechanism": "Exact divisor-incidence sieve with the recurrence R(n+1)=max(R(n), n+tau(n)), independently audited by trial-division factorization and direct maximization.",
+      "status": "blocked",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "last_attempt_id": "erdos-647-20260720-162607-f232b3",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T16:26:07.624575+00:00"
+    }
+  ],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {
+    "recommended_strategy_id": "strategy-ac5aa432225c",
+    "objective": "Independently review or run the reported frontier certificate through approximately 6.16e17.",
+    "first_action": "Independently review or run the reported frontier certificate through approximately 6.16e17.",
+    "stop_condition": "",
+    "source_attempt_id": "erdos-647-20260720-162607-f232b3"
+  },
+  "recent_attempt_ids": [
+    "erdos-647-20260720-162134-fd027a",
+    "erdos-647-20260720-162607-f232b3"
+  ]
+}

@@ -8,7 +8,7 @@ import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
-from . import intake, publication, render, scheduler, scout, store
+from . import intake, publication, render, research_state, scheduler, scout, store, strategy_lab
 
 
 EXTERNAL_STATES = {
@@ -146,6 +146,8 @@ def parser() -> argparse.ArgumentParser:
     intake_parser = sub.add_parser("intake")
     intake_parser.add_argument("--target", type=int, default=12)
     sub.add_parser("scout")
+    sub.add_parser("strategy-lab")
+    sub.add_parser("backfill-state")
     return root
 
 
@@ -183,6 +185,16 @@ def main(argv: list[str] | None = None) -> int:
         result = scout.run()
         if result.get("added"):
             render.build()
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "strategy-lab":
+        result = strategy_lab.run()
+        render.build()
+        print(json.dumps(result, indent=2))
+        return 0
+    if args.command == "backfill-state":
+        result = research_state.backfill()
+        render.build()
         print(json.dumps(result, indent=2))
         return 0
     return 2
