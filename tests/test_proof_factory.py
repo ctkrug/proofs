@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab
+from proof_factory import agent, brain, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -376,6 +376,25 @@ class ProofFactoryTests(unittest.TestCase):
             report = scheduler.watchdog()
         self.assertEqual(report["health"], "healthy")
         self.assertEqual(report["health_issues"], [])
+
+    def test_usage_policy_enforces_elapsed_week_and_baseline(self) -> None:
+        now = datetime(2026, 7, 20, 2, 0, tzinfo=timezone.utc)
+        clock = now.timestamp()
+        fresh = {"ok": True, "checked_at": clock, "week": {"used_pct": 20.0, "resets_at": clock + 5.25 * 86400, "window_seconds": 7 * 86400}}
+        with tempfile.TemporaryDirectory() as raw:
+            cache = Path(raw) / "usage.json"
+            cache.write_text(json.dumps(fresh))
+            with patch.dict("os.environ", {"PROOF_USAGE_CACHE_PATH": str(cache)}):
+                within = usage.admission("hard", now=now, monotonic_now=clock)
+                self.assertEqual(within["mode"], "primary")
+                self.assertTrue(within["allowed"])
+                fresh["week"]["used_pct"] = 40.0
+                cache.write_text(json.dumps(fresh))
+                baseline = usage.admission("hard", now=now.replace(hour=3), monotonic_now=clock)
+                self.assertEqual(baseline["mode"], "baseline")
+                self.assertFalse(baseline["allowed"])
+                easy = usage.admission("easy", now=now.replace(hour=3), monotonic_now=clock)
+                self.assertTrue(easy["allowed"])
 
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

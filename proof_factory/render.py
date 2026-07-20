@@ -161,6 +161,7 @@ def _index(
     operational_blockers = runtime.get("operational_blockers") or []
     health = runtime.get("health", "starting")
     health_issues = runtime.get("health_issues") or []
+    usage_policy = runtime.get("usage_policy") or {}
     running_lanes = [lane for lane in ("hard", "easy") if runtime.get(f"{lane}_running")]
     ordered = lambda rows: sorted(
         rows,
@@ -180,6 +181,7 @@ def _index(
         blocker = operational_blockers[0] if isinstance(operational_blockers[0], dict) else {"detail": str(operational_blockers[0])}
         blocker_banner = f"""<section class="candidate-alert operational-alert" data-operational-blockers><div><span class="pulse"></span><strong>Research infrastructure needs attention.</strong><p>{h(blocker.get('detail') or blocker.get('title') or 'A required research dependency is unavailable.')} {h(blocker.get('next_action') or '')}</p></div><a href="#runs">Open run history →</a></section>"""
     issues = "" if not health_issues else " · ".join(h(x) for x in health_issues)
+    usage_note = h(usage_policy.get("reason") or "Usage policy awaiting its first check.")
     live_work = "No pass currently running" if not running_lanes else "Active now: " + " and ".join(
         _program_label(lane) for lane in running_lanes
     )
@@ -194,7 +196,7 @@ def _index(
 {blocker_banner}
 <section id="operations" class="operations section-block">
   <div class="section-heading"><div><span class="overline">RESEARCH OPERATIONS</span><h2>Current schedule</h2></div><span class="section-note" data-live-updated>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span></div>
-  <div class="healthline"><span class="health health-{h(health)}" data-live-health>System {h(health)}</span><span>{h(live_work)}</span><span>{issues}</span></div>
+  <div class="healthline"><span class="health health-{h(health)}" data-live-health>System {h(health)}</span><span>{h(live_work)}</span><span data-usage-policy>{usage_note}</span><span>{issues}</span></div>
   <div class="operation-grid">{_lane_card('hard', live_snapshot['lanes']['hard'])}{_lane_card('easy', live_snapshot['lanes']['easy'])}</div>
 </section>
 <section id="ongoing" class="section-block">
@@ -678,6 +680,10 @@ SITE_JS = r"""
     alert.querySelector("p").textContent = `${detail} ${blocker.next_action || ""}`.trim();
     document.querySelector(".hero")?.insertAdjacentElement("afterend", alert);
   };
+  const renderUsagePolicy = policy => {
+    const item = document.querySelector("[data-usage-policy]");
+    if (item) item.textContent = policy?.reason || "Usage policy awaiting its first check.";
+  };
   const dateText = value => {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "Not yet";
@@ -742,7 +748,7 @@ SITE_JS = r"""
       const response = await fetch("/api/live", {cache:"no-store", headers:{accept:"application/json"}});
       if (!response.ok) return;
       const data = await response.json(); if (!data.available) return;
-      renderLane("hard", data.lanes?.hard); renderLane("easy", data.lanes?.easy); renderRuns(data.recent_runs); renderBlockers(data.operational_blockers);
+      renderLane("hard", data.lanes?.hard); renderLane("easy", data.lanes?.easy); renderRuns(data.recent_runs); renderBlockers(data.operational_blockers); renderUsagePolicy(data.usage_policy);
       const updated = document.querySelector("[data-live-updated]"); if (updated) updated.textContent = `Live data · ${dateText(data.generated_at)}`;
       const health = document.querySelector("[data-live-health]"); if (health) { health.textContent = `System ${data.health || "starting"}`; health.className = `health health-${data.health || "starting"}`; health.dataset.liveHealth = ""; }
     } catch (_) { /* Static render remains the honest fallback. */ }

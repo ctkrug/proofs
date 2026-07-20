@@ -97,6 +97,7 @@ def snapshot(
         "health": runtime.get("health", "starting"),
         "health_issues": runtime.get("health_issues") or [],
         "operational_blockers": runtime.get("operational_blockers") or [],
+        "usage_policy": runtime.get("usage_policy") or {},
         "lanes": lanes,
         "recent_runs": recent_runs,
     }

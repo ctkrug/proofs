@@ -9,7 +9,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, render, repositories, research_state, resources, store
+from . import agent, brain, render, repositories, research_state, resources, store, usage
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -93,6 +93,11 @@ def publish_if_configured() -> None:
 def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
     if lane not in {"easy", "hard"}:
         raise ValueError("lane must be easy or hard")
+    admission = usage.admission(lane)
+    store.update_runtime(usage_policy=admission)
+    if not admission["allowed"]:
+        render.build()
+        return {"status": "deferred", "lane": lane, "usage_policy": admission}
     with store.lock(f"lane-{lane}", nonblocking=True) as acquired:
         if not acquired:
             raise RuntimeError(f"{lane} lane already running")
