@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -29,10 +30,11 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_scout_requires_sourced_scored_candidate(self) -> None:
         text = '''```contribution_candidate
-{"title":"One missing case","statement":"Determine exact X(7).","source_url":"https://example.test/paper","source_name":"Paper","problem_state":"open","contribution_type":"exact optimum","verifiability":"Witness and UNSAT certificate","rationale":"Adjacent cases are known","external_channel":"Maintained table","external_url":"https://example.test/table","estimated_success_probability":0.2,"difficulty":4,"verification_score":5,"contribution_score":3,"review_cost":2,"novelty_risk":3,"techniques":["SAT"]}
+{"outcome":"candidate","title":"One missing case","statement":"Determine exact X(7).","source_url":"https://example.test/paper","source_name":"Paper","problem_state":"open","contribution_type":"exact optimum","verifiability":"Witness and UNSAT certificate","rationale":"Adjacent cases are known","external_channel":"Maintained table","external_url":"https://example.test/table","estimated_success_probability":0.2,"difficulty":4,"verification_score":5,"contribution_score":3,"review_cost":2,"novelty_risk":3,"techniques":["SAT"]}
 ```'''
         value = scout.extract_candidate(text)
         self.assertEqual(value["contribution_type"], "exact optimum")
+        self.assertEqual(scout.extract_candidate('{"outcome":"no_candidate","reason":"No current source survived."}')["outcome"], "no_candidate")
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
@@ -100,18 +102,22 @@ class ProofFactoryTests(unittest.TestCase):
             state = root / "state"
             data.mkdir()
             problem = {"id": "p", "title": "Tiny result", "status": "candidate", "source_url": "https://example.test"}
+            workspace = root / "research" / "p" / "workspace"
+            workspace.mkdir(parents=True)
+            (workspace / "proof.txt").write_text("certificate\n")
+            artifact_hash = hashlib.sha256((workspace / "proof.txt").read_bytes()).hexdigest()
             attempt = {
                 "id": "a", "problem_id": "p", "outcome": "candidate", "summary": "bounded claim",
                 "rationale": "exact check", "claims": ["claim"], "evidence": ["checker"],
                 "citations": ["https://example.test"], "techniques": ["enumeration"],
-                "tool_disclosure": "AI and Python", "artifact_hashes": {"proof.txt": "abc"},
+                "tool_disclosure": "AI and Python", "artifact_hashes": {"proof.txt": artifact_hash},
                 "independent_checker": "A separately written checker reproduced the result.",
             }
             (data / "problems.json").write_text(json.dumps([problem]))
             (data / "attempts.jsonl").write_text(json.dumps(attempt) + "\n")
             (data / "reviews.json").write_text("[]\n")
             with patch.multiple(
-                store, ROOT=root, DATA=data, STATE=state, SITE=root / "site",
+                store, ROOT=root, DATA=data, STATE=state, SITE=root / "site", RESEARCH=root / "research",
                 PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
             ), patch.object(render, "build"):
                 cli._review("a", "accept", "I reproduced the checker.", release=True)
@@ -119,7 +125,8 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(updated["status"], "published")
                 self.assertFalse(updated["accepted_result"])
                 self.assertTrue((root / "publications" / "a" / "README.md").exists())
-                self.assertIn("abc", (root / "publications" / "a" / "MANIFEST.sha256").read_text())
+                self.assertIn(artifact_hash, (root / "publications" / "a" / "MANIFEST.sha256").read_text())
+                self.assertEqual((root / "publications" / "a" / "artifacts" / "proof.txt").read_text(), "certificate\n")
                 cli._external_validation(
                     "a", "expert-confirmed", "https://example.test/review", "The source expert confirmed it."
                 )

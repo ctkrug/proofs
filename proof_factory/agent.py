@@ -70,14 +70,15 @@ def _workspace_artifacts(workspace: Path) -> dict[str, str]:
     hashes: dict[str, str] = {}
     ignored = {".git", ".venv", "venv", "__pycache__", "node_modules", ".mypy_cache", ".pytest_cache"}
     for path in sorted(workspace.rglob("*")):
-        if not path.is_file() or any(part in ignored for part in path.relative_to(workspace).parts):
+        if path.is_symlink() or not path.is_file() or any(part in ignored for part in path.relative_to(workspace).parts):
             continue
         try:
+            path.resolve().relative_to(workspace.resolve())
             if path.stat().st_size > 50 * 1024 * 1024:
                 continue
             relative = path.relative_to(workspace).as_posix()
             hashes[relative] = store.sha256_file(path)
-        except OSError:
+        except (OSError, ValueError):
             continue
         if len(hashes) >= 250:
             break

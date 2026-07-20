@@ -73,7 +73,8 @@ repository confirmed → venue accepted → peer reviewed`
 
 One Charlie approval action creates and releases a versioned packet on the website and GitHub. The
 packet contains the precise claim, evidence, code locations, hashes, citation metadata, scope limits,
-human review note, novelty trail, AI disclosure, and venue plan. Mechanical publication is automated;
+human review note, a bounded copy of the actual artifacts, novelty trail, AI disclosure, and venue
+plan. Mechanical publication is automated;
 expert email, OEIS submission, formal-library PR, arXiv/journal submission, and irreversible DOI
 release remain explicit human actions.
 

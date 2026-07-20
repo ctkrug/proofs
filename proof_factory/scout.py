@@ -18,11 +18,28 @@ SOURCES_FILE = store.DATA / "source_registry.json"
 
 def extract_candidate(text: str) -> dict[str, Any]:
     matches = SCOUT_RE.findall(text or "")
-    if not matches:
-        raise ValueError("missing contribution_candidate JSON block")
-    value = json.loads(matches[-1])
+    if matches:
+        value = json.loads(matches[-1])
+    else:
+        value = None
+        decoder = json.JSONDecoder()
+        for index, char in enumerate(text or ""):
+            if char != "{":
+                continue
+            try:
+                parsed, _ = decoder.raw_decode(text[index:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(parsed, dict) and (parsed.get("outcome") or parsed.get("source_url")):
+                value = parsed
+        if value is None:
+            raise ValueError("missing contribution_candidate JSON object")
     if not isinstance(value, dict):
         raise ValueError("contribution candidate must be an object")
+    if value.get("outcome") == "no_candidate":
+        if not isinstance(value.get("reason"), str) or not value["reason"].strip():
+            raise ValueError("no_candidate requires a reason")
+        return value
     required_text = {
         "title", "statement", "source_url", "source_name", "problem_state",
         "contribution_type", "verifiability", "rationale", "external_channel", "external_url",
@@ -71,6 +88,7 @@ RULES
 
 ```contribution_candidate
 {{
+  "outcome": "candidate",
   "title": "precise target",
   "statement": "exact bounded objective and what remains open",
   "source_url": "primary/current URL supporting status",
@@ -89,6 +107,12 @@ RULES
   "novelty_risk": 1,
   "techniques": ["specific technique"]
 }}
+```
+
+If no target survives current-status and external-channel checks, return this instead of lowering the bar:
+
+```contribution_candidate
+{{"outcome":"no_candidate","reason":"specific searches performed and why every lead failed"}}
 ```
 """
 
@@ -113,9 +137,19 @@ def run() -> dict[str, Any]:
         env=env, timeout=int(os.environ.get("PROOF_SCOUT_TIMEOUT_SEC", "3600")), start_new_session=True,
     )
     text, usage, failed = agent._codex_text(proc.stdout)
+    store.write_json_atomic(store.STATE / "scout-last.json", {
+        "finished_at": store.now_iso(),
+        "returncode": proc.returncode,
+        "stream_failed": failed,
+        "final_text": text[-20000:],
+        "stderr_tail": proc.stderr[-4000:],
+        "usage": usage,
+    })
     if proc.returncode != 0 or failed:
         raise RuntimeError(f"scout failed rc={proc.returncode}: {proc.stderr[-1000:]}")
     candidate = extract_candidate(text)
+    if candidate.get("outcome") == "no_candidate":
+        return {"added": False, "reason": candidate["reason"]}
     key = hashlib.sha256((candidate["source_url"] + "\n" + candidate["statement"]).encode()).hexdigest()[:12]
     row = {
         "id": f"scout-{key}",

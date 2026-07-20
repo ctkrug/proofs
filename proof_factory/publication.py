@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -42,13 +43,35 @@ def build_packet(problem: dict[str, Any], attempt: dict[str, Any], review: dict[
     validate_candidate(attempt)
     packet_id = _safe_id(str(attempt["id"]))
     packet = store.ROOT / "publications" / packet_id
-    packet.mkdir(parents=True, exist_ok=True)
-    repo_path = f"research/{problem['id']}/workspace"
+    if packet.exists():
+        shutil.rmtree(packet)
+    packet.mkdir(parents=True)
+    workspace = (store.RESEARCH / problem["id"] / "workspace").resolve()
+    artifact_root = packet / "artifacts"
     claims = list(attempt.get("claims") or [])
     evidence = list(attempt.get("evidence") or [])
     citations = list(attempt.get("citations") or [])
     hashes = dict(attempt.get("artifact_hashes") or {})
     contribution_type = str(problem.get("contribution_type") or "research note")
+    copied: dict[str, str] = {}
+    total_bytes = 0
+    for relative, expected in sorted(hashes.items()):
+        source = (workspace / relative).resolve()
+        try:
+            source.relative_to(workspace)
+        except ValueError as exc:
+            raise ValueError(f"artifact escapes workspace: {relative}") from exc
+        if source.is_symlink() or not source.is_file():
+            raise ValueError(f"publication artifact is unavailable: {relative}")
+        if store.sha256_file(source) != expected:
+            raise ValueError(f"publication artifact hash changed: {relative}")
+        total_bytes += source.stat().st_size
+        if total_bytes > 100 * 1024 * 1024:
+            raise ValueError("publication artifacts exceed the 100 MB packet limit; archive externally")
+        destination = artifact_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+        copied[f"artifacts/{relative}"] = expected
 
     readme = f"""# {problem['title']}
 
@@ -65,7 +88,7 @@ Type: {contribution_type}
 
 {_bullets(evidence)}
 
-Reproducible source artifacts live under `{repo_path}`. Their SHA-256 hashes are in
+Reproducible source artifacts are bundled under `artifacts/`. Their SHA-256 hashes are in
 `MANIFEST.sha256` and `metadata.json`.
 
 Independent checker: {attempt.get('independent_checker')}
@@ -118,11 +141,11 @@ tracker. External acceptance or expert review is recorded separately from this r
         "evidence": evidence,
         "independent_checker": attempt.get("independent_checker"),
         "citations": citations,
-        "artifact_hashes": hashes,
+        "artifact_hashes": copied,
         "review": review,
     }
     (packet / "metadata.json").write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n")
-    manifest = "\n".join(f"{digest}  {repo_path}/{path}" for path, digest in sorted(hashes.items())) + "\n"
+    manifest = "\n".join(f"{digest}  {path}" for path, digest in sorted(copied.items())) + "\n"
     (packet / "MANIFEST.sha256").write_text(manifest)
     citation = f'''cff-version: 1.2.0
 message: "If you use this research artifact, please cite it using this metadata."
