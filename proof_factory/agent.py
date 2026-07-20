@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import research_state, store
+from . import contribution_gate, research_state, store
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -58,7 +58,7 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation"):
+    for key in ("strategy", "continuation", "candidate_profile"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
     return result
@@ -131,7 +131,8 @@ ACCEPTABLE CONTRIBUTIONS
 Terminal success is a concrete proof, counterexample/witness, exact optimum/classification, verified computational bound,
 formalization, correction, or research-software contribution that satisfies the verification contract. On a famous problem,
 a genuinely new rigorous lemma, reduction, parametric family, or falsified major route is useful progress even when it is
-not terminal success. `candidate` means only “send to isolated skeptic and Charlie,” never solved.
+not terminal success. A model cannot promote its own work: `candidate` is only a request to run the
+fail-closed contribution gate below. If that gate fails, the system records an internal result/progress.
 
 WHAT DOES NOT COUNT
 - Checking examples without a theorem matching the checked scope.
@@ -171,7 +172,10 @@ WORK RULES
 5. A suspiciously short proof, unused hypothesis, stronger-than-requested conclusion, or mismatch with the source is a red flag.
 6. Cite prior human work and disclose every automated tool used. Do not optimize for publicity.
 7. Report concrete lemmas, equations, maps, programs, certificates, and counterexamples. Reject vague “promising direction” language.
-8. End with exactly one fenced JSON block in this schema:
+8. A larger arbitrary cutoff is not a contribution. It becomes candidate-eligible only if it improves
+   the actual best-known result, answers a source's explicit request, has confirmed expert interest,
+   or yields a new structural result. “We did not find it in a quick search” is not novelty evidence.
+9. End with exactly one fenced JSON block in this schema:
 
 ```proof_result
 {{
@@ -200,6 +204,18 @@ WORK RULES
   "reopen_evidence": "new evidence satisfying the prior reopen condition, or blank",
   "continuation": {{"objective":"next epoch objective","first_action":"exact command/lemma/source to start with","stop_condition":"evidence that ends or redirects it"}},
   "strategy_proposals": [{{"family":"different family","mechanism":"concrete mechanism","hypothesis":"testable claim","discriminating_test":"cheap test","rationale":"why it may outperform current routes"}}],
+  "candidate_profile": {{
+    "contribution_class":"terminal_result|recognized_open_subproblem|bounded_extension|research_artifact",
+    "scholarly_question":"what recognized question this answers",
+    "meaningful_delta":"specific difference from the closest prior result",
+    "acceptance_test":"objective condition for accepting this contribution",
+    "closest_prior_work":[{{"url":"direct primary-source URL","difference":"exact difference"}}],
+    "novelty_searches":[{{"source":"database or citation graph","query":"reproducible query","url":"direct results/source URL","finding":"what was found"}}],
+    "external_channel":{{"recipient":"named maintainer/expert/venue","url":"channel URL","acceptance_path":"how it can be accepted"}},
+    "independent_validations":[{{"type":"formal_kernel|independent_third_party|repository_ci|external_expert","validator":"who or what","result":"exact result","artifact":"local certificate path or blank","evidence_url":"public evidence or blank"}}],
+    "relevance":{{"settles_exact_open_target":false,"improves_best_known_result":false,"source_explicitly_requests_result":false,"expert_interest_confirmed":false,"new_structural_result":false,"evidence_url":"supporting URL"}},
+    "arbitrary_cutoff_extension":false
+  }},
   "tool_disclosure": "models, CAS, proof assistants, solvers, and code used"
 }}
 ```
@@ -258,6 +274,13 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
             )
             outcome = "no_progress"
             result["strategy_status"] = prior_strategy.get("status")
+        gate = contribution_gate.assess(result) if result.get("outcome") == "candidate" else {
+            "schema_version": 1, "passed": False, "status": "not_requested", "reasons": [],
+        }
+        if result.get("outcome") == "candidate" and not gate["passed"]:
+            policy_flags.extend(f"Contribution gate: {reason}" for reason in gate["reasons"])
+            if outcome == "candidate":
+                outcome = "progress"
         error = ""
     except (OSError, subprocess.SubprocessError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
         usage = {}
@@ -272,6 +295,7 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         outcome = "error"
         error = str(exc)
         policy_flags = []
+        gate = {"schema_version": 1, "passed": False, "status": "not_requested", "reasons": []}
 
     finished = store.now_iso()
     stamp = finished[:19].replace(":", "").replace("-", "").replace("T", "-")
@@ -312,10 +336,13 @@ def run(problem: dict[str, Any], lane: str) -> dict[str, Any]:
         "reopen_condition": str(result.get("reopen_condition") or "")[:4000],
         "reopen_evidence": str(result.get("reopen_evidence") or "")[:4000],
         "policy_flags": policy_flags,
+        "candidate_profile": result.get("candidate_profile") if isinstance(result.get("candidate_profile"), dict) else {},
+        "contribution_gate": gate,
+        "contribution_status": "candidate_eligible" if outcome == "candidate" else ("internal_result" if result.get("outcome") == "candidate" else "research_attempt"),
         "continuation": result.get("continuation") if isinstance(result.get("continuation"), dict) else {},
         "strategy_proposals": objects("strategy_proposals", 10),
         "tool_disclosure": str(result.get("tool_disclosure") or "")[:4000],
-        "review_status": "needs Charlie review" if outcome == "candidate" else "not a result claim",
+        "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),
         "usage": usage,
         "error": error,
         "artifact_hashes": _workspace_artifacts(workspace),

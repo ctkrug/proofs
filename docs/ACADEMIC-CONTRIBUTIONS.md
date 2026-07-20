@@ -61,6 +61,22 @@ Every target must have a claim contract: exact statement, source/status date, no
 success certificate, independent checker, recognized external channel, likely expert/maintainer,
 resource estimate, and stop conditions.
 
+## Candidate eligibility
+
+A completed computation is not automatically a contribution. The model may request candidate review,
+but code downgrades it to `internal result` unless the result records all of the following:
+
+- the recognized scholarly question and a meaningful delta from URL-backed closest prior work;
+- at least two reproducible, URL-backed novelty searches;
+- a named expert, maintainer, repository, or venue with an objective acceptance path;
+- formal-kernel, repository-CI, external-expert, or independent-third-party validation; and
+- sourced evidence that it settles an exact open target, improves the actual best-known result,
+  answers an explicit source request, has confirmed expert interest, or yields structural mathematics.
+
+A larger unrequested cutoff by itself fails the gate even when its program and certificate are correct.
+It remains visible in the append-only research ledger but is not placed in Charlie's review queue and
+is not eligible for publication or résumé credit.
+
 A daily Terra scout searches the versioned source registry and adds at most one cross-field target.
 The scout must supply a primary/current source and a real outside acceptance channel. Because target
 selection is still model-generated, the first research pass re-audits status and literature before

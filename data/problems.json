@@ -50,7 +50,6 @@
     "last_attempt_at": "2026-07-20T18:18:22.062611+00:00",
     "accepted_result": false,
     "priority": 0,
-    "candidate_attempt_id": "erdos-242-20260720-181822-bad8d7",
     "parked_at": "2026-07-20T20:24:00+00:00",
     "parked_reason": "Hard lane now prioritizes a finite exact problem with compact lower-bound witnesses and certificate-carrying upper-bound proofs."
   },

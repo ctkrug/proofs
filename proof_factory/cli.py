@@ -35,9 +35,15 @@ def _doctor() -> dict[str, Any]:
     return checks
 
 
-def _review(attempt_id: str, decision: str, note: str, *, release: bool = False) -> dict[str, Any]:
+def _review(
+    attempt_id: str, decision: str, note: str, *, release: bool = False, reviewer: str = "Charlie Krug"
+) -> dict[str, Any]:
     if decision not in {"accept", "reject", "needs-work"}:
         raise ValueError("decision must be accept, reject, or needs-work")
+    if not reviewer.strip():
+        raise ValueError("reviewer is required")
+    if decision == "accept" and reviewer != "Charlie Krug":
+        raise ValueError("only Charlie Krug can accept a result")
     with store.lock("state") as acquired:
         if not acquired:
             raise RuntimeError("state lock unavailable")
@@ -45,22 +51,29 @@ def _review(attempt_id: str, decision: str, note: str, *, release: bool = False)
         attempt = next((row for row in attempts if row.get("id") == attempt_id), None)
         if not attempt:
             raise ValueError(f"unknown attempt: {attempt_id}")
+        reviews = store.read_json(store.DATA / "reviews.json", [])
+        prior_reviews = [row for row in reviews if row.get("attempt_id") == attempt_id]
         if decision == "accept" and attempt.get("outcome") != "candidate":
             raise ValueError("only a candidate attempt can be accepted as a result")
+        if decision == "accept" and prior_reviews and prior_reviews[-1].get("display_status") == "internal_result":
+            raise ValueError("an internal result must pass a new contribution gate before it can be accepted")
+        gate = attempt.get("contribution_gate") if isinstance(attempt.get("contribution_gate"), dict) else {}
+        if decision == "accept" and gate and not gate.get("passed"):
+            raise ValueError("the attempt did not pass the contribution gate")
         if decision == "accept" and not note.strip():
             raise ValueError("accepting a result requires a human review note")
         if release and decision != "accept":
             raise ValueError("only an accepted candidate can be released")
         problems = store.load_problems()
         problem = next(row for row in problems if row["id"] == attempt["problem_id"])
-        reviews = store.read_json(store.DATA / "reviews.json", [])
         record = {
             "attempt_id": attempt_id,
             "problem_id": problem["id"],
             "decision": decision,
             "note": note,
             "reviewed_at": store.now_iso(),
-            "reviewer": "Charlie Krug",
+            "reviewer": reviewer,
+            "display_status": "internal_result" if decision == "reject" else "candidate",
         }
         reviews.append(record)
         if decision == "accept":
@@ -74,7 +87,8 @@ def _review(attempt_id: str, decision: str, note: str, *, release: bool = False)
                 problem["publication_packet"] = str(packet.relative_to(store.ROOT))
                 problem["publication_state"] = "public research note"
         elif decision == "reject":
-            problem["status"] = "attempted"
+            if problem.get("status") != "parked":
+                problem["status"] = "attempted"
             problem.pop("candidate_attempt_id", None)
         else:
             problem["status"] = "candidate"
@@ -137,6 +151,7 @@ def parser() -> argparse.ArgumentParser:
     review.add_argument("--attempt", required=True)
     review.add_argument("--decision", choices=("accept", "reject", "needs-work"), required=True)
     review.add_argument("--note", default="")
+    review.add_argument("--reviewer", default="Charlie Krug")
     review.add_argument("--release", action="store_true", help="publish the approved research-note packet")
     validate = sub.add_parser("validate")
     validate.add_argument("--attempt", required=True)
@@ -170,7 +185,9 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(scheduler.tick(args.lane, publish=args.publish), indent=2))
         return 0
     if args.command == "review":
-        print(json.dumps(_review(args.attempt, args.decision, args.note, release=args.release), indent=2))
+        print(json.dumps(_review(
+            args.attempt, args.decision, args.note, release=args.release, reviewer=args.reviewer
+        ), indent=2))
         return 0
     if args.command == "validate":
         print(json.dumps(_external_validation(args.attempt, args.state, args.source_url, args.note), indent=2))

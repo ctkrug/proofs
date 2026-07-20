@@ -19,9 +19,13 @@ candidate, verified, and published attempt. The system separates two research la
   the versioned Erdős Problems database; the schema and selector support broader contribution types.
   Three bounded non-error passes park a target only when no actionable lead or untried strategy remains.
 
-The system never equates model confidence with proof. A candidate is a review request. A result may
-be called solved only after statement validation, independent criticism, literature review,
-reproducible verification, and a remembered human approval.
+The system never equates model confidence with proof, and a model cannot promote its own output.
+`candidate` is a fail-closed contribution-gate result, not a confidence label: it requires a meaningful
+delta from URL-backed prior work, reproducible novelty searches, a named outside acceptance path,
+independent validation beyond another local implementation, and evidence that the result advances a
+recognized target. Arbitrary cutoff extensions remain `internal result`. A result may be called solved
+only after statement validation, independent criticism, literature review, reproducible verification,
+and a remembered human approval.
 
 ## Commands
 
@@ -36,6 +40,7 @@ python3 -m proof_factory intake --target 12
 python3 -m proof_factory scout
 python3 -m proof_factory strategy-lab
 python3 -m proof_factory backfill-state
+python3 -m proof_factory review --attempt ID --decision reject --reviewer "Proof Factory contribution gate" --note "..."
 scripts/approve-and-publish.sh ATTEMPT_ID "human review note"
 python3 -m proof_factory validate --attempt ATTEMPT_ID --state expert-confirmed --source-url URL --note "..."
 ```

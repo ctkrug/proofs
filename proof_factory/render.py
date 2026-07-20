@@ -12,7 +12,7 @@ from typing import Any
 from . import research_state, store
 
 
-STATUS_ORDER = ["candidate", "active", "attempted", "failed", "queued", "parked", "verified", "published"]
+STATUS_ORDER = ["candidate", "active", "attempted", "internal_result", "failed", "queued", "parked", "verified", "published"]
 STATUS_LABELS = {
     "queued": "Queued",
     "active": "Active / ongoing",
@@ -20,6 +20,7 @@ STATUS_LABELS = {
     "parked": "Paused after 3 passes",
     "failed": "Failed route",
     "candidate": "Candidate — review needed",
+    "internal_result": "Internal result — value unestablished",
     "verified": "Verified",
     "published": "Public research note",
 }
@@ -72,8 +73,15 @@ def _layout(title: str, body: str, *, description: str = "Live, transparent AI-a
 </html>"""
 
 
-def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any]) -> str:
-    outcome = str(attempt.get("outcome") or "unknown")
+def _effective_outcome(attempt: dict[str, Any], reviews: list[dict[str, Any]]) -> str:
+    latest = reviews[-1] if reviews else {}
+    if attempt.get("outcome") == "candidate" and latest.get("display_status") == "internal_result":
+        return "internal_result"
+    return str(attempt.get("outcome") or "unknown")
+
+
+def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any], reviews: list[dict[str, Any]] | None = None) -> str:
+    outcome = _effective_outcome(attempt, reviews or [])
     label = STATUS_LABELS.get(outcome, outcome.replace("_", " ").title())
     return f"""
 <article class="attempt-row" data-outcome="{h(outcome)}">
@@ -104,11 +112,16 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state
 </article>"""
 
 
-def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runtime: dict[str, Any]) -> str:
+def _index(
+    problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runtime: dict[str, Any], reviews: list[dict[str, Any]]
+) -> str:
     states = research_state.load_all(problems)
     by_problem: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:
         by_problem[str(attempt.get("problem_id"))].append(attempt)
+    reviews_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for review in reviews:
+        reviews_by_attempt[str(review.get("attempt_id"))].append(review)
     candidates = [row for row in problems if row.get("status") == "candidate"]
     hard = next((row for row in problems if row.get("lane") == "hard" and row.get("status") in {"active", "attempted", "candidate"}), None)
     easy = next(
@@ -177,7 +190,7 @@ def _index(problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runti
 </section>
 <section id="attempts" class="section-block attempts-block">
   <div class="section-heading"><div><span class="overline">Append-only history</span><h2>Recent research attempts</h2></div><a href="/api/state.json">Download JSON →</a></div>
-  <div class="attempt-list">{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id'])) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
+  <div class="attempt-list">{''.join(_attempt_row(row, next(p for p in problems if p['id'] == row['problem_id']), reviews_by_attempt[str(row.get('id'))]) for row in reversed(attempts[-25:])) or '<p>No attempts yet.</p>'}</div>
 </section>
 """
     return _layout("Live ledger", body)
@@ -193,9 +206,16 @@ def _state_items(rows: list[dict[str, Any]], primary: str, secondary: str, *, em
     return "".join(result)
 
 
-def _problem_page(problem: dict[str, Any], attempts: list[dict[str, Any]], state: dict[str, Any]) -> str:
+def _problem_page(
+    problem: dict[str, Any], attempts: list[dict[str, Any]], state: dict[str, Any], reviews: list[dict[str, Any]]
+) -> str:
     technique_tags = "".join(f"<span>{h(x)}</span>" for x in problem.get("techniques") or [])
-    attempt_html = "".join(_attempt_row(row, problem) for row in reversed(attempts)) or '<div class="empty">No attempt has completed yet. The problem is queued transparently.</div>'
+    reviews_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for review in reviews:
+        reviews_by_attempt[str(review.get("attempt_id"))].append(review)
+    attempt_html = "".join(
+        _attempt_row(row, problem, reviews_by_attempt[str(row.get("id"))]) for row in reversed(attempts)
+    ) or '<div class="empty">No attempt has completed yet. The problem is queued transparently.</div>'
     candidate = ""
     if problem.get("status") == "candidate":
         candidate = '<div class="candidate-alert"><div><strong>Unverified candidate finding</strong><p>Read the attempt and evidence below. This is not an accepted solution.</p></div></div>'
@@ -248,16 +268,19 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
             details = " · ".join(str(value) for key, value in row.items() if key != primary and value)
             rendered.append(f'<li><strong>{h(row.get(primary))}</strong><br>{h(details)}</li>')
         return "<ul>" + "".join(rendered) + "</ul>"
-    outcome = str(attempt.get("outcome") or "unknown")
+    raw_outcome = str(attempt.get("outcome") or "unknown")
+    outcome = _effective_outcome(attempt, reviews)
     warning = ""
     if outcome == "candidate":
         warning = '<div class="candidate-alert"><div><strong>Candidate for review — not a solution claim</strong><p>Independent statement checking, criticism, literature review, and verification remain required.</p></div></div>'
+    elif outcome == "internal_result":
+        warning = '<div class="internal-alert"><div><strong>Internal result — not a contribution candidate</strong><p>The computation remains in the transparent ledger, but it did not establish meaningful novelty or scholarly value and is not queued for Charlie review.</p></div></div>'
     if attempt.get("policy_flags"):
         warning += f'<div class="candidate-alert"><div><strong>Research-policy redirect</strong><p>{h(" · ".join(attempt.get("policy_flags") or []))}</p></div></div>'
     if problem.get("publication_attempt_id") == attempt.get("id"):
         warning += f'<div class="candidate-alert"><div><strong>{h(problem.get("publication_state"))}</strong><p>Human-approved research note; external acceptance and peer review are separate states.</p></div><a href="/publications/{h(attempt["id"])}/">Publication packet →</a></div>'
     review_html = "".join(
-        f'<li><strong>{h(row.get("decision"))}</strong> · {h(_time(row.get("reviewed_at")))}<br>{h(row.get("note") or "No note recorded.")}</li>'
+        f'<li><strong>{h(row.get("decision"))}</strong> · {h(row.get("reviewer"))} · {h(_time(row.get("reviewed_at")))}<br>{h(row.get("note") or "No note recorded.")}</li>'
         for row in reviews
     ) or '<p class="muted">No human review recorded.</p>'
     body = f"""
@@ -270,6 +293,7 @@ def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: lis
   <article><span class="overline">Evidence and scope</span>{items('evidence')}</article>
   <article><span class="overline">Computational experiments</span>{items('experiments')}</article>
   <article><span class="overline">Independent checker</span><p>{h(attempt.get('independent_checker') or 'Not provided.')}</p></article>
+  <article><span class="overline">Contribution gate</span><p><strong>{h((attempt.get('contribution_gate') or {}).get('status') or ('retroactively adjudicated' if outcome == 'internal_result' else 'legacy attempt'))}</strong></p>{('<ul>' + ''.join(f'<li>{h(reason)}</li>' for reason in (attempt.get('contribution_gate') or {}).get('reasons', [])) + '</ul>') if (attempt.get('contribution_gate') or {}).get('reasons') else '<p class="muted">No structured gate reasons were recorded in this legacy attempt; see the adjudication ledger.</p>'}<dl><dt>Original model outcome</dt><dd>{h(raw_outcome)}</dd><dt>Public classification</dt><dd>{h(outcome)}</dd></dl></article>
   <article><span class="overline">Cross-domain transfers tested</span>{items('transfer_insights')}</article>
   <article><span class="overline">Established facts</span>{object_items('established_facts', 'claim')}</article>
   <article><span class="overline">Ruled out in this epoch</span>{object_items('ruled_out', 'claim_or_route')}</article>
@@ -317,7 +341,7 @@ def _method_page() -> str:
   <article><strong>03</strong><h2>Portfolio</h2><p>Every problem keeps a durable registry of distinct mechanisms, live leads, theorem-strength blockers, scoped negative results, and explicit conditions for reopening a route.</p></article>
   <article><strong>04</strong><h2>Experiment</h2><p>Sol designs theories and discriminating tests. Deterministic scripts, Terra, exact solvers, and proof tools do repetition, parameter sweeps, and falsification with recorded seeds and hashes.</p></article>
   <article><strong>05</strong><h2>Resume</h2><p>The campaign can continue indefinitely through bounded safety-controlled epochs. Each epoch must leave an objective, first action, and stop condition for the next one.</p></article>
-  <article><strong>06</strong><h2>Challenge</h2><p>Failed, no progress, progress, and candidate are distinct. Candidates get isolated reconstruction, source and novelty checks, reproducible evidence, and Charlie's approval.</p></article>
+  <article><strong>06</strong><h2>Gate</h2><p>A model cannot promote its own work. Arbitrary cutoff extensions remain internal results; candidate eligibility requires meaningful delta, reproducible novelty searches, a named outside channel, sourced relevance, and validation beyond another local implementation.</p></article>
   <article><strong>07</strong><h2>Improve</h2><p>A separate strategy lab studies current primary research and may add or revise only concrete, testable methods with evaluators and named failure modes.</p></article>
   <article><strong>08</strong><h2>Release</h2><p>One human approval action creates and publishes a versioned packet with claims, artifacts, hashes, citations, limitations, and AI disclosure. External acceptance remains separate.</p></article>
 </section>
@@ -357,6 +381,7 @@ CSS = r"""
 CSS += r"""
 .research-map{padding:55px clamp(20px,7vw,110px)}.research-map>.section-heading>span{color:var(--muted);font-size:13px}.research-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.research-grid article{background:var(--card);border:1px solid var(--line);padding:26px}.research-grid h3{font-family:Georgia,serif;font-size:28px;font-weight:400;line-height:1.15;margin:16px 0}.research-grid ul{padding-left:20px}.research-grid li{margin:11px 0}.research-grid em{color:var(--red)}
 .strategy-library{padding:44px clamp(20px,7vw,110px);display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.strategy-library article{background:var(--card);border:1px solid var(--line);padding:28px}.strategy-library h2{font-family:Georgia,serif;font-size:32px;font-weight:400;line-height:1.1}.strategy-sources{display:flex;gap:14px;flex-wrap:wrap}.strategy-sources a{color:var(--blue);font-weight:700}
+.internal-alert{margin:28px clamp(20px,7vw,110px);padding:20px 24px;background:#f2e7e2;border:1px solid #d5ada1;color:#6f3126}.badge-internal_result{background:#f2e7e2;border-color:#d5ada1;color:#8b392d}.outcome-internal_result{background:var(--red)}
 @media(max-width:720px){.research-grid,.strategy-library{grid-template-columns:1fr}}
 """
 
@@ -398,13 +423,16 @@ def build() -> Path:
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
     _write(store.SITE / "assets" / "site.css", CSS)
     _write(store.SITE / "assets" / "site.js", JS)
-    _write(store.SITE / "index.html", _index(problems, attempts, runtime))
+    _write(store.SITE / "index.html", _index(problems, attempts, runtime, reviews))
     by_problem: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for attempt in attempts:
         by_problem[str(attempt.get("problem_id"))].append(attempt)
     problem_by_id = {row["id"]: row for row in problems}
     for problem in problems:
-        _write(store.SITE / "problems" / problem["id"] / "index.html", _problem_page(problem, by_problem[problem["id"]], research_states[problem["id"]]))
+        _write(
+            store.SITE / "problems" / problem["id"] / "index.html",
+            _problem_page(problem, by_problem[problem["id"]], research_states[problem["id"]], reviews),
+        )
     for attempt in attempts:
         problem = problem_by_id.get(str(attempt.get("problem_id")))
         if problem:
@@ -414,11 +442,18 @@ def build() -> Path:
                 _write(store.SITE / "publications" / attempt["id"] / "index.html", _publication_page(problem, attempt, reviews, validations))
     _write(store.SITE / "method" / "index.html", _method_page())
     _write(store.SITE / "strategies" / "index.html", _strategies_page(strategy_library, strategy_proposals))
+    reviews_by_attempt: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for review in reviews:
+        reviews_by_attempt[str(review.get("attempt_id"))].append(review)
+    public_attempts = [
+        {**attempt, "public_outcome": _effective_outcome(attempt, reviews_by_attempt[str(attempt.get("id"))])}
+        for attempt in attempts
+    ]
     public_state = {
         "generated_at": store.now_iso(),
         "runtime": runtime,
         "problems": problems,
-        "attempts": attempts,
+        "attempts": public_attempts,
         "reviews": reviews,
         "validations": validations,
         "research_states": research_states,

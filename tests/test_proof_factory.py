@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, cli, intake, render, research_state, scheduler, scout, store, strategy_lab
+from proof_factory import agent, cli, contribution_gate, intake, render, research_state, scheduler, scout, store, strategy_lab
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -49,6 +49,69 @@ class ProofFactoryTests(unittest.TestCase):
 ```'''
         with self.assertRaises(ValueError):
             agent.extract_result(text)
+
+    def test_contribution_gate_rejects_arbitrary_range_extension(self) -> None:
+        result = {
+            "candidate_profile": {
+                "contribution_class": "bounded_extension",
+                "scholarly_question": "Which restricted examples occur below B?",
+                "meaningful_delta": "Raised B from 30,000 to 1,000,000.",
+                "acceptance_test": "Reproduce the list.",
+                "closest_prior_work": [{"url": "https://example.test/paper", "difference": "larger B"}],
+                "novelty_searches": [
+                    {"source": "arXiv", "query": "restricted examples", "url": "https://example.test/a", "finding": "none"},
+                    {"source": "repository", "query": "example list", "url": "https://example.test/b", "finding": "none"},
+                ],
+                "external_channel": {"recipient": "Maintainer", "url": "https://example.test/channel", "acceptance_path": "email"},
+                "independent_validations": [{"type": "formal_kernel", "validator": "Lean", "result": "accepted", "artifact": "proof.lean"}],
+                "relevance": {"evidence_url": "https://example.test/paper"},
+                "arbitrary_cutoff_extension": True,
+            }
+        }
+        gate = contribution_gate.assess(result)
+        self.assertFalse(gate["passed"])
+        self.assertEqual(gate["status"], "internal_result")
+        self.assertTrue(any("cutoff" in reason for reason in gate["reasons"]))
+
+    def test_contribution_gate_accepts_exact_recognized_target(self) -> None:
+        result = {
+            "candidate_profile": {
+                "contribution_class": "terminal_result",
+                "scholarly_question": "Does the exact open target have a witness?",
+                "meaningful_delta": "Supplies the first exact witness.",
+                "acceptance_test": "Independent checker accepts the witness.",
+                "closest_prior_work": [{"url": "https://example.test/problem", "difference": "open; no witness"}],
+                "novelty_searches": [
+                    {"source": "maintained registry", "query": "target", "url": "https://example.test/problem", "finding": "open"},
+                    {"source": "arXiv", "query": "exact target", "url": "https://example.test/search", "finding": "no result"},
+                ],
+                "external_channel": {"recipient": "Registry maintainer", "url": "https://example.test/problem", "acceptance_path": "submit certificate"},
+                "independent_validations": [{"type": "repository_ci", "validator": "maintained checker", "result": "accepted", "evidence_url": "https://example.test/ci"}],
+                "relevance": {"settles_exact_open_target": True, "evidence_url": "https://example.test/problem"},
+                "arbitrary_cutoff_extension": False,
+            }
+        }
+        self.assertTrue(contribution_gate.assess(result)["passed"])
+
+    def test_rejected_candidate_displays_as_internal_result(self) -> None:
+        attempt = {"id": "a", "outcome": "candidate"}
+        reviews = [{"decision": "reject", "display_status": "internal_result"}]
+        self.assertEqual(render._effective_outcome(attempt, reviews), "internal_result")
+
+    def test_internal_result_cannot_be_human_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            data.mkdir()
+            (data / "problems.json").write_text(json.dumps([{"id": "p", "status": "attempted"}]))
+            (data / "attempts.jsonl").write_text(json.dumps({"id": "a", "problem_id": "p", "outcome": "candidate"}) + "\n")
+            (data / "reviews.json").write_text(json.dumps([{"attempt_id": "a", "display_status": "internal_result"}]))
+            with patch.multiple(
+                store, ROOT=root, DATA=data, STATE=root / "state", SITE=root / "site",
+                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                with self.assertRaisesRegex(ValueError, "internal result"):
+                    cli._review("a", "accept", "looks good")
 
     def test_prompt_injects_computational_researcher_contract(self) -> None:
         problem = store.load_problems()[1]
@@ -213,6 +276,9 @@ class ProofFactoryTests(unittest.TestCase):
                 api = json.loads((site / "api" / "state.json").read_text())
                 self.assertIn("research_states", api)
                 self.assertIn("strategy_library", api)
+                adjudicated = next(row for row in api["attempts"] if row["id"] == "erdos-242-20260720-181822-bad8d7")
+                self.assertEqual(adjudicated["outcome"], "candidate")
+                self.assertEqual(adjudicated["public_outcome"], "internal_result")
 
 
 if __name__ == "__main__":

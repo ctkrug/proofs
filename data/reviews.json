@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "attempt_id": "erdos-242-20260720-181822-bad8d7",
+    "problem_id": "erdos-242",
+    "decision": "reject",
+    "note": "Downgraded to an internal computational result. It extends Xu's restricted tame/wild cutoff but does not improve the known Erdős–Straus verification bound, answer a source-requested target, establish structural mathematics, or have confirmed expert relevance. Preserve the artifacts and audit trail; do not queue Charlie review or publication.",
+    "reviewed_at": "2026-07-20T18:38:37.389531+00:00",
+    "reviewer": "Proof Factory contribution gate",
+    "display_status": "internal_result"
+  }
+]

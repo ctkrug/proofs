@@ -64,6 +64,14 @@ The north star and broader target taxonomy live in `docs/ACADEMIC-CONTRIBUTIONS.
 7. **Human approval:** Charlie records accept, reject, or needs-work. Accepted means ready for wider
    expert/community review, not that a blog replaces peer review.
 
+Before step 5, the deterministic contribution gate separates a correct internal experiment from a
+candidate scholarly contribution. Model-declared candidates fail closed unless they show meaningful
+delta, reproducible novelty work, a named acceptance channel, independent validation beyond another
+local implementation, and sourced relevance to a recognized target. Arbitrary range extensions are
+explicitly rejected unless they improve the actual best-known bound, answer a source's request, have
+confirmed expert interest, or produce a structural result. The original model outcome remains in the
+immutable record; a gate adjudication controls the public label.
+
 ## Initial lanes
 
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
