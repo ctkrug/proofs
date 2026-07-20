@@ -381,6 +381,24 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(adjudicated["outcome"], "candidate")
                 self.assertEqual(adjudicated["public_outcome"], "internal_result")
 
+    def test_render_uses_shared_process_lock(self) -> None:
+        events: list[str] = []
+
+        class Lock:
+            def __enter__(self) -> bool:
+                events.append("enter")
+                return True
+
+            def __exit__(self, *args: object) -> None:
+                events.append("exit")
+
+        with patch.object(store, "lock", return_value=Lock()) as lock, \
+             patch.object(render, "_build_unlocked", return_value=Path("/tmp/site")):
+            self.assertEqual(render.build(), Path("/tmp/site"))
+
+        lock.assert_called_once_with("render")
+        self.assertEqual(events, ["enter", "exit"])
+
 
 if __name__ == "__main__":
     unittest.main()

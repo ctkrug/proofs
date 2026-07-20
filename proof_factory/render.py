@@ -425,7 +425,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('.filter');if(!b)
 """
 
 
-def build() -> Path:
+def _build_unlocked() -> Path:
     problems = store.load_problems()
     attempts = store.load_attempts()
     runtime = store.runtime()
@@ -506,3 +506,15 @@ def build() -> Path:
     _write(store.SITE / "_headers", "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  X-Frame-Options: DENY\n\n/assets/*\n  Cache-Control: public, max-age=3600\n")
     _write(store.SITE / "404.html", _layout("Not found", '<section class="method-head"><h1>That record does not exist.</h1><p><a href="/">Return to the live ledger →</a></p></section>'))
     return store.SITE
+
+
+def build() -> Path:
+    """Render the shared site under a cross-process lock.
+
+    Hard, easy, watchdog, and publishing services can run concurrently.  They
+    all rebuild the same directory, so cleanup and writes must be serialized.
+    """
+    with store.lock("render") as acquired:
+        if not acquired:
+            raise RuntimeError("render lock unavailable")
+        return _build_unlocked()
