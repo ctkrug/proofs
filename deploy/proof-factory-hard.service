@@ -20,7 +20,6 @@ MemoryHigh=900M
 MemoryMax=1500M
 OOMScoreAdjust=600
 TimeoutStartSec=3h
-PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target
