@@ -18,6 +18,7 @@
       "collision witness"
     ],
     "attempt_count": 1,
+    "research_attempt_count": 1,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": "2026-07-20T15:20:00+00:00",
     "accepted_result": false,
@@ -44,6 +45,7 @@
       "exact search"
     ],
     "attempt_count": 1,
+    "research_attempt_count": 1,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": "2026-07-20T16:44:38.319463+00:00",
     "accepted_result": false,
@@ -69,6 +71,7 @@
       "OEIS cross-check"
     ],
     "attempt_count": 2,
+    "research_attempt_count": 1,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": "2026-07-20T16:26:07.624575+00:00",
     "accepted_result": false,
@@ -93,6 +96,7 @@
       "modular pruning"
     ],
     "attempt_count": 0,
+    "research_attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
     "accepted_result": false,
@@ -118,6 +122,7 @@
       "certificate checking"
     ],
     "attempt_count": 0,
+    "research_attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
     "accepted_result": false,
@@ -143,6 +148,7 @@
       "LCM-period verification"
     ],
     "attempt_count": 0,
+    "research_attempt_count": 0,
     "created_at": "2026-07-20T15:00:00+00:00",
     "last_attempt_at": null,
     "accepted_result": false,
