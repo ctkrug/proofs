@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - six daily easier-problem passes
+
+[Timer]
+OnCalendar=*-*-* 00,04,08,12,16,20:30:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=proof-factory-easy.service
+
+[Install]
+WantedBy=timers.target

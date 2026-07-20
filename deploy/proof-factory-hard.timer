@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - twice-daily hard/famous research
+
+[Timer]
+OnCalendar=*-*-* 06,18:00:00 UTC
+Persistent=true
+AccuracySec=1min
+Unit=proof-factory-hard.service
+
+[Install]
+WantedBy=timers.target

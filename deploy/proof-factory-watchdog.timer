@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - six-hour cadence watchdog
+
+[Timer]
+OnBootSec=10min
+OnUnitInactiveSec=6h
+Persistent=true
+Unit=proof-factory-watchdog.service
+
+[Install]
+WantedBy=timers.target

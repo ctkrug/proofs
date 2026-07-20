@@ -1,0 +1,20 @@
+[Unit]
+Description=Proof Factory - cadence and state watchdog
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/proof-factory
+Environment=HOME=/root
+Environment=PROOF_FACTORY_ROOT=/root/proof-factory
+ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory watchdog
+Nice=19
+CPUWeight=1
+IOWeight=5
+MemoryMax=160M
+TimeoutStartSec=5min
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/root/proof-factory/state /root/proof-factory/site
+NoNewPrivileges=true

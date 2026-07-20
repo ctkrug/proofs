@@ -1,0 +1,10 @@
+{
+  "name": "proof-factory-deploy",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "4.112.0"
+  },
+  "scripts": {
+    "deploy": "wrangler pages deploy site --project-name=proofs --branch=main"
+  }
+}

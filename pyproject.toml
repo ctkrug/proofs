@@ -1,0 +1,16 @@
+[project]
+name = "proof-factory"
+version = "0.1.0"
+description = "Certificate-first, always-on open-problem research ledger"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6.0,<7"]
+
+[project.scripts]
+proof-factory = "proof_factory.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["proof_factory*"]

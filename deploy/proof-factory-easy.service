@@ -1,0 +1,28 @@
+[Unit]
+Description=Proof Factory - certificate-first discovery pass
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/proof-factory
+Environment=HOME=/root
+Environment=PROOF_FACTORY_ROOT=/root/proof-factory
+ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane easy
+ExecStartPost=/bin/systemctl start --no-block proof-factory-publish.service
+Nice=15
+CPUWeight=2
+IOWeight=10
+MemoryHigh=700M
+MemoryMax=1200M
+OOMScoreAdjust=700
+TimeoutStartSec=2h
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/root/proof-factory/data /root/proof-factory/state /root/proof-factory/site /root/proof-factory/research
+InaccessiblePaths=/root/project-factory /root/.ssh /root/.config/gh
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
