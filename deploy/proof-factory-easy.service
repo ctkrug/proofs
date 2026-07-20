@@ -21,7 +21,7 @@ TimeoutStartSec=2h
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/root/proof-factory/data /root/proof-factory/state /root/proof-factory/site /root/proof-factory/research
+ReadWritePaths=/root/proof-factory/data /root/proof-factory/state /root/proof-factory/site /root/proof-factory/research /root/.codex
 InaccessiblePaths=/root/project-factory /root/.ssh /root/.config/gh
 NoNewPrivileges=true
 
