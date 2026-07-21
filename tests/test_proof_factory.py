@@ -792,6 +792,24 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(report["status"], "completed_awaiting_review")
         self.assertEqual(report["segments_run"], 3)
 
+    def test_lab_tranche_has_no_hidden_activation_cap_before_review(self) -> None:
+        segments = [
+            {"status": "checkpointed", "segment": index}
+            for index in range(1, 102)
+        ] + [{"status": "completed_awaiting_review", "segment": 102}]
+        with patch.object(lab, "worker_once", side_effect=segments) as worker:
+            report = lab.worker_tranche()
+        self.assertEqual(report["status"], "completed_awaiting_review")
+        self.assertEqual(report["segments_run"], 102)
+        self.assertEqual(worker.call_count, 102)
+
+    def test_lab_tranche_explicit_operator_cap_remains_available(self) -> None:
+        with patch.object(lab, "worker_once", return_value={"status": "checkpointed", "segment": 1}) as worker:
+            report = lab.worker_tranche(max_segments=2)
+        self.assertEqual(report["status"], "checkpointed")
+        self.assertEqual(report["segments_run"], 2)
+        self.assertEqual(worker.call_count, 2)
+
     def test_capacity_cleanup_candidates_exclude_fresh_and_system_tmp(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)

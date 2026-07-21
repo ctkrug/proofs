@@ -515,10 +515,16 @@ def worker_once() -> dict[str, Any]:
             running.unlink(missing_ok=True)
 
 
-def worker_tranche(*, max_segments: int = 100) -> dict[str, Any]:
-    """Run consecutive bounded segments until the next review/stop boundary."""
+def worker_tranche(*, max_segments: int | None = None) -> dict[str, Any]:
+    """Run bounded segments continuously until the next real review/stop boundary.
+
+    ``max_segments`` remains available for tests and explicitly bounded operator
+    calls.  The production ``--drain`` path deliberately leaves it unset: each
+    segment retains its own resource limits, while an arbitrary activation cap
+    must not create idle gaps before the predeclared review tranche is due.
+    """
     results: list[dict[str, Any]] = []
-    for _ in range(max_segments):
+    while max_segments is None or len(results) < max_segments:
         result = worker_once()
         results.append(result)
         if result.get("status") != "checkpointed":
