@@ -27,7 +27,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The two-record feasibility gate passed with exact three-way validation. No block was emitted and 43 <= R(5,5) <= 46 is unchanged.",
+  "synthesis_summary": "The two-record feasibility gate passed with exact three-way validation. The approximately 5.6-core-hour full supplied-class census is now approved and durably queued as checkpointed job lab-ramsey-r55-872a7c3ee855; a one-host lifecycle canary is queued ahead of it. Droplet execution is safely deferred while the separate build-cache volume remains below its 1 GiB reserve. No block was emitted and 43 <= R(5,5) <= 46 is unchanged.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -1427,9 +1427,9 @@
   ],
   "next_session": {
     "recommended_strategy_id": "strategy-r55-known-class-embedding-block",
-    "objective": "Determine whether complete supplied-class boundary blocking is technically sound and tractable before another search call.",
-    "first_action": "Enumerate embeddings of the fixed source-record-21 order-30 core into supplied source records 21 and 12 using two independent implementations; emit exact counts, normalized assignment sets, and hashes.",
-    "stop_condition": "Stop immediately on an implementation mismatch, failed boundary replay, or projected full-corpus cost that exceeds a measured bounded pass; do not run residual SAT until the complete block set is independently reconciled.",
+    "objective": "Complete and independently validate the checkpointed 656-host supplied-class embedding census before any residual SAT.",
+    "first_action": "When the host capacity reserve clears, run lifecycle canary lab-ramsey-r55-f314736c524b, review its durable completion event, then begin full job lab-ramsey-r55-872a7c3ee855 with a one-host measured pilot.",
+    "stop_condition": "Automatically pause on implementation mismatch, failed coverage/correctness, throughput below 0.001 host/second, per-segment artifact growth above 200 MB, or lost decision value. Preserve all verified host receipts. Before scaling beyond the supplied corpus, require a bounded residual-SAT discriminator and independent validation.",
     "source_attempt_id": "ramsey-r55-20260721-173738-495bea"
   },
   "recent_attempt_ids": [
