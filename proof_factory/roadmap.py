@@ -39,6 +39,7 @@ def current(problem: dict[str, Any]) -> dict[str, Any]:
         "incumbent_fingerprint": fingerprint,
         "operating_rule": value.get("operating_rule"),
         "selection_policy": value.get("selection_policy", []),
+        "portfolio_rule": value.get("portfolio_rule"),
         "active_phase": active,
         "confidence_calibration": value.get("confidence_calibration"),
         "sources": value.get("sources", []),

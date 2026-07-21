@@ -94,7 +94,7 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "schema_version": 1,
-        "decision_rule": "Transparent heuristic priority, not a probability or proof. Terminal routes remain ineligible; a materially new child strategy records any justified reopening.",
+        "decision_rule": "Transparent heuristic priority, not a probability or proof. The portfolio is a working set, not an exhaustive ontology: terminal routes remain ineligible, while a materially new or composite child strategy records any justified reopening or cross-field transfer.",
         "contribution_target": {
             "objective": _text(state.get("objective") or problem.get("statement"), 2000),
             "acceptance_tests": problem.get("field_progress_gates") or state.get("completion_criteria", []),
@@ -119,6 +119,7 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
         "execution_contract": {
             "predeclare": ["prediction", "cheapest discriminator", "success signal", "failure signal", "redirect signal"],
             "one_epoch_limit": "One bounded discriminator; scale only after measured pilot throughput and shortcut validation.",
+            "open_ended_discovery": "The route menu is not closed. A proposed synthesis must name its inputs, mechanism-level transfer hypothesis, nearest prior art, and a cheap falsifier before it is eligible for compute.",
             "reduction_priority": "Prefer a sound class/cube/profile/family elimination over many labelled point blocks. Report exact expressions or honest upper bounds; never imply local-family coverage is global.",
             "end_state": "Record surprise, failure signature, exact constraints learned, reusable assets, route decision, and next discriminator.",
         },

@@ -60,10 +60,22 @@ def extract_result(text: str) -> dict[str, Any]:
             raise ValueError(f"missing result field: {key}")
     for key in (
         "claims", "evidence", "next_steps", "citations", "techniques", "experiments", "transfer_insights",
-        "established_facts", "ruled_out", "open_leads", "strategy_proposals",
+        "established_facts", "ruled_out", "open_leads", "strategy_proposals", "synthesis_candidates",
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
+    for candidate in result.get("synthesis_candidates", []):
+        if not isinstance(candidate, dict):
+            raise ValueError("synthesis_candidates entries must be objects")
+        required_candidate = (
+            "family", "mechanism", "source_inputs", "transfer_hypothesis",
+            "discriminating_test", "falsification_signal",
+        )
+        missing_candidate = [key for key in required_candidate if not str(candidate.get(key) or "").strip()]
+        if missing_candidate:
+            raise ValueError(f"synthesis candidate missing fields: {missing_candidate}")
+        if not isinstance(candidate.get("parent_strategy_ids", []), list):
+            raise ValueError("synthesis_candidate.parent_strategy_ids must be a list")
     for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "prior_art_check", "field_progress_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
@@ -387,6 +399,9 @@ STRATEGY PORTFOLIO RULES
    failure, and redirect signals, and record the override reason. Never confuse a high route score with mathematical evidence.
 9. Treat the roadmap as an evidence-driven stage graph, not a sequence. Recompute the active stage after every epoch and
    switch immediately when a promote, kill, hold, redirect, or reopen condition is observed.
+10. The current portfolio is an evidence-backed working set, not an exhaustive ontology. You may propose one genuinely
+   new or composite mechanism from this problem, another problem, or another field when it has a concrete transfer
+   hypothesis and a cheap falsifier. Do not force a synthesis: an empty list is correct when no candidate clears that bar.
 
 WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
@@ -470,6 +485,7 @@ WORK RULES
   "continuation": {{"objective":"next epoch objective","first_action":"exact command/lemma/source to start with","stop_condition":"evidence that ends or redirects it"}},
   "campaign_assessment": {{"decision":"continue|hold","close_signal":"concrete evidence of nearness, or blank when holding","reason":"why another bounded pass is or is not worth its compute"}},
   "strategy_proposals": [{{"family":"different family","mechanism":"concrete mechanism","hypothesis":"testable claim","discriminating_test":"cheap test","rationale":"why it may outperform current routes"}}],
+  "synthesis_candidates": [{{"family":"stable composite family","mechanism":"how the inputs combine into a new information-generating mechanism","parent_strategy_ids":["strategy-id", "strategy-id"],"source_inputs":["specific current strategy, other problem, or external field"],"transfer_hypothesis":"why this structure should transfer to this exact problem","discriminating_test":"cheapest bounded test before scale-up","falsification_signal":"observation that rejects the transfer","rationale":"why this is not a renamed existing route"}}],
   "candidate_profile": {{
     "contribution_class":"terminal_result|recognized_open_subproblem|bounded_extension|research_artifact",
     "scholarly_question":"what recognized question this answers",

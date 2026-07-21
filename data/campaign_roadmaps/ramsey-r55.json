@@ -5,6 +5,7 @@
   "updated_at": "2026-07-21",
   "default_phase": "core_theorem",
   "operating_rule": "This is an evidence-driven stage graph, not a fixed sequence or session allocation. The tactical incumbent selects the active stage after every completed epoch. Run only the cheapest decisive discriminator, then immediately promote, kill, hold, or redirect the route from the observed evidence.",
+  "portfolio_rule": "The named stages are a current evidence-backed portfolio, not an exhaustive list of permissible ideas. A new composite route may enter at any epoch when it identifies concrete inputs from R(5,5), another problem, or another field; states a mechanism-level transfer hypothesis; clears prior-art comparison; and has a bounded falsifier. It does not displace the active incumbent until evidence from that discriminator supports redirecting.",
   "confidence_calibration": {
     "basis": "Current evidence as of 2026-07-21; update after decisive observations rather than after an arbitrary number of sessions.",
     "meaningful_gate_candidate_probability": 0.22,

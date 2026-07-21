@@ -25,6 +25,21 @@ append-only attempts.jsonl + durable research maps → self-improving selector a
 static renderer → Cloudflare Pages → proofs.charliekrug.com
 ```
 
+## Open-ended synthesis contract
+
+The named roadmap stages are a current, evidence-backed portfolio—not a closed list of ways the
+engine may reason. At the end of an epoch, Sol may register a **synthesis candidate** that combines
+methods from the current problem, another tracked problem, or another field. It becomes a proposed
+strategy only when the record preserves its inputs, mechanism-level transfer hypothesis, nearest
+prior-art comparison, cheapest bounded discriminator, and falsification signal. This makes
+cross-pollination testable rather than rhetorical.
+
+Registering a synthesis candidate never interrupts an in-flight epoch or replaces its incumbent.
+The tactical selector considers it in a later epoch; it receives substantial compute only after its
+cheap discriminator produces evidence. A negative result is retained as a reusable transfer failure
+signature, and a positive result proceeds through the same independent-verification and contribution
+gates as every other route.
+
 Cloudflare serves only generated static files. It is not coupled to the model runtime, so the ledger
 stays available if the content box, Codex login, or an individual attempt fails.
 

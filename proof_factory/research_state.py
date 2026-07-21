@@ -9,7 +9,7 @@ from typing import Any
 from . import store
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 STRATEGY_STATUSES = {
     "proposed", "active", "promising", "blocked", "ruled_out", "exhausted", "superseded",
 }
@@ -285,7 +285,32 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         }])[-60:]
     state["tactical_memory"] = memory
 
-    proposals = _object_rows(attempt.get("strategy_proposals"), ("family", "mechanism", "hypothesis", "discriminating_test", "rationale"), 10)
+    proposals = _object_rows(
+        attempt.get("strategy_proposals"),
+        ("family", "mechanism", "hypothesis", "discriminating_test", "rationale"),
+        10,
+    )
+    synthesis = _object_rows(
+        attempt.get("synthesis_candidates"),
+        (
+            "family", "mechanism", "source_inputs", "transfer_hypothesis",
+            "discriminating_test", "falsification_signal", "rationale",
+        ),
+        5,
+    )
+    for candidate in synthesis:
+        candidate["hypothesis"] = candidate.get("transfer_hypothesis", "")
+        candidate["origin"] = "cross_problem_or_cross_field_synthesis"
+        candidate["parent_ids"] = [
+            _text(value, 100)
+            for value in next(
+                (row.get("parent_strategy_ids", []) for row in attempt.get("synthesis_candidates", [])
+                 if isinstance(row, dict) and _text(row.get("mechanism")) == candidate.get("mechanism")),
+                [],
+            )
+            if _text(value, 100)
+        ][:10]
+    proposals.extend(synthesis)
     known = {row.get("fingerprint") for row in state["strategies"]}
     added_proposal_ids: list[str] = []
     for proposal in proposals:
@@ -295,7 +320,7 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         proposal.update({
             "id": f"strategy-{proposal_fp}", "fingerprint": proposal_fp, "status": "proposed",
             "title": proposal.get("mechanism", "")[:500], "attempts": 0,
-            "parent_ids": [strategy_row["id"]], "updated_at": now,
+            "parent_ids": proposal.get("parent_ids") or [strategy_row["id"]], "updated_at": now,
         })
         state["strategies"].append(proposal)
         added_proposal_ids.append(proposal["id"])

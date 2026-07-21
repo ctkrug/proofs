@@ -217,6 +217,16 @@ class ProofFactoryTests(unittest.TestCase):
                 "strategy_status": "promising", "established_facts": [{"claim": "Covers class 0", "scope": "mod 6", "evidence": "identity"}],
                 "ruled_out": [{"claim_or_route": "linear family", "scope": "degree one", "reason": "coefficient contradiction", "reopen_condition": "allow degree two"}],
                 "open_leads": [{"description": "try mod 12", "next_experiment": "enumerate exact residues", "status": "open"}],
+                "synthesis_candidates": [{
+                    "family": "constraint-guided residue SAT",
+                    "mechanism": "feed residue exclusions into a canonical SAT cube generator",
+                    "parent_strategy_ids": ["strategy-existing-residues", "strategy-existing-cubes"],
+                    "source_inputs": ["this problem's residue checker", "Ramsey canonical cube method"],
+                    "transfer_hypothesis": "residue constraints reduce the canonical cube branching factor",
+                    "discriminating_test": "compare 100 constrained and unconstrained cubes",
+                    "falsification_signal": "no reduction in solved cube count under matched calls",
+                    "rationale": "combines two mechanisms rather than renaming either one",
+                }],
                 "continuation": {"objective": "cover the remainder", "first_action": "run residues.py", "stop_condition": "all classes covered or witness fails"},
                 "tactical_learning": {
                     "prediction": "new residue classes", "observation": "same obstruction", "surprise": "no new classes",
@@ -238,8 +248,11 @@ class ProofFactoryTests(unittest.TestCase):
                 attempt["id"] = "a2"
                 second = research_state.update_from_attempt(problem, attempt)
                 self.assertEqual(second["epoch_count"], 2)
-                self.assertEqual(len(second["strategies"]), 1)
-                self.assertEqual(second["strategies"][0]["attempts"], 2)
+                self.assertEqual(len(second["strategies"]), 2)
+                self.assertEqual(next(row for row in second["strategies"] if row["family"] == "congruences")["attempts"], 2)
+                synthesis = next(row for row in second["strategies"] if row["family"] == "constraint-guided residue SAT")
+                self.assertEqual(synthesis["origin"], "cross_problem_or_cross_field_synthesis")
+                self.assertEqual(synthesis["parent_ids"], ["strategy-existing-residues", "strategy-existing-cubes"])
                 self.assertEqual(second["next_session"]["first_action"], "run residues.py")
                 self.assertEqual(second["tactical_memory"]["failure_signatures"][0]["count"], 2)
                 self.assertEqual(second["tactical_memory"]["reusable_assets"][0]["name"], "residue checker")
