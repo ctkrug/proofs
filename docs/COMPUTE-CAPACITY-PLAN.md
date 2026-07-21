@@ -26,6 +26,19 @@ write that volume, so a full Lean cache no longer blocks unrelated Python/SAT en
 Do not run arbitrary search merely to keep CPUs busy. The durable queue should remain available
 continuously, but only qualified experiments consume it.
 
+## R(5,5)-priority allocation
+
+While R(5,5) is Charlie's highest-priority project, its deterministic lab receives one continuously
+available low-priority CPU core and drains each approved tranche without timer gaps. The second core is
+reserved for the OS, dashboards, checkpoint publication, validation, and event review. Competing model
+programs are paused: Project Factory production work, the Proof Factory discovery lane, scouting,
+strategy-lab exploration, and intake. Their state and timers remain recoverable. Backups, watchdogs,
+capacity checks, runtime sync, public publication, and read-only dashboards remain active.
+
+The R(5,5) hard reviewer polls every 15 minutes but remains evidence-gated: no completion/source event
+means no model call. Provider-usage admission and evidence validation remain mandatory. This directs model
+quota to completed R(5,5) tranches without manufacturing clock-driven research epochs.
+
 ## Upgrade triggers
 
 - Expand the shared volume before more Lean/Mathlib hydration. A 50 GiB volume provides roughly
