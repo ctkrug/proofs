@@ -282,6 +282,18 @@ class SchemaCompatibilityTests(unittest.TestCase):
                 self.assertFalse(queue.exists())
                 self.assertEqual(lab._read_state(submitted["id"])["status"], "stopped_with_reason")
 
+    def test_lab_stopped_job_cannot_be_restarted_by_continue_review(self) -> None:
+        stopped = {
+            "id": "job", "problem_id": "p", "status": "stopped_with_reason",
+            "checkpoint_path": "checkpoint.json", "latest_progress": {
+                "correctness_checks_passed": False, "decision_value_active": False,
+            },
+            "segments": [{"threshold_failures": ["correctness failed"]}],
+        }
+        with patch.object(lab, "_read_state", return_value=stopped):
+            with self.assertRaisesRegex(ValueError, "stopped lab job cannot continue"):
+                lab.apply_review("job", "continue", reason="model suggested retry")
+
     def test_evidence_loaders_accept_generated_records_and_reject_legacy_schema(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)

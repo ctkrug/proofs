@@ -710,7 +710,20 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
         raise schemas.SchemaError("lab validation receipt is not bound to the completed job segment")
     if receipt["result"] != "passed":
         raise schemas.SchemaError("lab validation receipt result is not passed")
-    if receipt["progress_sha256"] != state.get("latest_progress", {}).get("sha256"):
+    progress_relative = state.get("latest_progress", {}).get("path")
+    if not isinstance(progress_relative, str) or not progress_relative:
+        raise schemas.SchemaError("completed lab state has no final progress path")
+    progress_path = (workspace / progress_relative).resolve()
+    if (
+        Path(progress_relative).is_absolute() or ".." in Path(progress_relative).parts
+        or not _inside(progress_path, workspace) or not progress_path.is_file() or progress_path.is_symlink()
+    ):
+        raise schemas.SchemaError("final progress record is not a regular workspace file")
+    current_progress_sha256 = _sha256(progress_path)
+    if (
+        receipt["progress_sha256"] != state.get("latest_progress", {}).get("sha256")
+        or current_progress_sha256 != receipt["progress_sha256"]
+    ):
         raise schemas.SchemaError("lab validation receipt does not bind the final progress record")
     if not isinstance(receipt["validator"], str) or not receipt["validator"].strip():
         raise schemas.SchemaError("lab validation receipt.validator must be nonempty")
@@ -777,8 +790,18 @@ def apply_review(
     state.setdefault("reviews", []).append(review)
     workspace = _workspace(str(state["problem_id"]))
     if decision == "continue":
+        if state.get("status") != "completed_awaiting_review":
+            raise ValueError("a stopped lab job cannot continue; submit a new audited job or redirect it")
         if not state.get("checkpoint_path"):
             raise ValueError("cannot continue a job without a checkpoint")
+        latest = state.get("latest_progress") if isinstance(state.get("latest_progress"), dict) else {}
+        last_segment = state.get("segments", [])[-1] if state.get("segments") else {}
+        if (
+            not latest.get("correctness_checks_passed")
+            or not latest.get("decision_value_active")
+            or last_segment.get("threshold_failures")
+        ):
+            raise ValueError("lab continuation gates are not satisfied")
         state["last_reviewed_segment"] = int(state.get("segment") or 1)
         state["segment"] = int(state.get("segment") or 1) + 1
         if state.get("max_segments") and state["segment"] > int(state["max_segments"]):

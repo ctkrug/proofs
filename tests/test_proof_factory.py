@@ -646,6 +646,15 @@ class ProofFactoryTests(unittest.TestCase):
                     "independence_basis": "separate checker code reads only the final artifact",
                     "created_at": store.now_iso(),
                 }))
+                progress_file = workspace / "progress.json"
+                original_progress = progress_file.read_bytes()
+                progress_file.write_text('{"tampered":true}\n')
+                with self.assertRaisesRegex(ValueError, "final progress record"):
+                    lab.apply_review(
+                        submitted["id"], "validate", reason="tampered progress",
+                        validation_receipt="validation-receipt.json",
+                    )
+                progress_file.write_bytes(original_progress)
                 self.assertEqual(lab.apply_review(
                     submitted["id"], "validate", reason="complete and checked",
                     validation_receipt="validation-receipt.json",
