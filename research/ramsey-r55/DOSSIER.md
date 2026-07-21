@@ -583,6 +583,33 @@ minima remain 2 and contain only symmetry copies, close the near-circulant famil
 multi-orbit or nonlocal surgery. No external novelty claim is made for this internal classification;
 a targeted literature/expert audit is required before publication framing.
 
+### S18. Adversarial certification and two-orbit closure (2026-07-21)
+
+The retained Springer seed, radius-one ledger, radius-two ledger, and distance-6 classification were
+recomputed with an independent C++ bitset checker and a separately written Python audit. The audit
+re-derived all 903 one-edge and 407,253 two-edge scores, matched the retained radius-two ledger byte
+for byte, checked both minimizers as explicit rotations, accounted for all 962,598 five-sets, and
+passed malformed-input and planted-clique/coclique controls.
+
+The distance-6 result is now proof-carrying: checked DRAT certificates exclude burdens 0 and 1, an
+independent enumeration reconstructs and exactly rescans all 86 burden-2 words, and a final checked
+certificate excludes an 87th word. For every `d != 6`, the family `F_{6,d}` releases exactly the two
+cyclic distance orbits 6 and `d`. All 20 families have exact minimum burden 2. Equality always freezes
+the second orbit, so the optimum set remains the same 86 one-orbit words: two rotation orbits and two
+graph-isomorphism classes. The sweep carries 60 checked DRAT proofs and 60 independent unsymmetrized
+Z3 decisions, with explicit verification that all 42 nonidentity common rotations preserve each raw
+formula.
+
+This does **not** meet the field-progress gate: there is no zero-conflict witness, no lower conflict
+count, no concise human structural theorem, no material reduction of an accepted global search
+space, and no held-out algorithmic benchmark. Record it as a verified negative experiment plus
+certificate-carrying infrastructure, and close the one- and two-orbit witness route. The single next
+discriminator is proof-core compression: continue only if the 20 unsymmetrized burden-zero exclusions
+have deletion-minimal raw cores of at most 20 clauses that collapse to at most five parameterized
+types; otherwise redirect to the leakage-safe held-out algorithm benchmark. See
+`workspace/docs/FIELD_PROGRESS_AUDIT.md` and
+`workspace/artifacts/field_progress_gate_report.json`.
+
 ## 9. Combining ideas without making analogy soup
 
 Use at most three transfers in one epoch and attach a prediction to each:

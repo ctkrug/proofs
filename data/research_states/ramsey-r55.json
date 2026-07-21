@@ -12,6 +12,7 @@
     "A local-search score, a partial SAT cube set, or an unchecked solver result is not a bound.",
     "Rediscovering one of the known 656 order-42 graphs is a control result, not frontier progress.",
     "The 656 known order-42 graphs are not a proved complete census.",
+    "Completing a structured-family sweep, accumulating UNSAT responses, or finding symmetry copies is not field progress without one of the five explicit contribution gates.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
   "epoch_count": 14,
@@ -203,12 +204,28 @@
       "updated_at": "2026-07-20T19:10:03-06:00"
     },
     {
+      "claim": "An independently written C++20/Python audit reproduced the Springer seed, all 903 radius-one scores, and the complete 407253-entry radius-two ledger byte-for-byte, including both explicit rotation minimizers and the strict 403809-pair subfamily.",
+      "evidence": "artifacts/adversarial_audit_report.json and .proof-experiments/20260721-022123-71d7c4 in the R55 problem workspace",
+      "scope": "The authenticated Springer source and the retained radius-one, radius-two, and distance-six derivations.",
+      "status": "independently-replicated",
+      "source_attempt_id": "20260721-022123-71d7c4",
+      "updated_at": "2026-07-21T02:22:03+00:00"
+    },
+    {
       "claim": "Freezing the publisher seed's 20 constant cyclic-distance orbits and varying all 43 distance-6 edges yields minimum burden 2 over all 2^43 assignments. Exactly 86 assignments attain it: every rotation of a step-27 interval of 24 ones or 25 ones.",
-      "evidence": "Independent Python/Z3 and custom C DPLL complete model-set agreement in artifacts/distance6_slice_exact_report.json",
+      "evidence": "Independent Python/Z3 and custom C DPLL agreement in artifacts/distance6_slice_exact_report.json, upgraded by deterministic CNFs and checked DRAT proofs in artifacts/distance6_independent_sat_report.json",
       "scope": "The exact 43-variable distance-6 slice only, not the full 903-edge space",
-      "status": "computed",
-      "source_attempt_id": "manual-local-radius2-domain-wall-2026-07-20",
-      "updated_at": "2026-07-20T19:10:03-06:00"
+      "status": "certified-computationally",
+      "source_attempt_id": "20260721-020646-b4834f",
+      "updated_at": "2026-07-21T02:09:02+00:00"
+    },
+    {
+      "claim": "For every d in {1,...,21} except 6, the 86-variable family F_{6,d} obtained by releasing exactly distance 6 and distance d has minimum monochromatic-K5 burden 2. Equality freezes distance d to its Springer color, so the complete minima are the same 86 one-orbit interval words and no new minimum class appears.",
+      "evidence": "artifacts/two_orbit_certified_sweep_report.json, 60 checked DRAT proofs under artifacts/two_orbit_certificates/, and 60 independent unsymmetrized Z3 decisions",
+      "scope": "The union of 20 precisely defined two-orbit families only; not all near-circulant colorings, the full 903-edge space, a global multiplicity result, or a changed Ramsey bound",
+      "status": "certified-computationally-no-field-progress",
+      "source_attempt_id": "20260721-020930-8c427b",
+      "updated_at": "2026-07-21T02:15:20+00:00"
     },
     {
       "claim": "For adjacency rows a_u and a_v of any (5,5,n) graph, d_H(a_u,a_v)=d(u)+d(v)-2|N(u) intersect N(v)|. If uv is an edge then the common-neighbor set has size at most 13; if uv is a nonedge then the common-nonneighbor set has size at most 13.",
@@ -706,18 +723,46 @@
         "strategy-r55novel42basin2026"
       ],
       "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "id": "strategy-r55-two-orbit-proof-compression",
+      "family": "proof-core compression for structured Ramsey exclusions",
+      "fingerprint": "r55tworbitproofcompress2026",
+      "title": "Compress the certified two-orbit exclusions into a human theorem",
+      "mechanism": "Strip symmetry and cardinality auxiliaries from the burden-zero formulas, deletion-minimize raw K5-clause cores, canonicalize their signed incidence hypergraphs, and derive parameterized obstruction templates across the 20 second distances.",
+      "status": "proposed",
+      "hypothesis": "Every two-orbit burden-zero exclusion has a raw core of at most 20 clauses and the 20 distances collapse to at most five symbolic templates, permitting a concise human-checkable proof.",
+      "discriminating_test": "Continue only if exact deletion minimization meets both thresholds and every template maps deterministically back to valid K43 five-set clauses without SAT auxiliaries or symmetry assumptions.",
+      "blocker": "No minimized raw-core atlas or symbolic template proof exists yet.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55twocore2026"
+      ],
+      "updated_at": "2026-07-21T02:22:03+00:00"
     }
   ],
   "open_leads": [
     {
       "description": "Sweep the 20 exact two-orbit domain-wall slices obtained by releasing cyclic distance 6 with one additional distance orbit.",
       "rationale": "Radius 2 contains only translations of the one-dimensional defect, while the full one-orbit family is exactly closed at burden 2. Any structured escape must couple the defect to at least one more orbit.",
-      "next_experiment": "For each second distance, derive the 86-variable K5 CNF, quotient the common rotation action, ask first for burden 0, dual-check every SAT model, and retain proof logs before treating any UNSAT slice as certified. Rank nonzero slices by exact minimum and factor-graph width.",
+      "next_experiment": "Closed: all 20 families have exact minimum 2 and no new minimum class. Reopen only after a source, encoding, proof-checking, or symmetry-coverage defect is demonstrated.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-r55-two-orbit-domain-wall",
       "strategy_id": "strategy-r55-two-orbit-domain-wall",
-      "updated_at": "2026-07-20T19:10:03-06:00"
+      "updated_at": "2026-07-21T02:22:03+00:00"
+    },
+    {
+      "description": "Compress the 20 certified two-orbit burden-zero exclusions into a concise human-checkable obstruction theorem.",
+      "rationale": "The finite sweep is not field progress by itself. A small family of raw-clause obstruction templates is the only nearby outcome that would meet the structural-theorem gate.",
+      "next_experiment": "Extract deletion-minimal unsymmetrized raw K5-clause cores; canonicalize signed incidence hypergraphs; continue only if every core has at most 20 clauses and all 20 distances collapse to at most five symbolic templates.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-r55-two-orbit-proof-compression",
+      "strategy_id": "strategy-r55-two-orbit-proof-compression",
+      "updated_at": "2026-07-21T02:22:03+00:00"
     },
     {
       "description": "Authenticate the 656 order-42 control corpus and reproduce the 13- and 9-conflict K43 constructions.",
@@ -1191,7 +1236,7 @@
     }
   ],
   "unresolved_questions": [
-    "Does releasing distance 6 together with any one additional cyclic-distance orbit permit burden below 2?",
+    "Can the 20 certified two-orbit exclusions be compressed into at most five human-checkable raw-clause obstruction templates of at most 20 clauses each?",
     "Can the reported distance-six exclusion around the 656 be replayed or obtained with a coverage manifest?",
     "Does the almost-regular order-42 slice contain a new Ramsey graph?",
     "Which exact subgraph-count or small-graph SDP ideas can be converted into a human/checkable order-45 restriction?",
