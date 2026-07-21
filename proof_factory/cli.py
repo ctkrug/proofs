@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import brain, intake, lab, publication, render, repositories, research_state, scheduler, scout, store, strategy_lab
+from . import brain, capacity, intake, lab, publication, render, repositories, research_state, scheduler, scout, store, strategy_lab
 
 
 EXTERNAL_STATES = {
@@ -171,6 +171,8 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor")
     watch = sub.add_parser("watchdog")
     watch.add_argument("--publish", action="store_true")
+    guard = sub.add_parser("capacity-guard")
+    guard.add_argument("--lane", choices=("easy", "hard"), default="easy")
     tick = sub.add_parser("tick")
     tick.add_argument("--lane", choices=("easy", "hard"), required=True)
     tick.add_argument("--publish", action="store_true")
@@ -228,6 +230,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result["ok"] else 1
     if args.command == "watchdog":
         print(json.dumps(scheduler.watchdog(publish=args.publish), indent=2))
+        return 0
+    if args.command == "capacity-guard":
+        result = capacity.admission(args.lane)
+        print(json.dumps(result, indent=2))
+        # Capacity pressure is an expected protected state; scheduler admission
+        # records the deferment, so the maintenance timer itself stays healthy.
         return 0
     if args.command == "tick":
         print(json.dumps(scheduler.tick(args.lane, publish=args.publish), indent=2))

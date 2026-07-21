@@ -1,0 +1,15 @@
+[Unit]
+Description=Proof Factory - disposable residue cleanup and capacity check
+After=local-fs.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/proof-factory
+Environment=HOME=/root
+Environment=PROOF_FACTORY_ROOT=/root/proof-factory
+Environment=PROOF_FACTORY_CACHE_DIR=/root/.cache/proof-factory
+ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory capacity-guard --lane easy
+Nice=19
+CPUWeight=1
+IOWeight=1
+MemoryMax=256M

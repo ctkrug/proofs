@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - 15-minute capacity guard
+
+[Timer]
+OnBootSec=5m
+OnUnitActiveSec=15m
+Persistent=true
+Unit=proof-factory-capacity-guard.service
+
+[Install]
+WantedBy=timers.target

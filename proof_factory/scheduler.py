@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, render, repositories, research_state, resources, store, usage
+from . import agent, brain, capacity, render, repositories, research_state, resources, store, usage
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -90,6 +90,18 @@ def publish_if_configured() -> None:
 def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
     if lane not in {"easy", "hard"}:
         raise ValueError("lane must be easy or hard")
+    capacity_policy = capacity.admission(lane)
+    store.update_runtime(capacity_policy=capacity_policy)
+    if not capacity_policy["allowed"]:
+        blocker = {
+            "title": "Host capacity reserve is protecting the proof factory",
+            "detail": "; ".join(capacity_policy["reasons"]),
+            "priority": "urgent",
+            "next_action": "Scoped cleanup runs automatically; this lane will retry on its next scheduled pass.",
+        }
+        store.update_runtime(operational_blockers=[blocker])
+        render.build()
+        return {"status": "deferred", "lane": lane, "capacity_policy": capacity_policy}
     admission = usage.admission(lane)
     store.update_runtime(usage_policy=admission)
     if not admission["allowed"]:
@@ -143,6 +155,7 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
     hard = [row for row in attempts if row.get("lane") == "hard"]
     easy = [row for row in attempts if row.get("lane") == "easy"]
     current_runtime = store.runtime()
+    capacity_policy = capacity.admission("easy")
     hard_started = store.parse_iso(current_runtime.get("hard_started_at"))
     hard_in_flight = bool(
         current_runtime.get("hard_running")
@@ -150,6 +163,8 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         and (now - hard_started).total_seconds() < 3 * 3600
     )
     issues: list[str] = []
+    if not capacity_policy["allowed"]:
+        issues.extend(capacity_policy["reasons"])
     if hard:
         last_hard = store.parse_iso(hard[-1].get("finished_at"))
         if not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 1.5 * 3600:
@@ -165,7 +180,7 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         elif now.hour >= 3:
             issues.append("open-problem program has not completed its first attempt")
     health = "degraded" if issues else "healthy"
-    report = store.update_runtime(health=health, health_issues=issues, watchdog_at=store.now_iso())
+    report = store.update_runtime(health=health, health_issues=issues, watchdog_at=store.now_iso(), capacity_policy=capacity_policy)
     render.build()
     if publish:
         publish_if_configured()

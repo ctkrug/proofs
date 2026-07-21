@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, usage
+from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -453,10 +453,35 @@ class ProofFactoryTests(unittest.TestCase):
                 patch.object(store, "runtime", return_value={}), \
                 patch.object(store, "update_runtime", side_effect=lambda **fields: fields), \
                 patch.object(render, "build"), \
+                patch.object(capacity, "admission", return_value={"allowed": True}), \
                 patch.dict("os.environ", {"PROOF_EASY_EXPECTED": "0"}):
             report = scheduler.watchdog()
         self.assertEqual(report["health"], "healthy")
         self.assertEqual(report["health_issues"], [])
+
+    def test_capacity_admission_defers_when_memory_reserve_is_low(self) -> None:
+        with patch.object(capacity, "cleanup", return_value={}), \
+                patch.object(capacity, "_free_bytes", return_value=20 * 1024**3), \
+                patch.object(capacity, "_available_memory_bytes", return_value=100 * 1024**2):
+            report = capacity.admission("easy")
+        self.assertFalse(report["allowed"])
+        self.assertIn("available memory", report["reasons"][0])
+
+    def test_capacity_cleanup_candidates_exclude_fresh_and_system_tmp(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            tmp = Path(raw)
+            old = tmp / "old"
+            old.write_text("remove")
+            fresh = tmp / "fresh"
+            fresh.write_text("keep")
+            system = tmp / "systemd-private-safe"
+            system.write_text("keep")
+            import os
+            os.utime(old, (1, 1))
+            os.utime(fresh, (999, 999))
+            with patch.object(capacity, "TMP_MAX_AGE_SECONDS", 10):
+                candidates = capacity._cleanup_candidates(tmp, 1_000.0)
+        self.assertEqual(candidates, [old])
 
     def test_usage_policy_enforces_elapsed_week_and_baseline(self) -> None:
         now = datetime(2026, 7, 20, 2, 0, tzinfo=timezone.utc)

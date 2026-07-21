@@ -1,0 +1,121 @@
+"""Host-capacity admission and conservative cleanup for Proof Factory.
+
+Only disposable build residue is eligible for automatic cleanup. Research
+records, workspaces, completed toolchains, and published artifacts are not.
+"""
+
+from __future__ import annotations
+
+import os
+import shutil
+import time
+from pathlib import Path
+from typing import Any
+
+
+ROOT_MIN_FREE_BYTES = 8 * 1024**3
+CACHE_MIN_FREE_BYTES = 1 * 1024**3
+MEMORY_MIN_FREE_BYTES = {"easy": 900 * 1024**2, "hard": 1200 * 1024**2}
+TMP_MAX_AGE_SECONDS = 6 * 3600
+TMP_EXCLUSIONS = {".X11-unix", ".ICE-unix", ".XIM-unix", ".font-unix"}
+
+
+def _free_bytes(path: Path) -> int:
+    return shutil.disk_usage(path).free
+
+
+def _available_memory_bytes() -> int:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) * 1024
+    except (OSError, ValueError, IndexError):
+        pass
+    return 0
+
+
+def _cache_root() -> Path:
+    return Path(os.environ.get("PROOF_FACTORY_CACHE_DIR", "/root/.cache/proof-factory"))
+
+
+def _existing_path(path: Path) -> Path:
+    """Find a usable filesystem probe without creating anything during checks."""
+    while not path.exists() and path != path.parent:
+        path = path.parent
+    return path
+
+
+def _tree_size(path: Path) -> int:
+    try:
+        if path.is_file() or path.is_symlink():
+            return path.lstat().st_size
+        return sum(item.stat().st_size for item in path.rglob("*") if item.is_file() and not item.is_symlink())
+    except OSError:
+        return 0
+
+
+def cleanup(*, now: float | None = None) -> dict[str, Any]:
+    """Remove stale job temp trees and incomplete elan installs only."""
+    now = time.time() if now is None else now
+    removed: list[str] = []
+    reclaimed = 0
+    for entry in _cleanup_candidates(Path("/tmp"), now):
+        try:
+            size = _tree_size(entry)
+            shutil.rmtree(entry) if entry.is_dir() and not entry.is_symlink() else entry.unlink()
+            removed.append(str(entry))
+            reclaimed += size
+        except OSError:
+            continue
+    elan_home = Path(os.environ.get("ELAN_HOME", str(_cache_root() / "lean" / "elan")))
+    try:
+        incomplete = list((elan_home / "toolchains").glob("*.tmp"))
+    except OSError:
+        incomplete = []
+    for entry in incomplete:
+        try:
+            size = _tree_size(entry)
+            shutil.rmtree(entry) if entry.is_dir() and not entry.is_symlink() else entry.unlink()
+            removed.append(str(entry))
+            reclaimed += size
+        except OSError:
+            continue
+    return {"removed": removed, "reclaimed_bytes": reclaimed, "cleaned_at": now}
+
+
+def _cleanup_candidates(tmp: Path, now: float) -> list[Path]:
+    try:
+        entries = list(tmp.iterdir())
+    except OSError:
+        return []
+    result = []
+    for entry in entries:
+        if entry.name in TMP_EXCLUSIONS or entry.name.startswith(("systemd-private-", "snap-private-tmp")):
+            continue
+        try:
+            if now - entry.stat().st_mtime >= TMP_MAX_AGE_SECONDS:
+                result.append(entry)
+        except OSError:
+            continue
+    return result
+
+
+def admission(lane: str, *, run_cleanup: bool = True) -> dict[str, Any]:
+    if lane not in MEMORY_MIN_FREE_BYTES:
+        raise ValueError("lane must be easy or hard")
+    cleanup_result = cleanup() if run_cleanup else None
+    root_free = _free_bytes(Path("/"))
+    cache_free = _free_bytes(_existing_path(_cache_root()))
+    memory_free = _available_memory_bytes()
+    reasons: list[str] = []
+    if root_free < ROOT_MIN_FREE_BYTES:
+        reasons.append(f"root disk reserve is below 8 GiB ({root_free / 1024**3:.1f} GiB free)")
+    if cache_free < CACHE_MIN_FREE_BYTES:
+        reasons.append(f"build-cache volume reserve is below 1 GiB ({cache_free / 1024**3:.1f} GiB free)")
+    required_memory = MEMORY_MIN_FREE_BYTES[lane]
+    if memory_free < required_memory:
+        reasons.append(f"available memory is below the {lane} reserve ({memory_free / 1024**2:.0f} MiB free)")
+    return {"allowed": not reasons, "lane": lane, "reasons": reasons,
+            "root_free_bytes": root_free, "cache_free_bytes": cache_free,
+            "memory_available_bytes": memory_free, "memory_required_bytes": required_memory,
+            "cleanup": cleanup_result}
