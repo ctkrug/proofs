@@ -38,6 +38,8 @@ capacity checks, runtime sync, public publication, and read-only dashboards rema
 The R(5,5) hard reviewer polls every 15 minutes but remains evidence-gated: no completion/source event
 means no model call. Provider-usage admission and evidence validation remain mandatory. This directs model
 quota to completed R(5,5) tranches without manufacturing clock-driven research epochs.
+While the explicit priority allocation is active, the hard lane may run ahead of proportional weekly pacing;
+provider rate-limit and spend-control signals still stop it immediately. No other lane receives this override.
 
 ## Upgrade triggers
 

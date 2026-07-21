@@ -12,6 +12,7 @@ Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
 Environment=PROOF_CODEX_SANDBOX=workspace-write
 Environment=PROOF_HARD_DELEGATE_TIMEOUT_SEC=1200
+Environment=PROOF_HARD_PRIORITY=true
 EnvironmentFile=-/root/project-factory/.env
 Environment=PHOENIX_ENABLED=true
 Environment=PHOENIX_ENDPOINT=https://app.phoenix.arize.com/s/ctkrug4501

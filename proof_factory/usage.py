@@ -41,6 +41,7 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     payload = store.read_json(_cache_path(), {})
     baseline = _baseline_slot(lane, now)
     operator_authorized = os.environ.get("PROOF_OPERATOR_RUN", "").strip().lower() in {"1", "true", "yes"}
+    priority_authorized = lane == "hard" and os.environ.get("PROOF_HARD_PRIORITY", "").strip().lower() in {"1", "true", "yes"}
     result: dict[str, Any] = {
         "checked_at": payload.get("checked_at") if isinstance(payload, dict) else None,
         "mode": "baseline",
@@ -48,6 +49,7 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
         "lane": lane,
         "baseline_slot": baseline,
         "operator_authorized": operator_authorized,
+        "priority_authorized": priority_authorized,
         "reason": "usage snapshot unavailable; retaining baseline only",
     }
     if not isinstance(payload, dict) or not payload.get("ok"):
@@ -63,6 +65,12 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
         result.update({
             "mode": "operator", "allowed": True,
             "reason": "one-shot operator-authorized pass; provider hard limits remain enforced",
+        })
+        return result
+    if priority_authorized:
+        result.update({
+            "mode": "priority", "allowed": True,
+            "reason": "R(5,5) priority allocation; provider hard limits and evidence gating remain enforced",
         })
         return result
     week = payload.get("week")

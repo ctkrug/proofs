@@ -742,6 +742,21 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertFalse(stopped["allowed"])
                 self.assertEqual(stopped["mode"], "paused")
 
+    def test_hard_priority_reallocates_pacing_but_not_provider_stop(self) -> None:
+        payload = {
+            "ok": True, "checked_at": 1000.0,
+            "week": {"used_pct": 90.0, "resets_at": 604800.0, "window_seconds": 604800.0},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            cache = Path(raw) / "usage.json"; cache.write_text(json.dumps(payload))
+            with patch.dict("os.environ", {"PROOF_USAGE_CACHE_PATH": str(cache), "PROOF_HARD_PRIORITY": "true"}):
+                allowed = usage.admission("hard", monotonic_now=1000.0)
+                self.assertTrue(allowed["allowed"]); self.assertEqual(allowed["mode"], "priority")
+                easy = usage.admission("easy", monotonic_now=1000.0)
+                self.assertNotEqual(easy["mode"], "priority")
+                payload["spend_control_reached"] = True; cache.write_text(json.dumps(payload))
+                self.assertEqual(usage.admission("hard", monotonic_now=1000.0)["mode"], "paused")
+
     def test_recent_hard_pass_satisfies_next_baseline_slot(self) -> None:
         recent = datetime.now(timezone.utc).isoformat()
         with patch.object(capacity, "admission", return_value={"allowed": True}), \
