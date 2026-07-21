@@ -185,7 +185,7 @@ class ProofFactoryTests(unittest.TestCase):
 ```'''
         calls = []
 
-        def fake_run(prompt, *, model, effort, workspace, timeout):
+        def fake_run(prompt, *, model, effort, workspace, timeout, telemetry_meta=None):
             calls.append((model, effort, workspace.name))
             if model == agent.TERRA_MODEL:
                 return "Delegate memo with one falsifiable test.", {"output_tokens": 10}

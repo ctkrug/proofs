@@ -1,1 +1,3 @@
 PyYAML>=6.0,<7
+opentelemetry-sdk>=1.39,<2
+opentelemetry-exporter-otlp-proto-http>=1.39,<2

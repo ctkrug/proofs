@@ -12,6 +12,11 @@ Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
 Environment=PROOF_CODEX_SANDBOX=danger-full-access
 Environment=PROOF_HARD_DELEGATE_TIMEOUT_SEC=1200
+EnvironmentFile=-/root/project-factory/.env
+Environment=PHOENIX_ENABLED=true
+Environment=PHOENIX_ENDPOINT=https://app.phoenix.arize.com/s/ctkrug4501
+Environment=PHOENIX_PROJECT=proof-factory
+Environment=PHOENIX_CAPTURE_TEXT=true
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane hard
 Nice=15
 CPUWeight=2

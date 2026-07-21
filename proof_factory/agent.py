@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import brain, contribution_gate, prior_art, research_state, roadmap, store, tactics
+from . import brain, contribution_gate, prior_art, research_state, roadmap, store, tactics, telemetry
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -258,7 +258,8 @@ def _minimal_env() -> dict[str, str]:
     return env
 
 
-def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout: int) -> tuple[str, dict[str, Any]]:
+def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout: int,
+               telemetry_meta: dict[str, str] | None = None) -> tuple[str, dict[str, Any]]:
     command = [
         os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
         "--sandbox", os.environ.get("PROOF_CODEX_SANDBOX", "danger-full-access"),
@@ -267,6 +268,7 @@ def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout
         "-c", f'model_reasoning_effort="{effort}"',
         "--ignore-user-config", "--ignore-rules", "--model", model, "-",
     ]
+    started = time.monotonic()
     proc = subprocess.run(
         command, input=prompt, text=True, capture_output=True, cwd=workspace,
         env=_minimal_env(), timeout=timeout, start_new_session=True,
@@ -274,7 +276,13 @@ def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout
     text, usage, stream_failed = _codex_text(proc.stdout)
     if proc.returncode != 0 or stream_failed or not text.strip():
         detail = (proc.stderr or proc.stdout)[-1000:]
+        if telemetry_meta:
+            telemetry.codex_call(prompt=prompt, output=detail, usage=usage, model=model, effort=effort,
+                                 duration_seconds=time.monotonic() - started, outcome="error", **telemetry_meta)
         raise RuntimeError(f"Codex {model} failed rc={proc.returncode}: {detail}")
+    if telemetry_meta:
+        telemetry.codex_call(prompt=prompt, output=text, usage=usage, model=model, effort=effort,
+                             duration_seconds=time.monotonic() - started, outcome="ok", **telemetry_meta)
     return text, usage
 
 
@@ -529,6 +537,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             memo, delegate_usage = _run_codex(
                 build_delegate_prompt(problem, lane, workspace, role, phase),
                 model=TERRA_MODEL, effort="high", workspace=delegate_workspace, timeout=delegate_ceiling,
+                telemetry_meta={"role": f"delegate:{role}", "lane": lane, "problem_id": problem["id"], "phase": phase},
             )
             memo = memo.strip()[:12000]
             status = "completed"
@@ -547,7 +556,10 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         })
     prompt = build_prompt(problem, lane, workspace, delegate_records, phase)
     try:
-        text, usage = _run_codex(prompt, model=model, effort=effort, workspace=workspace, timeout=ceiling)
+        text, usage = _run_codex(
+            prompt, model=model, effort=effort, workspace=workspace, timeout=ceiling,
+            telemetry_meta={"role": "principal", "lane": lane, "problem_id": problem["id"], "phase": phase},
+        )
         result = extract_result(text)
         outcome = result["outcome"]
         policy_flags: list[str] = []
@@ -648,7 +660,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
     if TERRA_MODEL not in disclosure:
         disclosure = (disclosure + f"; orchestration: {model} principal with {TERRA_MODEL} delegates.").lstrip("; ")
 
-    return {
+    attempt = {
         "id": attempt_id,
         "problem_id": problem["id"],
         "started_at": started,
@@ -749,3 +761,5 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "error": error,
         "artifact_hashes": _workspace_artifacts(workspace),
     }
+    telemetry.epoch_summary(attempt)
+    return attempt
