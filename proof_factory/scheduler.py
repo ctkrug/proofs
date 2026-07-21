@@ -160,7 +160,20 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         store.update_runtime(**{f"{lane}_running": problem["id"], f"{lane}_started_at": store.now_iso()})
         brain.refresh()
         render.build()
-        attempt = agent.run(problem, lane, phase=phase)
+        try:
+            attempt = agent.run(problem, lane, phase=phase)
+        except Exception as exc:
+            store.update_runtime(**{
+                f"{lane}_running": None,
+                "operational_blockers": [{
+                    "title": f"{lane.title()} research review failed",
+                    "detail": f"{type(exc).__name__}: {exc}",
+                    "problem_id": problem["id"], "priority": "urgent",
+                    "next_action": "The evidence event remains durable; repair and retry the review.",
+                }],
+            })
+            render.build()
+            raise
         lab_decision = attempt.get("lab_review") or {}
         if (
             lane == "hard"
