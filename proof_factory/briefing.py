@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from . import prior_art, research_state, roadmap, tactics
+from . import events, lab, prior_art, research_state, roadmap, tactics
 
 
 def _trim(value: Any, limit: int = 500) -> str:
@@ -91,6 +91,8 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
             "closed_route_ids": [row.get("strategy_id") for row in tactical.get("closed_routes", [])[:8]],
         },
         "active_roadmap_phase": active_roadmap.get("active_phase"),
+        "research_events": events.pending(str(problem.get("id")))[:10],
+        "lab_experiments": lab.status(str(problem.get("id")))["jobs"][-10:],
         "prior_art": compact_methods[:14],
     }
 

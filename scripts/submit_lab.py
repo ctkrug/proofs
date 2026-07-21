@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit a bounded, shell-free Proof Factory simulation-lab job."""
+"""Submit a checkpointed, shell-free Proof Factory experiment tranche."""
 
 from __future__ import annotations
 
@@ -21,23 +21,39 @@ def main() -> int:
     parser.add_argument("--name", required=True)
     parser.add_argument("--hypothesis", required=True)
     parser.add_argument("--expected-signal", required=True)
+    parser.add_argument("--decision-value", required=True)
+    parser.add_argument("--efficiency-design", required=True, help="JSON efficiency-design report")
     parser.add_argument("--source-url", action="append", default=[])
     parser.add_argument("--segment-seconds", type=int, default=3600)
     parser.add_argument("--max-segments", type=int, default=1)
     parser.add_argument("--memory-mb", type=int, default=512)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--checkpoint-path", default="")
+    parser.add_argument("--progress-path", default="")
+    parser.add_argument("--pilot-segments", type=int, default=1)
+    parser.add_argument("--review-every-segments", type=int, default=1)
+    parser.add_argument("--min-throughput", type=float, default=0.0)
+    parser.add_argument("--max-artifact-growth-bytes", type=int, default=0)
+    parser.add_argument("--no-correctness-gate", action="store_true")
     parser.add_argument("argv", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = list(args.argv)
     if command[:1] == ["--"]:
         command = command[1:]
+    efficiency = json.loads(Path(args.efficiency_design).read_text())
     result = lab.submit({
         "problem_id": args.problem, "name": args.name, "hypothesis": args.hypothesis,
-        "expected_signal": args.expected_signal, "source_urls": args.source_url,
+        "expected_signal": args.expected_signal, "decision_value": args.decision_value,
+        "efficiency_design": efficiency, "source_urls": args.source_url,
         "segment_seconds": args.segment_seconds, "max_segments": args.max_segments,
         "memory_mb": args.memory_mb, "seed": args.seed,
-        "checkpoint_path": args.checkpoint_path, "command": command,
+        "checkpoint_path": args.checkpoint_path, "progress_path": args.progress_path,
+        "pilot_segments": args.pilot_segments, "review_every_segments": args.review_every_segments,
+        "continuation_thresholds": {
+            "min_throughput_per_second": args.min_throughput,
+            "max_artifact_growth_bytes": args.max_artifact_growth_bytes,
+            "require_correctness_checks": not args.no_correctness_gate,
+        }, "command": command,
     })
     print(json.dumps(result, indent=2))
     return 0

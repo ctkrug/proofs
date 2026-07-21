@@ -11,6 +11,7 @@ from . import store
 
 ALLOWED_KINDS = {
     "lab_completed",
+    "lab_segment_completed",
     "source_changed",
     "route_authorized",
     "external_feedback",
@@ -72,4 +73,3 @@ def consume(problem_id: str, attempt_id: str) -> list[dict[str, Any]]:
         source.unlink()
         archived.append(value)
     return archived
-

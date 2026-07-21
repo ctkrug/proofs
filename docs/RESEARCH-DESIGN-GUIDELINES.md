@@ -70,7 +70,25 @@ The normal cadence is:
 4. the controller promotes, kills, holds, or redirects the route and schedules the next job.
 
 Clock timers may poll or maintain workers, but they do not create research epochs without new evidence.
-Long jobs must expose progress, resource ceilings, resumable state, and a deterministic stop condition.
+Long jobs are allowed when their declared decision value remains credible, including jobs that take days.
+There is no universal overall wall-clock cutoff. Before substantial computation, write an efficiency-design
+report that records the naive cost; symmetry/canonical/orbit opportunities; bitset, batching, vectorization,
+and incremental-evaluation options; caching and reusable learned-prefix options; decomposition,
+cube-and-conquer, meet-in-the-middle, and distributed/resumable options; compressed streaming artifacts;
+sound cheap prefilters; the selected reductions and expected throughput gain; their soundness basis; and
+what remains uncompressed.
+
+Begin with a measured pilot or tranche. Divide execution into resource-bounded, atomic segments that resume
+after reboot or deployment. Bind every segment to immutable inputs, code revision, hashes, and exact argv;
+fsync durable progress, logs, partial results, checkpoints, and compressed/hash-verified manifests. Project
+remaining runtime and artifact growth from observed throughput. Continue only while the remainder can still
+produce the predeclared decisive result or reusable artifact. Automatically pause for review when throughput,
+artifact growth, correctness checks, coverage, or decision value crosses a declared threshold.
+
+Every completed segment emits a durable event. The lifecycle is `running`, `checkpointed`,
+`completed_awaiting_review`, `validated`, or `stopped_with_reason`; dashboards and records must preserve the
+distinction. A later reviewer reads the recorded state and artifacts and chooses `continue`, `validate`,
+`promote`, or `redirect`. Completion never depends on a model being scheduled at that instant.
 
 ## 5. Validate evidence before updating research memory
 

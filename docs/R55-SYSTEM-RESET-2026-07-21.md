@@ -10,7 +10,8 @@ The mathematical pilot passed its scoped gate. Two independent embedding enumera
 for supplied source records 21 and 12 and for a complement negative control. A third checker replayed
 every mapping and boundary vector, recovered the historical controls, ran two exact five-set checkers,
 and rejected both a one-edge corruption and a mapping corruption. The pilot projects the complete
-656-host census at about 5.6 core-hours, below its predeclared 12-core-hour ceiling.
+656-host census at about 5.6 core-hours. The estimate is permitted under the checkpointed continuation
+policy; it is no longer judged against a universal 12-core-hour ceiling.
 
 This is verified infrastructure and a justified next discriminator, not a Ramsey result. No known
 isomorphism class was fully blocked, no new order-42 graph was found, and the maintained bound remains
@@ -85,9 +86,8 @@ or after a decisive failure at its predeclared limits.
 
 ## Next decision
 
-Generalize both enumerators into an atomic per-host checkpoint driver, submit the 328-source plus
-328-complement census to the deterministic lab, and stop on the first stream mismatch, replay failure,
-host time of at least 30 s, tied expansion above 100,000, aggregate projection above 12 core-hours, or
-20 GiB storage projection. Do not emit partial blocks and do not run residual SAT until the complete
-corpus is independently reconciled.
-
+Run the atomic per-host checkpoint driver over all 328 source graphs and their 328 complements. Begin with
+a measured tranche, then pause automatically on a stream mismatch, replay failure, failed coverage check,
+throughput below the declared floor, or artifact growth above the declared per-segment ceiling. Preserve
+every verified partial host receipt. After complete reconciliation, require a bounded residual-SAT
+discriminator and materially independent validation before scaling beyond the supplied corpus.

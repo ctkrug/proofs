@@ -190,6 +190,11 @@ def _index(
         _program_label(lane) for lane in running_lanes
     )
     live_snapshot = live.snapshot(problems, attempts, runtime, reviews)
+    experiment_counts = live_snapshot["experiments"]["counts"]
+    experiment_lifecycle = " · ".join(
+        f"{h(name.replace('_', ' '))}: {int(experiment_counts.get(name, 0))}"
+        for name in ("running", "checkpointed", "completed_awaiting_review", "validated", "stopped_with_reason")
+    )
     body = f"""
 <section class="hero">
   <div class="hero-kicker">AI-assisted mathematics research</div>
@@ -202,6 +207,7 @@ def _index(
   <div class="section-heading"><div><span class="overline">RESEARCH OPERATIONS</span><h2>Current schedule</h2></div><span class="section-note" data-live-updated>Updated {_time(runtime.get('updated_at') or store.now_iso())}</span></div>
   <div class="healthline"><span class="health health-{h(health)}" data-live-health>System {h(health)}</span><span>{h(live_work)}</span><span data-usage-policy>{usage_note}</span><span>{issues}</span></div>
   <div class="operation-grid">{_lane_card('hard', live_snapshot['lanes']['hard'])}{_lane_card('easy', live_snapshot['lanes']['easy'])}</div>
+  <div class="healthline" data-experiment-lifecycle><strong>Experiment lifecycle</strong> · {experiment_lifecycle}</div>
 </section>
 <section id="ongoing" class="section-block">
   <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) twice hourly · focused open-problem campaign 12× daily</span></div>

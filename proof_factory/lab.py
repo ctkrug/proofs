@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -12,7 +13,7 @@ from typing import Any
 from . import capacity, events, repositories, store
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 RUNNER = store.ROOT / "skills" / "computational-researcher" / "scripts" / "run_experiment.py"
 ALLOWED_EXECUTABLES = {
     "python", "python3", "pypy3", "julia", "sage", "lean", "lake",
@@ -21,8 +22,17 @@ ALLOWED_EXECUTABLES = {
     "clingo", "cbc",
 }
 MAX_SEGMENT_SECONDS = 24 * 3600
-MAX_SEGMENTS = 7
+MAX_DECLARED_SEGMENTS = 100_000
 MAX_MEMORY_MB = 1100
+LIFECYCLE_STATES = {
+    "queued", "running", "checkpointed", "completed_awaiting_review",
+    "validated", "stopped_with_reason",
+}
+REVIEW_DECISIONS = {"continue", "validate", "promote", "redirect"}
+EFFICIENCY_FIELDS = {
+    "naive_cost", "opportunities_considered", "chosen_reductions",
+    "expected_throughput_gain", "soundness_basis", "remains_uncompressed",
+}
 
 
 def _workspace(problem_id: str) -> Path:
@@ -35,6 +45,84 @@ def _inside(path: Path, root: Path) -> bool:
         return True
     except ValueError:
         return False
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _state_root() -> Path:
+    return store.STATE / "labs" / "jobs"
+
+
+def _state_path(job_id: str) -> Path:
+    return _state_root() / f"{job_id}.json"
+
+
+def _read_state(job_id: str) -> dict[str, Any]:
+    value = store.read_json(_state_path(job_id), None)
+    if not isinstance(value, dict):
+        raise ValueError(f"unknown lab job: {job_id}")
+    return value
+
+
+def _write_state(state: dict[str, Any]) -> None:
+    state["updated_at"] = store.now_iso()
+    _state_root().mkdir(parents=True, exist_ok=True)
+    store.write_json_atomic(_state_path(str(state["id"])), state)
+
+
+def _git_commit(workspace: Path) -> str:
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=workspace, text=True, capture_output=True, timeout=20,
+    )
+    return proc.stdout.strip() if proc.returncode == 0 else "unversioned"
+
+
+def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
+    identities: dict[str, str] = {}
+    for raw in command:
+        if len(raw) > 512 or any(char in raw for char in "\n\r\0"):
+            continue
+        candidate = Path(raw)
+        path = candidate if candidate.is_absolute() else workspace / candidate
+        try:
+            resolved = path.resolve()
+        except OSError:
+            continue
+        try:
+            if _inside(resolved, workspace) and resolved.is_file() and not resolved.is_symlink():
+                identities[resolved.relative_to(workspace).as_posix()] = _sha256(resolved)
+        except OSError:
+            continue
+    return dict(sorted(identities.items()))
+
+
+def _validate_efficiency(value: Any, *, substantial: bool) -> dict[str, Any]:
+    if not substantial and not value:
+        return {}
+    if not isinstance(value, dict):
+        if substantial:
+            raise ValueError("substantial lab jobs require efficiency_design")
+        return {}
+    missing = sorted(field for field in EFFICIENCY_FIELDS if not value.get(field))
+    if missing:
+        raise ValueError(f"efficiency_design missing: {', '.join(missing)}")
+    opportunities = value.get("opportunities_considered")
+    if not isinstance(opportunities, list) or len(opportunities) < 3:
+        raise ValueError("efficiency_design must document at least three compression opportunities")
+    return {
+        "naive_cost": str(value["naive_cost"])[:4000],
+        "opportunities_considered": [str(item)[:1000] for item in opportunities][:30],
+        "chosen_reductions": str(value["chosen_reductions"])[:4000],
+        "expected_throughput_gain": str(value["expected_throughput_gain"])[:2000],
+        "soundness_basis": str(value["soundness_basis"])[:4000],
+        "remains_uncompressed": str(value["remains_uncompressed"])[:4000],
+    }
 
 
 def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[str, Any]:
@@ -66,21 +154,44 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
 
     segment_seconds = int(spec.get("segment_seconds") or 3600)
     memory_mb = int(spec.get("memory_mb") or 512)
-    max_segments = int(spec.get("max_segments") or 1)
+    max_segments = int(spec.get("max_segments") if spec.get("max_segments") is not None else 1)
     segment = int(spec.get("segment") or 1)
+    review_every = int(spec.get("review_every_segments") or 1)
+    pilot_segments = int(spec.get("pilot_segments") or 1)
     if segment_seconds < 60 or segment_seconds > MAX_SEGMENT_SECONDS:
         raise ValueError(f"segment_seconds must be 60..{MAX_SEGMENT_SECONDS}")
     if memory_mb < 64 or memory_mb > MAX_MEMORY_MB:
         raise ValueError(f"memory_mb must be 64..{MAX_MEMORY_MB}")
-    if max_segments < 1 or max_segments > MAX_SEGMENTS or segment < 1 or segment > max_segments:
-        raise ValueError(f"segments must fit 1..{MAX_SEGMENTS}")
+    if max_segments < 0 or max_segments > MAX_DECLARED_SEGMENTS:
+        raise ValueError(f"max_segments must be 0 (open continuation) or <= {MAX_DECLARED_SEGMENTS}")
+    if segment < 1 or (max_segments and segment > max_segments):
+        raise ValueError("segment is outside the declared tranche")
+    if review_every < 1 or pilot_segments < 1:
+        raise ValueError("pilot_segments and review_every_segments must be positive")
+
     checkpoint = str(spec.get("checkpoint_path") or "").strip()
-    if max_segments > 1 and not checkpoint:
-        raise ValueError("resumable multisegment jobs require checkpoint_path")
-    if checkpoint:
-        checkpoint_path = (workspace / checkpoint).resolve()
-        if not _inside(checkpoint_path, workspace):
-            raise ValueError("checkpoint_path must remain inside the problem workspace")
+    progress_path = str(spec.get("progress_path") or "").strip()
+    substantial = max_segments == 0 or max_segments > 1 or segment_seconds > 3600
+    if substantial and (not checkpoint or not progress_path):
+        raise ValueError("substantial jobs require checkpoint_path and progress_path")
+    for label, relative in (("checkpoint_path", checkpoint), ("progress_path", progress_path)):
+        if relative:
+            path = (workspace / relative).resolve()
+            if not _inside(path, workspace):
+                raise ValueError(f"{label} must remain inside the problem workspace")
+
+    thresholds = spec.get("continuation_thresholds") or {}
+    if substantial and not isinstance(thresholds, dict):
+        raise ValueError("substantial jobs require continuation_thresholds")
+    normalized_thresholds = {
+        "min_throughput_per_second": max(0.0, float(thresholds.get("min_throughput_per_second") or 0.0)),
+        "max_artifact_growth_bytes": max(0, int(thresholds.get("max_artifact_growth_bytes") or 0)),
+        "require_correctness_checks": bool(thresholds.get("require_correctness_checks", substantial)),
+    }
+    decision_value = str(spec.get("decision_value") or "").strip()
+    if substantial and not decision_value:
+        raise ValueError("substantial jobs require a predeclared decision_value")
+    efficiency = _validate_efficiency(spec.get("efficiency_design"), substantial=substantial)
 
     normalized = {
         "schema_version": SCHEMA_VERSION,
@@ -89,6 +200,8 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
         "name": str(spec.get("name") or "").strip()[:200],
         "hypothesis": str(spec.get("hypothesis") or "").strip()[:4000],
         "expected_signal": str(spec.get("expected_signal") or "").strip()[:4000],
+        "decision_value": decision_value[:4000],
+        "efficiency_design": efficiency,
         "source_urls": [str(value)[:1000] for value in spec.get("source_urls", []) if str(value).startswith("http")][:20],
         "command": command,
         "seed": int(spec.get("seed") or 0),
@@ -96,11 +209,22 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
         "memory_mb": memory_mb,
         "max_segments": max_segments,
         "segment": segment,
+        "pilot_segments": pilot_segments,
+        "review_every_segments": review_every,
         "checkpoint_path": checkpoint,
+        "progress_path": progress_path,
+        "continuation_thresholds": normalized_thresholds,
         "submitted_at": str(spec.get("submitted_at") or store.now_iso()),
+        "workspace_git_commit": str(spec.get("workspace_git_commit") or _git_commit(workspace)),
+        "input_sha256": spec.get("input_sha256") or _input_identity(workspace, command),
     }
     if not normalized["name"] or not normalized["hypothesis"] or not normalized["expected_signal"]:
         raise ValueError("name, hypothesis, and expected_signal are required")
+    identity = dict(normalized)
+    identity.pop("segment", None)
+    normalized["spec_sha256"] = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    ).hexdigest()
     return normalized
 
 
@@ -109,11 +233,31 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
     queue = _workspace(normalized["problem_id"]) / "lab-queue"
     queue.mkdir(parents=True, exist_ok=True)
     destination = queue / f"{normalized['id']}.json"
-    if destination.exists():
+    if destination.exists() or _state_path(normalized["id"]).exists():
         raise ValueError(f"duplicate lab job: {normalized['id']}")
     store.write_json_atomic(destination, normalized)
+    state = {
+        **normalized,
+        "status": "queued",
+        "segments": [],
+        "last_reviewed_segment": 0,
+        "created_at": store.now_iso(),
+    }
+    _write_state(state)
     repositories.record_lab(normalized["problem_id"], "submitted", normalized)
     return {"status": "queued", "spec": str(destination), **normalized}
+
+
+def _verify_immutable_inputs(spec: dict[str, Any], workspace: Path) -> None:
+    current_commit = _git_commit(workspace)
+    if spec["workspace_git_commit"] != "unversioned" and current_commit != spec["workspace_git_commit"]:
+        raise ValueError(
+            f"workspace revision changed: submitted {spec['workspace_git_commit']}, current {current_commit}"
+        )
+    for relative, expected in spec.get("input_sha256", {}).items():
+        path = (workspace / relative).resolve()
+        if not _inside(path, workspace) or not path.is_file() or _sha256(path) != expected:
+            raise ValueError(f"immutable input changed or disappeared: {relative}")
 
 
 def _append_record(record: dict[str, Any]) -> None:
@@ -125,29 +269,95 @@ def _append_record(record: dict[str, Any]) -> None:
         os.fsync(handle.fileno())
 
 
+def _recover_running_specs() -> list[str]:
+    recovered: list[str] = []
+    for running in store.RESEARCH.glob("*/workspace/lab-queue/*.running.json"):
+        source = running.with_name(running.name.replace(".running.json", ".json"))
+        os.replace(running, source)
+        try:
+            raw = json.loads(source.read_text())
+            state = _read_state(str(raw["id"]))
+            state["status"] = "checkpointed"
+            state["recovery_note"] = "in-flight segment recovered after worker interruption; exact segment will replay"
+            _write_state(state)
+            recovered.append(str(raw["id"]))
+        except Exception:
+            recovered.append(source.stem)
+    return recovered
+
+
 def queued_specs() -> list[Path]:
     return sorted(store.RESEARCH.glob("*/workspace/lab-queue/*.json"), key=lambda path: path.stat().st_mtime)
+
+
+def _progress(workspace: Path, spec: dict[str, Any], previous: dict[str, Any], duration: float) -> tuple[dict[str, Any], list[str]]:
+    if not spec["progress_path"]:
+        return {"complete": True, "completed_units": 1, "total_units": 1,
+                "correctness_checks_passed": True, "decision_value_active": True}, []
+    path = workspace / spec["progress_path"]
+    value = store.read_json(path, None)
+    if not isinstance(value, dict):
+        return {}, ["progress record missing or invalid"]
+    completed = float(value.get("completed_units") or 0)
+    total = float(value.get("total_units") or 0)
+    prior_completed = float(previous.get("completed_units") or 0)
+    artifact_bytes = int(value.get("artifact_bytes") or path.stat().st_size)
+    prior_bytes = int(previous.get("artifact_bytes") or 0)
+    delta = completed - prior_completed
+    throughput = delta / max(duration, 0.001)
+    progress = {
+        "path": spec["progress_path"],
+        "sha256": _sha256(path),
+        "completed_units": completed,
+        "total_units": total,
+        "delta_units": delta,
+        "throughput_per_second": throughput,
+        "artifact_bytes": artifact_bytes,
+        "artifact_growth_bytes": max(0, artifact_bytes - prior_bytes),
+        "complete": bool(value.get("complete") or (total > 0 and completed >= total)),
+        "correctness_checks_passed": bool(value.get("correctness_checks_passed")),
+        "decision_value_active": bool(value.get("decision_value_active", True)),
+        "message": str(value.get("message") or "")[:2000],
+    }
+    failures: list[str] = []
+    limits = spec["continuation_thresholds"]
+    if delta <= 0 and not progress["complete"]:
+        failures.append("completed units did not increase")
+    if limits["min_throughput_per_second"] and throughput < limits["min_throughput_per_second"]:
+        failures.append("measured throughput fell below the declared continuation threshold")
+    if limits["max_artifact_growth_bytes"] and progress["artifact_growth_bytes"] > limits["max_artifact_growth_bytes"]:
+        failures.append("artifact growth exceeded the declared per-segment threshold")
+    if limits["require_correctness_checks"] and not progress["correctness_checks_passed"]:
+        failures.append("declared correctness checks did not pass")
+    if not progress["decision_value_active"]:
+        failures.append("progress record says the predeclared decision value is no longer active")
+    return progress, failures
+
+
+def _emit_segment_event(spec: dict[str, Any], status: str, record: dict[str, Any]) -> dict[str, Any]:
+    kind = "lab_completed" if status in {"completed_awaiting_review", "stopped_with_reason"} else "lab_segment_completed"
+    return events.enqueue(
+        spec["problem_id"], kind,
+        evidence=(
+            f"lab job {spec['id']} segment {spec['segment']} entered {status}; "
+            f"progress={json.dumps(record.get('progress', {}), sort_keys=True)[:2500]}"
+        ),
+        source=f"state/labs/jobs/{spec['id']}.json",
+    )
 
 
 def worker_once() -> dict[str, Any]:
     with store.lock("lab-worker", nonblocking=True) as acquired:
         if not acquired:
             return {"status": "busy"}
+        recovered = _recover_running_specs()
         queue = queued_specs()
         if not queue:
-            return {"status": "idle"}
-        # A lab job can run for days, so it independently observes the same
-        # host reserves as model epochs.  Leave the spec queued on pressure;
-        # the timer will retry after the capacity guard has had a chance to
-        # reclaim only disposable residue.
+            return {"status": "idle", "recovered": recovered}
         capacity_policy = capacity.admission("hard")
         if not capacity_policy["allowed"]:
-            return {
-                "status": "deferred",
-                "reason": "host capacity reserve",
-                "capacity_policy": capacity_policy,
-                "queued_job": str(queue[0]),
-            }
+            return {"status": "deferred", "reason": "host capacity reserve",
+                    "capacity_policy": capacity_policy, "queued_job": str(queue[0])}
         source = queue[0]
         running = source.with_suffix(".running.json")
         os.replace(source, running)
@@ -155,11 +365,16 @@ def worker_once() -> dict[str, Any]:
             raw = json.loads(running.read_text())
             spec = _validate(raw, source_path=source)
             workspace = _workspace(spec["problem_id"])
-            output_root = workspace / "lab-runs" / spec["id"] / f"segment-{spec['segment']:02d}"
+            _verify_immutable_inputs(spec, workspace)
+            state = _read_state(spec["id"])
+            state["status"] = "running"
+            state["running_segment"] = spec["segment"]
+            _write_state(state)
+            output_root = workspace / "lab-runs" / spec["id"] / f"segment-{spec['segment']:06d}"
             output_root.mkdir(parents=True, exist_ok=True)
+            total_label = "open" if spec["max_segments"] == 0 else str(spec["max_segments"])
             command = [
-                sys.executable, str(RUNNER),
-                "--name", f"{spec['name']} segment {spec['segment']}/{spec['max_segments']}",
+                sys.executable, str(RUNNER), "--name", f"{spec['name']} segment {spec['segment']}/{total_label}",
                 "--hypothesis", spec["hypothesis"], "--expected-signal", spec["expected_signal"],
                 "--timeout", str(spec["segment_seconds"]), "--memory-mb", str(spec["memory_mb"]),
                 "--seed", str(spec["seed"]), "--output-root", str(output_root),
@@ -171,42 +386,78 @@ def worker_once() -> dict[str, Any]:
                 "HOME", "PATH", "LANG", "LC_ALL", "SSL_CERT_FILE", "SSL_CERT_DIR",
             }}
             env["PROOF_EXPERIMENT_MAX_SECONDS"] = str(MAX_SEGMENT_SECONDS)
-            proc = subprocess.run(
-                command, cwd=workspace, env=env, text=True, capture_output=True,
-                timeout=spec["segment_seconds"] + 120,
-            )
-            checkpoint_exists = bool(spec["checkpoint_path"] and (workspace / spec["checkpoint_path"]).is_file())
+            started = store.parse_iso(store.now_iso())
+            proc = subprocess.run(command, cwd=workspace, env=env, text=True, capture_output=True,
+                                  timeout=spec["segment_seconds"] + 120)
+            finished = store.parse_iso(store.now_iso())
+            duration = max(0.0, (finished - started).total_seconds()) if started and finished else 0.0
+            checkpoint_path = workspace / spec["checkpoint_path"] if spec["checkpoint_path"] else None
+            checkpoint_exists = bool(checkpoint_path and checkpoint_path.is_file())
+            previous = state.get("segments", [])[-1].get("progress", {}) if state.get("segments") else {}
+            progress, threshold_failures = _progress(workspace, spec, previous, duration)
+            if spec["checkpoint_path"] and not checkpoint_exists and not progress.get("complete"):
+                threshold_failures.append("checkpoint file missing")
             record = {
                 "recorded_at": store.now_iso(), "job_id": spec["id"], "problem_id": spec["problem_id"],
                 "segment": spec["segment"], "max_segments": spec["max_segments"],
-                "returncode": proc.returncode, "checkpoint_exists": checkpoint_exists,
+                "returncode": proc.returncode, "duration_seconds": duration,
+                "checkpoint_exists": checkpoint_exists,
+                "checkpoint_sha256": _sha256(checkpoint_path) if checkpoint_exists else "",
+                "progress": progress, "threshold_failures": threshold_failures,
                 "runner_result": proc.stdout[-12000:], "runner_error": proc.stderr[-4000:],
+                "output_root": str(output_root.relative_to(workspace)),
             }
-            _append_record(record)
-            should_resume = proc.returncode == 124 and checkpoint_exists and spec["segment"] < spec["max_segments"]
-            if should_resume:
+            if proc.returncode not in {0, 124}:
+                threshold_failures.append(f"segment process returned {proc.returncode}")
+            if proc.returncode == 124 and not checkpoint_exists:
+                threshold_failures.append("timed-out segment has no resumable checkpoint")
+
+            if threshold_failures:
+                lifecycle = "stopped_with_reason"
+            elif progress.get("complete"):
+                lifecycle = "completed_awaiting_review"
+            else:
+                since_review = spec["segment"] - int(state.get("last_reviewed_segment") or 0)
+                tranche_limit = spec["segment"] >= spec["pilot_segments"] and since_review >= spec["review_every_segments"]
+                declared_end = bool(spec["max_segments"] and spec["segment"] >= spec["max_segments"])
+                lifecycle = "completed_awaiting_review" if tranche_limit or declared_end else "checkpointed"
+
+            state.setdefault("segments", []).append(record)
+            state["status"] = lifecycle
+            state["running_segment"] = None
+            state["latest_progress"] = progress
+            state["stop_reason"] = "; ".join(threshold_failures)
+            if lifecycle == "checkpointed":
                 spec["segment"] += 1
+                state["segment"] = spec["segment"]
                 store.write_json_atomic(source, spec)
-                status = "requeued"
             else:
                 archive = workspace / "lab-archive"
                 archive.mkdir(parents=True, exist_ok=True)
                 store.write_json_atomic(archive / f"{spec['id']}.json", {**spec, "final_record": record})
-                status = "completed" if proc.returncode == 0 else "stopped"
-            repositories.record_lab(spec["problem_id"], status, {**spec, **record})
-            if status == "completed":
-                event = events.enqueue(
-                    spec["problem_id"], "lab_completed",
-                    evidence=f"lab job {spec['id']} completed with returncode {proc.returncode}; {record['runner_result'][-1500:]}",
-                    source=f"state/labs/jobs.jsonl#{spec['id']}",
-                )
-                record["research_event_id"] = event["id"]
-            return {"status": status, **record}
+            event = _emit_segment_event(spec, lifecycle, record)
+            record["research_event_id"] = event["id"]
+            _write_state(state)
+            _append_record({**record, "status": lifecycle})
+            repositories.record_lab(spec["problem_id"], lifecycle, {**spec, **record})
+            return {"status": lifecycle, **record}
         except Exception as exc:
-            record = {
-                "recorded_at": store.now_iso(), "job_id": running.stem, "status": "invalid",
-                "error": f"{type(exc).__name__}: {exc}",
-            }
+            error = f"{type(exc).__name__}: {exc}"
+            try:
+                failed_spec = json.loads(running.read_text())
+                failed_id = str(failed_spec.get("id") or running.stem.replace(".running", ""))
+                failed_problem = str(failed_spec.get("problem_id") or "")
+                state = _read_state(failed_id)
+                state["status"] = "stopped_with_reason"
+                state["stop_reason"] = error
+                _write_state(state)
+                if failed_problem:
+                    events.enqueue(failed_problem, "lab_completed", evidence=f"lab job {failed_id} stopped: {error}",
+                                   source=f"state/labs/jobs/{failed_id}.json")
+            except Exception:
+                failed_id, failed_problem = running.stem.replace(".running", ""), ""
+            record = {"recorded_at": store.now_iso(), "job_id": failed_id, "problem_id": failed_problem,
+                      "status": "stopped_with_reason", "error": error}
             _append_record(record)
             rejected = running.parent.parent / "lab-rejected"
             rejected.mkdir(parents=True, exist_ok=True)
@@ -216,25 +467,83 @@ def worker_once() -> dict[str, Any]:
             running.unlink(missing_ok=True)
 
 
-def status() -> dict[str, Any]:
-    ledger = store.STATE / "labs" / "jobs.jsonl"
-    records = []
-    if ledger.exists():
-        for line in ledger.read_text().splitlines()[-50:]:
-            try:
-                value = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(value, dict):
-                records.append(value)
+def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "operator") -> dict[str, Any]:
+    decision = str(decision).strip()
+    if decision not in REVIEW_DECISIONS:
+        raise ValueError(f"review decision must be one of {sorted(REVIEW_DECISIONS)}")
+    if not str(reason).strip():
+        raise ValueError("review reason is required")
+    state = _read_state(job_id)
+    if state.get("status") not in {"completed_awaiting_review", "stopped_with_reason"}:
+        raise ValueError(f"job {job_id} is not awaiting review or stopped")
+    review = {"decision": decision, "reason": str(reason)[:4000], "reviewer": str(reviewer)[:200],
+              "reviewed_at": store.now_iso(), "segment": int(state.get("segment") or 1)}
+    state.setdefault("reviews", []).append(review)
+    workspace = _workspace(str(state["problem_id"]))
+    if decision == "continue":
+        if not state.get("checkpoint_path"):
+            raise ValueError("cannot continue a job without a checkpoint")
+        state["last_reviewed_segment"] = int(state.get("segment") or 1)
+        state["segment"] = int(state.get("segment") or 1) + 1
+        if state.get("max_segments") and state["segment"] > int(state["max_segments"]):
+            state["max_segments"] = state["segment"] + int(state.get("review_every_segments") or 1) - 1
+        state["status"] = "queued"
+        queue = workspace / "lab-queue"
+        queue.mkdir(parents=True, exist_ok=True)
+        spec = {key: state[key] for key in (
+            "schema_version", "id", "problem_id", "name", "hypothesis", "expected_signal", "decision_value",
+            "efficiency_design", "source_urls", "command", "seed", "segment_seconds", "memory_mb", "max_segments",
+            "segment", "pilot_segments", "review_every_segments", "checkpoint_path", "progress_path",
+            "continuation_thresholds", "submitted_at", "workspace_git_commit", "input_sha256", "spec_sha256",
+        )}
+        store.write_json_atomic(queue / f"{job_id}.json", spec)
+    elif decision in {"validate", "promote"}:
+        if not state.get("latest_progress", {}).get("complete"):
+            raise ValueError("only a complete experiment can be validated or promoted")
+        state["status"] = "validated"
+        state["promotion_requested"] = decision == "promote"
+    else:
+        state["status"] = "stopped_with_reason"
+        state["stop_reason"] = str(reason)[:4000]
+    _write_state(state)
+    _append_record({"recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
+                    "status": state["status"], "review": review})
+    repositories.record_lab(str(state["problem_id"]), state["status"], {"id": job_id, "review": review})
+    return {"status": state["status"], "job_id": job_id, "review": review}
+
+
+def status(problem_id: str | None = None) -> dict[str, Any]:
+    states: list[dict[str, Any]] = []
+    for path in sorted(_state_root().glob("*.json")):
+        value = store.read_json(path, None)
+        if isinstance(value, dict) and (not problem_id or value.get("problem_id") == problem_id):
+            states.append(value)
+    counts = {name: sum(1 for row in states if row.get("status") == name) for name in sorted(LIFECYCLE_STATES)}
     return {
+        "counts": counts,
+        "jobs": states[-50:],
         "queued": [str(path) for path in queued_specs()],
-        "recent_records": records,
         "limits": {
             "allowed_executables": sorted(ALLOWED_EXECUTABLES),
             "max_segment_seconds": MAX_SEGMENT_SECONDS,
-            "max_segments": MAX_SEGMENTS,
+            "max_declared_segments": MAX_DECLARED_SEGMENTS,
+            "open_continuation_value": 0,
             "max_memory_mb": MAX_MEMORY_MB,
             "shell": False,
+            "policy": "bounded segments with measured review tranches; no universal overall wall-clock stop",
         },
     }
+
+
+def public_summary() -> dict[str, Any]:
+    report = status()
+    visible = []
+    for row in report["jobs"][-10:]:
+        visible.append({
+            "id": row.get("id"), "problem_id": row.get("problem_id"), "name": row.get("name"),
+            "status": row.get("status"), "segment": row.get("segment"),
+            "completed_units": row.get("latest_progress", {}).get("completed_units"),
+            "total_units": row.get("latest_progress", {}).get("total_units"),
+            "stop_reason": row.get("stop_reason"), "updated_at": row.get("updated_at"),
+        })
+    return {"counts": report["counts"], "jobs": visible}

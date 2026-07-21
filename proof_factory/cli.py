@@ -213,19 +213,33 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("repo-backfill")
     sub.add_parser("repo-status")
     sub.add_parser("repo-sync")
-    sub.add_parser("lab-status")
+    lab_status = sub.add_parser("lab-status")
+    lab_status.add_argument("--problem")
     sub.add_parser("lab-worker")
+    lab_review = sub.add_parser("lab-review")
+    lab_review.add_argument("--job", required=True)
+    lab_review.add_argument("--decision", choices=sorted(lab.REVIEW_DECISIONS), required=True)
+    lab_review.add_argument("--reason", required=True)
+    lab_review.add_argument("--reviewer", default="operator")
     lab_submit = sub.add_parser("lab-submit")
     lab_submit.add_argument("--problem", required=True)
     lab_submit.add_argument("--name", required=True)
     lab_submit.add_argument("--hypothesis", required=True)
     lab_submit.add_argument("--expected-signal", required=True)
+    lab_submit.add_argument("--decision-value", required=True)
+    lab_submit.add_argument("--efficiency-design", required=True, help="JSON efficiency-design report")
     lab_submit.add_argument("--source-url", action="append", default=[])
     lab_submit.add_argument("--segment-seconds", type=int, default=3600)
     lab_submit.add_argument("--max-segments", type=int, default=1)
     lab_submit.add_argument("--memory-mb", type=int, default=512)
     lab_submit.add_argument("--seed", type=int, default=0)
     lab_submit.add_argument("--checkpoint-path", default="")
+    lab_submit.add_argument("--progress-path", default="")
+    lab_submit.add_argument("--pilot-segments", type=int, default=1)
+    lab_submit.add_argument("--review-every-segments", type=int, default=1)
+    lab_submit.add_argument("--min-throughput", type=float, default=0.0)
+    lab_submit.add_argument("--max-artifact-growth-bytes", type=int, default=0)
+    lab_submit.add_argument("--no-correctness-gate", action="store_true")
     lab_submit.add_argument("argv", nargs=argparse.REMAINDER)
     return root
 
@@ -337,21 +351,32 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(result, indent=2))
         return 1 if result["errors"] else 0
     if args.command == "lab-status":
-        print(json.dumps(lab.status(), indent=2))
+        print(json.dumps(lab.status(args.problem), indent=2))
         return 0
     if args.command == "lab-worker":
         print(json.dumps(lab.worker_once(), indent=2))
+        return 0
+    if args.command == "lab-review":
+        print(json.dumps(lab.apply_review(args.job, args.decision, reason=args.reason, reviewer=args.reviewer), indent=2))
         return 0
     if args.command == "lab-submit":
         command = list(args.argv)
         if command[:1] == ["--"]:
             command = command[1:]
+        efficiency = json.loads(Path(args.efficiency_design).read_text())
         result = lab.submit({
             "problem_id": args.problem, "name": args.name, "hypothesis": args.hypothesis,
-            "expected_signal": args.expected_signal, "source_urls": args.source_url,
+            "expected_signal": args.expected_signal, "decision_value": args.decision_value,
+            "efficiency_design": efficiency, "source_urls": args.source_url,
             "segment_seconds": args.segment_seconds, "max_segments": args.max_segments,
             "memory_mb": args.memory_mb, "seed": args.seed,
-            "checkpoint_path": args.checkpoint_path, "command": command,
+            "checkpoint_path": args.checkpoint_path, "progress_path": args.progress_path,
+            "pilot_segments": args.pilot_segments, "review_every_segments": args.review_every_segments,
+            "continuation_thresholds": {
+                "min_throughput_per_second": args.min_throughput,
+                "max_artifact_growth_bytes": args.max_artifact_growth_bytes,
+                "require_correctness_checks": not args.no_correctness_gate,
+            }, "command": command,
         })
         print(json.dumps(result, indent=2))
         return 0

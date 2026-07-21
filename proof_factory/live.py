@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from . import store
+from . import lab, store
 
 
 def next_hard_after(now: datetime) -> datetime:
@@ -97,5 +97,6 @@ def snapshot(
         "operational_blockers": runtime.get("operational_blockers") or [],
         "usage_policy": runtime.get("usage_policy") or {},
         "lanes": lanes,
+        "experiments": lab.public_summary(),
         "recent_runs": recent_runs,
     }

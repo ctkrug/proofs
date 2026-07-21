@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, capacity, events, render, repositories, research_state, resources, store, usage
+from . import agent, brain, capacity, events, lab, render, repositories, research_state, resources, store, usage
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -154,6 +154,19 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         brain.refresh()
         render.build()
         attempt = agent.run(problem, lane, phase=phase)
+        lab_decision = attempt.get("lab_review") or {}
+        if (
+            lane == "hard"
+            and lab_decision.get("decision") in lab.REVIEW_DECISIONS
+            and attempt.get("evidence_validation", {}).get("status") == "valid"
+        ):
+            try:
+                attempt["lab_review_applied"] = lab.apply_review(
+                    str(lab_decision.get("job_id")), str(lab_decision.get("decision")),
+                    reason=str(lab_decision.get("reason")), reviewer=f"proof-factory:{attempt['id']}",
+                )
+            except Exception as exc:
+                attempt.setdefault("policy_flags", []).append(f"Lab review was not applied: {type(exc).__name__}: {exc}")
         store.record_attempt(attempt)
         repositories.record_attempt(problem, attempt)
         consumed_events = events.consume(problem["id"], attempt["id"]) if lane == "hard" else []

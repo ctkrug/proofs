@@ -80,6 +80,15 @@ def extract_result(text: str) -> dict[str, Any]:
     for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "prior_art_check", "field_progress_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
+    lab_review = result.get("lab_review", {})
+    if not isinstance(lab_review, dict):
+        raise ValueError("lab_review must be an object")
+    if lab_review.get("decision", "none") not in {"none", "continue", "validate", "promote", "redirect"}:
+        raise ValueError("lab_review.decision is invalid")
+    if lab_review.get("decision", "none") != "none" and not all(
+        str(lab_review.get(key) or "").strip() for key in ("job_id", "reason")
+    ):
+        raise ValueError("an actionable lab_review requires job_id and reason")
     efficiency = result.get("search_efficiency")
     if not isinstance(efficiency, dict):
         raise ValueError("search_efficiency must be an object")
@@ -428,11 +437,14 @@ WORK RULES
    For a checkpointed search that needs longer than this epoch, submit it to the cloud simulation lab instead of using
    nohup, screen, tmux, `&`, or an untracked background process:
    python3 {store.ROOT / 'scripts' / 'submit_lab.py'} --problem {problem['id']} --name NAME --hypothesis HYPOTHESIS \
-     --expected-signal SIGNAL --segment-seconds SECONDS --max-segments SEGMENTS --memory-mb MB \
-     --checkpoint-path RELATIVE_CHECKPOINT -- COMMAND ARGS...
-   The lab is shell-free, low-priority, hash-recorded, limited to 24-hour segments and seven resumable segments, and accepts
-   only allowlisted math runtimes/solvers or executables inside this problem workspace. A multisegment job must actually
-   write its checkpoint. Queueing compute is not evidence; a later epoch must inspect its exact record and artifacts.
+     --expected-signal SIGNAL --decision-value VALUE --efficiency-design REPORT.json \
+     --segment-seconds SECONDS --max-segments SEGMENTS --memory-mb MB \
+     --checkpoint-path CHECKPOINT.json --progress-path PROGRESS.json -- COMMAND ARGS...
+   The lab is shell-free, low-priority, hash-recorded, and limited to 24-hour resource-capped segments, but a justified
+   checkpointed experiment may continue across any number of reviewed tranches. Substantial jobs require an efficiency
+   design, immutable inputs, checkpoint and progress records, measured continuation thresholds, and independent checks.
+   Queueing compute is not evidence. For completed-awaiting-review jobs in the canonical brief, inspect durable state,
+   logs, hashes, and artifacts, then emit exactly one lab_review decision: continue, validate, promote, or redirect.
 3. Choose the cheapest discriminating test first. Use programs for enumeration and repetition; reserve reasoning for models,
    invariants, decompositions, experiment design, and interpreting failures. Record negative controls and exact bounds.
 4. SEARCH-EFFICIENCY PASS: before any large-space run, estimate the naive candidate count, memory traffic, and dominant
@@ -469,6 +481,7 @@ WORK RULES
   "tactical_learning": {{"prediction":"predeclared expected signal","observation":"what occurred","surprise":"difference from prediction, or none","failure_signature":"reusable failure pattern, or none","bottleneck_update":"current limiting uncertainty or operation","reusable_assets":[{{"name":"artifact/checker/dataset","use":"future use","evidence":"path/hash/check"}}],"constraints_learned":[{{"constraint":"exact restriction learned","scope":"valid scope","evidence":"support"}}],"route_decision":"continue|hold|redirect|close","next_discriminator":"cheapest next test"}},
   "prior_art_check": {{"nearest_method_ids":["stable registry ID or none-found"],"classification":"genuinely_different|material_modification|replication_control","exact_delta":"mechanism-level difference from the nearest work","duplicate_risk":"what could merely rediscover a known result","comparison_test":"cheapest matched test against the nearest baseline","decision":"proceed|control_only|stop","source_urls":["direct primary URL"]}},
   "field_progress_assessment": {{"status":"met|not_met","gate_id":"exact configured gate number/name, or none","contribution_class":"exact contribution class or verified negative/infrastructure result","closest_prior_result":"closest prior result or baseline","measurable_improvement":"quantified delta, or none","independent_validation":"validator and result, or not yet independently validated","external_audience":"accepted audience/channel, or none","remains_unproved":"precise remaining gap","route_recommendation":"close|broaden|redirect|continue and why"}},
+  "lab_review": {{"job_id":"durable lab job ID or blank","decision":"none|continue|validate|promote|redirect","reason":"artifact-grounded review reason or blank","evidence":["state/artifact/check read"]}},
   "strategy_status": "proposed|active|promising|blocked|ruled_out|exhausted|superseded",
   "summary": "what actually happened, including limits",
   "rationale": "why the evidence supports this outcome",
@@ -743,6 +756,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                 "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
             )
         },
+        "lab_review": result.get("lab_review") if isinstance(result.get("lab_review"), dict) else {"decision": "none"},
         "strategy_status": str(result.get("strategy_status") or "active")[:100],
         "summary": result["summary"].strip()[:8000],
         "rationale": result["rationale"].strip()[:4000],

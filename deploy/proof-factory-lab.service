@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - resumable low-priority simulation lab worker
+Description=Proof Factory - checkpointed continuation experiment segment worker
 After=network-online.target
 
 [Service]

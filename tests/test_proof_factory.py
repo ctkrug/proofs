@@ -398,9 +398,44 @@ class ProofFactoryTests(unittest.TestCase):
                 })
                 self.assertEqual(submitted["status"], "queued")
                 result = lab.worker_once()
-                self.assertEqual(result["status"], "completed", result)
+                self.assertEqual(result["status"], "completed_awaiting_review", result)
                 self.assertEqual(result["returncode"], 0)
                 self.assertTrue((state / "labs" / "jobs.jsonl").is_file())
+
+    def test_lab_checkpoint_review_continue_validate_lifecycle(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); data = root / "data"; research = root / "research"; state = root / "state"
+            data.mkdir(); (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            code = (
+                "import json,pathlib; c=pathlib.Path('checkpoint.json'); "
+                "n=(json.loads(c.read_text())['n'] if c.exists() else 0)+1; "
+                "c.write_text(json.dumps({'n':n})); "
+                "pathlib.Path('progress.json').write_text(json.dumps({'completed_units':n,'total_units':2,"
+                "'complete':n>=2,'correctness_checks_passed':True,'decision_value_active':True,'artifact_bytes':c.stat().st_size}))"
+            )
+            efficiency = {
+                "naive_cost": "two full units", "opportunities_considered": ["symmetry", "memoization", "decomposition"],
+                "chosen_reductions": "checkpoint one unit per segment", "expected_throughput_gain": "resumability",
+                "soundness_basis": "unit counter checked independently", "remains_uncompressed": "two units",
+            }
+            with patch.multiple(store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
+                                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl"), \
+                    patch.object(capacity, "admission", return_value={"allowed": True}):
+                submitted = lab.submit({
+                    "problem_id": "p", "name": "lifecycle", "hypothesis": "two segments complete",
+                    "expected_signal": "counter reaches two", "decision_value": "decides lifecycle correctness",
+                    "efficiency_design": efficiency, "command": ["python3", "-c", code],
+                    "segment_seconds": 60, "memory_mb": 128, "max_segments": 2,
+                    "checkpoint_path": "checkpoint.json", "progress_path": "progress.json",
+                    "continuation_thresholds": {"require_correctness_checks": True},
+                })
+                first = lab.worker_once()
+                self.assertEqual(first["status"], "completed_awaiting_review")
+                self.assertEqual(lab.apply_review(submitted["id"], "continue", reason="pilot passed")["status"], "queued")
+                second = lab.worker_once()
+                self.assertEqual(second["status"], "completed_awaiting_review")
+                self.assertEqual(lab.apply_review(submitted["id"], "validate", reason="complete and checked")["status"], "validated")
+                self.assertEqual(lab.status("p")["counts"]["validated"], 1)
 
     def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
         text = '''```strategy_proposal
