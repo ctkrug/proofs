@@ -21,6 +21,16 @@ checkout="$cache_root/formal-conjectures"
 lock_dir="$cache_root/locks/formal-conjectures-bootstrap.lock"
 mkdir -p "$cache_root/locks"
 
+# A first Mathlib cache hydrate can consume several GiB.  Fail before any
+# download if the cache filesystem cannot absorb it; the scheduler can keep
+# normal research work running instead of letting this bootstrap fill a disk.
+min_free_kib="${PROOF_FACTORY_LEAN_BOOTSTRAP_MIN_FREE_KIB:-8388608}" # 8 GiB
+available_kib="$(df -Pk "$cache_root" | awk 'NR == 2 { print $4 }')"
+if [[ ! "$available_kib" =~ ^[0-9]+$ ]] || (( available_kib < min_free_kib )); then
+  echo "formal-conjectures bootstrap needs $((${min_free_kib} / 1024 / 1024)) GiB free in $cache_root; only ${available_kib:-0} KiB available" >&2
+  exit 75
+fi
+
 # `mkdir` is atomic on macOS and Linux. Serializing avoids competing `lake update`
 # processes corrupting a temporary package checkout.
 for _ in $(seq 1 600); do
