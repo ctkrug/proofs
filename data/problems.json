@@ -481,5 +481,52 @@
     "campaign_start_research_attempt_count": 1,
     "campaign_min_runs": 25,
     "campaign_decision": "resumed after easier candidate #3688 was screened out for an active upstream PR; continue the focused campaign while the next easier unclaimed issue is audited"
+  },
+  {
+    "id": "scout-1b950f384759",
+    "outcome": "candidate",
+    "title": "Formalize that products of strict continuous group homomorphisms are strict",
+    "statement": "In Mathlib, prove that if f : G₁ →* H₁ and g : G₂ →* H₂ are continuous, topologically strict group homomorphisms, then Prod.map f g is strict; add the narrowly required API expressing strictness through rangeRestrict/kernel quotient and the existing IsOpenQuotientMap product theorem.",
+    "source_url": "https://github.com/leanprover-community/mathlib4/issues/38421",
+    "source_name": "mathlib Issue #38421",
+    "problem_state": "open",
+    "contribution_type": "formalization",
+    "verifiability": "A Lean theorem with no axioms or sorrys, compiled by Mathlib CI; the issue identifies the existing lemmas IsOpenQuotientMap.prodMap and Homeomorph.Set.prod that provide an independently checkable proof route.",
+    "rationale": "This is explicitly labeled a good first issue, has a concrete proof architecture from a Mathlib maintainer, and is an unusually bounded formalization gap in topological-group infrastructure rather than a speculative open-ended theorem hunt.",
+    "external_channel": "leanprover-community/mathlib4 pull request",
+    "external_url": "https://github.com/leanprover-community/mathlib4/pulls",
+    "upstream_work_check": {
+      "active_prs": 0,
+      "checked_url": "https://github.com/leanprover-community/mathlib4/issues/38421",
+      "checked_at": "2026-07-21T00:00:00Z",
+      "evidence": "The current open issue’s Development section states “No branches or pull requests”; it is unassigned and has no linked relationships."
+    },
+    "estimated_success_probability": 0.42,
+    "difficulty": 4,
+    "verification_score": 10,
+    "contribution_score": 6,
+    "review_cost": 3,
+    "novelty_risk": 2,
+    "techniques": [
+      "Lean 4 formalization",
+      "quotient-map characterization of strictness",
+      "product stability of open quotient maps"
+    ],
+    "lane": "easy",
+    "status": "queued",
+    "priority": 40,
+    "attempt_count": 0,
+    "research_attempt_count": 0,
+    "accepted_result": false,
+    "added_at": "2026-07-21T16:36:09.845184+00:00",
+    "source_checked_at": "2026-07-21T16:36:09.845209+00:00",
+    "intake_source": "agentic academic contribution scout",
+    "scout_model": "gpt-5.6-terra",
+    "scout_usage": {
+      "input_tokens": 430031,
+      "cached_input_tokens": 368640,
+      "output_tokens": 2729,
+      "reasoning_output_tokens": 1338
+    }
   }
 ]

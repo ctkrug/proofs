@@ -108,11 +108,25 @@
       "commit": "e02f75297b431349a362be7ad0ab3ed1f8e0af90"
     },
     {
+      "problem_id": "formal-conjectures-3688",
+      "repository": "ctkrug/proofs-formal-conjectures-3688",
+      "url": "https://github.com/ctkrug/proofs-formal-conjectures-3688",
+      "visibility": "PUBLIC",
+      "commit": "7262f54d43d6a75edc38bbd64043dee3b6f3968d"
+    },
+    {
       "problem_id": "scout-bdf77f43574b",
       "repository": "ctkrug/proofs-scout-bdf77f43574b",
       "url": "https://github.com/ctkrug/proofs-scout-bdf77f43574b",
       "visibility": "PUBLIC",
       "commit": "b2a0f0f2c8408f389f27c724998f296c4c57792b"
+    },
+    {
+      "problem_id": "scout-1b950f384759",
+      "repository": "ctkrug/proofs-scout-1b950f384759",
+      "url": "https://github.com/ctkrug/proofs-scout-1b950f384759",
+      "visibility": "PUBLIC",
+      "commit": "c7c42f1ef0e6b9dafb22bccd64789ba28c53311e"
     }
   ],
   "errors": []
