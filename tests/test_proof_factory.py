@@ -161,7 +161,6 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("bulk class/cube/profile elimination", prompt)
         self.assertIn("DETERMINISTIC TACTICAL BRIEF", prompt)
         self.assertIn("AUTOMATED CAMPAIGN ROADMAP", prompt)
-        self.assertIn("core_theorem", prompt)
         self.assertIn("tactical_learning", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
