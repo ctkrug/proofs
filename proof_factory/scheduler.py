@@ -14,6 +14,11 @@ from . import agent, brain, capacity, events, lab, render, repositories, researc
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
 
 
+def _reviewable_events(problem_id: str) -> list[dict[str, Any]]:
+    """Return evidence that warrants a model turn, excluding tranche-internal receipts."""
+    return [row for row in events.pending(problem_id) if row.get("kind") != "lab_segment_completed"]
+
+
 def accepted_original_results(problems: list[dict[str, Any]]) -> int:
     return sum(1 for row in problems if row.get("external_validation_state") in {
         "expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed",
@@ -94,7 +99,9 @@ def publish_if_configured() -> None:
 def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
     if lane not in {"easy", "hard"}:
         raise ValueError("lane must be easy or hard")
-    capacity_policy = capacity.admission(lane)
+    # The hard lane is the workspace-only R(5,5) campaign; unlike formalization
+    # discovery it does not use the separate Lean build cache.
+    capacity_policy = capacity.admission(lane, require_cache=lane != "hard")
     store.update_runtime(capacity_policy=capacity_policy)
     if not capacity_policy["allowed"]:
         blocker = {
@@ -123,7 +130,7 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
         problem = choose_problem(lane, problems)
-        research_events = events.pending(problem["id"]) if lane == "hard" else []
+        research_events = _reviewable_events(problem["id"]) if lane == "hard" else []
         if lane == "hard" and admission.get("mode") != "operator" and not research_events:
             reason = "no unconsumed research event; clock time alone cannot start a model-backed R(5,5) pass"
             store.update_runtime(hard_running=None, hard_event_policy={
@@ -206,10 +213,10 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         issues.extend(capacity_policy["reasons"])
     if hard:
         last_hard = store.parse_iso(hard[-1].get("finished_at"))
-        pending_hard_events = events.pending(hard[-1].get("problem_id"))
+        pending_hard_events = _reviewable_events(str(hard[-1].get("problem_id")))
         if pending_hard_events and not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 6 * 3600:
             issues.append("Ramsey campaign has an unconsumed evidence event for more than 6 hours")
-    elif not hard_in_flight and any(events.pending(row["id"]) for row in store.load_problems() if row.get("lane") == "hard"):
+    elif not hard_in_flight and any(_reviewable_events(row["id"]) for row in store.load_problems() if row.get("lane") == "hard"):
         issues.append("Ramsey campaign has evidence ready but has not completed its first review")
     easy_expected = os.environ.get("PROOF_EASY_EXPECTED", "1").strip().lower() not in {"0", "false", "no", "off"}
     if easy_expected:
