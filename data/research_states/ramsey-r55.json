@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 8,
-  "last_updated": "2026-07-21T02:34:27.831856+00:00",
+  "epoch_count": 9,
+  "last_updated": "2026-07-21T04:34:22.440967+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The hypothesis was falsified at its exact scope. Every second distance in {1,...,21} minus {6} is UNSAT. Complete Python and C origin ledgers and CNFs agree byte-for-byte. All 20 DRAT proofs pass drat-trim, all LRAT conversions pass lrat-check, and full-graph semantic controls agree. This excludes only the specified fixed-background two-orbit union and changes no Ramsey bound.",
+  "synthesis_summary": "The hypothesis was falsified at its exact scope. All 20 slices are UNSAT under both independent encodings. The authenticated publisher assignment has burden two in every slice, so every slice has exact minimum burden two. This concerns only the declared fixed-background family and changes no Ramsey bound.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -248,6 +248,14 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-023427-94891a",
       "updated_at": "2026-07-21T02:34:27.831856+00:00"
+    },
+    {
+      "claim": "Every specified fixed-background two-orbit slice has exact minimum raw monochromatic-K5 burden two.",
+      "evidence": "Dual per-origin UNSAT encodings, 40 checked DRAT proofs, 40 checked LRAT proofs, and the authenticated publisher burden-two assignment.",
+      "scope": "Exactly the 20 unsymmetrized slices freeing cyclic distance 6 and one other cyclic distance while freezing the remaining 19 orbits.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-043422-7a2274",
+      "updated_at": "2026-07-21T04:34:22.440967+00:00"
     }
   ],
   "strategies": [
@@ -499,21 +507,37 @@
       "id": "strategy-r55twoorbitdomainwall2026",
       "family": "certificate-carrying two-orbit SAT",
       "fingerprint": "r55twoorbitdomainwall2026",
-      "title": "Proof-carrying burden-zero sweep of all 20 two-orbit cyclic domain-wall slices around the authenticated Springer K43 seed.",
-      "mechanism": "Free cyclic distance 6 and one other distance orbit, independently derive the exact K5 CNF in Python and C without symmetry reduction, solve it, and verify DRAT/LRAT proofs and variable-to-graph semantics.",
-      "status": "active",
-      "hypothesis": "At least one of the 20 slices contains a burden-zero R(5,5,43) coloring.",
-      "discriminating_test": "Solve every unsymmetrized 86-variable slice; accept SAT only after two full K5 scans, and accept UNSAT only after dual clause derivation and independent proof checking.",
-      "blocker": "The burden-zero witness question is closed for this family, but exact slice minima remain unknown because burden one has not yet been encoded with raw-origin multiplicity.",
-      "reopen_condition": "Reopen the burden-zero witness route only after a concrete defect in source provenance, encoding, mapping, proof verification, or slice coverage.",
-      "reopen_evidence": "The saved radius-two and distance-6 prerequisite gates replayed successfully before the new sweep.",
-      "last_attempt_id": "ramsey-r55-20260721-023427-94891a",
-      "attempts": 1,
+      "title": "Proof-carrying raw-origin burden-at-most-one exclusion for all 20 fixed-background two-orbit cyclic slices",
+      "mechanism": "Assign one relaxation variable to every raw five-set/color origin, impose independently derived prefix and suffix sequential at-most-one constraints, solve both encodings, and verify DRAT, LRAT, specialization, and full-graph semantics.",
+      "status": "exhausted",
+      "hypothesis": "At least one of the 20 fixed-background two-orbit slices has raw monochromatic-K5 burden at most one.",
+      "discriminating_test": "For each second distance, solve two unsymmetrized per-origin burden-at-most-one CNFs; accept SAT only after two exact full-graph scans, and accept UNSAT only after DRAT and LRAT verification.",
+      "blocker": "The classified family is too narrow to affect R(5,5); releasing a third orbit has no current structural discriminator or credible bounded certificate cost.",
+      "reopen_condition": "Reopen this strategy only after a concrete defect in its retained provenance, multiplicity, encoding, mapping, proof, or coverage evidence.",
+      "reopen_evidence": "The former burden-one blocker was satisfied by per-origin relaxation, dual AMO encodings, proof replay, and adversarial semantic controls.",
+      "last_attempt_id": "ramsey-r55-20260721-043422-7a2274",
+      "attempts": 2,
       "parent_ids": [
         "strategy-r55twocore2026",
         "strategy-r55-certified-pilot"
       ],
-      "updated_at": "2026-07-21T02:34:27.831856+00:00"
+      "updated_at": "2026-07-21T04:34:22.440967+00:00"
+    },
+    {
+      "family": "novel order-42 basin discovery",
+      "mechanism": "Combine exact Ramsey clauses with an almost-regular degree constraint, using proof logging for exclusions and independent full scans for models.",
+      "hypothesis": "The almost-regular order-42 slice contains a valid graph outside the authenticated supplied corpus.",
+      "discriminating_test": "A small-control-validated, 300-second proof-logging SAT pilot.",
+      "rationale": "It is a structurally specified, potentially witness-producing slice and avoids automatic escalation of the exhausted orbit family.",
+      "id": "strategy-33eb5acd3b31",
+      "fingerprint": "33eb5acd3b31",
+      "status": "proposed",
+      "title": "Combine exact Ramsey clauses with an almost-regular degree constraint, using proof logging for exclusions and independent full scans for models.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55twoorbitdomainwall2026"
+      ],
+      "updated_at": "2026-07-21T04:34:22.440967+00:00"
     }
   ],
   "open_leads": [
@@ -648,6 +672,16 @@
       "id": "lead-365cf4cbff",
       "strategy_id": "strategy-r55twoorbitdomainwall2026",
       "updated_at": "2026-07-21T02:34:27.831856+00:00"
+    },
+    {
+      "description": "Test the recognized almost-regular order-42 Ramsey slice with a deterministic degree-constrained SAT encoding.",
+      "rationale": "None of the authenticated supplied 656 graphs is almost regular, so a valid result would be outside that corpus and address a named structural slice.",
+      "next_experiment": "Hash-lock the corpus report, reproduce its degree spreads, validate the degree counter on small known instances, then run a 300-second/1-GiB proof-logging pilot.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-118e4c9764",
+      "strategy_id": "strategy-r55twoorbitdomainwall2026",
+      "updated_at": "2026-07-21T04:34:22.440967+00:00"
     }
   ],
   "ruled_out": [
@@ -816,6 +850,15 @@
       "reopen_condition": "Demonstrate a source, clause-derivation, variable-mapping, proof-checker, or 20-distance coverage defect; freeing a third orbit is a different route.",
       "attempt_id": "ramsey-r55-20260721-023427-94891a",
       "updated_at": "2026-07-21T02:34:27.831856+00:00"
+    },
+    {
+      "claim_or_route": "Lower the monochromatic-K5 burden below two in the fixed-background two-released-orbit family.",
+      "scope": "All 20 declared 86-edge slices.",
+      "reason": "Both raw-origin burden-at-most-one encodings are proof-checked UNSAT in every slice.",
+      "evidence": "artifacts/two_orbit_burden_one, artifacts/two_orbit_burden_one_lrat, and the two retained reports.",
+      "reopen_condition": "Demonstrate a source, raw-origin multiplicity, specialization, cardinality, graph-mapping, proof-checker, or distance-coverage defect.",
+      "attempt_id": "ramsey-r55-20260721-043422-7a2274",
+      "updated_at": "2026-07-21T04:34:22.440967+00:00"
     }
   ],
   "unresolved_questions": [
@@ -827,10 +870,10 @@
   ],
   "next_session": {
     "recommended_strategy_id": "strategy-r55twoorbitdomainwall2026",
-    "objective": "Determine whether any two-orbit slice lowers the exact monochromatic-K5 burden from two to one.",
-    "first_action": "Extend both generators with one relaxation variable per raw origin and independently derived at-most-one constraints; validate first on the retained distance-6 slice.",
-    "stop_condition": "Stop on any source, multiplicity, specialization, dual-CNF, proof, or full-scan mismatch; otherwise stop after a checked burden-one model or 20 checked UNSAT results.",
-    "source_attempt_id": "ramsey-r55-20260721-023427-94891a"
+    "objective": "Run the cheapest exact feasibility discriminator for the almost-regular order-42 slice.",
+    "first_action": "Hash-lock artifacts/authenticated_corpus_report.json, extract all supplied degree spreads, and implement a small-control-tested degree-spread-at-most-one counter.",
+    "stop_condition": "Stop on any corpus, graph6, degree-counter, CNF-to-graph, proof, or full-scan mismatch; otherwise stop after a dual-checked new graph, a checked bounded exclusion, or the 300-second/1-GiB pilot timeout.",
+    "source_attempt_id": "ramsey-r55-20260721-043422-7a2274"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -840,6 +883,7 @@
     "ramsey-r55-20260720-235107-8e574c",
     "ramsey-r55-20260721-001847-bbfd27",
     "manual-local-radius2-domain-wall-2026-07-20",
-    "ramsey-r55-20260721-023427-94891a"
+    "ramsey-r55-20260721-023427-94891a",
+    "ramsey-r55-20260721-043422-7a2274"
   ]
 }

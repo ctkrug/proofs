@@ -10,14 +10,193 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T04:53:09.076732+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T04:53:09.076732+00:00",
+    "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+    "source_status": "verifiable",
+    "facts_recorded": 5,
+    "exclusions_recorded": 4,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The problem remains open. Dense marking and direct streaming congruence evaluation agreed on all 1919 controls and failed closed at the period cap. The May 2026 Lean claim depends on custom axioms extending beyond BBMST's hypotheses. The April 2026 few-prime manuscript asserts a false Step 2 equality: tower classes 0 mod 3 and 0 mod 9 leave 6 residues, not 9/2. A normalized-ratio repair remains open.",
+  "established_facts": [
+    {
+      "claim": "Every distinct covering has a modulus divisible by 2 or 3.",
+      "evidence": "Hough–Nielsen Theorem 1, DOI 10.1215/00127094-2019-0058",
+      "scope": "All finite distinct covering systems.",
+      "status": "proved",
+      "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim": "No distinct odd covering exists if every prime p <= 73 occurs only to exponent at most one in all moduli.",
+      "evidence": "BBMST Theorem 1.1 and final Section 5 remark, DOI 10.2140/ant.2021.15.609",
+      "scope": "All finite systems satisfying that exponent restriction.",
+      "status": "proved",
+      "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim": "A hypothetical distinct odd cover has LCM divisible by 9 or 15.",
+      "evidence": "BBMST Theorem 1.4, DOI 10.1007/s00222-021-01087-5",
+      "scope": "All finite distinct odd covering systems.",
+      "status": "proved",
+      "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim": "Dense and streaming verification agree throughout the 1919-case control corpus.",
+      "evidence": ".proof-experiments/20260721-044214-bde719",
+      "scope": "Every residue assignment over every nonempty subset of {3,5,7,9}.",
+      "status": "computed",
+      "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim": "The few-prime manuscript's displayed Step 2 equality fails on an allowed tower.",
+      "evidence": ".proof-experiments/20260721-044556-444ba6 and direct counting modulo 9",
+      "scope": "The equality as written, not the headline four-prime theorem.",
+      "status": "proved",
+      "source_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-isolated-adversarial-reconstruction",
+      "family": "isolated adversarial reconstruction",
+      "fingerprint": "isolated-adversarial-reconstruction",
+      "title": "Mandatory source/status baseline, adversarial reconstruction of postdated claims, and differential validation of finite-witness checkers.",
+      "mechanism": "Compare exact source hypotheses with claimed encodings, isolate the smallest exact discrepancy, and validate witness tooling using independent algorithms.",
+      "status": "active",
+      "hypothesis": "The maintained problem remains open, the two postdated self-published claims do not establish an unconditional resolution, and independent finite-period checkers agree on a complete bounded control corpus.",
+      "discriminating_test": "Audit original and current sources, compare cited theorem hypotheses with claimed formal axioms, enumerate the smallest disputed weight-region example, and compare dense versus streaming coverage on 1919 prescribed candidates.",
+      "blocker": "No accepted theorem provides a finite complete search universe, the closest constructions still repeat a modulus, and both postdated negative claims omit a theorem-strength step.",
+      "reopen_condition": "For the few-prime route, establish a corrected normalized-region lemma handling arbitrary tower overlaps and edge cases; for the Lean route, replace both custom axioms with proofs.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "family": "symbolic and congruence family discovery",
+      "mechanism": "Replace absolute weight-region cardinalities by normalized CRT fibre ratios and sum geometric prime-power towers.",
+      "hypothesis": "The normalized inequality survives arbitrary tower overlaps and repairs the four-prime exclusion.",
+      "discriminating_test": "Exact exhaustive tower/cylinder tests at primes 3,5,7 and exponents at most 3.",
+      "rationale": "The identified error is an equality, while ratio cancellation may retain the intended bound.",
+      "id": "strategy-4ea2404f4aec",
+      "fingerprint": "4ea2404f4aec",
+      "status": "proposed",
+      "title": "Replace absolute weight-region cardinalities by normalized CRT fibre ratios and sum geometric prime-power towers.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-isolated-adversarial-reconstruction"
+      ],
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "family": "counterexample-guided inductive synthesis",
+      "mechanism": "Use a verified split-tree grammar to replace repeated leaves while retaining counterexample CRT fibres.",
+      "hypothesis": "A published near-distinct tree admits a local replacement lowering repeated-modulus multiplicity.",
+      "discriminating_test": "Exhaust one explicitly bounded local replacement grammar and accept only a structurally checked tree.",
+      "rationale": "It starts from the closest known constructive objects and yields a compact certificate on success.",
+      "id": "strategy-fda44ed7bcae",
+      "fingerprint": "fda44ed7bcae",
+      "status": "proposed",
+      "title": "Use a verified split-tree grammar to replace repeated leaves while retaining counterexample CRT fibres.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-isolated-adversarial-reconstruction"
+      ],
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Repair or refute the four-prime weight-region argument using normalized intersection ratios.",
+      "rationale": "It is a short structural lemma that can be killed by a small finite counterexample before significant work.",
+      "next_experiment": "Exhaust tower assignments at primes 3,5,7 and exponents at most 3 using exact Fractions.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-b84950b549",
+      "strategy_id": "strategy-isolated-adversarial-reconstruction",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "description": "Machine-check published condensed covering trees.",
+      "rationale": "This would create the missing reusable dataset and support disciplined repeated-modulus replacement.",
+      "next_experiment": "Define a JSON split-tree schema and encode the published t_15 <= 4 construction.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-1d488ce0a7",
+      "strategy_id": "strategy-isolated-adversarial-reconstruction",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "description": "Seek a square-free near-cover with one prime repeated exactly twice.",
+      "rationale": "Harrington–Sun–Wong prove that such an object transforms into a genuine distinct odd covering.",
+      "next_experiment": "After tree tooling exists, encode the published tau_7 <= 6 tree and test a bounded replacement grammar.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-3917320cf4",
+      "strategy_id": "strategy-isolated-adversarial-reconstruction",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Square-free or p<=73-square-free candidate search.",
+      "scope": "Systems with no p^2 dividing a modulus for p<=73.",
+      "reason": "Published BBMST work excludes the entire scope.",
+      "evidence": "https://doi.org/10.2140/ant.2021.15.609",
+      "reopen_condition": "A demonstrated error in the published theorem.",
+      "attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim_or_route": "Odd LCM search avoiding both 9 and 15.",
+      "scope": "All finite distinct odd systems in that LCM class.",
+      "reason": "Published BBMST work excludes the entire scope.",
+      "evidence": "https://doi.org/10.1007/s00222-021-01087-5",
+      "reopen_condition": "A demonstrated error in the published theorem.",
+      "attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim_or_route": "Treat the May 2026 Lean repository as an unconditional resolution.",
+      "scope": "Commit fe530b2cedd3a71c2cdb47cc36ed0c3cb047b086.",
+      "reason": "Its main theorem depends on two custom axioms not supplied by the cited BBMST results.",
+      "evidence": "Source audit recorded in notes/baseline-audit-2026-07-21.md.",
+      "reopen_condition": "Replace both custom axioms with faithful proofs.",
+      "attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    },
+    {
+      "claim_or_route": "Use the April 2026 four-prime proof as written to prune search.",
+      "scope": "Its Step 2 and Step 3 weight-region derivation.",
+      "reason": "The asserted exact cardinality is false for overlapping tower congruences.",
+      "evidence": ".proof-experiments/20260721-044556-444ba6",
+      "reopen_condition": "Supply and independently audit a corrected actual-region or weighted-region proof.",
+      "attempt_id": "erdos-7-20260721-045309-4d8aa9",
+      "updated_at": "2026-07-21T04:53:09.076732+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-isolated-adversarial-reconstruction",
+    "objective": "Decide whether the four-prime weight-function theorem can be rigorously repaired.",
+    "first_action": "Test and then prove or falsify |C_d intersection W|/|W| <= product over support of p^(-b)(p-1)/(p-2), beginning with exact exhaustive controls for primes {3,5,7} and exponents <=3.",
+    "stop_condition": "Stop at the first exact counterexample; otherwise stop after a complete proof and novelty audit determine whether the resulting theorem is valid and new.",
+    "source_attempt_id": "erdos-7-20260721-045309-4d8aa9"
+  },
+  "recent_attempt_ids": [
+    "erdos-7-20260721-045309-4d8aa9"
+  ]
 }
