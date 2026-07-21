@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 2,
-  "last_updated": "2026-07-21T18:57:48.713116+00:00",
+  "epoch_count": 3,
+  "last_updated": "2026-07-21T22:08:06.961049+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The candidate was not falsified. Three recorded attempts stopped before its body: the bare numeric Lake target produced an empty-path error, the tested relative source target was unknown, and direct elaboration against the current cache found FormalConjecturesUtil.olean missing while bootstrap was still compiling. Lake's +module grammar was captured independently. The corrected target +FormalConjectures.ErdosProblems.«530» is queued as lab-scout-bdf77f43574b-eec7321621e3.",
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The original candidate was not warning-clean: its source elaborated and produced an OLean, but eight missing AMS attributes caused --wfail to reject it. A metadata-only repair added AMS 5 11 to those declarations, producing candidate hash 208af82a…71c9. An independent 512-case semantic regression still passes. The repaired warning-fatal target build is queued and is not counted as evidence yet.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -166,7 +166,8 @@
   },
   "recent_attempt_ids": [
     "scout-bdf77f43574b-20260720-195251-a9f2d4",
-    "scout-bdf77f43574b-20260721-185748-323167"
+    "scout-bdf77f43574b-20260721-185748-323167",
+    "scout-bdf77f43574b-20260721-220806-a12504"
   ],
   "tactical_memory": {
     "current_bottleneck": "",
