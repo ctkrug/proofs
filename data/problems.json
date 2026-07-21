@@ -78,6 +78,13 @@
     "contribution_type": "exact optimum",
     "external_channel": "Small Ramsey Numbers Dynamic Survey; graph-theory and SAT/formal-verification venues",
     "external_url": "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
+    "field_progress_gates": [
+      "Find a zero-conflict K43 witness that passes both independent exact checkers.",
+      "Lower the best known conflict count within a broader, independently interesting, precisely defined family.",
+      "Prove a concise structural theorem explaining why the two-orbit or near-circulant family cannot work.",
+      "Produce certified exclusions that materially shrink an accepted R(5,5) search space, with deterministic encodings, checked proof logs, and sound symmetry coverage.",
+      "Improve a search algorithm on held-out Ramsey benchmarks under matched compute, exact evaluation, leakage-safe splits, and appropriate prior-art baselines."
+    ],
     "estimated_success_probability": 0.12,
     "verification_score": 5,
     "contribution_score": 5,

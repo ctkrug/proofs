@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import brain, contribution_gate, research_state, store
+from . import brain, contribution_gate, research_state, store, tactics
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -64,7 +64,7 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency"):
+    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "tactical_learning", "field_progress_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
     efficiency = result.get("search_efficiency")
@@ -76,6 +76,30 @@ def extract_result(text: str) -> dict[str, Any]:
         raise ValueError(f"search_efficiency missing fields: {missing_efficiency}")
     if not isinstance(efficiency.get("reductions_considered"), list) or not efficiency["reductions_considered"]:
         raise ValueError("search_efficiency.reductions_considered must be a nonempty list")
+    learning = result.get("tactical_learning")
+    if not isinstance(learning, dict):
+        raise ValueError("tactical_learning must be an object")
+    required_learning = ("prediction", "observation", "surprise", "failure_signature", "bottleneck_update", "route_decision", "next_discriminator")
+    missing_learning = [key for key in required_learning if not str(learning.get(key) or "").strip()]
+    if missing_learning:
+        raise ValueError(f"tactical_learning missing fields: {missing_learning}")
+    if learning.get("route_decision") not in {"continue", "hold", "redirect", "close"}:
+        raise ValueError("tactical_learning.route_decision must be continue|hold|redirect|close")
+    for key in ("reusable_assets", "constraints_learned"):
+        if not isinstance(learning.get(key), list):
+            raise ValueError(f"tactical_learning.{key} must be a list")
+    field_progress = result.get("field_progress_assessment")
+    if not isinstance(field_progress, dict):
+        raise ValueError("field_progress_assessment must be an object")
+    if field_progress.get("status") not in {"met", "not_met"}:
+        raise ValueError("field_progress_assessment.status must be met|not_met")
+    required_progress = (
+        "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
+        "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
+    )
+    missing_progress = [key for key in required_progress if not str(field_progress.get(key) or "").strip()]
+    if missing_progress:
+        raise ValueError(f"field_progress_assessment missing fields: {missing_progress}")
     return result
 
 
@@ -158,6 +182,9 @@ DELEGATE ROLE: {role}
 
 DURABLE CAMPAIGN STATE
 {research_state.compact_for_prompt(problem)}
+
+DETERMINISTIC TACTICAL BRIEF
+{tactics.compact_for_prompt(problem)}
 
 CROSS-PROBLEM RESEARCH BRAIN
 {brain.context_for_problem(problem)}
@@ -258,6 +285,7 @@ Formalization: {problem.get('formalization_url') or '(none known)'}
 Why selected: {problem.get('rationale')}
 Verification contract: {problem.get('verifiability')}
 Known techniques: {', '.join(problem.get('techniques') or [])}
+Field-progress gates: {json.dumps(problem.get('field_progress_gates') or ['Use the sourced contribution and verification contract.'], ensure_ascii=False)}
 
 RESEARCH PHASE
 {phase_contract}
@@ -302,6 +330,9 @@ DURABLE RESEARCH STATE (claims/evidence/decisions, never private chain-of-though
 CROSS-PROBLEM RESEARCH BRAIN (links are transfer hypotheses, not evidence)
 {brain.context_for_problem(problem)}
 
+DETERMINISTIC TACTICAL BRIEF (inspectable priorities, not probabilities)
+{tactics.compact_for_prompt(problem)}
+
 REUSABLE STRATEGY LIBRARY
 {json.dumps(strategy_library, indent=2, ensure_ascii=False)[:18000]}
 
@@ -314,6 +345,8 @@ STRATEGY PORTFOLIO RULES
 6. Use an adversarial audit appropriate to the claim: quantifiers, domain/codomain, exact hypotheses, singularities, exhaustive scope,
    numerical tolerance, solver/model assumptions, certificate checking, novelty/status, and unused hypotheses.
 7. End the epoch with a synthesis: what is established, what was ruled out and at what scope, live leads, and the next first action.
+8. Follow the tactical brief unless concrete evidence overrides it. Compare its incumbent and challenger, predeclare success,
+   failure, and redirect signals, and record the override reason. Never confuse a high route score with mathematical evidence.
 
 WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
@@ -365,6 +398,8 @@ WORK RULES
   "hypothesis": "falsifiable claim tested this epoch",
   "discriminating_test": "cheapest observation that separates success from failure",
   "search_efficiency": {{"naive_space":"candidate count and bottleneck","reductions_considered":["symmetry/compression/batching/vectorization/incremental/decomposition/pruning/reuse options"],"chosen_mechanism":"bulk-elimination design","estimated_or_measured_savings":"reduction ratio or throughput","soundness_guard":"independent equivalence or one-sided coverage check"}},
+  "tactical_learning": {{"prediction":"predeclared expected signal","observation":"what occurred","surprise":"difference from prediction, or none","failure_signature":"reusable failure pattern, or none","bottleneck_update":"current limiting uncertainty or operation","reusable_assets":[{{"name":"artifact/checker/dataset","use":"future use","evidence":"path/hash/check"}}],"constraints_learned":[{{"constraint":"exact restriction learned","scope":"valid scope","evidence":"support"}}],"route_decision":"continue|hold|redirect|close","next_discriminator":"cheapest next test"}},
+  "field_progress_assessment": {{"status":"met|not_met","gate_id":"exact configured gate number/name, or none","contribution_class":"exact contribution class or verified negative/infrastructure result","closest_prior_result":"closest prior result or baseline","measurable_improvement":"quantified delta, or none","independent_validation":"validator and result, or not yet independently validated","external_audience":"accepted audience/channel, or none","remains_unproved":"precise remaining gap","route_recommendation":"close|broaden|redirect|continue and why"}},
   "strategy_status": "proposed|active|promising|blocked|ruled_out|exhausted|superseded",
   "summary": "what actually happened, including limits",
   "rationale": "why the evidence supports this outcome",
@@ -464,6 +499,21 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             )
             outcome = "no_progress"
             result["strategy_status"] = prior_strategy.get("status")
+        field_progress = result.get("field_progress_assessment", {})
+        configured_gates = problem.get("field_progress_gates") or []
+        if field_progress.get("status") == "met" and configured_gates:
+            gate_id = str(field_progress.get("gate_id") or "")
+            valid_gate_ids = {str(index) for index in range(1, len(configured_gates) + 1)}
+            if gate_id not in valid_gate_ids:
+                policy_flags.append(f"Field-progress claim names unconfigured gate {gate_id!r}; expected one of {sorted(valid_gate_ids)}.")
+                field_progress["status"] = "not_met"
+                outcome = "no_progress"
+        if field_progress.get("status") == "met" and result.get("outcome") != "candidate":
+            policy_flags.append("A field-progress claim must request candidate review and pass the fail-closed contribution gate.")
+            field_progress["status"] = "not_met"
+        if result.get("outcome") == "candidate" and field_progress.get("status") != "met":
+            policy_flags.append("Candidate outcome did not identify a satisfied configured field-progress gate.")
+            outcome = "progress"
         gate = contribution_gate.assess(result) if result.get("outcome") == "candidate" else {
             "schema_version": 1, "passed": False, "status": "not_requested", "reasons": [],
         }
@@ -478,6 +528,24 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "approach": "Headless research pass",
             "summary": f"The pass did not produce a valid research result: {type(exc).__name__}: {exc}",
             "rationale": "Infrastructure or output-contract failure is not mathematical progress.",
+            "search_efficiency": {
+                "naive_space": "not reached", "reductions_considered": ["not reached"],
+                "chosen_mechanism": "not reached", "estimated_or_measured_savings": "not reached",
+                "soundness_guard": "no mathematical claim accepted",
+            },
+            "tactical_learning": {
+                "prediction": "produce a valid bounded epoch", "observation": "output contract or infrastructure failure",
+                "surprise": "the epoch failed before evaluation", "failure_signature": f"{type(exc).__name__}: invalid epoch output",
+                "bottleneck_update": "repair the epoch failure before further research",
+                "reusable_assets": [], "constraints_learned": [], "route_decision": "hold",
+                "next_discriminator": "rerun the smallest valid output-contract control",
+            },
+            "field_progress_assessment": {
+                "status": "not_met", "gate_id": "none", "contribution_class": "infrastructure failure",
+                "closest_prior_result": "previous valid epoch", "measurable_improvement": "none",
+                "independent_validation": "not applicable", "external_audience": "none",
+                "remains_unproved": "the full research target", "route_recommendation": "hold and repair the epoch failure",
+            },
             "claims": [], "evidence": [], "next_steps": ["Repair the failed pass and rerun."],
             "citations": [problem["source_url"]], "techniques": [],
             "tool_disclosure": f"Codex {model} principal with {TERRA_MODEL} delegates; run failed before a valid disclosure was returned.",
@@ -530,6 +598,24 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "chosen_mechanism": str(result["search_efficiency"].get("chosen_mechanism") or "")[:2000],
             "estimated_or_measured_savings": str(result["search_efficiency"].get("estimated_or_measured_savings") or "")[:2000],
             "soundness_guard": str(result["search_efficiency"].get("soundness_guard") or "")[:2000],
+        },
+        "tactical_learning": {
+            "prediction": str(result["tactical_learning"].get("prediction") or "")[:2000],
+            "observation": str(result["tactical_learning"].get("observation") or "")[:2000],
+            "surprise": str(result["tactical_learning"].get("surprise") or "")[:2000],
+            "failure_signature": str(result["tactical_learning"].get("failure_signature") or "")[:2000],
+            "bottleneck_update": str(result["tactical_learning"].get("bottleneck_update") or "")[:2000],
+            "reusable_assets": [row for row in result["tactical_learning"].get("reusable_assets", []) if isinstance(row, dict)][:20],
+            "constraints_learned": [row for row in result["tactical_learning"].get("constraints_learned", []) if isinstance(row, dict)][:20],
+            "route_decision": str(result["tactical_learning"].get("route_decision") or "")[:40],
+            "next_discriminator": str(result["tactical_learning"].get("next_discriminator") or "")[:2000],
+        },
+        "field_progress_assessment": {
+            key: str(result["field_progress_assessment"].get(key) or "")[:4000]
+            for key in (
+                "status", "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
+                "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
+            )
         },
         "strategy_status": str(result.get("strategy_status") or "active")[:100],
         "summary": result["summary"].strip()[:8000],

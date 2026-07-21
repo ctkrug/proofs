@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, usage
+from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, tactics, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -42,7 +42,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
-{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"tactical_learning":{"prediction":"lemma holds","observation":"lemma holds","surprise":"none","failure_signature":"none","bottleneck_update":"next lemma","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"test next lemma"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"internal lemma","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"proof check","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         result = agent.extract_result(text)
         self.assertEqual(result["outcome"], "progress")
@@ -52,6 +52,13 @@ class ProofFactoryTests(unittest.TestCase):
 {"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         with self.assertRaisesRegex(ValueError, "search_efficiency"):
+            agent.extract_result(text)
+
+    def test_structured_result_requires_tactical_learning(self) -> None:
+        text = '''```proof_result
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only","reductions_considered":["symbolic"],"chosen_mechanism":"direct","estimated_or_measured_savings":"n/a","soundness_guard":"proof check"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+```'''
+        with self.assertRaisesRegex(ValueError, "tactical_learning"):
             agent.extract_result(text)
 
     def test_rejects_self_declared_solved_outcome(self) -> None:
@@ -143,6 +150,8 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("submit_lab.py", prompt)
         self.assertIn("SEARCH-EFFICIENCY PASS", prompt)
         self.assertIn("search_efficiency", prompt)
+        self.assertIn("DETERMINISTIC TACTICAL BRIEF", prompt)
+        self.assertIn("tactical_learning", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
         self.assertIn("cheapest decisive experiment", delegate)
@@ -159,7 +168,7 @@ class ProofFactoryTests(unittest.TestCase):
             "rationale": "Compact certificate", "verifiability": "Exact checker", "techniques": [],
         }
         principal = '''```proof_result
-{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"tactical_learning":{"prediction":"find signal","observation":"bounded result","surprise":"none","failure_signature":"none","bottleneck_update":"larger exact test","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"larger pilot"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"verified internal experiment","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"scalar replay","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         calls = []
 
@@ -196,6 +205,13 @@ class ProofFactoryTests(unittest.TestCase):
                 "ruled_out": [{"claim_or_route": "linear family", "scope": "degree one", "reason": "coefficient contradiction", "reopen_condition": "allow degree two"}],
                 "open_leads": [{"description": "try mod 12", "next_experiment": "enumerate exact residues", "status": "open"}],
                 "continuation": {"objective": "cover the remainder", "first_action": "run residues.py", "stop_condition": "all classes covered or witness fails"},
+                "tactical_learning": {
+                    "prediction": "new residue classes", "observation": "same obstruction", "surprise": "no new classes",
+                    "failure_signature": "residue partition stalls on class 5", "bottleneck_update": "class 5",
+                    "reusable_assets": [{"name": "residue checker", "use": "exact replay", "evidence": "checker.py"}],
+                    "constraints_learned": [{"constraint": "class 5 remains", "scope": "mod 6", "evidence": "checker.py"}],
+                    "route_decision": "redirect", "next_discriminator": "test mod 12",
+                },
             }
             with patch.multiple(store, ROOT=root, DATA=data):
                 first = research_state.update_from_attempt(problem, attempt)
@@ -205,9 +221,25 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(len(second["strategies"]), 1)
                 self.assertEqual(second["strategies"][0]["attempts"], 2)
                 self.assertEqual(second["next_session"]["first_action"], "run residues.py")
+                self.assertEqual(second["tactical_memory"]["failure_signatures"][0]["count"], 2)
+                self.assertEqual(second["tactical_memory"]["reusable_assets"][0]["name"], "residue checker")
                 prompt_state = research_state.compact_for_prompt(problem)
                 self.assertIn("allow degree two", prompt_state)
                 self.assertEqual(first["problem_id"], "p")
+
+    def test_tactical_brief_blocks_closed_routes_and_prefers_challenger(self) -> None:
+        problem = {"id": "p", "statement": "Find x.", "verifiability": "Exact witness"}
+        state = research_state._initial(problem)
+        state["baseline_review"]["status"] = "complete"
+        state["strategies"] = [
+            {"id": "dead", "fingerprint": "dead", "family": "circulant", "mechanism": "same sweep", "status": "exhausted", "attempts": 8, "reopen_condition": "new theorem"},
+            {"id": "live", "fingerprint": "live", "family": "SAT decomposition", "mechanism": "canonical cubes", "status": "proposed", "attempts": 0, "hypothesis": "cubes shrink", "discriminating_test": "pilot 100 cubes"},
+        ]
+        with patch.object(research_state, "load", return_value=state):
+            brief = tactics.build(problem)
+        self.assertEqual(brief["incumbent"]["strategy_id"], "live")
+        self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "dead")["eligible"])
+        self.assertEqual(brief["closed_routes"][0]["reopen_condition"], "new theorem")
 
     def test_baseline_review_is_required_then_completed(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

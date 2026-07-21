@@ -45,6 +45,7 @@ python3 -m proof_factory scout
 python3 -m proof_factory strategy-lab
 python3 -m proof_factory backfill-state
 python3 -m proof_factory brain-build
+python3 -m proof_factory tactics-show --problem ramsey-r55
 python3 -m proof_factory repo-init --all
 python3 -m proof_factory repo-backfill
 python3 -m proof_factory repo-status

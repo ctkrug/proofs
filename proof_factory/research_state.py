@@ -9,7 +9,7 @@ from typing import Any
 from . import store
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 STRATEGY_STATUSES = {
     "proposed", "active", "promising", "blocked", "ruled_out", "exhausted", "superseded",
 }
@@ -56,6 +56,13 @@ def _initial(problem: dict[str, Any]) -> dict[str, Any]:
         "unresolved_questions": [],
         "next_session": {},
         "recent_attempt_ids": [],
+        "tactical_memory": {
+            "current_bottleneck": "",
+            "failure_signatures": [],
+            "reusable_assets": [],
+            "constraints_learned": [],
+            "decision_history": [],
+        },
     }
 
 
@@ -70,6 +77,15 @@ def load(problem: dict[str, Any]) -> dict[str, Any]:
             seeded[key] = []
     if not isinstance(seeded.get("baseline_review"), dict):
         seeded["baseline_review"] = _initial(problem)["baseline_review"]
+    if not isinstance(seeded.get("tactical_memory"), dict):
+        seeded["tactical_memory"] = _initial(problem)["tactical_memory"]
+    else:
+        memory = _initial(problem)["tactical_memory"]
+        memory.update(seeded["tactical_memory"])
+        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history"):
+            if not isinstance(memory.get(key), list):
+                memory[key] = []
+        seeded["tactical_memory"] = memory
     return seeded
 
 
@@ -203,6 +219,42 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         row.setdefault("status", "open")
     state["open_leads"] = _dedupe(state["open_leads"] + leads, ("description",), 60)
 
+    learning = attempt.get("tactical_learning") if isinstance(attempt.get("tactical_learning"), dict) else {}
+    memory = state.get("tactical_memory", _initial(problem)["tactical_memory"])
+    bottleneck = _text(learning.get("bottleneck_update"), 2000)
+    if bottleneck:
+        memory["current_bottleneck"] = bottleneck
+    signature = _text(learning.get("failure_signature"), 1000)
+    if signature and signature.lower() not in {"none", "not applicable", "n/a"}:
+        signature_id = hashlib.sha256(signature.lower().encode()).hexdigest()[:12]
+        existing_signature = next((row for row in memory["failure_signatures"] if row.get("id") == signature_id), None)
+        signature_row = {
+            "id": signature_id, "signature": signature,
+            "count": int(existing_signature.get("count") or 0) + 1 if existing_signature else 1,
+            "last_strategy_id": strategy_row["id"], "last_attempt_id": attempt["id"], "updated_at": now,
+        }
+        memory["failure_signatures"] = [row for row in memory["failure_signatures"] if row.get("id") != signature_id]
+        memory["failure_signatures"].append(signature_row)
+        memory["failure_signatures"] = memory["failure_signatures"][-40:]
+    assets = _object_rows(learning.get("reusable_assets"), ("name", "use", "evidence"), 20)
+    for row in assets:
+        row.update({"source_attempt_id": attempt["id"], "updated_at": now})
+    memory["reusable_assets"] = _dedupe(memory["reusable_assets"] + assets, ("name",), 60)
+    constraints = _object_rows(learning.get("constraints_learned"), ("constraint", "scope", "evidence"), 20)
+    for row in constraints:
+        row.update({"source_attempt_id": attempt["id"], "updated_at": now})
+    memory["constraints_learned"] = _dedupe(memory["constraints_learned"] + constraints, ("constraint", "scope"), 80)
+    decision = _text(learning.get("route_decision"), 40)
+    if decision:
+        memory["decision_history"] = (memory["decision_history"] + [{
+            "attempt_id": attempt["id"], "strategy_id": strategy_row["id"], "decision": decision,
+            "prediction": _text(learning.get("prediction"), 1000),
+            "observation": _text(learning.get("observation"), 1000),
+            "surprise": _text(learning.get("surprise"), 1000),
+            "next_discriminator": _text(learning.get("next_discriminator"), 1000), "updated_at": now,
+        }])[-40:]
+    state["tactical_memory"] = memory
+
     continuation = attempt.get("continuation") if isinstance(attempt.get("continuation"), dict) else {}
     if not continuation and attempt.get("next_steps"):
         continuation = {"objective": attempt["next_steps"][0], "first_action": attempt["next_steps"][0]}
@@ -241,6 +293,7 @@ def compact_for_prompt(problem: dict[str, Any]) -> str:
         "strategy_registry": state.get("strategies", [])[-30:],
         "open_leads": state.get("open_leads", [])[-20:],
         "ruled_out": state.get("ruled_out", [])[-20:],
+        "tactical_memory": state.get("tactical_memory", {}),
         "next_session": state.get("next_session", {}),
     }
     return json.dumps(payload, indent=2, ensure_ascii=False)

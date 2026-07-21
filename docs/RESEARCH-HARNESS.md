@@ -88,6 +88,23 @@ facts and artifacts, scope negative results, identify open leads and tools, esti
 compute cost, and name a legitimate external acceptance path. The resulting facts, exclusions, leads,
 and first discriminator become durable state and feed the cross-problem research brain.
 
+Every later epoch begins from a deterministic tactical brief projected from that durable state. The
+brief ranks the route portfolio with visible score components, makes blocked/ruled-out/exhausted routes
+ineligible unless their recorded reopen evidence is present, compares an incumbent with a different-family
+challenger, inventories scoped exclusions and reusable assets, and prescribes one cheapest discriminator.
+The score is a scheduling heuristic, never mathematical evidence or a confidence estimate. Each result must
+then report its predeclared prediction, observation, surprise, reusable failure signature, bottleneck update,
+exact constraints learned, assets created, route decision, and next discriminator. Those fields are folded
+back into bounded tactical memory, so repeated failures become progressively more expensive while checkers,
+datasets, certificates, and useful negative results compound across runs.
+For targets with configured field-progress gates, every epoch also records whether one exact gate was
+met, the contribution class, closest prior baseline, measurable delta, independent validation,
+external audience, remaining gap, and whether to close, broaden, redirect, or continue the route.
+Candidate promotion is downgraded when no configured gate is identified; completed sweeps and larger
+unrequested cutoffs remain honest negative experiments or infrastructure results.
+Operators can inspect the exact next-epoch decision at any time with
+`python3 -m proof_factory tactics-show --problem PROBLEM_ID`.
+
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
   checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
   witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,
