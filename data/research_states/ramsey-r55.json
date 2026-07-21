@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 11,
-  "last_updated": "2026-07-21T08:29:00.713798+00:00",
+  "epoch_count": 12,
+  "last_updated": "2026-07-21T10:37:33.656863+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "All normalization, mapping, degree-counter, Ramsey-ledger, mutation, and small-instance controls passed. The production CNF had 71,421 variables and 1,844,093 clauses. CaDiCaL returned UNKNOWN after 300.226 seconds; peak child RSS was 524,756 KiB. No witness or exclusion was obtained, so 43 <= R(5,5) <= 46 remains unchanged.",
+  "synthesis_summary": "The complete cover and independent reconstruction audit passed. All 16 toy leaves were proof-checked UNSAT. All 16 production leaves returned UNKNOWN after 322.789 aggregate solver-seconds; fresh drat-trim rejected every partial stream. No witness, exclusion, or Ramsey-bound change was obtained.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -304,6 +304,30 @@
       "status": "proved",
       "source_attempt_id": "ramsey-r55-20260721-082900-aea66d",
       "updated_at": "2026-07-21T08:29:00.713798+00:00"
+    },
+    {
+      "claim": "The four-variable manifest exactly covers all assignments and reconstructs 16 physical q=20 leaf CNFs at locked hashes.",
+      "evidence": "Production manifest and identical primary/cold audit hashes.",
+      "scope": "Frozen normalized q=20 parent only.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "claim": "All 16 normalized R(3,3,6) leaf proofs pass DRAT-to-LRAT conversion and LRAT checking.",
+      "evidence": "Primary and cold certificate replays.",
+      "scope": "Six-vertex control only.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "claim": "All 16 production leaves returned UNKNOWN and all partial proof streams fail fresh DRAT verification.",
+      "evidence": "Primary pilot and cold-audit reports.",
+      "scope": "Exact CaDiCaL 1.7.3, 20-second-per-leaf configuration only.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
     }
   ],
   "strategies": [
@@ -610,20 +634,24 @@
       "updated_at": "2026-07-21T08:29:00.713798+00:00"
     },
     {
-      "family": "certificate-carrying cube-and-conquer",
-      "mechanism": "Partition the audited normalized formula with a tiny explicit prefix tree and retain a checked cover plus per-leaf proof or model status.",
-      "hypothesis": "The normalized branch contains leaf-level cost heterogeneity that a monolithic CaDiCaL run obscures.",
-      "discriminating_test": "A 16-leaf short pilot must resolve at least one leaf or materially improve projected proof throughput while its cover passes independent checking.",
-      "rationale": "It changes the search architecture and creates resumable, independently scoped evidence without broadening the mathematical domain.",
       "id": "strategy-596a3981722b",
+      "family": "certificate-carrying cube-and-conquer",
       "fingerprint": "596a3981722b",
-      "status": "proposed",
-      "title": "Partition the audited normalized formula with a tiny explicit prefix tree and retain a checked cover plus per-leaf proof or model status.",
-      "attempts": 0,
+      "title": "Complete 16-leaf physical-CNF cube pilot on the normalized order-42 degree-{20,21} q=20 branch",
+      "mechanism": "Partition the frozen normalized formula on four declared cross-part primary variables, independently verify the cover and physical leaf reconstruction, and require a checked model or DRAT/LRAT certificate per resolved leaf.",
+      "status": "blocked",
+      "hypothesis": "At least one of the 16 normalized q=20 leaves is decidable by CaDiCaL 1.7.3 within 20 seconds and 1 GiB with a checkable SAT model or UNSAT proof.",
+      "discriminating_test": "First require all 16 normalized R(3,3,6) physical leaves to pass DRAT-to-LRAT conversion and LRAT checking; then execute all 16 q=20 leaves for 20 seconds each.",
+      "blocker": "No production cube resolved, and the data provide no principled scaling law for a larger arbitrary cutoff.",
+      "reopen_condition": "A materially different proof-logging solver or encoding, justified branching/budget evidence, or a demonstrated parent, cover, or checker defect.",
+      "reopen_evidence": "The prior checked-cover precondition was satisfied by the independently audited manifest, enabling this attempt.",
+      "last_attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "attempts": 1,
       "parent_ids": [
-        "strategy-e81525840a9b"
+        "strategy-e81525840a9b",
+        "strategy-r55-certified-pilot"
       ],
-      "updated_at": "2026-07-21T08:29:00.713798+00:00"
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
     }
   ],
   "open_leads": [
@@ -808,6 +836,26 @@
       "id": "lead-d193504618",
       "strategy_id": "strategy-e81525840a9b",
       "updated_at": "2026-07-21T08:29:00.713798+00:00"
+    },
+    {
+      "description": "Test the exact adjacency-row pair-distance relaxation before constructing a custom SDP.",
+      "rationale": "It is a materially different, cheap structural discriminator with authenticated positive controls.",
+      "next_experiment": "Extract exact row-weight, pair-intersection, and edge/nonedge distance distributions from all 656 controls and compare a rational pair-moment LP against published degree/subgraph restrictions for n=43–45.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-cbf8c0fd37",
+      "strategy_id": "strategy-596a3981722b",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "description": "Revisit q=20 only after a solver, encoding, or branching change has a measured reason to alter certificate throughput.",
+      "rationale": "The monolith and every short cube leaf are currently unresolved.",
+      "next_experiment": "Benchmark a materially different proof-logging configuration first on normalized R(3,3,6) and a declared bounded q=20 subset.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-b2dd264dcd",
+      "strategy_id": "strategy-596a3981722b",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
     }
   ],
   "ruled_out": [
@@ -1021,6 +1069,24 @@
       "reopen_condition": "Obtain a completed proof that passes independent DRAT and LRAT checking.",
       "attempt_id": "ramsey-r55-20260721-082900-aea66d",
       "updated_at": "2026-07-21T08:29:00.713798+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the same four-variable q=20 cube pilot with CaDiCaL 1.7.3 and 20 seconds per leaf.",
+      "scope": "All 16 physical leaf CNFs in the retained manifest.",
+      "reason": "Every leaf returned UNKNOWN; an identical replay has low information value.",
+      "evidence": "artifacts/q20_cube16_pilot_report.json",
+      "reopen_condition": "Use a materially different proof-logging solver or encoding, justified branching/budget evidence, or demonstrate an artifact defect.",
+      "attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "claim_or_route": "Treat any retained production timeout stream as an UNSAT certificate.",
+      "scope": "All 16 partial streams, totaling 128241561 uncompressed bytes.",
+      "reason": "Fresh drat-trim rejected every stream against its cold-reconstructed leaf CNF.",
+      "evidence": "artifacts/q20_cube16_pilot_cold_audit.json",
+      "reopen_condition": "Supply a completed proof bound to the exact leaf hash and passing DRAT-to-LRAT conversion and LRAT checking.",
+      "attempt_id": "ramsey-r55-20260721-103733-ba8afb",
+      "updated_at": "2026-07-21T10:37:33.656863+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1031,11 +1097,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-e81525840a9b",
-    "objective": "Determine whether a tiny complete cube cover exposes tractable or heterogeneous leaves in the normalized q=20 branch.",
-    "first_action": "Implement a deterministic 16-leaf cover on four declared cross-part edge variables and validate its coverage and certificate path on normalized R(3,3,6).",
-    "stop_condition": "Stop on any cover, mapping, or proof mismatch; otherwise stop if no production leaf resolves under the short pilot or projected certificate storage is not materially improved.",
-    "source_attempt_id": "ramsey-r55-20260721-082900-aea66d"
+    "recommended_strategy_id": "strategy-596a3981722b",
+    "objective": "Run the cheapest exact adjacency-row pair-distance LP discriminator before any custom SDP or q=20 retry.",
+    "first_action": "Extract exact row-weight, pair-intersection, and edge/nonedge distance distributions from all 656 authenticated controls, then encode the rational pair-moment relaxation for admissible n=43–45 profiles.",
+    "stop_condition": "Park the route if it cuts no profile beyond published constraints, cuts a known control, or yields only a numerical dual that cannot be rationalized and checked exactly.",
+    "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1048,6 +1114,7 @@
     "ramsey-r55-20260721-023427-94891a",
     "ramsey-r55-20260721-043422-7a2274",
     "ramsey-r55-20260721-063540-e1ccef",
-    "ramsey-r55-20260721-082900-aea66d"
+    "ramsey-r55-20260721-082900-aea66d",
+    "ramsey-r55-20260721-103733-ba8afb"
   ]
 }

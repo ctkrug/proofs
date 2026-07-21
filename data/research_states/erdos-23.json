@@ -10,14 +10,116 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T10:44:01.143813+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T10:44:01.143813+00:00",
+    "source_attempt_id": "erdos-23-20260721-104401-8f0f00",
+    "source_status": "falsifiable",
+    "facts_recorded": 2,
+    "exclusions_recorded": 1,
+    "leads_recorded": 2,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The baseline review was completed. The global problem remains open/falsifiable and BCL's N^2/23.5 bound remains the best incorporated universal result. The June 2026 preprint claims a finite N<=200 theorem, but its v1 bundle is only a smoke test: five full-verifier inputs, two local modules, other moment inputs, and geng are absent; the gate includes cached valid in its final decision and does not recompute 12,172 residuals. This does not refute the theorem.",
+  "established_facts": [
+    {
+      "claim": "beta(G[t])=t^2 beta(G), and beta(C5[n])=n^2.",
+      "evidence": "Multilinear twin-class Max-Cut argument and primary-source trail in the baseline note.",
+      "scope": "All finite simple graphs under uniform blow-up.",
+      "status": "proved",
+      "source_attempt_id": "erdos-23-20260721-104401-8f0f00",
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    },
+    {
+      "claim": "The v1 archive is hash-consistent but incomplete for its advertised verifier.",
+      "evidence": ".proof-experiments/20260721-103739-3f80aa/",
+      "scope": "arXiv:2606.28041v1 only.",
+      "status": "computed",
+      "source_attempt_id": "erdos-23-20260721-104401-8f0f00",
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit",
+      "family": "isolated adversarial reconstruction",
+      "fingerprint": "isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit",
+      "title": "Mandatory source/literature baseline plus fail-closed static audit of the arXiv:2606.28041v1 certificate bundle",
+      "mechanism": "Pin the external archive, verify its manifest and a mutation control, inventory verifier dependencies, and trace whether the claimed independent gate derives or trusts the decisive verdict.",
+      "status": "blocked",
+      "hypothesis": "The arXiv:2606.28041v1 ancillary bundle is integrity-consistent but insufficient for independent verification because its gate trusts a cached verdict and its full verifier dependencies are absent.",
+      "discriminating_test": "Require the pinned archive and all listed hashes to pass, a one-byte mutation to fail, every full-verifier input to be present, and the independent gate to recompute rather than deserialize the per-state verdict.",
+      "blocker": "The advertised order-10 raw state tables, local modules, and complete regeneration path are absent from arXiv v1.",
+      "reopen_condition": "A pinned full bundle that recomputes all 12,172 residual inequalities from raw certificate data without reading a cached verdict.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-23-20260721-104401-8f0f00",
+      "attempts": 1,
+      "parent_ids": [
+        "isolated-adversarial-reconstruction"
+      ],
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    },
+    {
+      "family": "counterexample and witness search",
+      "mechanism": "Use nauty isomorph-free generation and two exact Max-Cut implementations only as a bounded ground-truth control, preserving extremal graph6 witnesses.",
+      "hypothesis": "The independently computed a(N) values through N=10 match McKay/OEIS and the claimed brute checker normalization.",
+      "discriminating_test": "All unlabeled triangle-free graphs through order 10 are covered; both Max-Cut implementations agree; McKay extremals attain and no graph exceeds each catalogued a(N).",
+      "rationale": "This is the cheapest independent check of the computational substrate before any larger certificate audit.",
+      "id": "strategy-052a4b323d2a",
+      "fingerprint": "052a4b323d2a",
+      "status": "proposed",
+      "title": "Use nauty isomorph-free generation and two exact Max-Cut implementations only as a bounded ground-truth control, preserving extremal graph6 witnesses.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit"
+      ],
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Full finite-range certificate audit",
+      "rationale": "Potentially validates meaningful new partial progress through N=200.",
+      "next_experiment": "Compare the current arXiv e-print hash/version; proceed only if all missing modules, caches, and raw inputs are supplied.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-6d32d048b4",
+      "strategy_id": "strategy-isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit",
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    },
+    {
+      "description": "Independent small-order exact control harness",
+      "rationale": "Tests generation, graph6 decoding, Max-Cut, and published small values without relying on the preprint implementation.",
+      "next_experiment": "Enumerate triangle-free graphs through order 10 with /usr/bin/nauty-geng and compare two exact Max-Cut implementations against McKay's pinned archive.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-e246218a4d",
+      "strategy_id": "strategy-isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit",
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use step1_v2_independent_gate.py as independent validation of a(5n)=n^2 for n<=40.",
+      "scope": "The pinned arXiv v1 archive only.",
+      "reason": "It trusts the cached valid field and omits the residual recomputation; the complete verifier cannot be reconstructed from supplied inputs.",
+      "evidence": ".proof-experiments/20260721-103739-3f80aa/stdout.txt",
+      "reopen_condition": "A complete content-addressed bundle plus two agreeing exact residual verifiers.",
+      "attempt_id": "erdos-23-20260721-104401-8f0f00",
+      "updated_at": "2026-07-21T10:44:01.143813+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-isolated-adversarial-reconstruction/ferudun-v1-static-bundle-audit",
+    "objective": "Determine whether a complete certificate has appeared; otherwise establish only the bounded exact control harness.",
+    "first_action": "Open https://arxiv.org/abs/2606.28041 and compare the current e-print hash with v1 SHA-256 15e49186a7bf2496abfc9617817269db6adf28d48c25850f54982096a8d474cf.",
+    "stop_condition": "Stop the certificate route if unchanged/incomplete; if complete, stop on two exact-verifier agreement or the first irreducible discrepancy. Stop the control harness at order 10 unless a discrepancy appears.",
+    "source_attempt_id": "erdos-23-20260721-104401-8f0f00"
+  },
+  "recent_attempt_ids": [
+    "erdos-23-20260721-104401-8f0f00"
+  ]
 }
