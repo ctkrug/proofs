@@ -15,8 +15,8 @@
     "Completing a structured-family sweep, accumulating UNSAT responses, or finding symmetry copies is not field progress without one of the five explicit contribution gates.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 18,
-  "last_updated": "2026-07-21T19:53:09.309391+00:00",
+  "epoch_count": 19,
+  "last_updated": "2026-07-21T20:46:44.043303+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -27,7 +27,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The mandatory segment-33 review passed. All 33 artifacts reconcile; six positive hosts contain twelve exact embeddings and eight distinct boundary vectors; fresh VF2 regenerated every positive mapping stream; both exact graph checkers accepted all eight graphs; and four mutations failed. The remaining 623 hosts are untouched, no block was emitted, and 43 <= R(5,5) <= 46 is unchanged.",
+  "synthesis_summary": "Canonical hosts 0..48 passed a strengthened cold audit: six positive hosts contain twelve exact embeddings and eight distinct vectors; fresh VF2 reproduced every positive mapping stream; two exact graph checkers accepted all eight pullbacks; and four mutations failed. All recorded Git revisions contain identical producer bytes and exact observed resource gates pass. The active job is nevertheless redirected because runtime imported-module provenance and aggregate gate enforcement are incomplete. No Ramsey bound or supplied-class exclusion changed.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -433,6 +433,30 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
       "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "claim": "The segment-49 prefix covers canonical supplied hosts 0..48 exactly once and all saved artifact hashes and byte counts reconcile.",
+      "evidence": "Independent cold audit report e8c434e5c23cf90f3529ccbd961f561e6315d7240fbc761e767c75df7511e5f5.",
+      "scope": "Exactly the first 49 supplied source hosts.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "claim": "The twelve positive embeddings yield eight distinct valid Ramsey(5,5,42) labelled graphs.",
+      "evidence": "Exact pullback reconstruction plus independent Python and C K5 checkers.",
+      "scope": "The eight vectors found among canonical hosts 0..48.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "claim": "All 49 recorded Git revisions contain identical committed producer bytes, and all exact prefix resource measurements pass their stated thresholds.",
+      "evidence": "Recorded-revision/resource gate v2.",
+      "scope": "Recorded commits and immutable prefix timing records only; not historical dirty worktrees.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
     }
   ],
   "strategies": [
@@ -837,26 +861,25 @@
       "id": "strategy-r55knownclassembeddingblock2026",
       "family": "complete known-class boundary blocking",
       "fingerprint": "r55knownclassembeddingblock2026",
-      "title": "Cold-review the mandatory segment-33 boundary of the checkpointed 656-host supplied-class embedding census before authorizing further computation.",
-      "mechanism": "Enumerate every induced embedding of the fixed source-record-21 order-30 core into each supplied order-42 graph and complement, expand every row-lex-compatible residual order, and retain exact 426-bit boundary pullbacks for a future complete supplied-class block.",
+      "title": "Cold-review the 49-host supplied-class embedding prefix, audit recorded producer revisions and operational thresholds, and decide whether the checkpointed job is safe to continue.",
+      "mechanism": "Enumerate induced embeddings of a frozen order-30 core into supplied order-42 controls using custom bitset DFS and NetworkX VF2, expand tied residual orders, and retain exact 426-bit pullbacks.",
       "status": "promising",
-      "hypothesis": "The canonical 33-host census prefix is hash-consistent; fresh VF2 exactly regenerates every positive mapping stream and an empty control; every saved pullback reconstructs; all distinct vectors pass two exact five-set checkers; and four corruptions are rejected.",
-      "discriminating_test": "Independently parse the corpus, verify the segment receipt and every saved object, cold-regenerate the six positive VF2 mapping streams, cold-enumerate host 0, replay all saved pullbacks, run two exact K5 checkers, and inject four mutations.",
-      "blocker": "The remaining 623 supplied host representations and final cold coverage audit are incomplete; therefore no known-class block exists.",
-      "reopen_condition": "",
+      "hypothesis": "Canonical supplied hosts 0 through 48 reconcile exactly and their recorded lab provenance is sufficient to authorize continuation under the declared resource gates.",
+      "discriminating_test": "Cold-replay the complete prefix, regenerate every positive VF2 stream, dual-check every retained graph, inject four mutations, inspect every recorded producer revision, and compare exact host timings with the predeclared gates.",
+      "blocker": "The current job cannot establish the exact historical imported-module bytes and does not enforce the declared aggregate per-host time gate.",
+      "reopen_condition": "A fresh job must explicitly hash all executable producer modules, refuse dirty producer inputs, and enforce every host-level gate before writing a checkpoint.",
       "reopen_evidence": "",
-      "last_attempt_id": "ramsey-r55-20260721-195309-1f8700",
-      "attempts": 1,
+      "last_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "attempts": 2,
       "parent_ids": [
-        "strategy-a230b66ef386",
-        "strategy-r55novel42basin2026"
+        "strategy-r55knownclassembeddingblock2026"
       ],
-      "updated_at": "2026-07-21T19:53:09.309391+00:00",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00",
       "route_evaluation": {
         "gate_proximity": 0.55,
         "contribution_value": 0.4,
         "decisiveness": 0.95,
-        "novelty_confidence": 0.45,
+        "novelty_confidence": 0.4,
         "novelty_risk": 0.35,
         "scope": 0.25,
         "reuse_value": 0.9,
@@ -1190,6 +1213,26 @@
       "id": "lead-dcce5a03b4",
       "strategy_id": "strategy-r55knownclassembeddingblock2026",
       "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "description": "Restart the complete supplied-class embedding census under a hash-locked wrapper.",
+      "rationale": "It preserves the strongest live mechanism while repairing the exact verification-contract failure before substantial additional compute.",
+      "next_experiment": "Run a one-host lifecycle canary from host 0 with explicit hashes for the driver and both imported enumerators and fail-closed aggregate resource checks.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-8dbc5f045e",
+      "strategy_id": "strategy-r55knownclassembeddingblock2026",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "description": "Deletion-minimize one certified distance-3 two-orbit raw K5-origin core.",
+      "rationale": "This remains the predeclared structural fallback if the locked census cannot pass its canary.",
+      "next_experiment": "Run duplicate-preserving deletion minimization and stop unless the exact core contains at most 20 origins.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-065ecc1f0b",
+      "strategy_id": "strategy-r55knownclassembeddingblock2026",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
     }
   ],
   "ruled_out": [
@@ -1484,6 +1527,42 @@
       "reopen_condition": "Retain complete second-path sidecars or cold-regenerate every positive stream.",
       "attempt_id": "ramsey-r55-20260721-195309-1f8700",
       "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "claim_or_route": "Continue lab-ramsey-r55-872a7c3ee855 as proof-carrying production.",
+      "scope": "The existing job specification and future segments.",
+      "reason": "Imported modules are not explicit hashed inputs, historical dirty state is unavailable, and the aggregate 30-second gate is not enforced.",
+      "evidence": "Job-state and driver inspection plus recorded-revision gate v2.",
+      "reopen_condition": "Do not reopen this job; replace it with a hash-locked fail-closed job.",
+      "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "claim_or_route": "Treat the 49-host prefix as a supplied-class block or exhaustive classification.",
+      "scope": "The fixed-core boundary and global order-42 Ramsey graph space.",
+      "reason": "Only 49 of 656 supplied profiles were processed, and the supplied 656 are historically non-exhaustive.",
+      "evidence": "Checkpoint scope and McKay-Radziszowski primary paper.",
+      "reopen_condition": "Complete a locked 656-host census and separately justify any claimed corpus completeness.",
+      "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "claim_or_route": "Accept stored NetworkX summaries alone as offline proof of complete mapping streams.",
+      "scope": "The current archive format.",
+      "reason": "Full VF2 mapping streams are not retained.",
+      "evidence": "Production artifact inspection; cold regeneration was required for every positive host.",
+      "reopen_condition": "Retain complete VF2 sidecars or cold-regenerate every required stream.",
+      "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
+    },
+    {
+      "claim_or_route": "Use artifacts/known-class-embedding-prefix49-audit/provenance.json as proof that historical runtime imports were frozen.",
+      "scope": "The superseded first provenance interpretation.",
+      "reason": "Recorded Git commits do not reveal temporary uncommitted worktree changes.",
+      "evidence": "Corrected recorded-revision-gate-v2 qualification.",
+      "reopen_condition": "none; use the corrected v2 report.",
+      "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+      "updated_at": "2026-07-21T20:46:44.043303+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1495,10 +1574,10 @@
   ],
   "next_session": {
     "recommended_strategy_id": "strategy-r55knownclassembeddingblock2026",
-    "objective": "Complete and independently validate all 656 supplied host profiles before emitting any block.",
-    "first_action": "After the continue review is applied, inspect /root/proof-factory/state/labs/jobs/lab-ramsey-r55-872a7c3ee855.json and confirm resumption from next_host 33 with unchanged input hashes.",
-    "stop_condition": "Redirect on any implementation or cold-replay mismatch, host timeout, throughput below 0.001 host/s, segment artifact growth above 200 MB, or loss of decision value.",
-    "source_attempt_id": "ramsey-r55-20260721-195309-1f8700"
+    "objective": "Create and canary a hash-locked replacement for the 656-host supplied-class embedding census.",
+    "first_action": "Implement scripts/run_known_class_embedding_census_locked.py so the lab command explicitly names the base driver, bitset module, and NetworkX module as hashed inputs; use a fresh checkpoint/output directory and run exactly host 0.",
+    "stop_condition": "Stop on any input-hash, dirty-worktree, stream, pullback, aggregate-time, memory, tied-vector, throughput, growth, or cold-replay failure; otherwise submit the locked continuation.",
+    "source_attempt_id": "ramsey-r55-20260721-204644-7cb261"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1518,10 +1597,11 @@
     "ramsey-r55-20260721-164650-ef8c5a",
     "ramsey-r55-20260721-173738-495bea",
     "ramsey-r55-20260721-184001-fccb60",
-    "ramsey-r55-20260721-195309-1f8700"
+    "ramsey-r55-20260721-195309-1f8700",
+    "ramsey-r55-20260721-204644-7cb261"
   ],
   "tactical_memory": {
-    "current_bottleneck": "The current bottleneck is completing and reviewing the remaining 623 supplied host profiles, followed by a final 32-empty-host stratified cold sample.",
+    "current_bottleneck": "The immediate bottleneck is a hash-locked replacement driver and lifecycle canary, not additional hosts from the under-recorded job.",
     "failure_signatures": [
       {
         "id": "8e93ec5473f4",
@@ -1538,6 +1618,14 @@
         "last_strategy_id": "strategy-r55knownclassembeddingblock2026",
         "last_attempt_id": "ramsey-r55-20260721-195309-1f8700",
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "id": "c3d07c55e802",
+        "signature": "A lab spec hashes only its top-level driver while executable behavior depends on unhashed imported modules, and a research threshold is stated but represented only by a much looser component timeout.",
+        "count": 1,
+        "last_strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "last_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ],
     "reusable_assets": [
@@ -1575,6 +1663,20 @@
         "evidence": "artifacts/known_class_embedding_tranche33_graphs.g6; SHA-256 4e99010340746b1c2ffdd81fec3da6b51342891d8cd906d8669fe1ac27053bcf",
         "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "name": "49-host cold-audit packet",
+        "use": "Calibration and regression control for a replacement census.",
+        "evidence": "artifacts/known-class-embedding-prefix49-audit/audit.json, SHA-256 e8c434e5c23cf90f3529ccbd961f561e6315d7240fbc761e767c75df7511e5f5",
+        "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
+      },
+      {
+        "name": "Recorded-revision/resource gate",
+        "use": "Checks canonical prefix coverage, all recorded Git producer revisions, current tracked cleanliness, and exact resource thresholds.",
+        "evidence": "checkers/known_class_embedding_provenance_gate.py and recorded-revision-gate-v2.json",
+        "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ],
     "constraints_learned": [
@@ -1598,6 +1700,20 @@
         "evidence": ".proof-experiments/20260721-194527-481cfe recorded 139.167 seconds.",
         "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "constraint": "Every executable imported module must be an explicit hashed lab input or verified by a hash-locked wrapper before import.",
+        "scope": "Checkpointed census production and future proof-carrying experiments.",
+        "evidence": "The old lab input_sha256 contains only the driver and corpus.",
+        "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
+      },
+      {
+        "constraint": "The aggregate bitset+VF2 time must be checked after every host; --case-seconds 900 does not implement the declared less-than-30-second aggregate gate.",
+        "scope": "Known-class census continuation.",
+        "evidence": "Production driver inspection and exact 49-row timing audit.",
+        "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ],
     "decision_history": [
@@ -1632,6 +1748,16 @@
         ],
         "reason": "The frozen 328-record McKay corpus and all 328 complements have passed the declared control checks; repeated authentication leads are resolved.",
         "evidence": "R55 DOSSIER section 13; full-census immutable corpus hash 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb; monitored pilot and checkpointed census receipts."
+      },
+      {
+        "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "decision": "redirect",
+        "prediction": "The 49-host prefix would pass cold mathematical checks and its provenance would justify continuation.",
+        "observation": "The mathematical prefix audit passed, all exact prefix resource measurements passed, and all recorded Git revisions contain identical producer bytes. However, the runner did not hash imported modules or record historical worktree dirtiness, and the driver did not enforce the intended aggregate 30-second gate.",
+        "surprise": "Recorded revision equality cannot exclude temporary uncommitted module edits during past segments; the first provenance interpretation was therefore corrected and superseded.",
+        "next_discriminator": "Run one host from a fresh artifact directory through a wrapper that explicitly hashes all three producer files, refuses dirty producer files, and enforces every per-host gate.",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ],
     "reduction_ledger": [
@@ -1666,6 +1792,22 @@
         "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
         "strategy_id": "strategy-r55knownclassembeddingblock2026",
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "ambient_space": "The 656 supplied labelled host profiles; this is not the global 2^861 labelled order-42 graph universe.",
+        "represented_space_before": "49 computed profiles, of which only hosts 0..32 had received the strengthened cold audit.",
+        "eliminated_or_quotiented": "No host profile or isomorphism class was eliminated. Independent audit coverage increased from 33 to 49 profiles.",
+        "represented_space_after": "49 cold-reviewed supplied profiles and 607 untouched supplied profiles.",
+        "reduction_factor": "none; certification coverage increased by 16 profiles",
+        "measurement_status": "exact",
+        "unit": "profiles",
+        "coverage_scope": "Exactly canonical supplied hosts 0..48 under the frozen source-record-21 order-30 core.",
+        "soundness_basis": "Hash-chain reconciliation, complete saved-positive replay, fresh VF2 streams, dual exact graph checks, and mutation rejection.",
+        "remaining_unknown": "Hosts 49..655, completeness of the supplied corpus, all unknown order-42 classes, and every order-43 graph.",
+        "next_bulk_elimination": "Run a fresh hash-locked 656-host census before emitting any supplied-class boundary block.",
+        "source_attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -1707,6 +1849,24 @@
           "https://arxiv.org/abs/2409.15709"
         ],
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "attempt_id": "ramsey-r55-20260721-204644-7cb261",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "nearest_method_ids": [
+          "mckay-delete-three-extend",
+          "exoo-incremental-simulated-annealing"
+        ],
+        "classification": "replication_control",
+        "exact_delta": "This route creates a replayable fixed-core embedding and pullback ledger for the supplied controls; it neither repeats the historical extension closure nor searches stochastically for new classes.",
+        "duplicate_risk": "The resulting graphs are expected supplied controls, and completing the ledger must not be presented as a classification of all order-42 Ramsey graphs.",
+        "comparison_test": "Compare exact corpus scope and output certificates with the historical 656-control construction; require a new class or a complete natural boundary certificate before claiming field progress.",
+        "decision": "control_only",
+        "source_urls": [
+          "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+          "https://www.cs.rit.edu/~spr/ElJC/sur.pdf"
+        ],
+        "updated_at": "2026-07-21T20:46:44.043303+00:00"
       }
     ]
   }

@@ -17,6 +17,13 @@
       "commit": "f0510569340787bb331db1f18c699c6e1c7498ed"
     },
     {
+      "problem_id": "ramsey-r55",
+      "repository": "ctkrug/proofs-ramsey-r55",
+      "url": "https://github.com/ctkrug/proofs-ramsey-r55",
+      "visibility": "PUBLIC",
+      "commit": "2b7c417e303f78189baaddee400a3f30110c1e8e"
+    },
+    {
       "problem_id": "erdos-647",
       "repository": "ctkrug/proofs-erdos-647",
       "url": "https://github.com/ctkrug/proofs-erdos-647",
@@ -122,10 +129,5 @@
       "commit": "c7c42f1ef0e6b9dafb22bccd64789ba28c53311e"
     }
   ],
-  "errors": [
-    {
-      "problem_id": "ramsey-r55",
-      "error": "RuntimeError: git push --set-upstream origin main failed in /root/proof-factory/research/ramsey-r55/workspace: To https://github.com/ctkrug/proofs-ramsey-r55\n ! [rejected]        main -> main (fetch first)\nerror: failed to push some refs to 'https://github.com/ctkrug/proofs-ramsey-r55'\nhint: Updates were rejected because the remote contains work that you do not\nhint: have locally. This is usually caused by another repository pushing to\nhint: the same ref. If you want to integrate the remote changes, use\nhint: 'git pull' before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details."
-    }
-  ]
+  "errors": []
 }
