@@ -107,7 +107,7 @@ RULES
   "rationale": "why this is unusually tractable and potentially new",
   "external_channel": "specific repository, maintainer, workshop, or journal",
   "external_url": "channel URL",
-  "upstream_work_check": {"active_prs":0,"checked_url":"direct issue/PR search URL","checked_at":"ISO date","evidence":"what linked/open PR search showed"},
+  "upstream_work_check": {{"active_prs":0,"checked_url":"direct issue/PR search URL","checked_at":"ISO date","evidence":"what linked/open PR search showed"}},
   "estimated_success_probability": 0.01,
   "difficulty": 1,
   "verification_score": 1,
