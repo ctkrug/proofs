@@ -10,14 +10,177 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T01:01:33.290042+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T01:01:33.290042+00:00",
+    "source_attempt_id": "erdos-307-20260721-010133-c85502",
+    "source_status": "verifiable",
+    "facts_recorded": 4,
+    "exclusions_recorded": 3,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The source audit confirms that Erdős Problem 307 remains open. Exact arithmetic independently reproduced the known 59-prime threshold and both encodings agreed on all 57002 assignments in the bounded control shell, with no solution there. A dependency-free exact certificate verifier rejected four adversarial controls. The finite numerical input behind the reported side-product barrier was checked exactly. The universal Lean barrier was not locally reproduced: the first build stopped at ENOSPC and the single post-repair retry stopped during mathlib cache retrieval with failed to create thread under a 4096 MB limit, before theorem compilation.",
+  "established_facts": [
+    {
+      "claim": "Every solution satisfies A(P)=M(Q), A(Q)=M(P), and P intersect Q is empty.",
+      "evidence": "Elementary reduced-fraction proof in notes/baseline-audit-2026-07-21.md, consistent with Bado 2026 and Bonfioli v1.0.0.",
+      "scope": "All finite sets of primes P,Q.",
+      "status": "proved",
+      "source_attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "claim": "Every solution has at least 59 primes in P union Q.",
+      "evidence": "AM-GM, distinct-prime reciprocal extremality, and two independent exact computations of the 58/59 boundary.",
+      "scope": "All finite prime-set solutions; this is an established correction already public in 2019, not a new result.",
+      "status": "proved",
+      "source_attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "claim": "No solution exists in the first-ten-prime assignment shell.",
+      "evidence": "Exhaustive enumeration and independent payload checker in experiments 20260721-004424-f76e4e and 20260721-004437-ff8f64.",
+      "scope": "Exactly all 57002 assignments of the first ten primes to neither/P/Q with P,Q nonempty.",
+      "status": "computed",
+      "source_attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "claim": "The ceiling of the exact finite barrier ratio's square root is 209298852061282362260655116218815858656815144494074532631.",
+      "evidence": ".proof-experiments/20260721-005307-efbf19 checks this integer and its predecessor by exact arithmetic.",
+      "scope": "Finite numerical input only; it does not independently establish the universal barrier.",
+      "status": "computed",
+      "source_attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-exact-pq-forcing-fraction-trial-division-v1",
+      "family": "counterexample and witness search with formal barrier audit",
+      "fingerprint": "exact-pq-forcing-fraction-trial-division-v1",
+      "title": "Mandatory source-and-method baseline, exact structural reduction, bounded formulation calibration, fail-closed certificate verification, and attempted reproduction of the strongest reported Lean barrier",
+      "mechanism": "Reduce every candidate to exact integer forcing equations, validate a fixed finite shell under independent encodings, provide a fail-closed verifier, and audit the pinned formal lower-bound source before permitting search",
+      "status": "active",
+      "hypothesis": "The exact smallest-prime reciprocal threshold is 59, the rational identity agrees with the forced integer equations throughout the first-ten-prime shell, and the tagged Bonfioli barrier can be independently rebuilt with its claimed axiom footprint.",
+      "discriminating_test": "Compute the 58/59 threshold with exact fractions, exhaust all 57002 nonempty disjoint assignments of the first ten primes under two encodings, and run the clean tagged Lean source through lake build and Check.lean.",
+      "blocker": "No construction family is known that generates barrier-scale squarefree arithmetic-derivative two-cycles. Independently reproducing the strongest reported Lean barrier is additionally blocked by mathlib cache retrieval failing to create a thread under the prior 4096 MB experiment limit.",
+      "reopen_condition": "For the formal audit, provide memory above 4096 MB or a documented supported serialization setting. For frontier search, provide a barrier-scale exact construction family with measurable squarefree forced-partner output.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-307-20260721-010133-c85502",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search",
+        "formal-premise-retrieval"
+      ],
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "family": "formal proof with premise retrieval",
+      "mechanism": "Finish the pinned kernel build and inspect the exact axiom footprints of card_ge_59 and erdos307_barrier_closed.",
+      "hypothesis": "The tagged closed barrier compiles without sorryAx and uses only the documented axioms and native_decide.",
+      "discriminating_test": "A clean lake build followed by Check.lean output under adequate or serialized memory.",
+      "rationale": "This has higher information value than any bounded candidate sweep below the reported barrier.",
+      "id": "strategy-c7ec43dd0a1b",
+      "fingerprint": "c7ec43dd0a1b",
+      "status": "proposed",
+      "title": "Finish the pinned kernel build and inspect the exact axiom footprints of card_ge_59 and erdos307_barrier_closed.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-exact-pq-forcing-fraction-trial-division-v1"
+      ],
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "family": "counterexample and witness search",
+      "mechanism": "Replace trial-division primality with certificate-carrying Pratt or Pocklington verification while retaining exact forced-partner closure.",
+      "hypothesis": "A compact deterministic certificate schema can verify future large prime factors without a probable-prime trust gap.",
+      "discriminating_test": "One known large-prime certificate must pass two implementations and every mutated factor or witness must fail.",
+      "rationale": "It strengthens the verification surface before expensive generation and remains useful even without a candidate.",
+      "id": "strategy-d0cdd72e8d53",
+      "fingerprint": "d0cdd72e8d53",
+      "status": "proposed",
+      "title": "Replace trial-division primality with certificate-carrying Pratt or Pocklington verification while retaining exact forced-partner closure.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-exact-pq-forcing-fraction-trial-division-v1"
+      ],
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Complete the pinned Lean barrier and axiom audit under adequate or serialized memory.",
+      "rationale": "This determines whether the strongest current exclusion can be promoted from externally reported to locally kernel-reproduced.",
+      "next_experiment": "Run scripts/check_bonfioli_barrier.sh once through the experiment recorder with memory above 4096 MB or a documented supported single-thread cache configuration.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-fcdbc443da",
+      "strategy_id": "strategy-exact-pq-forcing-fraction-trial-division-v1",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "description": "Add proof-carrying primality to the exact certificate format.",
+      "rationale": "Trial division is exact but infeasible for the enormous primes expected in any witness.",
+      "next_experiment": "Define a Pratt or Pocklington JSON schema, accept one known certified prime under two implementations, and reject every one-field mutation.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-6434398fec",
+      "strategy_id": "strategy-exact-pq-forcing-fraction-trial-division-v1",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "description": "Test construction families solely through squarefree arithmetic-derivative closure.",
+      "rationale": "A candidate is determined by one squarefree a with squarefree a' and a''=a; independent P,Q generation is unnecessary.",
+      "next_experiment": "Specify a family reaching a greater than 2e56, evaluate exact squarefreeness and closure on a fixed small parameter sample, and stop if it cannot reach the scale or only optimizes decimal proximity.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-c2df3a7e0a",
+      "strategy_id": "strategy-exact-pq-forcing-fraction-trial-division-v1",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Independent two-sided subset search or floating-point genetic optimization as a proof-bearing route.",
+      "scope": "The exact prime-set existence problem.",
+      "reason": "Q is forced by A(P), while decimal proximity does not certify either integer forcing equality.",
+      "evidence": "Reduced-fraction forcing theorem, exact verifier, and comparison with the reported Rubbens search.",
+      "reopen_condition": "An exact theorem or construction showing that the proxy preserves or efficiently predicts forced-partner closure.",
+      "attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "claim_or_route": "Reporting 60 as the sharp consequence of the elementary reciprocal-sum argument.",
+      "scope": "All future statements of that argument.",
+      "reason": "The exact crossing occurs at the 59th prime.",
+      "evidence": "Independent exact computations and the 2019 MathOverflow correction.",
+      "reopen_condition": "None; the argument yields 59.",
+      "attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    },
+    {
+      "claim_or_route": "Another arbitrary bounded search beneath the reported 2e56 side-product scale.",
+      "scope": "A claimed contribution or solution search relying on Bonfioli's reported theorem.",
+      "reason": "It would repeat a range already excluded by the closest source and would not improve its result.",
+      "evidence": "Bonfioli v1.0.0 source and Formal Conjectures annotation; local kernel reproduction remains pending.",
+      "reopen_condition": "The formal barrier fails an independent kernel audit, or the computation targets a separately motivated structural statistic with an explicit acceptance path.",
+      "attempt_id": "erdos-307-20260721-010133-c85502",
+      "updated_at": "2026-07-21T01:01:33.290042+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-exact-pq-forcing-fraction-trial-division-v1",
+    "objective": "Independently reproduce or precisely reject the Bonfioli v1.0.0 universal barrier, then harden certificate verification.",
+    "first_action": "Reuse /root/.cache/proof-factory/erdos307-v1.0.0 and invoke scripts/check_bonfioli_barrier.sh once through run_experiment.py with memory above 4096 MB, or first document a supported single-thread setting; do not reclone.",
+    "stop_condition": "Stop after one successful lake build plus Check.lean axiom audit, or the first new precisely diagnosed failure. If successful, proceed only to one proof-carrying primality control.",
+    "source_attempt_id": "erdos-307-20260721-010133-c85502"
+  },
+  "recent_attempt_ids": [
+    "erdos-307-20260721-010133-c85502"
+  ]
 }

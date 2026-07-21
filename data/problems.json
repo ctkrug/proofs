@@ -121,7 +121,7 @@
     "title": "Prime reciprocal product sets",
     "lane": "easy",
     "difficulty": 6,
-    "status": "queued",
+    "status": "active",
     "problem_state": "verifiable",
     "statement": "Are there finite sets of primes P and Q such that 1 = (sum over p in P of 1/p)(sum over q in Q of 1/q)?",
     "source_url": "https://www.erdosproblems.com/307",
@@ -134,10 +134,10 @@
       "meet in the middle",
       "modular pruning"
     ],
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "created_at": "2026-07-20T15:00:00+00:00",
-    "last_attempt_at": null,
+    "last_attempt_at": "2026-07-21T01:01:33.290042+00:00",
     "accepted_result": false,
     "priority": 70
   },

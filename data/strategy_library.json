@@ -105,5 +105,26 @@
       "absence of a found flaw is reported as proof"
     ],
     "sources": []
+  },
+  {
+    "id": "counterexample-guided-inductive-synthesis",
+    "family": "counterexample-guided inductive synthesis",
+    "use_when": "Candidates belong to a finite, parameterized grammar and an exact verifier can return a small concrete input on which a candidate fails.",
+    "mechanism": "Encode a bounded candidate grammar in incremental SMT. Begin with a small test set, synthesize a candidate satisfying every retained test, then run an independent exact verifier over the full finite domain. If it fails, add the lexicographically first counterexample to the permanent constraint corpus and repeat. Preserve a Pareto archive of candidates by coverage across independently chosen CRT residue fibres, rather than retaining only the latest candidate. Accept a witness only if a separately implemented checker validates full-domain coverage; accept a bounded negative result only if the final finite encoding is independently replayed for the stated grammar.",
+    "first_discriminator": "On the standard distinct cover {0 mod 2, 0 mod 3, 1 mod 4, 5 mod 6, 7 mod 12}, require the loop to find a valid candidate and have an independent period-12 scanner accept it; then change one residue and require the scanner to return an uncovered residue that the next synthesis round excludes.",
+    "experiment_template": "erdos-7 -> hypothesis: a distinct odd covering system exists whose moduli are distinct nonunit divisors of 315 -> python -m research.erdos7.cegis --lcm 315 --max-iterations 64, using incremental SMT for residue choices and an independent exact scan of residues 0..314 -> expected decisive signal: either a decoded odd system passes the independent 315-period checker, or a replayable UNSAT result rules out this explicitly bounded modulus grammar -> stop condition: stop after 64 verifier counterexamples, a checked witness, or a second-encoding-checked UNSAT result; otherwise publish the retained counterexample corpus and Pareto archive only",
+    "failure_modes": [
+      "An UNSAT result is overclaimed beyond the fixed divisor-of-315 grammar or modulus bound.",
+      "A shared bug between the synthesis encoding and period checker falsely accepts a cover.",
+      "Residue or modulus symmetry normalization removes a valid candidate.",
+      "The counterexample corpus concentrates on one CRT fibre and causes search stagnation despite other informative failures."
+    ],
+    "sources": [
+      "https://www2.eecs.berkeley.edu/Pubs/TechRpts/2021/EECS-2021-10.html",
+      "https://cvc5.github.io/docs/latest/api/c/types/cvc5.html",
+      "https://www.erdosproblems.com/7"
+    ],
+    "version": 1,
+    "updated_at": "2026-07-21T01:22:40.577389+00:00"
   }
 ]
