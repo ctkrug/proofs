@@ -319,6 +319,13 @@ and stop when the discriminator resolves it.
 - **Discriminator:** certified optimum inside each bounded neighborhood plus matched-budget comparison
   with tabu/annealing. A local optimum of two is not a global lower bound.
 
+**2026-07-21 UTC update:** two direct Springer retrievals of Supplementary Data 4 agreed byte-for-byte
+at 3,812 bytes and SHA-256 `c2429869f6fa47ab7388134b580b014efae01e6f0e474f5bab2233afb1ef6990`.
+Independent Python and C checks found exactly the two reported all-zero `K5`s and no all-one `K5`.
+All 903 radius-1 edge flips were exhausted; the minimum burden remains two. The source blocker is closed,
+but this is only a certified radius-1 result, not a witness or global bound. The saved next discriminator is
+the complete 407,253-pair radius-2 neighborhood under two independent implementations.
+
 ### S5. Incremental exact-delta local search
 
 - **Hypothesis:** moves chosen by exact change in the overlapping violation hypergraph outperform raw
@@ -654,6 +661,6 @@ Before original search:
 5. Record the first mismatch and stop; do not silently repair source data.
 
 Only after these controls pass should the engine choose among S3–S15. The authenticated order-42 corpus
-now permits the held-out-control discriminators in S13–S15 even while the Springer two-conflict seed remains
-source-gated. The default first constructive route is S3 (unknown-42 basin), with S4 (the verified
-two-conflict core) as the highest-value direct K43 experiment once its publisher artifact is authenticated.
+and publisher K43 seed now permit the held-out-control discriminators in S13–S15. The current direct K43
+continuation is S4's complete radius-2 enumeration; S3 remains the default route into a genuinely unknown
+order-42 basin. Neither control gate nor radius-1 exhaustion changes the Ramsey bound.
