@@ -540,6 +540,49 @@ Additional primary sources:
 - Lidicky–Pfender, *Semidefinite Programming and Ramsey Numbers*:
   https://arxiv.org/abs/1704.03592
 
+### S17. Exact radius-two isolation and the cyclic domain-wall reduction (2026-07-20)
+
+The authenticated Springer K43 seed has now passed two further bounded exact experiments in the problem
+workspace at `research/ramsey-r55/workspace/`.
+
+**Complete radius 2.** Independent Python five-set contribution arithmetic and a C evaluator that
+recursively enumerates graph/complement K5s afresh agree on all `C(903,2)=407253` pair burdens. The
+global and 403,809-pair deletion-remainder-change minima are both 2. Exactly two pairs attain the
+minimum: `{(6,12),(9,15)}` and `{(33,39),(36,42)}`. Nauty labels and explicit NetworkX mappings show
+that the results are the original seed rotated by `-27` and `+27` modulo 43. Thus the apparent
+two-conflict relocation is only a symmetry motion. The compact complete ledger is
+`artifacts/publisher_seed_radius2_scores.u16le`; the gate report is
+`artifacts/publisher_seed_radius2_report.json`.
+
+**One-dimensional exact slice.** Twenty of the 21 cyclic-distance edge orbits are constant. Only the
+43 edges `{u,u+6 mod 43}` vary. Writing their bits as `x_u` and changing coordinate to `u=27t mod 43`
+reduces all active K5s to translations of three constraint shapes:
+
+```text
+x_t or x_(t+18)                          multiplicity 2
+x_t or x_(t+20)                          multiplicity 2
+not x_t or not x_(t+5) or not x_(t+24)  multiplicity 1
+```
+
+There are 215 active five-sets and 129 unique constraints. A Python/Z3 pseudo-Boolean enumeration and
+an independently derived custom C relaxation-case DPLL agree on the complete model set: burdens 0 and
+1 are UNSAT; minimum burden is 2; exactly 86 words attain it. Those words are precisely all 43
+rotations of a step-27 interval of 24 ones and all 43 rotations of an interval of 25 ones. The
+publisher seed is a length-24 interval. Six reconstructed matrices spanning optimum and nonoptimum
+words pass dual full K5 identity rescans. The retained report is
+`artifacts/distance6_slice_exact_report.json`.
+
+**Scope and next discriminator.** These computations change no Ramsey bound and do not prove global
+multiplicity two. They close radius 2 and the entire `2^43` one-orbit ansatz. The trapping-set analogy
+has nevertheless paid off structurally: the core is a one-dimensional domain wall whose only cheapest
+moves translate its endpoints. The next test should release distance 6 jointly with exactly one other
+cyclic-distance orbit, giving 20 deterministic 86-variable slices. Ask each first for burden 0,
+symmetry-break the common rotation action soundly, dual-check every SAT model, and retain checked proof
+logs before upgrading any UNSAT slice from a discriminator to a certificate. If all 20 certified
+minima remain 2 and contain only symmetry copies, close the near-circulant family and redirect to
+multi-orbit or nonlocal surgery. No external novelty claim is made for this internal classification;
+a targeted literature/expert audit is required before publication framing.
+
 ## 9. Combining ideas without making analogy soup
 
 Use at most three transfers in one epoch and attach a prediction to each:
@@ -557,6 +600,7 @@ Use at most three transfers in one epoch and attach a prediction to each:
 | LDPC trapping sets + exact core MaxSAT | A few canonical active cores dominate stalled trajectories | Recurrence versus shuffled cores, then held-out template escape under matched calls. |
 | GOMEA linkage learning + exact delta evaluation | Learned edge blocks transfer useful epistatic structure better than whole-bitstring crossover | Leakage-safe damaged-42 recovery tournament before K43. |
 | Coding-theory moments + adjacency-row identities | Pair/triple distributions remove profiles missed by scalar counts | Rational pair LP first; stop before SDP if it cuts nothing. |
+| One-dimensional domain walls + cyclic CSPs | The authenticated defect must couple to another distance orbit before burden can fall | Release distance 6 plus one orbit, quotient rotations, and solve all 20 exact slices. |
 
 Discard a transfer when the stated prediction fails. Do not preserve it as inspirational prose.
 
@@ -713,7 +757,7 @@ Before original search:
 4. Reconstruct and verify the public 13- and 9-violation K43 controls from the Exoo study.
 5. Record the first mismatch and stop; do not silently repair source data.
 
-Only after these controls pass should the engine choose among S3–S15. The authenticated order-42 corpus
-and publisher K43 seed now permit the held-out-control discriminators in S13–S15. The current direct K43
-continuation is S4's complete radius-2 enumeration; S3 remains the default route into a genuinely unknown
-order-42 basin. Neither control gate nor radius-1 exhaustion changes the Ramsey bound.
+The controls now pass, the complete radius-2 enumeration is retained, and the seed's full one-orbit
+distance-6 family is exactly classified at minimum burden two. The next direct K43 discriminator is S17's
+20-slice two-orbit sweep; S3 remains the default route into a genuinely unknown order-42 basin. None of
+the control, local-neighborhood, or structured-slice results changes the Ramsey bound.
