@@ -10,14 +10,185 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T08:52:34.251461+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T08:52:34.251461+00:00",
+    "source_attempt_id": "erdos-1082-20260721-085234-e90afe",
+    "source_status": "falsifiable",
+    "facts_recorded": 4,
+    "exclusions_recorded": 4,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The baseline review is complete. The maintained source, original 1975 paper, current and historical formalizations, few-distance classifications, convex-position refinements, and recent citation trails were audited. H8 passed exact checks in 0.043 seconds with peak child memory 17,920 KB. This closes the statement ambiguity but supplies no counterexample to the open global assertion. The next bounded junction is the unique 12-point five-distance configuration.",
+  "established_facts": [
+    {
+      "claim": "The maintained source lists the global assertion open/falsifiable and explicitly says the local strengthening is false.",
+      "evidence": "https://www.erdosproblems.com/1082, accessed 2026-07-21; retrieved-page hash in notes/source-audit-manifest.json",
+      "scope": "Maintained status, page last edited 2026-04-11.",
+      "status": "proved",
+      "source_attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim": "The explicit H8 set has no collinear triple, three local nonzero distances at every point, and four global distances.",
+      "evidence": ".proof-experiments/20260721-084327-476459 and tools/check_h8.py",
+      "scope": "Eight explicit Z[sqrt(3)] coordinates.",
+      "status": "computed",
+      "source_attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim": "Szemerédi's argument gives ceil((n-1)/3) distances from some point.",
+      "evidence": "Erdős 1975 p.101; Sheffer arXiv:1406.1949 Lemma 3.1; Nivasch et al. 2013 section 2.",
+      "scope": "Every finite planar set with no three collinear.",
+      "status": "proved",
+      "source_attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim": "The current Formal Conjectures statement uses floor division, off-diagonal global distances, and subtraction of the local self-distance.",
+      "evidence": "Formal Conjectures commit b8b5208aa5d01f5f91c49ca516bf09cae8d93693 and source hashes in notes/source-audit-manifest.json",
+      "scope": "Source-level semantic audit; not a fresh build.",
+      "status": "proved",
+      "source_attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-exact-global-sqdist-plus-all-determinants-v1",
+      "family": "counterexample and witness search",
+      "fingerprint": "exact-global-sqdist-plus-all-determinants-v1",
+      "title": "Mandatory authoritative-source and methods audit followed by an exact semantic discriminator on the Harborth-Fishburn H8 configuration",
+      "mechanism": "Separate global and local distance counts, represent coordinates in Z[sqrt(3)], test every triple determinant and pairwise squared distance exactly, and use few-distance classifications only after checking collinearity.",
+      "status": "promising",
+      "hypothesis": "The pinned H8 coordinates have no collinear triple, exactly three nonzero distances from each point, and exactly four global distances, so they refute only the local strengthening.",
+      "discriminating_test": "Run the dependency-free exact checker under the experiment recorder and require all 56 triple determinants to be nonzero, all eight local counts to equal 3, and the global count to equal 4.",
+      "blocker": "Neither a global counterexample nor a theorem-strength general-position incidence bound is known. The immediate practical blocker is obtaining the exact primary description and full uniqueness scope of the 12-point five-distance extremizer.",
+      "reopen_condition": "",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "family": "exact finite classification transfer",
+      "mechanism": "Combine published g(k) maxima and uniqueness results with exact determinant checks on every extremizer.",
+      "hypothesis": "The unique 12-point five-distance extremizer contains a collinear triple, eliminating the first possible global counterexample size.",
+      "discriminating_test": "Exact triangular-lattice distance and determinant replay from primary coordinates.",
+      "rationale": "This is bounded, certificate-friendly, and more informative than arbitrary coordinate search.",
+      "id": "strategy-4e2a071f2d76",
+      "fingerprint": "4e2a071f2d76",
+      "status": "proposed",
+      "title": "Combine published g(k) maxima and uniqueness results with exact determinant checks on every extremizer.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-exact-global-sqdist-plus-all-determinants-v1"
+      ],
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "family": "extremal incidence double counting",
+      "mechanism": "Seek an upper bound for general-position isosceles triangles stronger than the two-apices-per-base count and translate it into a distance bound.",
+      "hypothesis": "A published or elementary refinement using only no-three-collinear hypotheses improves the one-third coefficient.",
+      "discriminating_test": "Derive the explicit resulting coefficient from each candidate bound; discard any proof that uses convexity or no-four-cocircular.",
+      "rationale": "It directly targets the known theorem-strength bottleneck, though it is less likely to settle one-half.",
+      "id": "strategy-d65dec708e17",
+      "fingerprint": "d65dec708e17",
+      "status": "proposed",
+      "title": "Seek an upper bound for general-position isosceles triangles stronger than the two-apices-per-base count and translate it into a distance bound.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-exact-global-sqdist-plus-all-determinants-v1"
+      ],
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Exact audit of Shinohara's unique 12-point five-distance extremizer.",
+      "rationale": "It is the first classified k-distance extremizer large enough to meet the numerical counterexample threshold.",
+      "next_experiment": "Encode the primary coordinates in triangular-lattice integer pairs and verify exactly five norms plus every determinant, with positive and negative controls.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-0e09b97fa9",
+      "strategy_id": "strategy-exact-global-sqdist-plus-all-determinants-v1",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "description": "Focused search for later general-position isosceles-triangle bounds.",
+      "rationale": "A strict improvement in the quadratic isosceles count transfers mechanically to a better local distance bound.",
+      "next_experiment": "Trace citations from Pach-Tardos and Nivasch et al.; translate every applicable bound through the explicit equal-radius-pair inequality before retaining it.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-7b3c40cd01",
+      "strategy_id": "strategy-exact-global-sqdist-plus-all-determinants-v1",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "description": "Generic exact quadratic-field certificate checker.",
+      "rationale": "It becomes useful only after a sourced candidate family is identified.",
+      "next_experiment": "Parameterize the ring discriminant and JSON coordinates, then require a separate SymPy or Lean replay for any candidate.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-813e154ee2",
+      "strategy_id": "strategy-exact-global-sqdist-plus-all-determinants-v1",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use H8 as a global counterexample.",
+      "scope": "The explicit Harborth-Fishburn eight-point set.",
+      "reason": "It has four global distances, exactly floor(8/2).",
+      "evidence": ".proof-experiments/20260721-084327-476459/stdout.txt",
+      "reopen_condition": "None for H8 itself; a different exact configuration is required.",
+      "attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim_or_route": "Transfer convex-position local improvements directly to arbitrary no-three-collinear sets.",
+      "scope": "The Dumitrescu and Nivasch-Pach-Pinchasi-Zerbib cap/good-edge methods.",
+      "reason": "Their improvement uses strict convexity and cyclic order, neither implied by noncollinearity.",
+      "evidence": "Nivasch et al. 2013, sections 2-4.",
+      "reopen_condition": "A proved replacement for the cap/good-edge lemmas using only NonTrilinear hypotheses.",
+      "attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim_or_route": "Use unrestricted g(k) values without inspecting extremal configurations.",
+      "scope": "Planar few-distance classifications through k=6.",
+      "reason": "Extremizers may contain collinear triples.",
+      "evidence": "Wei 2012 and the unresolved Shinohara coordinate audit.",
+      "reopen_condition": "Primary exact coordinates, all-triples determinant check, and verified classification coverage.",
+      "attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    },
+    {
+      "claim_or_route": "Freshly rebuild the historical H8 Lean proof during this epoch.",
+      "scope": "The shared Formal Conjectures checkout.",
+      "reason": "Only 1.4 GB was free and the required Mathlib build cache was absent.",
+      "evidence": "Filesystem and checkout inspection summarized in notes/baseline-review.md.",
+      "reopen_condition": "At least 6 GB verified free or a complete compatible shared .olean cache.",
+      "attempt_id": "erdos-1082-20260721-085234-e90afe",
+      "updated_at": "2026-07-21T08:52:34.251461+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-exact-global-sqdist-plus-all-determinants-v1",
+    "objective": "Resolve the first few-distance classification junction without open-ended search.",
+    "first_action": "Obtain Shinohara 2008, DOI 10.1016/j.disc.2007.08.028, or an author-hosted exact coordinate description; verify its uniqueness theorem and encode only the displayed 12-point set.",
+    "stop_condition": "Stop if primary coordinates or uniqueness cannot be sourced, the set does not have exactly five distances, or the theorem does not cover every 12-point five-distance set; otherwise record only the rigorously implied n <= 13 scope.",
+    "source_attempt_id": "erdos-1082-20260721-085234-e90afe"
+  },
+  "recent_attempt_ids": [
+    "erdos-1082-20260721-085234-e90afe"
+  ]
 }
