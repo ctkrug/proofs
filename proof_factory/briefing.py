@@ -63,6 +63,17 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
     open_leads = [row for row in state.get("open_leads", []) if row.get("status", "open") == "open"]
     strategies = {row.get("id"): row for row in state.get("strategies", [])}
     open_leads = [row for row in open_leads if strategies.get(row.get("strategy_id"), {}).get("status") not in terminal]
+    lab_jobs = []
+    for row in lab.status(str(problem.get("id")))["jobs"][-10:]:
+        lab_jobs.append({
+            "id": row.get("id"), "name": _trim(row.get("name"), 200),
+            "status": row.get("status"), "segment": row.get("segment"),
+            "decision_value": _trim(row.get("decision_value"), 500),
+            "latest_progress": row.get("latest_progress", {}),
+            "stop_reason": _trim(row.get("stop_reason"), 500),
+            "state_source": f"state/labs/jobs/{row.get('id')}.json",
+            "artifact_workspace": f"research/{problem.get('id')}/workspace",
+        })
     return {
         "schema_version": 1,
         "rule": "This is the only injected campaign packet. Load larger files only when the selected discriminator needs them.",
@@ -92,7 +103,7 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
         },
         "active_roadmap_phase": active_roadmap.get("active_phase"),
         "research_events": events.pending(str(problem.get("id")))[:10],
-        "lab_experiments": lab.status(str(problem.get("id")))["jobs"][-10:],
+        "lab_experiments": lab_jobs,
         "prior_art": compact_methods[:14],
     }
 
@@ -110,6 +121,21 @@ def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000) -> st
         payload["state"]["eligible_open_leads"] = payload["state"]["eligible_open_leads"][-3:]
         payload["state"]["newest_decisions"] = payload["state"]["newest_decisions"][-2:]
         payload["state"]["newest_reductions"] = payload["state"]["newest_reductions"][-1:]
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+    if len(text) > max_chars:
+        payload["prior_art"] = payload["prior_art"][:2]
+        payload["state"]["newest_facts"] = payload["state"]["newest_facts"][-1:]
+        payload["state"]["newest_exclusions"] = payload["state"]["newest_exclusions"][-1:]
+        payload["state"]["eligible_open_leads"] = payload["state"]["eligible_open_leads"][-2:]
+        payload["state"]["newest_decisions"] = []
+        payload["state"]["newest_reductions"] = []
+        phase = payload.get("active_roadmap_phase")
+        if isinstance(phase, dict):
+            payload["active_roadmap_phase"] = {
+                "id": phase.get("id"), "objective": _trim(phase.get("objective"), 700),
+                "required_artifact": _trim(phase.get("required_artifact"), 700),
+                "promote_if": _trim(phase.get("promote_if"), 700),
+            }
         text = json.dumps(payload, indent=2, ensure_ascii=False)
     if len(text) > max_chars:
         raise ValueError(f"canonical research brief exceeds {max_chars} characters after compaction")
