@@ -83,6 +83,14 @@ def _git_commit(workspace: Path) -> str:
     return proc.stdout.strip() if proc.returncode == 0 else "unversioned"
 
 
+def _git_contains(workspace: Path, revision: str) -> bool:
+    proc = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", revision, "HEAD"], cwd=workspace,
+        text=True, capture_output=True, timeout=20,
+    )
+    return proc.returncode == 0
+
+
 def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
     identities: dict[str, str] = {}
     for raw in command:
@@ -250,9 +258,13 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
 
 def _verify_immutable_inputs(spec: dict[str, Any], workspace: Path) -> None:
     current_commit = _git_commit(workspace)
-    if spec["workspace_git_commit"] != "unversioned" and current_commit != spec["workspace_git_commit"]:
+    if (
+        spec["workspace_git_commit"] != "unversioned"
+        and current_commit != spec["workspace_git_commit"]
+        and not _git_contains(workspace, spec["workspace_git_commit"])
+    ):
         raise ValueError(
-            f"workspace revision changed: submitted {spec['workspace_git_commit']}, current {current_commit}"
+            f"submitted revision is no longer an ancestor: {spec['workspace_git_commit']}, current {current_commit}"
         )
     for relative, expected in spec.get("input_sha256", {}).items():
         path = (workspace / relative).resolve()
