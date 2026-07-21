@@ -136,12 +136,112 @@ def load_attempts() -> list[dict[str, Any]]:
     return attempts
 
 
-def record_attempt(attempt: dict[str, Any]) -> None:
-    """Append an immutable attempt, then atomically refresh its problem projection."""
+def _validate_attempt(attempt: dict[str, Any]) -> None:
     required = {"id", "problem_id", "started_at", "finished_at", "lane", "outcome", "summary"}
     missing = required - set(attempt)
     if missing:
         raise ValueError(f"attempt missing fields: {sorted(missing)}")
+
+
+def _append_attempt_ledger(attempt: dict[str, Any]) -> None:
+    """Durably append one already-validated, unique attempt."""
+    ATTEMPTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with ATTEMPTS_FILE.open("a") as handle:
+        handle.write(json.dumps(attempt, ensure_ascii=False, separators=(",", ":")) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+
+
+def _state_has_actionable_work(durable_state: dict[str, Any], attempt_id: str) -> bool:
+    return any(
+        row.get("status") in {"proposed", "promising", "active"} and row.get("last_attempt_id") != attempt_id
+        for row in durable_state.get("strategies", [])
+    ) or any(row.get("status", "open") == "open" for row in durable_state.get("open_leads", []))
+
+
+def _apply_discovery_campaign_transition(
+    problem: dict[str, Any], attempt: dict[str, Any], *, actionable: bool,
+) -> bool:
+    """Project an active easy-lane campaign; return whether it handled the outcome."""
+    if problem.get("lane") != "easy" or problem.get("campaign_state") != "active":
+        return False
+    outcome = str(attempt["outcome"])
+    assessment = attempt.get("campaign_assessment") if isinstance(attempt.get("campaign_assessment"), dict) else {}
+    campaign_decision = str(assessment.get("decision") or "").strip().lower()
+    close_signal = str(assessment.get("close_signal") or "").strip()
+    if assessment:
+        problem["campaign_last_assessment"] = {
+            "attempt_id": attempt["id"],
+            "decision": campaign_decision,
+            "close_signal": close_signal[:2000],
+            "reason": str(assessment.get("reason") or "")[:2000],
+        }
+    if outcome == "candidate":
+        problem["status"] = "candidate"
+        problem["candidate_attempt_id"] = attempt["id"]
+        problem["campaign_state"] = "review"
+        problem["campaign_decision"] = "candidate awaiting review"
+        return True
+    if outcome == "error":
+        return False
+
+    completed = discovery_campaign_run_count(problem)
+    minimum = max(DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
+    problem["campaign_min_runs"] = minimum
+    if completed < minimum:
+        problem["status"] = "active" if outcome == "progress" else "attempted"
+        problem["campaign_decision"] = f"continue through run {minimum}"
+        return True
+    should_continue = (
+        campaign_decision == "continue" and bool(close_signal)
+    ) or (
+        not campaign_decision and outcome == "progress" and actionable
+    )
+    if should_continue:
+        problem["status"] = "active"
+        problem["campaign_state"] = "active"
+        problem["campaign_decision"] = "continue: concrete close signal recorded"
+    else:
+        problem["status"] = "parked"
+        problem["campaign_state"] = "hold"
+        problem["campaign_decision"] = "hold after minimum-run review"
+    return True
+
+
+def _project_problem_from_attempt(
+    problem: dict[str, Any], attempt: dict[str, Any], durable_state: dict[str, Any],
+) -> None:
+    """Refresh the mutable problem projection from one immutable attempt."""
+    problem["attempt_count"] = int(problem.get("attempt_count") or 0) + 1
+    problem["last_attempt_at"] = attempt["finished_at"]
+    outcome = str(attempt["outcome"])
+    if outcome != "error":
+        problem["research_attempt_count"] = int(problem.get("research_attempt_count") or 0) + 1
+    actionable = _state_has_actionable_work(durable_state, str(attempt["id"]))
+    if _apply_discovery_campaign_transition(problem, attempt, actionable=actionable):
+        return
+    if outcome == "candidate":
+        problem["status"] = "candidate"
+        problem["candidate_attempt_id"] = attempt["id"]
+    elif outcome == "progress":
+        problem["status"] = "active"
+    elif outcome in {"failed", "error", "no_progress"}:
+        if (
+            problem.get("lane") == "easy"
+            and outcome != "error"
+            and int(problem.get("research_attempt_count") or 0) >= DISCOVERY_CAMPAIGN_MIN_RUNS
+            and not actionable
+        ):
+            problem["status"] = "parked"
+        else:
+            problem["status"] = "attempted"
+    elif outcome in {"verified", "published"}:
+        problem["status"] = outcome
+
+
+def record_attempt(attempt: dict[str, Any]) -> None:
+    """Append an immutable attempt, then atomically refresh its projections."""
+    _validate_attempt(attempt)
     with lock("state") as acquired:
         if not acquired:
             raise RuntimeError("state lock unavailable")
@@ -154,79 +254,13 @@ def record_attempt(attempt: dict[str, Any]) -> None:
         if not problem:
             raise ValueError(f"unknown problem: {attempt['problem_id']}")
 
-        ATTEMPTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with ATTEMPTS_FILE.open("a") as handle:
-            handle.write(json.dumps(attempt, ensure_ascii=False, separators=(",", ":")) + "\n")
-            handle.flush()
-            os.fsync(handle.fileno())
+        _append_attempt_ledger(attempt)
 
         # Imported here to avoid a module cycle: research_state deliberately uses store's
         # atomic JSON primitives. This projection is public research memory, not chain-of-thought.
         from . import research_state
         durable_state = research_state.update_from_attempt(problem, attempt)
-
-        problem["attempt_count"] = int(problem.get("attempt_count") or 0) + 1
-        problem["last_attempt_at"] = attempt["finished_at"]
-        outcome = attempt["outcome"]
-        if outcome != "error":
-            problem["research_attempt_count"] = int(problem.get("research_attempt_count") or 0) + 1
-        actionable = any(
-            row.get("status") in {"proposed", "promising", "active"} and row.get("last_attempt_id") != attempt["id"]
-            for row in durable_state.get("strategies", [])
-        ) or any(row.get("status", "open") == "open" for row in durable_state.get("open_leads", []))
-        campaign = problem.get("lane") == "easy" and problem.get("campaign_state") == "active"
-        assessment = attempt.get("campaign_assessment") if isinstance(attempt.get("campaign_assessment"), dict) else {}
-        campaign_decision = str(assessment.get("decision") or "").strip().lower()
-        close_signal = str(assessment.get("close_signal") or "").strip()
-        if campaign and assessment:
-            problem["campaign_last_assessment"] = {
-                "attempt_id": attempt["id"],
-                "decision": campaign_decision,
-                "close_signal": close_signal[:2000],
-                "reason": str(assessment.get("reason") or "")[:2000],
-            }
-
-        if outcome == "candidate":
-            problem["status"] = "candidate"
-            problem["candidate_attempt_id"] = attempt["id"]
-            if campaign:
-                problem["campaign_state"] = "review"
-                problem["campaign_decision"] = "candidate awaiting review"
-        elif campaign and outcome != "error":
-            completed = discovery_campaign_run_count(problem)
-            minimum = max(DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
-            problem["campaign_min_runs"] = minimum
-            if completed < minimum:
-                problem["status"] = "active" if outcome == "progress" else "attempted"
-                problem["campaign_decision"] = f"continue through run {minimum}"
-            else:
-                should_continue = (
-                    campaign_decision == "continue" and bool(close_signal)
-                ) or (
-                    not campaign_decision and outcome == "progress" and actionable
-                )
-                if should_continue:
-                    problem["status"] = "active"
-                    problem["campaign_state"] = "active"
-                    problem["campaign_decision"] = "continue: concrete close signal recorded"
-                else:
-                    problem["status"] = "parked"
-                    problem["campaign_state"] = "hold"
-                    problem["campaign_decision"] = "hold after minimum-run review"
-        elif outcome == "progress":
-            problem["status"] = "active"
-        elif outcome in {"failed", "error", "no_progress"}:
-            if (
-                problem.get("lane") == "easy"
-                and outcome != "error"
-                and int(problem.get("research_attempt_count") or 0) >= DISCOVERY_CAMPAIGN_MIN_RUNS
-                and not actionable
-            ):
-                problem["status"] = "parked"
-            else:
-                problem["status"] = "attempted"
-        elif outcome in {"verified", "published"}:
-            problem["status"] = outcome
+        _project_problem_from_attempt(problem, attempt, durable_state)
         save_problems(problems)
 
 
