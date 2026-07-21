@@ -252,7 +252,7 @@ class ProofFactoryTests(unittest.TestCase):
             with patch.multiple(
                 store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
                 PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
-            ):
+            ), patch.object(capacity, "admission", return_value={"allowed": True}):
                 submitted = lab.submit({
                     "problem_id": "p", "name": "control", "hypothesis": "six times seven is 42",
                     "expected_signal": "stdout contains 42", "command": ["python3", "-c", "print(6*7)"],
@@ -482,6 +482,30 @@ class ProofFactoryTests(unittest.TestCase):
             with patch.object(capacity, "TMP_MAX_AGE_SECONDS", 10):
                 candidates = capacity._cleanup_candidates(tmp, 1_000.0)
         self.assertEqual(candidates, [old])
+
+    def test_lab_worker_leaves_job_queued_when_capacity_is_reserved(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            state = root / "state"
+            research = root / "research"
+            data.mkdir()
+            state.mkdir()
+            research.mkdir()
+            problems = data / "problems.json"
+            attempts = data / "attempts.jsonl"
+            problems.write_text(json.dumps([{"id": "p", "lane": "hard", "status": "active"}]))
+            attempts.write_text("")
+            queued = research / "p" / "workspace" / "lab-queue"
+            queued.mkdir(parents=True)
+            queued_file = queued / "job.json"
+            queued_file.write_text(json.dumps({"problem_id": "p"}))
+            with patch.multiple(store, ROOT=root, DATA=data, STATE=state, RESEARCH=research,
+                                PROBLEMS_FILE=problems, ATTEMPTS_FILE=attempts), \
+                    patch.object(capacity, "admission", return_value={"allowed": False, "reasons": ["reserve"]}):
+                result = lab.worker_once()
+            self.assertEqual(result["status"], "deferred")
+            self.assertTrue(queued_file.exists())
 
     def test_usage_policy_enforces_elapsed_week_and_baseline(self) -> None:
         now = datetime(2026, 7, 20, 2, 0, tzinfo=timezone.utc)

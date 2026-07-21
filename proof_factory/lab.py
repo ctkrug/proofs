@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import repositories, store
+from . import capacity, repositories, store
 
 
 SCHEMA_VERSION = 1
@@ -136,6 +136,18 @@ def worker_once() -> dict[str, Any]:
         queue = queued_specs()
         if not queue:
             return {"status": "idle"}
+        # A lab job can run for days, so it independently observes the same
+        # host reserves as model epochs.  Leave the spec queued on pressure;
+        # the timer will retry after the capacity guard has had a chance to
+        # reclaim only disposable residue.
+        capacity_policy = capacity.admission("hard")
+        if not capacity_policy["allowed"]:
+            return {
+                "status": "deferred",
+                "reason": "host capacity reserve",
+                "capacity_policy": capacity_policy,
+                "queued_job": str(queue[0]),
+            }
         source = queue[0]
         running = source.with_suffix(".running.json")
         os.replace(source, running)
