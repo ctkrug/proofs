@@ -55,6 +55,27 @@ Each route must declare:
 Reconcile route and lead state after every decision. A lead attached only to a killed or exhausted route is
 closed unless its reopen evidence exists. Empty or stale routes are ineligible for selection.
 
+### Successor selection: prefer an easier hard problem
+
+The default successor is not the most famous available frontier. Prefer the smallest meaningful finite
+uncertainty for which both positive and negative outcomes have compact, independently checkable evidence.
+Gap-one exact optima, tightly constrained designs, and small classification boundaries should outrank wide
+Ramsey or cage intervals when they offer a credible path to closure and a live expert/repository channel.
+
+Before Charlie approves a successor pilot, compare at least six current candidates and require:
+
+- a source-verified open statement and nearest active work;
+- a 90-day probability for a **field-usable contribution**, separate from reproduction and from external
+  acceptance, labeled as judgment until calibrated by a pilot;
+- positive and negative certificate formats, independent checker cost, and expected artifact size;
+- an objective acceptance owner or venue and a non-duplicative contribution class;
+- a bounded first gate whose result can raise or lower the estimate materially.
+
+Prefer a target above 50% estimated 90-day contribution probability when one remains mathematically
+meaningful. Demote a prestige frontier below that threshold unless it uniquely exercises a reusable method
+or outside evidence materially changes its cost profile. Reproduction alone is not success; it qualifies
+only when it creates a genuinely new accepted certification or verification artifact.
+
 ## 4. Use event-driven model review and persistent computation
 
 Models design experiments, interpret new evidence, compare mechanisms, and make route decisions.
@@ -119,6 +140,13 @@ delegate memos.
 Use deterministic tools for mechanical searches and independent agents only for genuinely complementary
 work such as separate implementations or source audits. Cache source extracts and stable context by hash.
 Measure model input, output, wall time, solver time, and artifact growth per decisive observation.
+
+Parallelize source review, adversarial code audit, independent checker construction, documentation, and
+packet tooling when their files and decisions are disjoint. Serialize shared-ledger writes, deployment,
+schema migrations, final artifact assembly, and any computation that competes for the same CPU/cache or
+depends on an earlier proof gate. Every parallel branch must state its write scope and return evidence to
+one integration review; delegation never creates an independent authority to promote, publish, spend, or
+bypass a gate.
 
 ## 7. Calibrate chances on explicit horizons
 
