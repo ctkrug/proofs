@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics, usage
+from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, prior_art, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -42,7 +42,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
-{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"space_reduction":{"ambient_space":"proof states","represented_space_before":"one goal","eliminated_or_quotiented":"one lemma discharged","represented_space_after":"next goal","reduction_factor":"not applicable","measurement_status":"not_applicable","unit":"proof states","coverage_scope":"single lemma","soundness_basis":"ordinary proof checking","remaining_unknown":"remaining theorem","next_bulk_elimination":"derive next lemma"},"tactical_learning":{"prediction":"lemma holds","observation":"lemma holds","surprise":"none","failure_signature":"none","bottleneck_update":"next lemma","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"test next lemma"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"internal lemma","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"proof check","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"space_reduction":{"ambient_space":"proof states","represented_space_before":"one goal","eliminated_or_quotiented":"one lemma discharged","represented_space_after":"next goal","reduction_factor":"not applicable","measurement_status":"not_applicable","unit":"proof states","coverage_scope":"single lemma","soundness_basis":"ordinary proof checking","remaining_unknown":"remaining theorem","next_bulk_elimination":"derive next lemma"},"tactical_learning":{"prediction":"lemma holds","observation":"lemma holds","surprise":"none","failure_signature":"none","bottleneck_update":"next lemma","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"test next lemma"},"prior_art_check":{"nearest_method_ids":["none-found"],"classification":"genuinely_different","exact_delta":"direct lemma beyond baseline","duplicate_risk":"may restate a known lemma","comparison_test":"compare exact theorem statements","decision":"proceed","source_urls":["https://example.test/source"]},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"internal lemma","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"proof check","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         result = agent.extract_result(text)
         self.assertEqual(result["outcome"], "progress")
@@ -161,12 +161,15 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("bulk class/cube/profile elimination", prompt)
         self.assertIn("DETERMINISTIC TACTICAL BRIEF", prompt)
         self.assertIn("AUTOMATED CAMPAIGN ROADMAP", prompt)
+        self.assertIn("PRIOR-ART ANTI-REDISCOVERY REGISTER", prompt)
+        self.assertIn("prior_art_check", prompt)
         self.assertIn("tactical_learning", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
         self.assertIn("cheapest decisive experiment", delegate)
         self.assertIn("may not promote a result", delegate)
         self.assertIn("search-efficiency pass", delegate)
+        self.assertIn("PRIOR-ART ANTI-REDISCOVERY REGISTER", delegate)
         baseline = agent.build_prompt(problem, "hard", Path("/tmp/research/workspace"), phase="baseline")
         self.assertIn("MANDATORY BASELINE PHASE", baseline)
         self.assertIn("Do not try to solve the problem", baseline)
@@ -178,7 +181,7 @@ class ProofFactoryTests(unittest.TestCase):
             "rationale": "Compact certificate", "verifiability": "Exact checker", "techniques": [],
         }
         principal = '''```proof_result
-{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"space_reduction":{"ambient_space":"finite test space","represented_space_before":"100 cases","eliminated_or_quotiented":"50 exact failures","represented_space_after":"50 cases","reduction_factor":"2x","measurement_status":"exact","unit":"labelled assignments","coverage_scope":"bounded fixture","soundness_basis":"independent scalar replay","remaining_unknown":"50 cases","next_bulk_elimination":"canonicalize classes"},"tactical_learning":{"prediction":"find signal","observation":"bounded result","surprise":"none","failure_signature":"none","bottleneck_update":"larger exact test","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"larger pilot"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"verified internal experiment","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"scalar replay","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"space_reduction":{"ambient_space":"finite test space","represented_space_before":"100 cases","eliminated_or_quotiented":"50 exact failures","represented_space_after":"50 cases","reduction_factor":"2x","measurement_status":"exact","unit":"labelled assignments","coverage_scope":"bounded fixture","soundness_basis":"independent scalar replay","remaining_unknown":"50 cases","next_bulk_elimination":"canonicalize classes"},"tactical_learning":{"prediction":"find signal","observation":"bounded result","surprise":"none","failure_signature":"none","bottleneck_update":"larger exact test","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"larger pilot"},"prior_art_check":{"nearest_method_ids":["none-found"],"classification":"material_modification","exact_delta":"batched checker compared with scalar baseline","duplicate_risk":"speedup may be implementation-only","comparison_test":"matched scalar replay","decision":"proceed","source_urls":["https://example.test/source"]},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"verified internal experiment","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"scalar replay","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         calls = []
 
@@ -259,23 +262,34 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "dead")["eligible"])
         self.assertEqual(brief["closed_routes"][0]["reopen_condition"], "new theorem")
 
-    def test_roadmap_selects_phase_from_completed_epoch_count(self) -> None:
+    def test_roadmap_selects_phase_from_tactical_incumbent(self) -> None:
         problem = {"id": "p"}
         value = {
-            "schema_version": 1, "problem_id": "p", "start_after_epoch": 10, "horizon_sessions": 4,
+            "schema_version": 2, "problem_id": "p", "default_phase": "first",
             "phases": [
-                {"id": "first", "sessions": [1, 2]},
-                {"id": "second", "sessions": [3, 4]},
+                {"id": "first", "strategy_fingerprints": ["a"]},
+                {"id": "second", "strategy_fingerprints": ["b"]},
             ],
         }
         with tempfile.TemporaryDirectory() as raw, patch.object(store, "DATA", Path(raw)), \
-                patch.object(research_state, "load", return_value={"epoch_count": 12}):
+                patch.object(roadmap.tactics, "build", return_value={"incumbent": {"fingerprint": "b"}}):
             folder = Path(raw) / "campaign_roadmaps"
             folder.mkdir()
             (folder / "p.json").write_text(json.dumps(value))
             selected = roadmap.current(problem)
-        self.assertEqual(selected["next_roadmap_session"], 3)
+        self.assertEqual(selected["incumbent_fingerprint"], "b")
         self.assertEqual(selected["active_phase"]["id"], "second")
+
+    def test_prior_art_registry_is_machine_readable(self) -> None:
+        problem = {"id": "p"}
+        value = {"schema_version": 1, "problem_id": "p", "methods": [{"id": "known-route"}]}
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "DATA", Path(raw)):
+            folder = Path(raw) / "prior_art"
+            folder.mkdir()
+            (folder / "p.json").write_text(json.dumps(value))
+            loaded = prior_art.load(problem)
+        self.assertTrue(loaded["configured"])
+        self.assertEqual(loaded["methods"][0]["id"], "known-route")
 
     def test_baseline_review_is_required_then_completed(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

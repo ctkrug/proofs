@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from . import research_state, store
+from . import store, tactics
 
 
 def path(problem_id: str):
@@ -24,23 +24,23 @@ def current(problem: dict[str, Any]) -> dict[str, Any]:
     value = load(problem)
     if not value:
         return {"configured": False, "problem_id": problem["id"]}
-    state = research_state.load(problem)
-    start_after = int(value.get("start_after_epoch") or 0)
-    next_session = max(1, int(state.get("epoch_count") or 0) - start_after + 1)
+    tactical = tactics.build(problem)
+    incumbent = tactical.get("incumbent") or {}
+    fingerprint = str(incumbent.get("fingerprint") or "")
     active = next((
         row for row in value["phases"]
-        if int(row.get("sessions", [0, 0])[0]) <= next_session <= int(row.get("sessions", [0, 0])[1])
-    ), value["phases"][-1])
+        if fingerprint and fingerprint in (row.get("strategy_fingerprints") or [])
+    ), next((row for row in value["phases"] if row.get("id") == value.get("default_phase")), value["phases"][0]))
     return {
         "configured": True,
         "schema_version": value.get("schema_version"),
         "problem_id": problem["id"],
-        "next_roadmap_session": next_session,
-        "horizon_sessions": value.get("horizon_sessions"),
+        "selection": "active tactical incumbent matched to a roadmap stage; evidence may change it every epoch",
+        "incumbent_fingerprint": fingerprint,
         "operating_rule": value.get("operating_rule"),
+        "selection_policy": value.get("selection_policy", []),
         "active_phase": active,
         "confidence_calibration": value.get("confidence_calibration"),
-        "portfolio_allocation": value.get("portfolio_allocation"),
         "sources": value.get("sources", []),
     }
 

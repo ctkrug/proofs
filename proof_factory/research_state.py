@@ -9,7 +9,7 @@ from typing import Any
 from . import store
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 STRATEGY_STATUSES = {
     "proposed", "active", "promising", "blocked", "ruled_out", "exhausted", "superseded",
 }
@@ -63,6 +63,7 @@ def _initial(problem: dict[str, Any]) -> dict[str, Any]:
             "constraints_learned": [],
             "decision_history": [],
             "reduction_ledger": [],
+            "prior_art_decisions": [],
         },
     }
 
@@ -83,7 +84,7 @@ def load(problem: dict[str, Any]) -> dict[str, Any]:
     else:
         memory = _initial(problem)["tactical_memory"]
         memory.update(seeded["tactical_memory"])
-        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history", "reduction_ledger"):
+        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history", "reduction_ledger", "prior_art_decisions"):
             if not isinstance(memory.get(key), list):
                 memory[key] = []
         seeded["tactical_memory"] = memory
@@ -269,6 +270,19 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
             "surprise": _text(learning.get("surprise"), 1000),
             "next_discriminator": _text(learning.get("next_discriminator"), 1000), "updated_at": now,
         }])[-40:]
+    prior = attempt.get("prior_art_check") if isinstance(attempt.get("prior_art_check"), dict) else {}
+    if prior:
+        memory["prior_art_decisions"] = (memory["prior_art_decisions"] + [{
+            "attempt_id": attempt["id"], "strategy_id": strategy_row["id"],
+            "nearest_method_ids": [_text(x, 200) for x in prior.get("nearest_method_ids", [])][:20],
+            "classification": _text(prior.get("classification"), 80),
+            "exact_delta": _text(prior.get("exact_delta"), 2000),
+            "duplicate_risk": _text(prior.get("duplicate_risk"), 2000),
+            "comparison_test": _text(prior.get("comparison_test"), 2000),
+            "decision": _text(prior.get("decision"), 40),
+            "source_urls": [_text(x, 1000) for x in prior.get("source_urls", [])][:20],
+            "updated_at": now,
+        }])[-60:]
     state["tactical_memory"] = memory
 
     continuation = attempt.get("continuation") if isinstance(attempt.get("continuation"), dict) else {}

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "problem_id": "ramsey-r55",
+  "updated_at": "2026-07-21",
+  "rule": "Before executing a route, cite the nearest method IDs, classify the work as replication/control, material modification, or genuinely different mechanism, and state the falsifiable delta. Replication is useful only as a control and cannot be promoted as novelty.",
+  "methods": [
+    {
+      "id": "mckay-delete-three-extend",
+      "family": "subgraph deletion and exact extension",
+      "mechanism": "Delete three vertices from known order-42 graphs, extend the resulting order-39 graphs back to order 42, and iterate until no new class appears.",
+      "scope_and_outcome": "Recovered the same 656 known order-42 classes and reached closure under this process; none extends to order 43.",
+      "material_delta_required": "A sound extension decomposition covering inputs outside the known-class closure, or a certificate proving a materially broader exhaustive cover.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "exoo-incremental-simulated-annealing",
+      "family": "incremental stochastic construction",
+      "mechanism": "Start from a random order-30 Ramsey graph, append one vertex at a time, and repair with simulated annealing through order 42.",
+      "scope_and_outcome": "Generated 5,812 order-42 graphs; every result belonged to the same 656 classes.",
+      "material_delta_required": "A different information-generating mechanism with held-out matched-compute improvement, not another parameter tuning of annealing.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "incremental-tabu-search",
+      "family": "incremental tabu construction",
+      "mechanism": "Use incremental vertex construction with tabu search instead of simulated annealing.",
+      "scope_and_outcome": "Constructed hundreds of order-42 graphs and found no new isomorphism class.",
+      "material_delta_required": "A new state representation or learned move block that wins on leakage-safe held-out classes against this baseline.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "known-class-avoidance-bias",
+      "family": "novelty-biased heuristic search",
+      "mechanism": "Bias stochastic search away from known order-42 graphs.",
+      "scope_and_outcome": "Reported attempts did not find a new class.",
+      "material_delta_required": "A canonical, measurable diversity objective with held-out evidence that it reaches basins absent from ordinary novelty bias.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "common-edge-subgraph-neighborhoods",
+      "family": "neighborhood search around known classes",
+      "mechanism": "Search neighborhoods defined by common edges or common subgraphs around known order-42 graphs.",
+      "scope_and_outcome": "More than one decade of CPU time found no new class.",
+      "material_delta_required": "A proof-carrying neighborhood cover or a nonlocal operator whose held-out behavior differs from common-edge/subgraph proximity.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "random-36-subgraph-extension",
+      "family": "large-scale subgraph extension",
+      "mechanism": "Take 100 random order-36 subgraphs and extend them to order 42 in all possible ways.",
+      "scope_and_outcome": "Produced over 65 million order-42 graphs, all isomorphic to known classes.",
+      "material_delta_required": "A canonically distinct core family, a proved coverage expansion, or class-level blocking that avoids enumerating equivalent extensions.",
+      "sources": ["https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf"]
+    },
+    {
+      "id": "continuous-time-maxsat-circulant-seed",
+      "family": "continuous-time MaxSAT with structured seeding",
+      "mechanism": "Use circulant initialization and continuous-time MaxSAT dynamics.",
+      "scope_and_outcome": "Recovered order-42 solutions and found the published order-43 coloring with exactly two monochromatic K5s, but no zero-conflict K43 witness.",
+      "material_delta_required": "Beat burden two, prove a broader exact minimum, or demonstrate a held-out algorithmic improvement under matched compute.",
+      "sources": ["https://www.nature.com/articles/s41467-018-07327-2"]
+    },
+    {
+      "id": "exoo-near-circulant-constructions",
+      "family": "circulant and near-circulant constructions",
+      "mechanism": "Exploit cyclic edge-orbit structure and variations of Exoo-style lower-bound constructions.",
+      "scope_and_outcome": "Established the order-42 lower-bound construction lineage and later yielded low-conflict K43 variations; our certified one/two-orbit subfamilies remain at minimum burden two.",
+      "material_delta_required": "A structural theorem, a lower conflict count in a broader precise family, or a mechanism not equivalent to releasing more cyclic orbits.",
+      "sources": ["https://arxiv.org/abs/2212.12630", "https://www.cs.rit.edu/~spr/ElJC/sur.pdf"]
+    },
+    {
+      "id": "alphaevolve-ramsey-program-search",
+      "family": "LLM-guided evolutionary program search",
+      "mechanism": "Evolve Ramsey construction/search programs across random, algebraic, circulant, hybrid, fractal, and spectral initializations.",
+      "scope_and_outcome": "Improved several other Ramsey lower bounds and matched many known cells; it is a strong algorithmic baseline and method precedent, not an R(5,5) result.",
+      "material_delta_required": "Leakage-safe R55/order-42 held-out gains against the published algorithm families under matched evaluator calls and ablations.",
+      "sources": ["https://arxiv.org/abs/2603.09172"]
+    },
+    {
+      "id": "verified-sat-cas-cube-conquer",
+      "family": "certificate-carrying SAT plus CAS and cube-and-conquer",
+      "mechanism": "Combine SAT with graph-symmetry CAS reasoning, parallel cubes, independently checkable leaf proofs, and exhaustive cover validation.",
+      "scope_and_outcome": "Verified R(3,8) and R(3,9) with major runtime gains over SAT-only; establishes the verification baseline for any R55 upper-bound reduction.",
+      "material_delta_required": "A deterministic R55 encoding/cover whose generator correspondence, symmetry coverage, and proof logs are independently checked.",
+      "sources": ["https://arxiv.org/abs/2502.06055"]
+    },
+    {
+      "id": "subgraph-counting-upper-bound",
+      "family": "exact subgraph-counting identities",
+      "mechanism": "Use neighborhood classifications and exact subgraph-counting identities to contradict hypothetical large Ramsey graphs.",
+      "scope_and_outcome": "This structural lineage underlies successive R(5,5) upper-bound improvements, including the current upper bound 46.",
+      "material_delta_required": "A new independently checked inequality/profile exclusion not subsumed by the published counting system.",
+      "sources": ["https://onlinelibrary.wiley.com/doi/full/10.1002/jgt.70029", "https://www.cs.rit.edu/~spr/ElJC/sur.pdf"]
+    }
+  ]
+}

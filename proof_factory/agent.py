@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import brain, contribution_gate, research_state, roadmap, store, tactics
+from . import brain, contribution_gate, prior_art, research_state, roadmap, store, tactics
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -64,7 +64,7 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "field_progress_assessment"):
+    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "prior_art_check", "field_progress_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
     efficiency = result.get("search_efficiency")
@@ -101,6 +101,21 @@ def extract_result(text: str) -> dict[str, Any]:
     for key in ("reusable_assets", "constraints_learned"):
         if not isinstance(learning.get(key), list):
             raise ValueError(f"tactical_learning.{key} must be a list")
+    prior = result.get("prior_art_check")
+    if not isinstance(prior, dict):
+        raise ValueError("prior_art_check must be an object")
+    required_prior = ("exact_delta", "duplicate_risk", "comparison_test")
+    missing_prior = [key for key in required_prior if not str(prior.get(key) or "").strip()]
+    if missing_prior:
+        raise ValueError(f"prior_art_check missing fields: {missing_prior}")
+    if not isinstance(prior.get("nearest_method_ids"), list) or not prior["nearest_method_ids"]:
+        raise ValueError("prior_art_check.nearest_method_ids must be a nonempty list")
+    if not isinstance(prior.get("source_urls"), list):
+        raise ValueError("prior_art_check.source_urls must be a list")
+    if prior.get("classification") not in {"genuinely_different", "material_modification", "replication_control"}:
+        raise ValueError("prior_art_check.classification must be genuinely_different|material_modification|replication_control")
+    if prior.get("decision") not in {"proceed", "control_only", "stop"}:
+        raise ValueError("prior_art_check.decision must be proceed|control_only|stop")
     field_progress = result.get("field_progress_assessment")
     if not isinstance(field_progress, dict):
         raise ValueError("field_progress_assessment must be an object")
@@ -199,12 +214,16 @@ DURABLE CAMPAIGN STATE
 DETERMINISTIC TACTICAL BRIEF
 {tactics.compact_for_prompt(problem)}
 
+PRIOR-ART ANTI-REDISCOVERY REGISTER
+{prior_art.compact_for_prompt(problem)}
+
 CROSS-PROBLEM RESEARCH BRAIN
 {brain.context_for_problem(problem)}
 
 RULES
 1. Read relevant files in the shared workspace and consult the full project dossier when it exists.
-2. Do not repeat a blocked or ruled-out route without satisfying its recorded reopen condition.
+2. Do not repeat a blocked or ruled-out route without satisfying its recorded reopen condition. Compare the proposed
+   mechanism with the nearest registered historical methods; label replications as controls and state the exact delta.
 3. Distinguish sourced fact, reported computation, inference, and proposal. Preserve direct source URLs.
 4. Do not declare a proof, disproof, or candidate. Do not edit the durable research map or append-only ledger.
 5. Return a memo under 1,500 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
@@ -346,8 +365,11 @@ CROSS-PROBLEM RESEARCH BRAIN (links are transfer hypotheses, not evidence)
 DETERMINISTIC TACTICAL BRIEF (inspectable priorities, not probabilities)
 {tactics.compact_for_prompt(problem)}
 
-AUTOMATED CAMPAIGN ROADMAP (phase budgets are caps; evidence may advance or kill a phase early)
+AUTOMATED CAMPAIGN ROADMAP (evidence-driven stage graph; no fixed session sequence)
 {roadmap.compact_for_prompt(problem)}
+
+PRIOR-ART ANTI-REDISCOVERY REGISTER (method IDs are stable comparison keys)
+{prior_art.compact_for_prompt(problem)}
 
 REUSABLE STRATEGY LIBRARY
 {json.dumps(strategy_library, indent=2, ensure_ascii=False)[:18000]}
@@ -363,6 +385,8 @@ STRATEGY PORTFOLIO RULES
 7. End the epoch with a synthesis: what is established, what was ruled out and at what scope, live leads, and the next first action.
 8. Follow the tactical brief unless concrete evidence overrides it. Compare its incumbent and challenger, predeclare success,
    failure, and redirect signals, and record the override reason. Never confuse a high route score with mathematical evidence.
+9. Treat the roadmap as an evidence-driven stage graph, not a sequence. Recompute the active stage after every epoch and
+   switch immediately when a promote, kill, hold, redirect, or reopen condition is observed.
 
 WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
@@ -408,7 +432,10 @@ WORK RULES
 9. A larger arbitrary cutoff is not a contribution. It becomes candidate-eligible only if it improves
    the actual best-known result, answers a source's explicit request, has confirmed expert interest,
    or yields a new structural result. “We did not find it in a quick search” is not novelty evidence.
-10. End with exactly one fenced JSON block in this schema:
+10. PRIOR-ART CHECK: before allocating substantial compute, identify the nearest method IDs in the supplied register and
+   inspect their primary sources. State the mechanism-level delta and cheapest matched comparison. A replication may run
+   only as a bounded calibration/control; it cannot be novelty and must not receive scale-up compute without a material delta.
+11. End with exactly one fenced JSON block in this schema:
 
 ```proof_result
 {{
@@ -420,6 +447,7 @@ WORK RULES
   "search_efficiency": {{"naive_space":"candidate count and bottleneck","reductions_considered":["symmetry/compression/batching/vectorization/incremental/decomposition/pruning/reuse options"],"chosen_mechanism":"bulk-elimination design","estimated_or_measured_savings":"reduction ratio or throughput","soundness_guard":"independent equivalence or one-sided coverage check"}},
   "space_reduction": {{"ambient_space":"exact reference universe, such as 2^903 labelled K43 graphs","represented_space_before":"exact expression or honest bound before this epoch","eliminated_or_quotiented":"what this epoch removed or identified","represented_space_after":"exact expression or honest bound after this epoch","reduction_factor":"exact factor, bound, estimate, or none","measurement_status":"exact|upper_bound|estimate|not_applicable","unit":"labelled assignments|isomorphism classes|cubes|profiles|families|proof states|not applicable","coverage_scope":"precise family or global scope","soundness_basis":"proof/check establishing safe elimination or quotient coverage","remaining_unknown":"what is not counted or excluded","next_bulk_elimination":"next class/cube/profile/family-level reduction"}},
   "tactical_learning": {{"prediction":"predeclared expected signal","observation":"what occurred","surprise":"difference from prediction, or none","failure_signature":"reusable failure pattern, or none","bottleneck_update":"current limiting uncertainty or operation","reusable_assets":[{{"name":"artifact/checker/dataset","use":"future use","evidence":"path/hash/check"}}],"constraints_learned":[{{"constraint":"exact restriction learned","scope":"valid scope","evidence":"support"}}],"route_decision":"continue|hold|redirect|close","next_discriminator":"cheapest next test"}},
+  "prior_art_check": {{"nearest_method_ids":["stable registry ID or none-found"],"classification":"genuinely_different|material_modification|replication_control","exact_delta":"mechanism-level difference from the nearest work","duplicate_risk":"what could merely rediscover a known result","comparison_test":"cheapest matched test against the nearest baseline","decision":"proceed|control_only|stop","source_urls":["direct primary URL"]}},
   "field_progress_assessment": {{"status":"met|not_met","gate_id":"exact configured gate number/name, or none","contribution_class":"exact contribution class or verified negative/infrastructure result","closest_prior_result":"closest prior result or baseline","measurable_improvement":"quantified delta, or none","independent_validation":"validator and result, or not yet independently validated","external_audience":"accepted audience/channel, or none","remains_unproved":"precise remaining gap","route_recommendation":"close|broaden|redirect|continue and why"}},
   "strategy_status": "proposed|active|promising|blocked|ruled_out|exhausted|superseded",
   "summary": "what actually happened, including limits",
@@ -520,6 +548,12 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             )
             outcome = "no_progress"
             result["strategy_status"] = prior_strategy.get("status")
+        prior_check = result.get("prior_art_check", {})
+        if result.get("outcome") == "candidate" and (
+            prior_check.get("classification") == "replication_control" or prior_check.get("decision") != "proceed"
+        ):
+            policy_flags.append("Candidate is a prior-art replication/control or lacks a proceed decision; it cannot be promoted as novelty.")
+            outcome = "progress"
         field_progress = result.get("field_progress_assessment", {})
         configured_gates = problem.get("field_progress_gates") or []
         if field_progress.get("status") == "met" and configured_gates:
@@ -567,6 +601,12 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                 "bottleneck_update": "repair the epoch failure before further research",
                 "reusable_assets": [], "constraints_learned": [], "route_decision": "hold",
                 "next_discriminator": "rerun the smallest valid output-contract control",
+            },
+            "prior_art_check": {
+                "nearest_method_ids": ["not-applicable"], "classification": "replication_control",
+                "exact_delta": "none; the epoch failed before comparison", "duplicate_risk": "unknown",
+                "comparison_test": "repair and rerun the smallest output-contract control", "decision": "stop",
+                "source_urls": [problem["source_url"]],
             },
             "field_progress_assessment": {
                 "status": "not_met", "gate_id": "none", "contribution_class": "infrastructure failure",
@@ -645,6 +685,15 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "constraints_learned": [row for row in result["tactical_learning"].get("constraints_learned", []) if isinstance(row, dict)][:20],
             "route_decision": str(result["tactical_learning"].get("route_decision") or "")[:40],
             "next_discriminator": str(result["tactical_learning"].get("next_discriminator") or "")[:2000],
+        },
+        "prior_art_check": {
+            "nearest_method_ids": [str(x)[:200] for x in result["prior_art_check"].get("nearest_method_ids", [])][:20],
+            "classification": str(result["prior_art_check"].get("classification") or "")[:80],
+            "exact_delta": str(result["prior_art_check"].get("exact_delta") or "")[:3000],
+            "duplicate_risk": str(result["prior_art_check"].get("duplicate_risk") or "")[:3000],
+            "comparison_test": str(result["prior_art_check"].get("comparison_test") or "")[:3000],
+            "decision": str(result["prior_art_check"].get("decision") or "")[:40],
+            "source_urls": [str(x)[:1000] for x in result["prior_art_check"].get("source_urls", [])][:20],
         },
         "field_progress_assessment": {
             key: str(result["field_progress_assessment"].get(key) or "")[:4000]

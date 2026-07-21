@@ -102,6 +102,7 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
             "failure_signatures": memory.get("failure_signatures", [])[-12:],
             "reusable_assets": memory.get("reusable_assets", [])[-12:],
             "reduction_ledger": memory.get("reduction_ledger", [])[-12:],
+            "prior_art_decisions": memory.get("prior_art_decisions", [])[-12:],
             "current_bottleneck": _text(memory.get("current_bottleneck"), 1500),
         },
         "closed_routes": [row for row in ranked if not row["eligible"]][:12],
