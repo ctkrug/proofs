@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 4,
-  "last_updated": "2026-07-20T22:46:31.902547+00:00",
+  "epoch_count": 6,
+  "last_updated": "2026-07-21T00:18:47.104341+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The authoritative HTTP/2 200 response omitted Content-Type, so provenance schema v2 now preserves that absence instead of inferring text/plain. The second 47,888-byte body matched SHA-256 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb. One full gate passed on 328 source records and 328 complements in 997.687 seconds. No Ramsey bound or completeness claim changed.",
+  "synthesis_summary": "The two authenticated 3812-byte Springer bodies agree at SHA-256 c2429869f6fa47ab7388134b580b014efae01e6f0e474f5bab2233afb1ef6990. The seed has exactly two all-zero K5s, [6,12,17,36,42] and [6,12,31,36,42], and no all-one K5. All 903 single-edge flips were exhausted. The global radius-1 minimum burden is 2, attained by flips (6,12) and (36,42). Among the 741 flips avoiding vertices {6,12,36,42}, the minimum is 3, attained by seven recorded edges. No witness or global Ramsey bound was obtained.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -161,6 +161,30 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260720-224631-ebf6f8",
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "claim": "The authenticated publisher seed has exactly two all-zero K5s and no all-one K5.",
+      "evidence": "artifacts/publisher_seed_radius1_report.json",
+      "scope": "Publisher body SHA-256 c2429869f6fa47ab7388134b580b014efae01e6f0e474f5bab2233afb1ef6990",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
+    },
+    {
+      "claim": "Every one of its 903 one-edge flips has burden at least 2.",
+      "evidence": "Complete dual-checked flip ledger in artifacts/publisher_seed_radius1_report.json",
+      "scope": "Hamming distance exactly one from the frozen seed",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
+    },
+    {
+      "claim": "The 741 flips avoiding {6,12,36,42} have minimum burden 3.",
+      "evidence": "Complete strict-family ledger and seven full minimizer identities",
+      "scope": "Exactly the recorded avoid-intersection predicate",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
     }
   ],
   "strategies": [
@@ -174,24 +198,6 @@
       "hypothesis": "A 43 witness, if it exists, is reachable only through an unknown order-42 basin, and the almost-regular conjecture supplies one sharp search slice.",
       "discriminating_test": "Produce a dual-verified order-42 graph outside all 656 or certify a precisely bounded branch empty; rediscovery of known classes fails the epoch.",
       "blocker": "Requires authenticated corpus, canonicalization, novelty metrics, and independent checkers.",
-      "reopen_condition": "",
-      "last_attempt_id": "",
-      "attempts": 0,
-      "parent_ids": [
-        "strategy-r55-controls"
-      ],
-      "updated_at": "2026-07-20T12:53:00-06:00"
-    },
-    {
-      "id": "strategy-r55-conflict-core",
-      "family": "exact destroy-and-repair around a published near-solution",
-      "fingerprint": "r55twocore2026",
-      "title": "Repair the six-vertex two-conflict core",
-      "mechanism": "Recover and verify the published two-conflict K43, freeze edges outside the six-vertex conflict union, optimize internal and incident edges, then expand destroy sets 6,8,10,... using conflict persistence and UNSAT-core information.",
-      "status": "proposed",
-      "hypothesis": "A coordinated boundary repair can escape the best published near-solution more effectively than unrestricted single-edge search.",
-      "discriminating_test": "Certify the optimum inside each bounded neighborhood and compare matched compute with tabu/annealing; only a dual-verified zero is a witness.",
-      "blocker": "The exact supplementary two-conflict graph has not yet been recovered and authenticated.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
@@ -287,6 +293,58 @@
         "strategy-r55-controls"
       ],
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "id": "strategy-0d0ea8626daf",
+      "family": "unspecified",
+      "fingerprint": "0d0ea8626daf",
+      "title": "Headless research pass",
+      "mechanism": "Headless research pass",
+      "status": "active",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "reopen_evidence": "",
+      "last_attempt_id": "ramsey-r55-20260720-235107-8e574c",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-20T23:51:07.097038+00:00"
+    },
+    {
+      "id": "strategy-r55twocore2026",
+      "family": "exact destroy-and-repair around a published near-solution",
+      "fingerprint": "r55twocore2026",
+      "title": "Authenticate Springer Supplementary Data 4 and exhaust every one-edge flip of its published two-conflict K43 matrix.",
+      "mechanism": "Hash-gate two direct publisher retrievals, independently parse the raw matrix in Python and C, and compare complete monochromatic-K5 identity ledgers for all 903 one-edge flips.",
+      "status": "active",
+      "hypothesis": "No single-edge flip of the authenticated publisher seed is a Ramsey witness, and every flip avoiding all four shared conflict vertices has at least three monochromatic K5s.",
+      "discriminating_test": "Exhaust the lexicographically ordered 903 edges under two materially different exact encodings and compare every violation identity.",
+      "blocker": "No exact result exists beyond Hamming radius 1. Radius 2 needs a retained complete pair-score ledger and independent identity checks; larger UNSAT neighborhoods would require proof-carrying encodings.",
+      "reopen_condition": "The previous source blocker is closed. Reopen radius 1 only upon a demonstrated provenance or checker defect.",
+      "reopen_evidence": "Two byte-identical direct Springer retrievals and the dual-checked report close the publisher-seed authentication blocker.",
+      "last_attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55controls2026"
+      ],
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
+    },
+    {
+      "family": "certificate-carrying local MaxSAT",
+      "mechanism": "If radius 2 contains no zero, encode a precisely bounded larger repair family with cardinality constraints and retain checked UNSAT proofs or independently checked SAT models.",
+      "hypothesis": "A coordinated edit set beyond radius 2 may escape the local basin while remaining small enough for proof logging.",
+      "discriminating_test": "First certify a toy bounded ball and measure proof storage before encoding any production slice.",
+      "rationale": "Explicit enumeration scales poorly beyond radius 2, while a proof-carrying bounded encoding preserves exact scope.",
+      "id": "strategy-235d96431caa",
+      "fingerprint": "235d96431caa",
+      "status": "proposed",
+      "title": "If radius 2 contains no zero, encode a precisely bounded larger repair family with cardinality constraints and retain checked UNSAT proofs or independently checked SAT models.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55twocore2026"
+      ],
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
     }
   ],
   "open_leads": [
@@ -398,6 +456,16 @@
       "id": "lead-3a1dd469bb",
       "strategy_id": "strategy-r55controls2026",
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "description": "Exhaust the complete radius-2 neighborhood and its deletion-remainder-change slice.",
+      "rationale": "Only 407253 unordered pairs remain, small enough for an explicit score certificate and independent replay.",
+      "next_experiment": "Implement lexicographically ordered C and Python radius-2 evaluators, retain every pair score and every minimizer identity, and stop at the first mismatch.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-f8d8033687",
+      "strategy_id": "strategy-r55twocore2026",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
     }
   ],
   "ruled_out": [
@@ -521,6 +589,24 @@
       "reopen_condition": "Produce a replayable exhaustive enumeration with checked coverage.",
       "attempt_id": "ramsey-r55-20260720-224631-ebf6f8",
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "claim_or_route": "Repair the authenticated publisher seed using exactly one edge flip.",
+      "scope": "All 903 one-edge flips",
+      "reason": "The exact global minimum burden remains 2.",
+      "evidence": "artifacts/publisher_seed_radius1_report.json",
+      "reopen_condition": "Demonstrate a source-byte, parser, or checker defect against the retained controls; larger radii are a different route.",
+      "attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
+    },
+    {
+      "claim_or_route": "Escape all four known deletion remainders using one edge that avoids their deleted vertices.",
+      "scope": "All 741 edges disjoint from {6,12,36,42}",
+      "reason": "The exact minimum burden is 3.",
+      "evidence": "avoid_all_shared_conflict_vertices family in the retained report",
+      "reopen_condition": "Use at least two coordinated edits or a materially different seed.",
+      "attempt_id": "ramsey-r55-20260721-001847-bbfd27",
+      "updated_at": "2026-07-21T00:18:47.104341+00:00"
     }
   ],
   "unresolved_questions": [
@@ -531,16 +617,18 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55controls2026",
-    "objective": "Authenticate the exact publisher K43 two-conflict seed.",
-    "first_action": "Run the Springer raw-TXT retrieval command recorded at CHECKPOINT.md lines 120-135.",
-    "stop_condition": "Stop on transport ambiguity, byte instability, parse ambiguity, or checker disagreement; do not begin repair before the source gate passes.",
-    "source_attempt_id": "ramsey-r55-20260720-224631-ebf6f8"
+    "recommended_strategy_id": "strategy-r55twocore2026",
+    "objective": "Exhaust and independently verify the publisher seed's complete radius-2 edge neighborhood.",
+    "first_action": "Run the cold replay command in CHECKPOINT.md, then enumerate the 407253 lexicographically ordered unordered edge pairs under separate C and Python implementations.",
+    "stop_condition": "Stop on any source, parser, ordering, score, or identity mismatch; otherwise stop after every pair is retained and agreed. A zero must pass both complete checkers.",
+    "source_attempt_id": "ramsey-r55-20260721-001847-bbfd27"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
     "ramsey-r55-20260720-201853-f9f229",
     "ramsey-r55-20260720-211702-50a040",
-    "ramsey-r55-20260720-224631-ebf6f8"
+    "ramsey-r55-20260720-224631-ebf6f8",
+    "ramsey-r55-20260720-235107-8e574c",
+    "ramsey-r55-20260721-001847-bbfd27"
   ]
 }
