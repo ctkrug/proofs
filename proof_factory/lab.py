@@ -500,6 +500,21 @@ def worker_once() -> dict[str, Any]:
             running.unlink(missing_ok=True)
 
 
+def worker_tranche(*, max_segments: int = 100) -> dict[str, Any]:
+    """Run consecutive bounded segments until the next review/stop boundary."""
+    results: list[dict[str, Any]] = []
+    for _ in range(max_segments):
+        result = worker_once()
+        results.append(result)
+        if result.get("status") != "checkpointed":
+            break
+    return {
+        "status": results[-1].get("status") if results else "idle",
+        "segments_run": len([row for row in results if row.get("segment")]),
+        "results": results,
+    }
+
+
 def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "operator") -> dict[str, Any]:
     decision = str(decision).strip()
     if decision not in REVIEW_DECISIONS:

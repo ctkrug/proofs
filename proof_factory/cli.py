@@ -215,7 +215,8 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("repo-sync")
     lab_status = sub.add_parser("lab-status")
     lab_status.add_argument("--problem")
-    sub.add_parser("lab-worker")
+    lab_worker = sub.add_parser("lab-worker")
+    lab_worker.add_argument("--drain", action="store_true", help="run bounded segments continuously until review is due")
     lab_review = sub.add_parser("lab-review")
     lab_review.add_argument("--job", required=True)
     lab_review.add_argument("--decision", choices=sorted(lab.REVIEW_DECISIONS), required=True)
@@ -354,7 +355,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(lab.status(args.problem), indent=2))
         return 0
     if args.command == "lab-worker":
-        print(json.dumps(lab.worker_once(), indent=2))
+        print(json.dumps(lab.worker_tranche() if args.drain else lab.worker_once(), indent=2))
         return 0
     if args.command == "lab-review":
         print(json.dumps(lab.apply_review(args.job, args.decision, reason=args.reason, reviewer=args.reviewer), indent=2))

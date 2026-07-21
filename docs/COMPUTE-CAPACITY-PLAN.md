@@ -7,6 +7,8 @@ volume shared by the immutable Alpha Factory tape and rebuildable Proof Factory 
 The checkpointed lab is low-priority and limited to one full CPU core (`CPUQuota=100%`), 1.3 GiB hard
 memory, 128 tasks, offline execution, and at most 24 hours per segment. That leaves one CPU core and
 most memory available for dashboards and orchestration.
+Within an approved tranche the worker drains consecutive checkpointed segments without waiting for the
+five-minute queue poll; it stops as soon as the next review, validation, redirect, or safety gate is due.
 
 Admission is resource-specific. Every job retains root-disk and memory reserves. Model/formalization
 work also requires at least 1 GiB free on the build-cache volume. Workspace-confined lab jobs cannot

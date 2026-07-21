@@ -652,6 +652,16 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertTrue(lab._requires_build_cache({"command": ["checks/run_lean_build.sh"]}))
         self.assertFalse(lab._requires_build_cache({"command": ["python3", "enumerate.py"]}))
 
+    def test_lab_tranche_drains_checkpoints_until_review(self) -> None:
+        with patch.object(lab, "worker_once", side_effect=[
+            {"status": "checkpointed", "segment": 2},
+            {"status": "checkpointed", "segment": 3},
+            {"status": "completed_awaiting_review", "segment": 4},
+        ]):
+            report = lab.worker_tranche()
+        self.assertEqual(report["status"], "completed_awaiting_review")
+        self.assertEqual(report["segments_run"], 3)
+
     def test_capacity_cleanup_candidates_exclude_fresh_and_system_tmp(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)

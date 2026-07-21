@@ -8,7 +8,7 @@ WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
 Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
-ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory lab-worker
+ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory lab-worker --drain
 Nice=19
 CPUWeight=1
 CPUQuota=100%
