@@ -291,6 +291,18 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(brief["incumbent"]["score_components"]["continuation_priority"], 30)
         self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "closed")["eligible"])
 
+    def test_strategy_similarity_separates_paraphrase_from_distinct_mechanism(self) -> None:
+        paraphrase = research_state.mechanism_similarity(
+            "deletion-minimize raw K5 clauses and canonicalize signed incidence cores",
+            "strip auxiliaries, minimize raw K5 clauses, and canonicalize signed-incidence cores",
+        )
+        distinct = research_state.mechanism_similarity(
+            "freeze an order-30 core and solve its boundary edges",
+            "encode every order-42 constraint with degree 20 or 21",
+        )
+        self.assertGreaterEqual(paraphrase, 0.25)
+        self.assertLess(distinct, 0.25)
+
     def test_roadmap_selects_phase_from_tactical_incumbent(self) -> None:
         problem = {"id": "p"}
         value = {

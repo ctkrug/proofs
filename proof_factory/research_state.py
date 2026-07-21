@@ -25,6 +25,13 @@ def strategy_fingerprint(family: Any, mechanism: Any) -> str:
     return hashlib.sha256(normalized.encode()).hexdigest()[:12]
 
 
+def mechanism_similarity(left: Any, right: Any) -> float:
+    """Cheap deterministic guard against paraphrased strategy duplication."""
+    left_tokens = set(re.findall(r"[a-z0-9]+", _text(left).lower()))
+    right_tokens = set(re.findall(r"[a-z0-9]+", _text(right).lower()))
+    return len(left_tokens & right_tokens) / max(1, len(left_tokens | right_tokens))
+
+
 def state_path(problem_id: str):
     return store.DATA / "research_states" / f"{problem_id}.json"
 
@@ -316,6 +323,21 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
     for proposal in proposals:
         proposal_fp = strategy_fingerprint(proposal.get("family"), proposal.get("mechanism"))
         if proposal_fp in known:
+            existing_id = next(row.get("id") for row in state["strategies"] if row.get("fingerprint") == proposal_fp)
+            added_proposal_ids.append(existing_id)
+            continue
+        same_mechanism = next((
+            row for row in state["strategies"]
+            if row.get("status") not in {"blocked", "ruled_out", "exhausted", "superseded"}
+            and _text(row.get("family"), 500).lower() == _text(proposal.get("family"), 500).lower()
+            and mechanism_similarity(row.get("mechanism"), proposal.get("mechanism")) >= 0.25
+        ), None)
+        if same_mechanism:
+            for key in ("hypothesis", "discriminating_test", "rationale"):
+                if proposal.get(key):
+                    same_mechanism[key] = proposal[key]
+            same_mechanism["updated_at"] = now
+            added_proposal_ids.append(same_mechanism["id"])
             continue
         proposal.update({
             "id": f"strategy-{proposal_fp}", "fingerprint": proposal_fp, "status": "proposed",
