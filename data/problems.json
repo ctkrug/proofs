@@ -420,7 +420,7 @@
       "minimum witness definition"
     ],
     "lane": "easy",
-    "status": "active",
+    "status": "parked",
     "priority": 50,
     "attempt_count": 0,
     "research_attempt_count": 0,
@@ -428,11 +428,11 @@
     "added_at": "2026-07-21T16:15:00+00:00",
     "source_checked_at": "2026-07-21T16:15:00+00:00",
     "intake_source": "official Formal Conjectures good-first-issue review",
-    "campaign_state": "active",
+    "campaign_state": "hold",
     "campaign_started_at": "2026-07-21T16:15:00+00:00",
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
-    "campaign_decision": "user-directed easy-to-hard sequence: start with the smallest official good-first issue"
+    "campaign_decision": "screened out before first dispatch: upstream PR #3714 is open and already under maintainer review; do not duplicate another contributor's work"
   },
   {
     "id": "scout-bdf77f43574b",
@@ -460,7 +460,7 @@
       "asymptotic notation"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "active",
     "priority": 40,
     "attempt_count": 1,
     "research_attempt_count": 1,
@@ -476,10 +476,10 @@
       "reasoning_output_tokens": 1031
     },
     "last_attempt_at": "2026-07-20T19:52:51.807779+00:00",
-    "campaign_state": "superseded",
+    "campaign_state": "active",
     "campaign_started_at": "2026-07-21T15:14:41.303998+00:00",
     "campaign_start_research_attempt_count": 1,
     "campaign_min_runs": 25,
-    "campaign_decision": "superseded before the 25-run minimum by explicit user direction to sequence from easier official contributions to harder ones; retain as the next formalization target"
+    "campaign_decision": "resumed after easier candidate #3688 was screened out for an active upstream PR; continue the focused campaign while the next easier unclaimed issue is audited"
   }
 ]

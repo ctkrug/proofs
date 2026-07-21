@@ -21,15 +21,6 @@ checkout="$cache_root/formal-conjectures"
 lock_dir="$cache_root/locks/formal-conjectures-bootstrap.lock"
 mkdir -p "$cache_root/locks"
 
-# A first Mathlib cache hydrate can consume several GiB.  Fail before any
-# download if the cache filesystem cannot absorb it; the scheduler can keep
-# normal research work running instead of letting this bootstrap fill a disk.
-min_free_kib="${PROOF_FACTORY_LEAN_BOOTSTRAP_MIN_FREE_KIB:-8388608}" # 8 GiB
-available_kib="$(df -Pk "$cache_root" | awk 'NR == 2 { print $4 }')"
-if [[ ! "$available_kib" =~ ^[0-9]+$ ]] || (( available_kib < min_free_kib )); then
-  echo "formal-conjectures bootstrap needs $((${min_free_kib} / 1024 / 1024)) GiB free in $cache_root; only ${available_kib:-0} KiB available" >&2
-  exit 75
-fi
 
 # `mkdir` is atomic on macOS and Linux. Serializing avoids competing `lake update`
 # processes corrupting a temporary package checkout.
@@ -69,12 +60,29 @@ if [[ ! -x "$elan_home/bin/lake" ]]; then
 fi
 
 if [[ ! -d "$checkout/.git" ]]; then
+  # A first clone plus Mathlib hydrate can consume several GiB. Fail before
+  # downloading if the cache filesystem cannot absorb it. An already-hydrated
+  # checkout remains usable under the normal, much smaller reserve.
+  min_free_kib="${PROOF_FACTORY_LEAN_BOOTSTRAP_MIN_FREE_KIB:-8388608}" # 8 GiB
+  available_kib="$(df -Pk "$cache_root" | awk 'NR == 2 { print $4 }')"
+  if [[ ! "$available_kib" =~ ^[0-9]+$ ]] || (( available_kib < min_free_kib )); then
+    echo "formal-conjectures first hydrate needs $((${min_free_kib} / 1024 / 1024)) GiB free in $cache_root; only ${available_kib:-0} KiB available" >&2
+    exit 75
+  fi
   git clone --depth 1 https://github.com/google-deepmind/formal-conjectures.git "$checkout"
 fi
 
 cd "$checkout"
 ELAN_HOME="$elan_home" "$elan_home/bin/lake" update
-ELAN_HOME="$elan_home" "$elan_home/bin/lake" exe cache get
+if [[ ! -d "$checkout/.lake/packages/mathlib/.lake/build" ]]; then
+  min_free_kib="${PROOF_FACTORY_LEAN_BOOTSTRAP_MIN_FREE_KIB:-8388608}" # 8 GiB
+  available_kib="$(df -Pk "$cache_root" | awk 'NR == 2 { print $4 }')"
+  if [[ ! "$available_kib" =~ ^[0-9]+$ ]] || (( available_kib < min_free_kib )); then
+    echo "formal-conjectures Mathlib build cache needs $((${min_free_kib} / 1024 / 1024)) GiB free in $cache_root; only ${available_kib:-0} KiB available" >&2
+    exit 75
+  fi
+  ELAN_HOME="$elan_home" "$elan_home/bin/lake" exe cache get
+fi
 # Build the imported support library once. Candidate module builds then have all local imports.
 LEAN_NUM_THREADS="${LEAN_NUM_THREADS:-1}" ELAN_HOME="$elan_home" \
   "$elan_home/bin/lake" build FormalConjecturesUtil
