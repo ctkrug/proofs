@@ -395,6 +395,46 @@
     "intake_source": "https://raw.githubusercontent.com/teorth/erdosproblems/master/data/problems.yaml"
   },
   {
+    "id": "formal-conjectures-3688",
+    "outcome": "candidate",
+    "title": "Lean formalization of Fortune's conjecture on Fortunate numbers",
+    "statement": "Add a scoped Lean declaration that every Fortunate number, defined as the least m > 1 for which primorial n + m is prime, is prime.",
+    "source_url": "https://github.com/google-deepmind/formal-conjectures/issues/3688",
+    "source_name": "google-deepmind/formal-conjectures issue #3688",
+    "problem_state": "open",
+    "contribution_type": "formalization",
+    "verifiability": "A self-contained Lean declaration and supporting minimum-existence definition typechecked by the repository's pinned Lean toolchain and CI; the target uses Nat.Prime, primorial, and standard natural arithmetic.",
+    "rationale": "The upstream maintainers explicitly label this unassigned, no-PR issue a good first issue and rate formalizability 1/5. Its stated building blocks already exist in Mathlib, making it a smaller and clearer first accepted contribution than the finite-set-over-reals API required for Erdős #530.",
+    "external_channel": "google-deepmind/formal-conjectures — open good-first-issue #3688",
+    "external_url": "https://github.com/google-deepmind/formal-conjectures/issues/3688",
+    "estimated_success_probability": 0.88,
+    "difficulty": 1,
+    "verification_score": 5,
+    "contribution_score": 3,
+    "review_cost": 1,
+    "novelty_risk": 1,
+    "techniques": [
+      "Lean 4 formalization",
+      "natural-number primality",
+      "primorial",
+      "minimum witness definition"
+    ],
+    "lane": "easy",
+    "status": "active",
+    "priority": 50,
+    "attempt_count": 0,
+    "research_attempt_count": 0,
+    "accepted_result": false,
+    "added_at": "2026-07-21T16:15:00+00:00",
+    "source_checked_at": "2026-07-21T16:15:00+00:00",
+    "intake_source": "official Formal Conjectures good-first-issue review",
+    "campaign_state": "active",
+    "campaign_started_at": "2026-07-21T16:15:00+00:00",
+    "campaign_start_research_attempt_count": 0,
+    "campaign_min_runs": 25,
+    "campaign_decision": "user-directed easy-to-hard sequence: start with the smallest official good-first issue"
+  },
+  {
     "id": "scout-bdf77f43574b",
     "outcome": "candidate",
     "title": "Lean formalization of Erdős Problem #530 (largest guaranteed Sidon subset)",
@@ -420,7 +460,7 @@
       "asymptotic notation"
     ],
     "lane": "easy",
-    "status": "active",
+    "status": "queued",
     "priority": 40,
     "attempt_count": 1,
     "research_attempt_count": 1,
@@ -436,10 +476,10 @@
       "reasoning_output_tokens": 1031
     },
     "last_attempt_at": "2026-07-20T19:52:51.807779+00:00",
-    "campaign_state": "active",
+    "campaign_state": "superseded",
     "campaign_started_at": "2026-07-21T15:14:41.303998+00:00",
     "campaign_start_research_attempt_count": 1,
     "campaign_min_runs": 25,
-    "campaign_decision": "continue through the minimum campaign"
+    "campaign_decision": "superseded before the 25-run minimum by explicit user direction to sequence from easier official contributions to harder ones; retain as the next formalization target"
   }
 ]
