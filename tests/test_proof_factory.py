@@ -929,6 +929,39 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(result["status"], "deferred")
         self.assertIn("already satisfied", result["usage_policy"]["reason"])
 
+    def test_lab_review_applies_on_easy_lane_and_events_consume_selectively(self) -> None:
+        attempt = {
+            "id": "easy-attempt", "lane": "easy",
+            "evidence_validation": {"status": "valid"},
+            "lab_review": {"job_id": "job-reviewed", "decision": "validate", "reason": "hashes pass"},
+        }
+        with patch.object(lab, "apply_review", return_value={"status": "validated"}) as apply_review:
+            reviewed_job = scheduler._apply_lab_review(attempt)
+        self.assertEqual(reviewed_job, "job-reviewed")
+        self.assertEqual(attempt["lab_review_applied"]["status"], "validated")
+        apply_review.assert_called_once_with(
+            "job-reviewed", "validate", reason="hashes pass", reviewer="proof-factory:easy-attempt",
+        )
+        research_events = [
+            {"id": "old-job", "kind": "lab_completed", "source": "state/jobs/job-old.json"},
+            {"id": "reviewed-job", "kind": "lab_completed", "source": "state/jobs/job-reviewed.json"},
+            {"id": "source", "kind": "source_changed", "source": "source"},
+        ]
+        pending_events = [
+            *research_events,
+            {"id": "segment", "kind": "lab_segment_completed", "evidence": "job-reviewed segment 1"},
+        ]
+        selected = scheduler._consumable_event_ids(
+            research_events, pending_events, reviewed_job=reviewed_job, evidence_valid=True,
+        )
+        self.assertEqual(selected, {"reviewed-job", "source", "segment"})
+        self.assertEqual(
+            scheduler._consumable_event_ids(
+                research_events, pending_events, reviewed_job=reviewed_job, evidence_valid=False,
+            ),
+            set(),
+        )
+
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             site = Path(raw) / "site"

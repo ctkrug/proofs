@@ -174,8 +174,13 @@ priority override; hard next-run cadence is four hours; and the active easy camp
   lab cgroup peaked at 3,435,134,976 bytes with about 409 MiB swap and zero high/max/OOM events.
   The durable lifecycle state is `completed_awaiting_review`, so this is a successful target build,
   not yet a validated contribution or an upstream-ready claim.
+- The measured run also settles the resource question for this target: more RAM is not required.
+  The standing profile is pinned-cache retention, target-only builds, one Lean thread, OLean reuse,
+  quick edit checks followed by one final warning-fatal evidence run, and no overlap with heavy
+  Ramsey/SAT lab work. Narrower imports are only a future benchmark candidate because they change the
+  verification surface; they are not an assumed optimization.
 
-Phase acceptance: the full local suite passes 66 tests. Production must retain at least 1 GiB on both
+Phase acceptance: the full local suite passes 67 tests. Production must retain at least 1 GiB on both
 filesystems, produce the pinned support OLean from a clean/hash-matching checkout, pass a warning-fatal
 #530 target build with durable lab records, and complete one real discovery epoch whose evidence receipt
 is valid. The superseded hand-written #530 queue spec correctly failed closed as an unknown job after the

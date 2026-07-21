@@ -28,6 +28,26 @@ Admission is resource-specific. Every job retains root-disk and memory reserves.
 work also requires at least 1 GiB free on the build-cache volume. Workspace-confined lab jobs cannot
 write that volume, so a full Lean cache no longer blocks unrelated Python/SAT enumeration.
 
+### Erdős #530 Lean operating profile
+
+The measured repaired-target run passed in 14 minutes 47 seconds with a 3.1 GiB service peak and
+about 409 MiB of swap, so this target does not require more RAM. Keep its operating path narrow:
+
+- retain the pinned precompiled Mathlib cache; never delete it as routine cleanup;
+- use `lake --wfail build +FormalConjectures.ErdosProblems.«530»`, not a whole-repository build,
+  during the target-validation loop;
+- keep `LEAN_NUM_THREADS=1` on the one-vCPU research allocation;
+- when the experiment harness is used, retain its measured 16 GiB virtual-address limit while the
+  3.6 GiB systemd cgroup remains the physical-memory boundary;
+- reuse the generated OLean for unchanged checks, rebuilding only after source or dependency changes;
+- use quick direct/target checks while editing, and reserve the slower warning-fatal Lake build for
+  the final evidence receipt;
+- serialize Lean against heavy Ramsey/SAT lab work so one CPU and file-cache churn are not contested.
+
+A narrower import set than `FormalConjecturesUtil` may be benchmarked later, but it changes the
+verification surface and is not presumed faster or safer without a measured, semantically reviewed
+comparison. The successful bounded Mathlib/Lean run means formalization capacity is no longer blocked.
+
 ## Always-on operating modes
 
 1. **Normal:** monitoring, validation, pilots, and one checkpointed lab segment run on the existing
@@ -59,8 +79,8 @@ checks, runtime sync, and public publication remain active for both programs.
 - Expand the shared volume again only if immutable evidence plus the pinned Lean/Mathlib cache cannot
   retain the 1 GiB reserve after safe relocation or pruning. The current 50 GiB volume already provides
   roughly 26 GiB headroom; any further provisioning remains a Charlie-only cost decision.
-- Use temporary 4–8 vCPU / 16–32 GiB compute when a measured pilot shows useful parallel scaling or
-  resident memory above the local 3.6 GiB lab ceiling.
+- Use temporary 4–8 vCPU / 16–32 GiB compute only when a different measured pilot shows useful
+  parallel scaling or resident memory above the local 3.6 GiB lab ceiling. The #530 target does not.
 - Use 16+ vCPU / 64+ GiB only for a verified proof/certificate search with a declared cost cap and
   independently checkable output.
 

@@ -45,6 +45,20 @@ class ResearchEventTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     events.enqueue("ramsey-r55", "source_changed", evidence="", source="source")
 
+    def test_selected_consumption_leaves_unreviewed_events_pending(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            data.mkdir()
+            problems = data / "problems.json"
+            problems.write_text(json.dumps([{"id": "p"}]))
+            with patch.multiple(store, ROOT=root, DATA=data, STATE=root / "state", PROBLEMS_FILE=problems):
+                first = events.enqueue("p", "lab_completed", evidence="job one", source="job-1")
+                second = events.enqueue("p", "lab_completed", evidence="job two", source="job-2")
+                consumed = events.consume("p", "attempt-1", event_ids={first["id"]})
+                self.assertEqual([row["id"] for row in consumed], [first["id"]])
+                self.assertEqual([row["id"] for row in events.pending("p")], [second["id"]])
+
 
 if __name__ == "__main__":
     unittest.main()

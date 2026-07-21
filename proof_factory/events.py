@@ -59,11 +59,14 @@ def pending(problem_id: str) -> list[dict[str, Any]]:
     return rows
 
 
-def consume(problem_id: str, attempt_id: str) -> list[dict[str, Any]]:
+def consume(problem_id: str, attempt_id: str, *, event_ids: set[str] | None = None) -> list[dict[str, Any]]:
+    """Archive selected pending events, or every pending event when no selection is supplied."""
     archived: list[dict[str, Any]] = []
     archive = _archive_root()
     archive.mkdir(parents=True, exist_ok=True)
     for event in pending(problem_id):
+        if event_ids is not None and event["id"] not in event_ids:
+            continue
         source = _pending_root() / f"{event['id']}.json"
         if not source.exists():
             continue

@@ -20,6 +20,45 @@ def _reviewable_events(problem_id: str) -> list[dict[str, Any]]:
     return [row for row in events.pending(problem_id) if row.get("kind") != "lab_segment_completed"]
 
 
+def _apply_lab_review(attempt: dict[str, Any]) -> str:
+    """Apply one evidence-valid review on either lane and return its job id on success."""
+    lab_decision = attempt.get("lab_review") or {}
+    if (
+        lab_decision.get("decision") not in lab.REVIEW_DECISIONS
+        or attempt.get("evidence_validation", {}).get("status") != "valid"
+    ):
+        return ""
+    try:
+        attempt["lab_review_applied"] = lab.apply_review(
+            str(lab_decision.get("job_id")), str(lab_decision.get("decision")),
+            reason=str(lab_decision.get("reason")), reviewer=f"proof-factory:{attempt['id']}",
+        )
+        return str(lab_decision.get("job_id") or "")
+    except Exception as exc:
+        attempt.setdefault("policy_flags", []).append(f"Lab review was not applied: {type(exc).__name__}: {exc}")
+        return ""
+
+
+def _consumable_event_ids(research_events: list[dict[str, Any]], pending_events: list[dict[str, Any]],
+                          *, reviewed_job: str, evidence_valid: bool) -> set[str]:
+    if not evidence_valid:
+        return set()
+    selected = {
+        str(row["id"])
+        for row in research_events
+        if row.get("kind") != "lab_completed"
+        or (reviewed_job and reviewed_job in f"{row.get('source', '')} {row.get('evidence', '')}")
+    }
+    if reviewed_job:
+        selected.update(
+            str(row["id"])
+            for row in pending_events
+            if row.get("kind") == "lab_segment_completed"
+            and reviewed_job in f"{row.get('source', '')} {row.get('evidence', '')}"
+        )
+    return selected
+
+
 def accepted_original_results(problems: list[dict[str, Any]]) -> int:
     return sum(1 for row in problems if row.get("external_validation_state") in {
         "expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed",
@@ -154,7 +193,7 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
         problem = choose_problem(lane, problems)
-        research_events = _reviewable_events(problem["id"]) if lane == "hard" else []
+        research_events = _reviewable_events(problem["id"])
         if lane == "hard" and admission.get("mode") != "operator" and not research_events:
             reason = "no unconsumed research event; clock time alone cannot start a model-backed R(5,5) pass"
             store.update_runtime(hard_running=None, hard_event_policy={
@@ -198,22 +237,17 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             })
             render.build()
             raise
-        lab_decision = attempt.get("lab_review") or {}
-        if (
-            lane == "hard"
-            and lab_decision.get("decision") in lab.REVIEW_DECISIONS
-            and attempt.get("evidence_validation", {}).get("status") == "valid"
-        ):
-            try:
-                attempt["lab_review_applied"] = lab.apply_review(
-                    str(lab_decision.get("job_id")), str(lab_decision.get("decision")),
-                    reason=str(lab_decision.get("reason")), reviewer=f"proof-factory:{attempt['id']}",
-                )
-            except Exception as exc:
-                attempt.setdefault("policy_flags", []).append(f"Lab review was not applied: {type(exc).__name__}: {exc}")
+        evidence_valid = attempt.get("evidence_validation", {}).get("status") == "valid"
+        reviewed_job = _apply_lab_review(attempt)
         store.record_attempt(attempt)
         repositories.record_attempt(problem, attempt)
-        consumed_events = events.consume(problem["id"], attempt["id"]) if lane == "hard" else []
+        # Tranche-internal events are omitted from model admission. Once the final event for that
+        # same job is reviewed, its internal receipts become consumable too.
+        consumable_ids = _consumable_event_ids(
+            research_events, events.pending(problem["id"]),
+            reviewed_job=reviewed_job, evidence_valid=evidence_valid,
+        )
+        consumed_events = events.consume(problem["id"], attempt["id"], event_ids=consumable_ids)
         brain.refresh()
         store.update_runtime(**{
             f"{lane}_running": None,
