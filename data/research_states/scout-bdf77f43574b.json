@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 3,
-  "last_updated": "2026-07-21T22:08:06.961049+00:00",
+  "epoch_count": 4,
+  "last_updated": "2026-07-21T22:39:58.314769+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The original candidate was not warning-clean: its source elaborated and produced an OLean, but eight missing AMS attributes caused --wfail to reject it. A metadata-only repair added AMS 5 11 to those declarations, producing candidate hash 208af82a…71c9. An independent 512-case semantic regression still passes. The repaired warning-fatal target build is queued and is not counted as evidence yet.",
+  "synthesis_summary": "The pre-refactor candidate's warning-fatal exact target build was validated. Independent review then found that the candidate duplicated the repository's existing IsSidon API. A separate Lean checker proved the old and project predicates equivalent for every finite real set and passed adversarial repeated-summand and swap controls. The candidate was refactored to reuse the project definition. Its new hash is queued/running in a checkpointed target build and is not yet claimed to compile.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -47,6 +47,30 @@
       "status": "conditional",
       "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
       "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim": "LegacyFinsetIsSidon S ↔ IsSidon (S : Set ℝ) for every S : Finset ℝ.",
+      "evidence": "Lean theorem legacyFinsetIsSidon_iff_projectIsSidon; experiment 20260721-223233-e53846.",
+      "scope": "All finite subsets of the real numbers.",
+      "status": "proved",
+      "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "claim": "The pre-refactor source hash 208af82a…71c9 is warning-clean for its exact Lean target.",
+      "evidence": "Validated lab-scout-bdf77f43574b-83c018dc57aa and OLean hash 5401908c…3201.",
+      "scope": "Pinned checkout 8f6e745…, Lean 4.27.0, exact module target only.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "claim": "The maintained source marked Problem #530 open and not formalised on 2026-07-21.",
+      "evidence": "https://www.erdosproblems.com/530",
+      "scope": "Maintained-site status, subject to its explicit literature-completeness warning.",
+      "status": "conditional",
+      "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
     }
   ],
   "strategies": [
@@ -70,20 +94,34 @@
       "updated_at": "2026-07-20T19:52:51.807779+00:00"
     },
     {
-      "family": "isolated adversarial reconstruction",
-      "mechanism": "Give a reviewer only the official source and compiled candidate, asking them to reconstruct the meaning of IsSidon, GuaranteedSidonSize, ell, and the asymptotic declaration without the design narrative.",
-      "hypothesis": "An independent reviewer will recover the same unordered-pair, exact-cardinality, and asymptotic semantics.",
-      "discriminating_test": "Record the first discrepancy in a pull-request review; absence of a discrepancy is not accepted until the kernel build also passes.",
-      "rationale": "This directly attacks informal-to-formal mismatch, which finite controls and the Lean kernel cannot fully detect.",
       "id": "strategy-7603cdb38bd3",
+      "family": "isolated adversarial reconstruction",
       "fingerprint": "7603cdb38bd3",
-      "status": "proposed",
-      "title": "Give a reviewer only the official source and compiled candidate, asking them to reconstruct the meaning of IsSidon, GuaranteedSidonSize, ell, and the asymptotic declaration without the design narrative.",
-      "attempts": 0,
+      "title": "Isolated adversarial reconstruction of the compiled Erdős #530 interface, followed by a kernel-checked comparison with the repository's existing Sidon API and a minimal API-reuse refactor.",
+      "mechanism": "Reconstruct the source meanings independently, detect repository API duplication, and compile a universal equivalence theorem before changing the candidate.",
+      "status": "promising",
+      "hypothesis": "The candidate's finite-set Sidon predicate is extensionally equivalent for every Finset ℝ to the repository's reusable set-level IsSidon predicate, including repeated summands and swapped-pair triviality.",
+      "discriminating_test": "Compile a separate Lean file that restates the removed finite predicate and proves an iff with project IsSidon for an arbitrary Finset ℝ, plus repeated-summand and swap controls.",
+      "blocker": "The current refactored source hash has not completed its exact target build, and no maintainer has accepted the placement or semantics of the supporting extremal definitions.",
+      "reopen_condition": null,
+      "reopen_evidence": "",
+      "last_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "attempts": 1,
       "parent_ids": [
         "strategy-formal-premise-retrieval"
       ],
-      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+      "updated_at": "2026-07-21T22:39:58.314769+00:00",
+      "route_evaluation": {
+        "gate_proximity": 0.55,
+        "contribution_value": 0.55,
+        "decisiveness": 0.75,
+        "novelty_confidence": 0.45,
+        "novelty_risk": 0.35,
+        "scope": 0.65,
+        "reuse_value": 0.7,
+        "model_cost": 1.0,
+        "cpu_cost": 1.0
+      }
     }
   ],
   "open_leads": [
@@ -92,30 +130,66 @@
       "rationale": "This is the cheapest decisive verification of the drafted artifact.",
       "next_experiment": "Run the exact build command recorded in CHECKPOINT.md inside a current Formal Conjectures checkout.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-195e69657a",
       "strategy_id": "strategy-formal-premise-retrieval",
-      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+      "updated_at": "2026-07-20T19:52:51.807779+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T22:39:58.314769+00:00"
     },
     {
       "description": "Repository review of informal-to-formal equivalence",
       "rationale": "Kernel checking cannot establish that the declaration faithfully translates the English source.",
       "next_experiment": "Request issue #773 assignment and submit a linked PR with the semantic-review checklist.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-8165298562",
       "strategy_id": "strategy-formal-premise-retrieval",
-      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+      "updated_at": "2026-07-20T19:52:51.807779+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T22:39:58.314769+00:00"
     },
     {
       "description": "Abbott constant discrepancy",
       "rationale": "The abstract says c < 2/25 while the new preprint reports 0.0805; propagating an unexplained value would weaken the audit.",
       "next_experiment": "Compare the relevant proof optimization and exact citation passage in the two papers.",
       "priority": "low",
-      "status": "open",
+      "status": "closed",
       "id": "lead-a4b0bba2bc",
       "strategy_id": "strategy-formal-premise-retrieval",
-      "updated_at": "2026-07-20T19:52:51.807779+00:00"
+      "updated_at": "2026-07-20T19:52:51.807779+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "description": "Review the refactored target lab.",
+      "rationale": "It is the cheapest decisive check of the current source hash.",
+      "next_experiment": "Inspect the completed record, hashes, stdout, stderr, and OLean for lab-scout-bdf77f43574b-03d1a8ffc4cf.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-0b0ebd8990",
+      "strategy_id": "strategy-7603cdb38bd3",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "description": "Resolve placement of extremal helper definitions.",
+      "rationale": "The contribution guide may require definitions needed for the conjecture in FormalConjecturesForMathlib.",
+      "next_experiment": "Compare accepted nearby extremal-function files and request maintainer review of the two possible layouts.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-68c18e8ba9",
+      "strategy_id": "strategy-7603cdb38bd3",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "description": "Clean-checkout and full-CI reproduction.",
+      "rationale": "These are explicit remaining verification-contract gates after source placement stabilizes.",
+      "next_experiment": "Apply only the stabilized patch to a clean pinned checkout, run the exact target, then submit a checkpointed full lake --wfail build.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-53c31ee37c",
+      "strategy_id": "strategy-7603cdb38bd3",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
     }
   ],
   "ruled_out": [
@@ -154,28 +228,159 @@
       "reopen_condition": "Only a newly identified semantic ambiguity requiring a specifically targeted finite control.",
       "attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4",
       "updated_at": "2026-07-20T19:52:51.807779+00:00"
+    },
+    {
+      "claim_or_route": "Retain a namespace-local finite-set IsSidon definition in the Problem 530 file.",
+      "scope": "Current Formal Conjectures interface design.",
+      "reason": "The repository already exports an extensionally equivalent reusable predicate, proved equivalent by Lean.",
+      "evidence": "checks/Erdos530SemanticAudit.lean and experiment 20260721-223233-e53846.",
+      "reopen_condition": "A maintainer explicitly requires a local wrapper despite the existing project API.",
+      "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "claim_or_route": "Claim that the exact target eliminated 8037 unrelated build jobs.",
+      "scope": "Search-efficiency accounting for this checkout.",
+      "reason": "The validated exact-target stdout itself reports an 8038-job dependency closure.",
+      "evidence": "lab-scout-bdf77f43574b-83c018dc57aa stdout.",
+      "reopen_condition": "A measured dependency-graph comparison with a full build establishes a different exact count.",
+      "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "claim_or_route": "Formalize weak Sidon uniqueness while ignoring repeated summands.",
+      "scope": "Problem #530 statement design.",
+      "reason": "It wrongly accepts {0,1,2}.",
+      "evidence": "Prior 512-case regression and the new projectIsSidon_rejects_zero_one_two theorem.",
+      "reopen_condition": "An authoritative source changes the target to weak Sidon sets.",
+      "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+    },
+    {
+      "claim_or_route": "Demand uniqueness of ordered pair representations.",
+      "scope": "Problem #530 statement design.",
+      "reason": "It wrongly rejects the commutative swap.",
+      "evidence": "Universal equivalence and swapped-pair control.",
+      "reopen_condition": "None for the present source statement.",
+      "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+      "updated_at": "2026-07-21T22:39:58.314769+00:00"
     }
   ],
   "unresolved_questions": [],
   "next_session": {
-    "recommended_strategy_id": "strategy-formal-premise-retrieval",
-    "objective": "Convert the drafted interface into a kernel-checked, externally reviewed Formal Conjectures contribution.",
-    "first_action": "Execute the erdos530-lean-build command in CHECKPOINT.md from a current repository checkout.",
-    "stop_condition": "Stop successfully when target and full builds pass and a repository reviewer confirms statement equivalence; otherwise stop at and preserve the first elaboration or semantic discrepancy.",
-    "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4"
+    "recommended_strategy_id": "strategy-7603cdb38bd3",
+    "objective": "Convert the API-refactored declaration into a kernel-checked, placement-reviewed Formal Conjectures contribution.",
+    "first_action": "Inspect durable state for lab-scout-bdf77f43574b-03d1a8ffc4cf and stop at its first exact warning or elaboration discrepancy.",
+    "stop_condition": "Redirect on the first build or placement discrepancy; advance only after the current hash passes and a reviewer accepts the interface layout.",
+    "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b"
   },
   "recent_attempt_ids": [
     "scout-bdf77f43574b-20260720-195251-a9f2d4",
     "scout-bdf77f43574b-20260721-185748-323167",
-    "scout-bdf77f43574b-20260721-220806-a12504"
+    "scout-bdf77f43574b-20260721-220806-a12504",
+    "scout-bdf77f43574b-20260721-223958-e0f52b"
   ],
   "tactical_memory": {
-    "current_bottleneck": "",
-    "failure_signatures": [],
-    "reusable_assets": [],
-    "constraints_learned": [],
-    "decision_history": [],
-    "reduction_ledger": [],
-    "prior_art_decisions": []
+    "current_bottleneck": "The current bottleneck is kernel-checking source hash e27b8c80… and obtaining a maintainer-style decision on whether the extremal helper definitions belong in the problem file or FormalConjecturesForMathlib.",
+    "failure_signatures": [
+      {
+        "id": "c817046b8ac8",
+        "signature": "Importing the previously built target OLean locally exposed a stale mounted-cache path; a second isolated attempt used unavailable repository-specific attributes. Neither failure reached the equivalence theorem.",
+        "count": 1,
+        "last_strategy_id": "strategy-7603cdb38bd3",
+        "last_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "Erdos530SemanticAudit.lean",
+        "use": "Regression guard for replacing the local finite predicate with project IsSidon.",
+        "evidence": "checks/Erdos530SemanticAudit.lean SHA-256 d9766dd56de50bc1617d545147436aaf18a0992a118931efda65cc3f621f5bf9; experiment 20260721-223233-e53846 passed.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      },
+      {
+        "name": "Hash-locked target driver",
+        "use": "Fail-closed warning-fatal target rebuild of the refactored candidate.",
+        "evidence": "checks/run_erdos530_lean_build.sh SHA-256 e2971cf312a830f1419729f45a817e60fbc7e7cceb9570b9dfa30aee825e8ec3; queued lab-scout-bdf77f43574b-03d1a8ffc4cf.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "The original finite-set predicate and project IsSidon are extensionally equivalent.",
+        "scope": "Every finite set of real numbers.",
+        "evidence": "Lean theorem legacyFinsetIsSidon_iff_projectIsSidon.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      },
+      {
+        "constraint": "Repeated summands must be included and swapped representations must be trivial.",
+        "scope": "The sourced Sidon convention for Problem #530.",
+        "evidence": "The universal equivalence and projectIsSidon_rejects_zero_one_two/projectIsSidon_allows_swap_clause controls.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      },
+      {
+        "constraint": "An exact target may still have an 8038-job dependency closure.",
+        "scope": "The pinned Formal Conjectures checkout and prior target run.",
+        "evidence": "Validated target stdout reported 8038/8038 jobs.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "decision": "continue",
+        "prediction": "The legacy finite predicate and repository predicate would agree, permitting API reuse without changing the mathematical statement.",
+        "observation": "Lean accepted the universal equivalence theorem and both edge controls with return code 0 and empty diagnostics.",
+        "surprise": "The mathematical semantics agreed, but the candidate unnecessarily duplicated an API already used by other Formal Conjectures files. The delegate's claimed elimination of 8037 build targets was also contradicted by the 8038-job target log.",
+        "next_discriminator": "Inspect the completed record for lab-scout-bdf77f43574b-03d1a8ffc4cf and accept or reject the refactored source at its first warning or elaboration result.",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "All finite subsets of ℝ for semantic equivalence; 975 local project source modules plus dependencies for repository compilation.",
+        "represented_space_before": "An unresolved relation between two Sidon definitions and a possible full-project build.",
+        "eliminated_or_quotiented": "The local-versus-project Sidon ambiguity was eliminated for the entire quantified domain; compilation was restricted to one named module target, without claiming removal of its dependency closure.",
+        "represented_space_after": "One reusable Sidon definition and one refactored Problem 530 module awaiting its exact target build.",
+        "reduction_factor": "Semantic ambiguity eliminated globally; build reduction factor unmeasured.",
+        "measurement_status": "not_applicable",
+        "unit": "proof states",
+        "coverage_scope": "Every Finset ℝ for predicate equivalence; exact Problem 530 module only for the queued build.",
+        "soundness_basis": "Lean theorem legacyFinsetIsSidon_iff_projectIsSidon; exact source and driver hash prefilters.",
+        "remaining_unknown": "The refactored source hash has not completed target elaboration, full CI, clean-checkout reproduction, or maintainer placement review.",
+        "next_bulk_elimination": "Review the completed refactored-target lab once, then decide helper-definition placement before requesting any full build.",
+        "source_attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "scout-bdf77f43574b-20260721-223958-e0f52b",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "nearest_method_ids": [
+          "formal-conjectures:FormalConjecturesForMathlib.Combinatorics.Basic.IsSidon",
+          "formal-conjectures:issue-773"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "The project already had the correct Sidon predicate, but no Problem 530 extremal function or asymptotic declaration. This epoch removed the redundant local predicate while retaining new scoped GuaranteedSidonSize, ell, bounded-maximality API, and the sourced asymptotic question.",
+        "duplicate_risk": "A local IsSidon definition would merely duplicate the existing reusable API; the remaining risk is that helper placement or an unlinked external formalization has been missed.",
+        "comparison_test": "Prove the local predicate iff the existing API in Lean and verify issue #773 has no branch or pull request.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjecturesForMathlib/Combinatorics/Basic.lean",
+          "https://github.com/google-deepmind/formal-conjectures/issues/773",
+          "https://www.erdosproblems.com/530"
+        ],
+        "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      }
+    ]
   }
 }
