@@ -1,0 +1,114 @@
+from __future__ import annotations
+
+import json
+from typing import Any
+
+from . import prior_art, research_state, roadmap, tactics
+
+
+def _trim(value: Any, limit: int = 500) -> str:
+    return " ".join(str(value or "").split())[:limit]
+
+
+def _route(row: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not row:
+        return None
+    return {
+        "strategy_id": row.get("strategy_id") or row.get("id"),
+        "fingerprint": row.get("fingerprint"),
+        "family": _trim(row.get("family"), 160),
+        "mechanism": _trim(row.get("mechanism"), 700),
+        "status": row.get("status"),
+        "score": row.get("score"),
+        "score_components": row.get("score_components", {}),
+        "route_evaluation": row.get("route_evaluation", {}),
+        "value_per_cost": row.get("value_per_cost"),
+        "discriminating_test": _trim(row.get("discriminating_test"), 700),
+        "blocker": _trim(row.get("blocker"), 500),
+        "reopen_condition": _trim(row.get("reopen_condition"), 500),
+    }
+
+
+def build(problem: dict[str, Any]) -> dict[str, Any]:
+    state = research_state.load(problem)
+    tactical = tactics.build(problem)
+    active_roadmap = roadmap.current(problem)
+    prior = prior_art.load(problem)
+    live_ids = {
+        str(value)
+        for row in (tactical.get("incumbent"), tactical.get("challenger"))
+        if isinstance(row, dict)
+        for value in (row.get("nearest_method_ids") or [])
+    }
+    methods = prior.get("methods", [])
+    compact_methods = [{
+        "id": row.get("id"),
+        "family": _trim(row.get("family"), 140),
+        "mechanism": _trim(row.get("mechanism"), 320),
+        "scope_and_outcome": _trim(row.get("scope_and_outcome"), 350),
+        "material_delta_required": _trim(row.get("material_delta_required"), 350),
+        "sources": row.get("sources", [])[:3],
+    } for row in methods if not live_ids or row.get("id") in live_ids]
+    if len(compact_methods) < min(5, len(methods)):
+        seen = {row["id"] for row in compact_methods}
+        compact_methods.extend({
+            "id": row.get("id"),
+            "family": _trim(row.get("family"), 140),
+            "mechanism": _trim(row.get("mechanism"), 240),
+            "scope_and_outcome": _trim(row.get("scope_and_outcome"), 260),
+            "material_delta_required": _trim(row.get("material_delta_required"), 260),
+            "sources": row.get("sources", [])[:2],
+        } for row in methods if row.get("id") not in seen)
+    terminal = {"blocked", "ruled_out", "exhausted", "superseded"}
+    open_leads = [row for row in state.get("open_leads", []) if row.get("status", "open") == "open"]
+    strategies = {row.get("id"): row for row in state.get("strategies", [])}
+    open_leads = [row for row in open_leads if strategies.get(row.get("strategy_id"), {}).get("status") not in terminal]
+    return {
+        "schema_version": 1,
+        "rule": "This is the only injected campaign packet. Load larger files only when the selected discriminator needs them.",
+        "problem": {
+            "id": problem.get("id"), "title": problem.get("title"),
+            "statement": _trim(problem.get("statement"), 1200),
+            "source_url": problem.get("source_url"),
+            "field_progress_gates": problem.get("field_progress_gates", []),
+        },
+        "state": {
+            "epoch_count": state.get("epoch_count"),
+            "last_updated": state.get("last_updated"),
+            "summary": _trim(state.get("synthesis_summary"), 1200),
+            "next_session": state.get("next_session", {}),
+            "current_bottleneck": _trim(state.get("tactical_memory", {}).get("current_bottleneck"), 800),
+            "newest_facts": state.get("established_facts", [])[-5:],
+            "newest_exclusions": state.get("ruled_out", [])[-5:],
+            "eligible_open_leads": open_leads[-6:],
+            "newest_decisions": state.get("tactical_memory", {}).get("decision_history", [])[-4:],
+            "newest_reductions": state.get("tactical_memory", {}).get("reduction_ledger", [])[-3:],
+        },
+        "tactics": {
+            "stage": tactical.get("stage"), "directive": tactical.get("directive"),
+            "incumbent": _route(tactical.get("incumbent")),
+            "challenger": _route(tactical.get("challenger")),
+            "closed_route_ids": [row.get("strategy_id") for row in tactical.get("closed_routes", [])[:8]],
+        },
+        "active_roadmap_phase": active_roadmap.get("active_phase"),
+        "prior_art": compact_methods[:14],
+    }
+
+
+def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000) -> str:
+    text = json.dumps(build(problem), indent=2, ensure_ascii=False)
+    if len(text) > max_chars:
+        payload = build(problem)
+        payload["prior_art"] = payload["prior_art"][:7]
+        payload["state"]["newest_facts"] = payload["state"]["newest_facts"][-3:]
+        payload["state"]["newest_exclusions"] = payload["state"]["newest_exclusions"][-3:]
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+    if len(text) > max_chars:
+        payload["prior_art"] = payload["prior_art"][:3]
+        payload["state"]["eligible_open_leads"] = payload["state"]["eligible_open_leads"][-3:]
+        payload["state"]["newest_decisions"] = payload["state"]["newest_decisions"][-2:]
+        payload["state"]["newest_reductions"] = payload["state"]["newest_reductions"][-1:]
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+    if len(text) > max_chars:
+        raise ValueError(f"canonical research brief exceeds {max_chars} characters after compaction")
+    return text

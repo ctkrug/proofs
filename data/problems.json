@@ -80,6 +80,7 @@
     "external_url": "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
     "field_progress_gates": [
       "Find a zero-conflict K43 witness that passes both independent exact checkers.",
+      "Find an order-42 graph outside the supplied 656 isomorphism classes, with two exact graph-property checks, canonical isomorphism separation, and a current novelty review.",
       "Lower the best known conflict count within a broader, independently interesting, precisely defined family.",
       "Prove a concise structural theorem explaining why the two-orbit or near-circulant family cannot work.",
       "Produce certified exclusions that materially shrink an accepted R(5,5) search space, with deterministic encodings, checked proof logs, and sound symmetry coverage.",

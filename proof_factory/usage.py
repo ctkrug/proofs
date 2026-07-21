@@ -20,9 +20,10 @@ def _cache_path() -> Path:
 
 
 def _baseline_slot(lane: str, now: datetime) -> bool:
-    # The hard timer fires every 30 minutes: retain only its even-hour dispatches
-    # when ahead of subscription pace. The easy lane is already exactly 12/day.
-    return lane == "easy" or (now.hour % 2 == 0 and now.minute < 5)
+    # Hard-lane model reviews are event-gated and poll six times daily. The
+    # baseline controls provider usage only; scheduler admission still requires
+    # a concrete research event. The easy lane retains its independent cadence.
+    return lane == "easy" or (now.hour % 4 == 0 and now.minute < 5)
 
 
 def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | None = None) -> dict[str, Any]:
@@ -30,7 +31,8 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
 
     A successful, fresh Codex weekly snapshot permits the primary schedule only
     while usage is no greater than elapsed-week percentage. Missing/stale data
-    fails conservatively to the defined baseline: 12 hard + 12 easy passes/day.
+    fails conservatively to the defined polling baseline. Hard polls still need
+    an unconsumed evidence event and therefore do not imply a model pass.
     """
     if lane not in {"hard", "easy"}:
         raise ValueError("lane must be hard or easy")

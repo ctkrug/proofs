@@ -1,8 +1,8 @@
 [Unit]
-Description=Proof Factory - twice-hourly around-the-clock R(5,5) research
+Description=Proof Factory - event-gated R(5,5) research review
 
 [Timer]
-OnCalendar=*-*-* *:00,30:00 UTC
+OnCalendar=*-*-* 00,04,08,12,16,20:00:00 UTC
 Persistent=true
 AccuracySec=1min
 Unit=proof-factory-hard.service

@@ -10,10 +10,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, prior_art, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics, usage
+from proof_factory import agent, brain, briefing, capacity, cli, contribution_gate, intake, lab, live, prior_art, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
+    def test_ramsey_brief_is_bounded_valid_json_and_selects_seeded_route(self) -> None:
+        problem = next(row for row in store.load_problems() if row["id"] == "ramsey-r55")
+        packet = briefing.compact_for_prompt(problem)
+        decoded = json.loads(packet)
+        self.assertLessEqual(len(packet), 24000)
+        self.assertEqual(
+            decoded["tactics"]["incumbent"]["strategy_id"],
+            "strategy-r55-known-class-embedding-block",
+        )
+        prompt = agent.build_prompt(problem, "hard", store.RESEARCH / problem["id"] / "workspace", phase="research")
+        self.assertLessEqual(len(prompt), 50000)
+
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
         self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "ramsey-r55")
@@ -195,11 +207,12 @@ class ProofFactoryTests(unittest.TestCase):
                 patch.object(agent, "_run_codex", side_effect=fake_run):
             attempt = agent.run(problem, "hard")
 
-        self.assertEqual([row[0] for row in calls], [agent.TERRA_MODEL, agent.TERRA_MODEL, agent.SOL_MODEL])
+            self.assertEqual([row[0] for row in calls].count(agent.TERRA_MODEL), 2)
+            self.assertEqual(calls[-1][0], agent.SOL_MODEL)
         self.assertEqual(calls[-1][1], "high")
         self.assertEqual(attempt["orchestration"]["architecture"], "sol-principal-terra-delegates")
         self.assertEqual(attempt["orchestration"]["delegate_statuses"], {
-            "literature-strategy": "completed", "experiment-verification": "completed",
+                "challenger-prior-art": "completed", "experiment-verification": "completed",
         })
         self.assertEqual(attempt["model"], agent.SOL_MODEL)
         self.assertTrue(all(row["memo_sha256"] for row in attempt["delegates"]))

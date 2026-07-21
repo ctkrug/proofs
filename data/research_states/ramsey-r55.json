@@ -758,7 +758,18 @@
         "strategy-r55twocore2026"
       ],
       "updated_at": "2026-07-21T17:37:38.498366+00:00",
-      "rationale": "This redirects from known-class sampling toward a possible human-checkable structural lemma."
+      "rationale": "This redirects from known-class sampling toward a possible human-checkable structural lemma.",
+      "route_evaluation": {
+        "gate_proximity": 0.55,
+        "contribution_value": 0.68,
+        "decisiveness": 0.7,
+        "novelty_confidence": 0.45,
+        "novelty_risk": 0.5,
+        "scope": 0.35,
+        "reuse_value": 0.7,
+        "model_cost": 0.5,
+        "cpu_cost": 0.5
+      }
     },
     {
       "id": "strategy-4c792f58d4a3",
@@ -797,9 +808,55 @@
         "strategy-4c792f58d4a3"
       ],
       "updated_at": "2026-07-21T17:37:38.498366+00:00"
+    },
+    {
+      "id": "strategy-r55-known-class-embedding-block",
+      "family": "complete known-class boundary blocking",
+      "fingerprint": "r55knownclassembeddingblock2026",
+      "title": "Enumerate and block every supplied-class boundary assignment induced by a fixed order-30 core",
+      "mechanism": "Enumerate every induced embedding of the fixed source-record-21 order-30 core into each of the supplied 656 order-42 Ramsey graphs, normalize the resulting 12-vertex boundary assignments under a separately checked quotient, add one complete finite block set, and then solve the residual boundary instance.",
+      "status": "promising",
+      "hypothesis": "For source records 21 and 12, two independent implementations agree exactly on the embedding count and the normalized boundary-assignment set, and the full supplied corpus remains small enough to enumerate before another SAT call.",
+      "discriminating_test": "Run a two-record pilot on source records 21 and 12; require identical counts and sorted assignment hashes from independent implementations plus successful replay of every assignment against the source graph and boundary mapping.",
+      "blocker": "The complete embedding and boundary-assignment corpus has not yet been generated or independently reconciled, so class-level exclusion is not established.",
+      "reopen_condition": "",
+      "reopen_evidence": "The prior quotient experiments established that label-level and row-order blocks alone merely rediscover supplied classes; complete supplied-class embedding blocks are now the cheapest direct discriminator.",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-a230b66ef386",
+        "strategy-r55controls2026"
+      ],
+      "sources": [
+        "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+        "https://users.cecs.anu.edu.au/~bdm/data/ramsey.html"
+      ],
+      "updated_at": "2026-07-21T18:00:00+00:00",
+      "rationale": "This turns the measured supplied-class rediscovery failure into a finite, independently checkable class-boundary exclusion rather than another arbitrary labelled-model cutoff.",
+      "route_evaluation": {
+        "gate_proximity": 0.85,
+        "contribution_value": 0.9,
+        "decisiveness": 0.95,
+        "novelty_confidence": 0.65,
+        "novelty_risk": 0.25,
+        "scope": 0.85,
+        "reuse_value": 0.85,
+        "model_cost": 0.35,
+        "cpu_cost": 0.7
+      }
     }
   ],
   "open_leads": [
+    {
+      "description": "Build a complete, independently checked supplied-class boundary block for one fixed order-30 core.",
+      "rationale": "This is the first route that directly converts repeated known-class rediscovery into a finite class-level exclusion with a decisive residual SAT test.",
+      "next_experiment": "Pilot source records 21 and 12 with independent embedding enumeration and normalized-assignment hashes; stop on any count, mapping, or hash mismatch.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-r55-known-class-embedding-block",
+      "strategy_id": "strategy-r55-known-class-embedding-block",
+      "updated_at": "2026-07-21T18:00:00+00:00"
+    },
     {
       "description": "Sweep the 20 exact two-orbit domain-wall slices obtained by releasing cyclic distance 6 with one additional distance orbit.",
       "rationale": "Radius 2 contains only translations of the one-dimensional defect, while the full one-orbit family is exactly closed at burden 2. Any structured escape must couple the defect to at least one more orbit.",
@@ -825,42 +882,54 @@
       "rationale": "Every search claim depends on trusted inputs, independent evaluators, and canonical IDs.",
       "next_experiment": "Mirror and hash r55_42some.g6; write transparent combination and independent bitset checkers; reproduce edge, degree, complement, and violation identities.",
       "priority": "high",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Test the almost-regular order-42 conjectural slice without treating it as a universal property.",
       "rationale": "None of the 656 is almost regular, so any solution in the slice is automatically a new component and addresses a named expert conjecture.",
       "next_experiment": "Encode degree spread <=1 at n=42, benchmark SAT/MaxSAT with multiple symmetry regimes, and require proof logs for bounded exclusions.",
       "priority": "high",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Reproduce or obtain the reported induced-subgraph-distance-six exclusion around the 656.",
       "rationale": "It would prevent wasted search near known basins, but should not become a hard prune from a survey statement alone.",
       "next_experiment": "Ask for or locate the McKay-Lieby generation code, coverage manifest, and outputs; otherwise formulate the exact distance predicate and reproduce the smallest bounded cases.",
       "priority": "normal",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Build a neutral-network atlas of the 656 under edge flips, switches, and short relabeled Hamming moves.",
       "rationale": "Landscape position may predict extension quality and reveal productive boundary states without assuming the corpus is complete.",
       "next_experiment": "Canonicalize the corpus, compute neutral adjacency and best one-vertex MaxSAT extension scores, then test predictors on held-out isomorphism classes.",
       "priority": "normal",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Implement a proof-carrying toy Ramsey pipeline before any frontier-wide nonexistence claim.",
       "rationale": "Encoding, cube coverage, symmetry soundness, proof checking, and artifact replay are distinct obligations.",
       "next_experiment": "Prove R(3,3)=6 with deterministic CNF, a checked cover, LRAT-Catcher, cake_lpr, immutable hashes, and a cold-start replay.",
       "priority": "high",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Mine edge-extremal (4,5,n) catalogues for exact count inequalities that strengthen the order-45 profile restrictions.",
       "rationale": "The <=46 authors judge direct scaling excessive; a new theorem-level reduction is the plausible upper-bound lever.",
       "next_experiment": "Fetch and verify the public r45extreme data, generate exact feature tables, learn candidate coefficients, rationalize them, and falsify on every control before attempting proof.",
       "priority": "normal",
-      "status": "open"
+      "status": "closed",
+      "closure_reason": "missing_strategy_id",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Authenticate the 328 McKay source records and their complements.",
@@ -927,30 +996,36 @@
       "rationale": "The row identity and generic LP/SDP are established prior art. A small rational LP is justified only as a cheap information-gain test against the existing R55 subgraph-count LP.",
       "next_experiment": "Reproduce the published adjacency-row Hamming identity and current R55 degree/subgraph constraints; extract exact distributions from all controls; formulate the pair-distance LP for n=43..45; count only profiles not already excluded by the established LP, and stop before SDP if there are none.",
       "priority": "normal",
-      "status": "open",
+      "status": "closed",
       "id": "lead-r55-row-code-sdp",
       "strategy_id": "strategy-r55-row-code-sdp",
-      "updated_at": "2026-07-20T18:30:56-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00",
+      "closure_reason": "orphaned_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Decide whether any of the 20 two-orbit slices has burden one.",
       "rationale": "The publisher assignment has burden two in every slice, so checked burden-at-most-one exclusions would establish exact minimum two and fully close this structured family.",
       "next_experiment": "Add raw-origin relaxation variables and an independently derived at-most-one encoding, validate it on the one-orbit control, then run all 20 cases with proof logging.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-365cf4cbff",
       "strategy_id": "strategy-r55twoorbitdomainwall2026",
-      "updated_at": "2026-07-21T02:34:27.831856+00:00"
+      "updated_at": "2026-07-21T02:34:27.831856+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Test the recognized almost-regular order-42 Ramsey slice with a deterministic degree-constrained SAT encoding.",
       "rationale": "None of the authenticated supplied 656 graphs is almost regular, so a valid result would be outside that corpus and address a named structural slice.",
       "next_experiment": "Hash-lock the corpus report, reproduce its degree spreads, validate the degree counter on small known instances, then run a 300-second/1-GiB proof-logging pilot.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-118e4c9764",
       "strategy_id": "strategy-r55twoorbitdomainwall2026",
-      "updated_at": "2026-07-21T04:34:22.440967+00:00"
+      "updated_at": "2026-07-21T04:34:22.440967+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Run the symmetry-normalized q=20 SAT pilot with N(0) fixed to vertices 1 through 20.",
@@ -977,50 +1052,60 @@
       "rationale": "A complete small cover tests resumability and leaf heterogeneity without repeating the failed monolithic configuration.",
       "next_experiment": "Branch on four deterministic cross-part edge variables, verify all 16 cubes independently, and run a short proof-logging leaf pilot.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-337a4a65f4",
       "strategy_id": "strategy-e81525840a9b",
-      "updated_at": "2026-07-21T08:29:00.713798+00:00"
+      "updated_at": "2026-07-21T08:29:00.713798+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Test q=17,18,19 only after a q=20 cube, solver, or encoding benchmark shows a material proof-cost improvement.",
       "rationale": "The normalized q=20 monolith still timed out, so identical runs in additional bands currently have low expected information value.",
       "next_experiment": "Retain the bands without executing them until the q=20 cost model changes.",
       "priority": "low",
-      "status": "open",
+      "status": "closed",
       "id": "lead-d193504618",
       "strategy_id": "strategy-e81525840a9b",
-      "updated_at": "2026-07-21T08:29:00.713798+00:00"
+      "updated_at": "2026-07-21T08:29:00.713798+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Test the exact adjacency-row pair-distance relaxation before constructing a custom SDP.",
       "rationale": "It is a materially different, cheap structural discriminator with authenticated positive controls.",
       "next_experiment": "Extract exact row-weight, pair-intersection, and edge/nonedge distance distributions from all 656 controls and compare a rational pair-moment LP against published degree/subgraph restrictions for n=43–45.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-cbf8c0fd37",
       "strategy_id": "strategy-596a3981722b",
-      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+      "updated_at": "2026-07-21T10:37:33.656863+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Revisit q=20 only after a solver, encoding, or branching change has a measured reason to alter certificate throughput.",
       "rationale": "The monolith and every short cube leaf are currently unresolved.",
       "next_experiment": "Benchmark a materially different proof-logging configuration first on normalized R(3,3,6) and a declared bounded q=20 subset.",
       "priority": "low",
-      "status": "open",
+      "status": "closed",
       "id": "lead-b2dd264dcd",
       "strategy_id": "strategy-596a3981722b",
-      "updated_at": "2026-07-21T10:37:33.656863+00:00"
+      "updated_at": "2026-07-21T10:37:33.656863+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Reconstruct a stronger order-45 I2/I3 scalar baseline from authenticated edge-extremal (4,5,n) data.",
       "rationale": "The edge-extremal interval is vacuous, while the published subgraph-count LP identifies triangle and refined neighbourhood features as the established next strengthening.",
       "next_experiment": "Fetch and hash the ANU archive index and r45extreme.tar.gz, inventory their schemas, and map every available feature to I2/I3 before generating profiles.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-53dd91d0b1",
       "strategy_id": "strategy-r55rowcodesdp2026",
-      "updated_at": "2026-07-21T12:33:03.280238+00:00"
+      "updated_at": "2026-07-21T12:33:03.280238+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Canonical counterexample-guided exact repair within one retained boundary.",
@@ -1037,20 +1122,24 @@
       "rationale": "Every completion has a row-sorted representative, and the current sample exhibits an exact 64-to-8 redundancy reduction.",
       "next_experiment": "Implement the lex CNF without the Hamming constraint and exhaustively test tied-row orbit coverage.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-a31ba34df3",
       "strategy_id": "strategy-4c792f58d4a3",
-      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+      "updated_at": "2026-07-21T16:46:50.059737+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     },
     {
       "description": "Compress a certified two-orbit exclusion into a raw K5-clause obstruction theorem.",
       "rationale": "A first core of at most 20 clauses is the cheapest discriminator for the named structural-theorem gate.",
       "next_experiment": "Deletion-minimize one raw clause set with exact UNSAT checks and independently verify its five-set origins.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-2141575747",
       "strategy_id": "strategy-a230b66ef386",
-      "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      "updated_at": "2026-07-21T17:37:38.498366+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-21T18:14:29.129762+00:00"
     }
   ],
   "ruled_out": [
@@ -1337,10 +1426,10 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55-two-orbit-proof-compression",
-    "objective": "Test whether one certified two-orbit exclusion has a raw core of at most 20 clauses.",
-    "first_action": "Use the retained burden-zero slice artifacts to generate a raw-clause-only instance, then deletion-minimize with exact replay and independent origin mapping.",
-    "stop_condition": "Stop on a core larger than 20 clauses, an origin-map failure, or non-replayable UNSAT; consider the 20-distance atlas only after the first threshold passes.",
+    "recommended_strategy_id": "strategy-r55-known-class-embedding-block",
+    "objective": "Determine whether complete supplied-class boundary blocking is technically sound and tractable before another search call.",
+    "first_action": "Enumerate embeddings of the fixed source-record-21 order-30 core into supplied source records 21 and 12 using two independent implementations; emit exact counts, normalized assignment sets, and hashes.",
+    "stop_condition": "Stop immediately on an implementation mismatch, failed boundary replay, or projected full-corpus cost that exceeds a measured bounded pass; do not run residual SAT until the complete block set is independently reconciled.",
     "source_attempt_id": "ramsey-r55-20260721-173738-495bea"
   },
   "recent_attempt_ids": [

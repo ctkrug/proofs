@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - R(5,5) Sol/high principal with Terra/high delegates
+Description=Proof Factory - event-gated R(5,5) evidence review
 After=network-online.target
 Wants=network-online.target
 
@@ -10,7 +10,7 @@ Environment=HOME=/root
 Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
-Environment=PROOF_CODEX_SANDBOX=danger-full-access
+Environment=PROOF_CODEX_SANDBOX=workspace-write
 Environment=PROOF_HARD_DELEGATE_TIMEOUT_SEC=1200
 EnvironmentFile=-/root/project-factory/.env
 Environment=PHOENIX_ENABLED=true

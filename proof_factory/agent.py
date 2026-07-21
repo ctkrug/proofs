@@ -6,10 +6,11 @@ import re
 import subprocess
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-from . import brain, contribution_gate, prior_art, research_state, roadmap, store, tactics, telemetry
+from . import briefing, contribution_gate, evidence as evidence_layer, research_state, store, telemetry
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -19,7 +20,7 @@ EXPERIMENT_RUNNER = store.ROOT / "skills" / "computational-researcher" / "script
 TERRA_MODEL = "gpt-5.6-terra"
 SOL_MODEL = "gpt-5.6-sol"
 DELEGATE_ROLES = {
-    "hard": ("literature-strategy", "experiment-verification"),
+    "hard": ("challenger-prior-art", "experiment-verification"),
     "easy": ("source-discriminator",),
 }
 
@@ -59,7 +60,7 @@ def extract_result(text: str) -> dict[str, Any]:
         if not isinstance(result.get(key), str) or not result[key].strip():
             raise ValueError(f"missing result field: {key}")
     for key in (
-        "claims", "evidence", "next_steps", "citations", "techniques", "experiments", "transfer_insights",
+        "claims", "evidence", "evidence_files", "next_steps", "citations", "techniques", "experiments", "transfer_insights",
         "established_facts", "ruled_out", "open_leads", "strategy_proposals", "synthesis_candidates",
     ):
         if not isinstance(result.get(key, []), list):
@@ -188,9 +189,9 @@ def build_delegate_prompt(
 ) -> str:
     dossier = store.RESEARCH / problem["id"] / "DOSSIER.md"
     role_job = {
-        "literature-strategy": (
-            "Audit the durable state and cited literature, identify the strongest live route, and expose any historical "
-            "duplication, missing premise, or combination with another recorded strategy."
+        "challenger-prior-art": (
+            "Attack the incumbent from a genuinely different route and current prior art. Identify overlap, a missing premise, "
+            "or a cheaper challenger. Do not duplicate the experiment delegate's execution plan."
         ),
         "experiment-verification": (
             "Design the cheapest decisive experiment and its independent verification plan. Inspect existing artifacts, "
@@ -220,17 +221,11 @@ Full project dossier when present: {dossier}
 DELEGATE ROLE: {role}
 {role_job}
 
-DURABLE CAMPAIGN STATE
-{research_state.compact_for_prompt(problem)}
-
-DETERMINISTIC TACTICAL BRIEF
-{tactics.compact_for_prompt(problem)}
+CANONICAL ROUTE BRIEF
+{briefing.compact_for_prompt(problem, max_chars=18000)}
 
 PRIOR-ART ANTI-REDISCOVERY REGISTER
-{prior_art.compact_for_prompt(problem)}
-
-CROSS-PROBLEM RESEARCH BRAIN
-{brain.context_for_problem(problem)}
+The current compact register is embedded in the canonical route brief. Open the full JSON only for the selected route.
 
 RULES
 1. Read relevant files in the shared workspace and consult the full project dossier when it exists.
@@ -238,7 +233,7 @@ RULES
    mechanism with the nearest registered historical methods; label replications as controls and state the exact delta.
 3. Distinguish sourced fact, reported computation, inference, and proposal. Preserve direct source URLs.
 4. Do not declare a proof, disproof, or candidate. Do not edit the durable research map or append-only ledger.
-5. Return a memo under 1,500 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
+5. Return a memo under 800 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
    reusable artifact; stop condition; and what the Sol principal should reject or verify independently. For any large
    search, include a search-efficiency pass covering symmetry/canonicalization, compression, batching/vectorization,
    incremental evaluation, decomposition, pruning, and reusable solver state; quantify the best safe reduction.
@@ -293,7 +288,6 @@ def build_prompt(
 ) -> str:
     hard = lane == "hard"
     epoch_minutes = 120 if hard else 60
-    strategy_library = store.read_json(store.DATA / "strategy_library.json", [])
     delegated = delegate_memos or []
     phase_contract = (
         "MANDATORY BASELINE PHASE. Do not try to solve the problem or launch a frontier search. Audit the exact statement "
@@ -344,9 +338,9 @@ RESEARCH PHASE
 {campaign_contract}
 
 LAB AUTHORITY
-You have network access and the installed mathematics toolchain inside a credential-isolated research service. Use them
-to retrieve primary sources and run bounded experiments when necessary. Treat a practical source/tool failure as the
-first task to repair, with reproducible commands and hashes, rather than as a reason to abandon the epoch.
+Use pinned, project-scoped tools and the pre-acquired sources in the workspace. Do not install system packages, change
+host configuration, edit credentials, or write outside the problem workspace. Submit deterministic work expected to
+take more than two minutes to the checkpointed lab; a model epoch should design or review that job, not babysit it.
 
 ACCEPTABLE CONTRIBUTIONS
 Terminal success is a concrete proof, counterexample/witness, exact optimum/classification, verified computational bound,
@@ -374,25 +368,28 @@ ephemeral delegate directories are not part of the accepted artifact set. Disclo
 roles in the final tool disclosure.
 
 TERRA DELEGATE MEMOS
-{json.dumps(delegated, indent=2, ensure_ascii=False)[:28000] if delegated else '(No delegate memo survived; proceed, but record the orchestration failure.)'}
+{json.dumps(delegated, indent=2, ensure_ascii=False)[:12000] if delegated else '(No delegate memo survived; proceed, but record the orchestration failure.)'}
 
-DURABLE RESEARCH STATE (claims/evidence/decisions, never private chain-of-thought)
-{research_state.compact_for_prompt(problem)}
+CANONICAL ROUTE BRIEF
+{briefing.compact_for_prompt(problem)}
 
-CROSS-PROBLEM RESEARCH BRAIN (links are transfer hypotheses, not evidence)
-{brain.context_for_problem(problem)}
+DURABLE RESEARCH STATE
+Summarized in the canonical route brief; load the versioned state file only for a selected fact.
 
-DETERMINISTIC TACTICAL BRIEF (inspectable priorities, not probabilities)
-{tactics.compact_for_prompt(problem)}
+CROSS-PROBLEM RESEARCH BRAIN
+Not injected. Consult it on demand only when testing a named transfer hypothesis.
 
-AUTOMATED CAMPAIGN ROADMAP (evidence-driven stage graph; no fixed session sequence)
-{roadmap.compact_for_prompt(problem)}
+DETERMINISTIC TACTICAL BRIEF
+Summarized in the canonical route brief.
 
-PRIOR-ART ANTI-REDISCOVERY REGISTER (method IDs are stable comparison keys)
-{prior_art.compact_for_prompt(problem)}
+AUTOMATED CAMPAIGN ROADMAP
+The active phase is included in the canonical route brief.
+
+PRIOR-ART ANTI-REDISCOVERY REGISTER
+The compact current registry is included in the canonical route brief; open the full JSON before a novelty claim.
 
 REUSABLE STRATEGY LIBRARY
-{json.dumps(strategy_library, indent=2, ensure_ascii=False)[:18000]}
+Load only the entry required by the selected route.
 
 STRATEGY PORTFOLIO RULES
 1. Identify your approach family and mechanism before working. Use a stable fingerprint from the ledger when continuing it.
@@ -464,7 +461,7 @@ WORK RULES
 {{
   "outcome": "failed|no_progress|progress|candidate",
   "approach": "specific route attempted",
-  "strategy": {{"family":"named approach family","fingerprint":"reuse existing or blank for deterministic creation","mechanism":"what actually generates information","parent_ids":["strategy-id if combined"]}},
+  "strategy": {{"family":"named approach family","fingerprint":"reuse existing or blank for deterministic creation","mechanism":"what actually generates information","parent_ids":["strategy-id if combined"],"route_evaluation":{{"gate_proximity":0.0,"contribution_value":0.0,"decisiveness":0.0,"novelty_confidence":0.0,"novelty_risk":0.0,"scope":0.0,"reuse_value":0.0,"model_cost":1.0,"cpu_cost":1.0}}}},
   "hypothesis": "falsifiable claim tested this epoch",
   "discriminating_test": "cheapest observation that separates success from failure",
   "search_efficiency": {{"naive_space":"candidate count and bottleneck","reductions_considered":["symmetry/compression/batching/vectorization/incremental/decomposition/pruning/reuse options"],"chosen_mechanism":"bulk-elimination design","estimated_or_measured_savings":"reduction ratio or throughput","soundness_guard":"independent equivalence or one-sided coverage check"}},
@@ -477,6 +474,7 @@ WORK RULES
   "rationale": "why the evidence supports this outcome",
   "claims": ["precise claim, if any"],
   "evidence": ["file/command/check and exact scope"],
+  "evidence_files": ["normalized workspace-relative immutable file path; list every file supporting a computed claim"],
   "next_steps": ["specific next move"],
   "citations": ["direct URL"],
   "techniques": ["technique used"],
@@ -521,6 +519,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                                  "7200" if lane == "hard" else "3600"))
     workspace = store.RESEARCH / problem["id"] / "workspace"
     workspace.mkdir(parents=True, exist_ok=True)
+    before_snapshot = evidence_layer.capture_workspace_snapshot(workspace)
     started = store.now_iso()
     start = time.monotonic()
     delegate_ceiling = int(os.environ.get(
@@ -530,7 +529,8 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
     epoch_key = f"{started[:19].replace(':', '').replace('-', '').replace('T', '-')}-{uuid.uuid4().hex[:6]}"
     delegate_root = workspace / ".delegates" / epoch_key
     delegate_records: list[dict[str, Any]] = []
-    for role in DELEGATE_ROLES[lane]:
+
+    def run_delegate(role: str) -> dict[str, Any]:
         delegate_workspace = delegate_root / role
         delegate_workspace.mkdir(parents=True, exist_ok=True)
         try:
@@ -539,7 +539,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                 model=TERRA_MODEL, effort="high", workspace=delegate_workspace, timeout=delegate_ceiling,
                 telemetry_meta={"role": f"delegate:{role}", "lane": lane, "problem_id": problem["id"], "phase": phase},
             )
-            memo = memo.strip()[:12000]
+            memo = memo.strip()[:7000]
             status = "completed"
             error_note = ""
         except (OSError, subprocess.SubprocessError, RuntimeError) as exc:
@@ -549,11 +549,17 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             error_note = str(exc)[:2000]
         memo_file = delegate_workspace / "memo.md"
         memo_file.write_text(memo + "\n")
-        delegate_records.append({
+        return {
             "role": role, "model": TERRA_MODEL, "effort": "high", "status": status,
             "memo_path": str(memo_file.relative_to(workspace)), "memo_sha256": store.sha256_file(memo_file),
             "memo": memo, "usage": delegate_usage, "error": error_note,
-        })
+        }
+
+    roles = DELEGATE_ROLES[lane]
+    with ThreadPoolExecutor(max_workers=len(roles)) as pool:
+        futures = {pool.submit(run_delegate, role): role for role in roles}
+        completed = {futures[future]: future.result() for future in as_completed(futures)}
+    delegate_records = [completed[role] for role in roles]
     prompt = build_prompt(problem, lane, workspace, delegate_records, phase)
     try:
         text, usage = _run_codex(
@@ -642,7 +648,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                 "independent_validation": "not applicable", "external_audience": "none",
                 "remains_unproved": "the full research target", "route_recommendation": "hold and repair the epoch failure",
             },
-            "claims": [], "evidence": [], "next_steps": ["Repair the failed pass and rerun."],
+            "claims": [], "evidence": [], "evidence_files": [], "next_steps": ["Repair the failed pass and rerun."],
             "citations": [problem["source_url"]], "techniques": [],
             "tool_disclosure": f"Codex {model} principal with {TERRA_MODEL} delegates; run failed before a valid disclosure was returned.",
         }
@@ -735,6 +741,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "rationale": result["rationale"].strip()[:4000],
         "claims": [str(x)[:2000] for x in result.get("claims", [])][:20],
         "evidence": [str(x)[:2000] for x in result.get("evidence", [])][:30],
+        "evidence_files": [str(x)[:1000] for x in result.get("evidence_files", [])][:2000],
         "next_steps": [str(x)[:2000] for x in result.get("next_steps", [])][:20],
         "citations": [str(x)[:1000] for x in result.get("citations", [])][:30],
         "techniques": [str(x)[:200] for x in result.get("techniques", [])][:30],
@@ -759,7 +766,62 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),
         "usage": usage,
         "error": error,
-        "artifact_hashes": _workspace_artifacts(workspace),
+        "artifact_hashes": {},
     }
+    mutable_patterns = (
+        ".git/**", ".venv/**", "venv/**", ".delegates/**", "__pycache__/**",
+        ".pytest_cache/**", "lab-queue/**", "lab-archive/**", "CHECKPOINT.md", "README.md",
+        "docs/DOSSIER.md", "records/problem.json", "records/research-state.json",
+    )
+    try:
+        manifest_path = evidence_layer.create_attempt_manifest(
+            workspace,
+            attempt_id,
+            before_snapshot,
+            claimed_evidence_paths=attempt["evidence_files"],
+            mutable_projection_patterns=mutable_patterns,
+            manifest_root=workspace / "evidence",
+        )
+        receipt_path = evidence_layer.create_evidence_receipt(manifest_path, workspace=workspace)
+        receipt = json.loads(receipt_path.read_text())
+        manifest = json.loads(manifest_path.read_text())
+        attempt["artifact_hashes"] = {
+            row["path"]: row.get("after", {}).get("sha256")
+            for row in manifest.get("artifacts", [])
+            if row.get("role") == "immutable_artifact"
+            and isinstance(row.get("after"), dict)
+            and row.get("after", {}).get("sha256")
+        }
+        attempt["evidence_validation"] = {
+            "status": receipt["status"],
+            "manifest": str(manifest_path.relative_to(workspace)),
+            "manifest_sha256": receipt["manifest_file_sha256"],
+            "receipt": str(receipt_path.relative_to(workspace)),
+            "artifact_count": receipt["artifact_count"],
+            "claimed_evidence_count": receipt["claimed_evidence_count"],
+            "errors": receipt["errors"][:20],
+        }
+        needs_claimed_files = attempt["outcome"] in {"progress", "candidate"} and bool(
+            attempt["claims"] or attempt["experiments"] or attempt["established_facts"]
+        )
+        if receipt["status"] != "valid" or (needs_claimed_files and receipt["claimed_evidence_count"] == 0):
+            if needs_claimed_files and receipt["claimed_evidence_count"] == 0:
+                attempt["evidence_validation"]["errors"].append(
+                    "computed progress requires at least one explicit immutable evidence file"
+                )
+            attempt["policy_flags"].append("Attempt evidence did not validate; durable progress is withheld.")
+            if attempt["outcome"] in {"progress", "candidate"}:
+                attempt["outcome"] = "no_progress"
+                attempt["contribution_status"] = "research_attempt"
+                attempt["review_status"] = "evidence invalid or incomplete; not durable progress"
+    except Exception as exc:
+        attempt["evidence_validation"] = {
+            "status": "invalid", "errors": [f"{type(exc).__name__}: {exc}"],
+        }
+        attempt["policy_flags"].append("Evidence receipt creation failed; durable progress is withheld.")
+        if attempt["outcome"] in {"progress", "candidate"}:
+            attempt["outcome"] = "no_progress"
+            attempt["contribution_status"] = "research_attempt"
+            attempt["review_status"] = "evidence receipt failure; not durable progress"
     telemetry.epoch_summary(attempt)
     return attempt

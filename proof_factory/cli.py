@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import brain, capacity, intake, lab, prior_art, publication, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics
+from . import brain, capacity, events, intake, lab, prior_art, publication, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics
 
 
 EXTERNAL_STATES = {
@@ -199,6 +199,14 @@ def parser() -> argparse.ArgumentParser:
     roadmap_parser.add_argument("--problem", required=True)
     prior_art_parser = sub.add_parser("prior-art-show")
     prior_art_parser.add_argument("--problem", required=True)
+    reconcile_parser = sub.add_parser("state-reconcile")
+    reconcile_parser.add_argument("--problem", required=True)
+    reconcile_parser.add_argument("--write", action="store_true")
+    event_parser = sub.add_parser("research-event")
+    event_parser.add_argument("--problem", required=True)
+    event_parser.add_argument("--kind", choices=sorted(events.ALLOWED_KINDS), required=True)
+    event_parser.add_argument("--evidence", required=True)
+    event_parser.add_argument("--source", required=True)
     repo_init = sub.add_parser("repo-init")
     repo_init.add_argument("--problem")
     repo_init.add_argument("--all", action="store_true")
@@ -298,6 +306,17 @@ def main(argv: list[str] | None = None) -> int:
         if not problem:
             raise ValueError(f"unknown problem: {args.problem}")
         print(json.dumps(prior_art.load(problem), indent=2))
+        return 0
+    if args.command == "state-reconcile":
+        problem = next((row for row in store.load_problems() if row["id"] == args.problem), None)
+        if not problem:
+            raise ValueError(f"unknown problem: {args.problem}")
+        print(json.dumps(research_state.reconcile(problem, write=args.write), indent=2))
+        return 0
+    if args.command == "research-event":
+        print(json.dumps(events.enqueue(
+            args.problem, args.kind, evidence=args.evidence, source=args.source,
+        ), indent=2))
         return 0
     if args.command == "repo-init":
         if args.all == bool(args.problem):

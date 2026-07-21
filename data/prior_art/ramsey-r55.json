@@ -85,6 +85,46 @@
       "sources": ["https://arxiv.org/abs/2502.06055"]
     },
     {
+      "id": "gauthier-generalized-sat-gluing",
+      "family": "generalized SAT gluing with formal-verification intent",
+      "mechanism": "Decompose the R(5,5) upper-bound problem into generalized Ramsey subproblems, glue their SAT encodings, and pursue a proof-producing route suitable for formal checking.",
+      "scope_and_outcome": "This is active 2025 work aimed directly at R(5,5), not a completed new bound. It overlaps generalized block gluing, proof-core reuse, and certificate-oriented upper-bound plans in this campaign.",
+      "material_delta_required": "Before further scale-up, obtain author/artifact alignment and identify a decomposition, reusable lemma, proof object, or independent verification component not already being pursued in this program.",
+      "sources": ["https://aitp-conference.org/2025/abstract/AITP_2025_paper_3.pdf"]
+    },
+    {
+      "id": "cmu-mackey-srg45-sat",
+      "family": "structured strongly regular graph SAT exclusion",
+      "mechanism": "Attack the potential strongly regular graph srg(45,22,10,11), a structured R(5,5)-relevant case, using SAT and symmetry-aware computation.",
+      "scope_and_outcome": "The CMU/Mackey group reports an active structured SAT program around this order-45 case. It is a targeted subfamily, not by itself a complete R(5,5) upper-bound proof.",
+      "material_delta_required": "Coordinate on current status and artifacts, then contribute a separately checkable encoding, symmetry/coverage argument, certificate pipeline, or new structural reduction that the active effort values.",
+      "sources": ["https://www.cs.rit.edu/~spr/COURSES/CCOMP/srg_r55.pdf"]
+    },
+    {
+      "id": "bigcompute-656-extension-drat",
+      "family": "proof-logged extension of the known order-42 corpus",
+      "mechanism": "Reproduce the barrier that the 656 known order-42 R(5,5) graph classes do not admit a one-vertex extension, retaining DRAT proof evidence and public experiment records.",
+      "scope_and_outcome": "BigCompute publicly reports a proof-logged reproduction of the known-class one-vertex-extension barrier and ongoing upper-bound exploration. This is independent verification of a known obstruction, not a new Ramsey bound.",
+      "material_delta_required": "Do not duplicate the same extension calculation except as a bounded control; require a broader exhaustive core family, a materially different verified decomposition, a new order-42 class, or an artifact/checker contribution coordinated with the project.",
+      "sources": ["https://bigcompute.science/experiments/ramsey-r55-lower-bound/"]
+    },
+    {
+      "id": "sat-modulo-symmetries",
+      "family": "symmetry-integrated SAT solving",
+      "mechanism": "Integrate graph automorphism and canonicality reasoning into SAT search so symmetric candidates are rejected during solving rather than by labelled post-hoc blocking.",
+      "scope_and_outcome": "SAT Modulo Symmetries is an existing solver framework directly relevant to the campaign's canonical augmentation and repeated-isomorph bottleneck; using canonical blocking without comparing against it risks rediscovery of established machinery.",
+      "material_delta_required": "Benchmark against or build on SMS, state the exact soundness obligation for any custom canonical propagator, and show an R55-specific coverage, interoperability, or performance contribution beyond reimplementing generic symmetry rejection.",
+      "sources": ["https://doi.org/10.1145/3670405", "https://sat-modulo-symmetries.readthedocs.io/en/latest/"]
+    },
+    {
+      "id": "formal-certificate-ecosystem",
+      "family": "independently checked SAT and formal proof certificates",
+      "mechanism": "Generate DRAT/LRAT or pseudo-Boolean proof objects, validate them with independently implemented checkers, and where practical replay the small trusted certificate layer in Lean, HOL4, or a verified CakeML checker.",
+      "scope_and_outcome": "DRAT-trim, LRAT, LRAT-Catcher, cake_lpr, HOL4 Ramsey developments, VeriPB, and the released SAT+CAS Ramsey artifacts establish a mature verification ecosystem. A locally replayed proof is strong evidence but is not novelty unless its mathematical scope or reusable verification contribution is new.",
+      "material_delta_required": "Bind every proof to exact generator/input hashes, independently check formula semantics and case coverage, disclose the trusted base, and demonstrate either a new mathematical exclusion or a verification artifact that an identified external effort will use.",
+      "sources": ["https://github.com/marijnheule/drat-trim", "https://www.cs.utexas.edu/~marijn/publications/lrat.pdf", "https://arxiv.org/abs/2607.00815", "https://github.com/leansolving/lrat-catcher", "https://cakeml.org/checkers.html", "https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ITP.2024.16", "https://github.com/ConDug/MathCheckRamsey", "https://veripb.org/"]
+    },
+    {
       "id": "subgraph-counting-upper-bound",
       "family": "exact subgraph-counting identities",
       "mechanism": "Use neighborhood classifications and exact subgraph-counting identities to contradict hypothetical large Ramsey graphs.",

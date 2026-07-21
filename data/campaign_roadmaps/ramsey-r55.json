@@ -4,10 +4,18 @@
   "created_at": "2026-07-21",
   "updated_at": "2026-07-21",
   "default_phase": "core_theorem",
-  "operating_rule": "This is an evidence-driven stage graph, not a fixed sequence or session allocation. The tactical incumbent selects the active stage after every completed epoch. Run only the cheapest decisive discriminator, then immediately promote, kill, hold, or redirect the route from the observed evidence.",
+  "operating_rule": "This is an evidence-driven stage graph, not a fixed sequence or session allocation. A model pass designs or reviews a bounded job; deterministic lab work runs from checkpoints without repeated model prompting; the next review is triggered only by a result, a new source, an explicit route decision, or a failed safety/reproducibility check. Run the cheapest decisive discriminator, then immediately promote, kill, hold, or redirect from observed evidence.",
   "portfolio_rule": "The named stages are a current evidence-backed portfolio, not an exhaustive list of permissible ideas. A new composite route may enter at any epoch when it identifies concrete inputs from R(5,5), another problem, or another field; states a mechanism-level transfer hypothesis; clears prior-art comparison; and has a bounded falsifier. It does not displace the active incumbent until evidence from that discriminator supports redirecting.",
+  "gate_design_rule": "Promotion conditions must name a natural mathematical object, a recognized search decomposition, a reusable verified artifact, or an externally valued algorithmic capability. Clause counts, percentage reductions, solve counts, speedups, and session counts are diagnostics unless a source, expert, downstream proof budget, or predeclared statistical decision rule makes that threshold consequential.",
+  "expert_alignment_rule": "Before scaling a route that overlaps active work, contact the relevant author or maintainer with the exact proposed delta and ask for current status, available artifacts, novelty boundaries, and useful independent-verification work. Record the response or documented nonresponse; do not infer novelty from silence.",
   "confidence_calibration": {
     "basis": "Current evidence as of 2026-07-21; update after decisive observations rather than after an arbitrary number of sessions.",
+    "horizon": "The next 90 calendar days, under the currently approved model, compute, and human-review caps; reset the estimates if the horizon or caps change.",
+    "event_definitions": {
+      "meaningful_gate_candidate_probability": "At least one result reaches candidate status for a configured field-progress gate after evidence validation and current novelty review.",
+      "external_acceptance_probability": "At least one independently validated result is accepted, adopted, or explicitly judged useful by a relevant external expert, maintainer, dataset, or venue.",
+      "ramsey_bound_improvement_probability": "The recognized lower or upper bound for R(5,5) changes because of a campaign result."
+    },
     "meaningful_gate_candidate_probability": 0.20,
     "credible_interval": [0.10, 0.32],
     "external_acceptance_probability": 0.09,
@@ -15,13 +23,13 @@
     "last_update": "Epoch 16 proved an exact 479,001,570.557x labelled-assignment quotient for one fixed-core boundary, but its sole post-block model was another known class. This closes label-only boundary normalization as a field-progress route and slightly lowers the planning prior.",
     "interpretation": "Subjective planning probabilities, not mathematical confidence. Meaningful means plausibly satisfying a configured field-progress gate after independent validation; external acceptance is stricter.",
     "increase_if": [
-      "proof cores collapse to at most five human-checkable parameterized types",
-      "canonical blocking removes whole classes at least 100 times faster than labelled blocking",
-      "a leakage-safe method beats the strongest relevant prior-art baseline by at least 2x under matched compute",
-      "a checked cube/profile system certifies a material accepted search-space reduction"
+      "proof cores yield a natural theorem whose hypotheses and conclusion explain the excluded family and survive current prior-art review",
+      "canonical blocking completes a recognized boundary classification or produces a new independently checked isomorphism class",
+      "a leakage-safe method shows a predeclared statistically credible, practically consequential gain against the strongest relevant prior-art baseline",
+      "a checked cube/profile system contributes a decomposition or certificate component that an identified R55 effort considers useful"
     ],
     "decrease_if": [
-      "proof-core compression misses either predeclared threshold",
+      "proof-core compression yields only encoding-specific fragments without a shorter semantic theorem",
       "canonical boundary search continues rediscovering supplied classes after sound class-level blocking",
       "held-out gains disappear under matched evaluator calls or stronger baselines",
       "all live routes fail their predeclared bulk-reduction or novelty discriminators"
@@ -32,7 +40,9 @@
     "Treat a replication as a bounded control, never as novelty; require an exact material delta to continue beyond calibration.",
     "Choose the eligible route with the highest expected contribution information per unit compute, not the oldest route.",
     "Evidence may switch the active stage after any epoch; closed routes require explicit reopen evidence.",
-    "Prefer sound elimination of classes, profiles, cubes, or families over accumulating isolated failures."
+    "Prefer sound elimination of classes, profiles, cubes, or families over accumulating isolated failures.",
+    "Require expert/artifact alignment before scaling a route that overlaps an active external program.",
+    "Schedule model review on evidence events, not a clock; persistent deterministic jobs own repetition, checkpoints, and resource accounting."
   ],
   "phases": [
     {
@@ -40,11 +50,22 @@
       "strategy_fingerprints": ["r55tworbitproofcompress2026"],
       "enter_when": "Certified two-orbit exclusions have compressible common structure not already covered by a sourced theorem.",
       "objective": "Determine whether the 20 certified two-orbit exclusions compress into a concise structural theorem.",
-      "cheapest_discriminator": "Minimize and canonicalize the signed K5-clause cores, then count parameterized core types and maximum clauses.",
+      "cheapest_discriminator": "Minimize and canonicalize one representative signed K5-clause core, then test whether its pattern admits a natural graph-theoretic statement that instantiates across the certified distances.",
       "required_artifact": "Deletion-minimal raw K5-clause cores, canonical signed-incidence types, deterministic maps for all 20 distances, and a human-readable theorem draft with an instantiation checker.",
-      "promote_if": "Every distance maps to at most five parameterized core types of at most 20 clauses, with no SAT auxiliaries or unproved symmetry premise.",
-      "kill_if": "Either threshold fails after exact minimization, the templates do not shorten the finite certificates, or the result is subsumed by prior art.",
+      "promote_if": "The minimized cores support a concise semantic theorem that explains the whole certified family, has independently checked instantiations, is shorter or more reusable than the finite certificates, and remains distinct after Gauthier/current-prior-art alignment.",
+      "kill_if": "The patterns remain encoding-specific, the proposed theorem merely restates the finite certificates, an unproved symmetry premise is required, or the result is subsumed by prior art.",
       "fallback": "Select the strongest eligible challenger from the tactical ledger."
+    },
+    {
+      "id": "known_class_boundary",
+      "strategy_fingerprints": ["4c792f58d4a3", "a230b66ef386"],
+      "enter_when": "A frozen core defines a natural finite boundary family and every known-class boundary assignment can be enumerated and independently reconstructed.",
+      "objective": "Classify the frozen order-30 boundary after blocking the complete set of assignments induced by all supplied 656 order-42 classes.",
+      "cheapest_discriminator": "Use two supplied classes as positive controls: enumerate every induced embedding of the core, derive and row-normalize each boundary assignment, and require agreement from a non-importing implementation before attempting the corpus.",
+      "required_artifact": "Frozen core and corpus hashes, complete embedding and normalized-boundary ledgers, two independent reconstruction paths, a sound known-class block, and either a dual-checked new graph or a checked exhaustive UNSAT certificate for the boundary family.",
+      "promote_if": "The complete-corpus job yields a new independently checked order-42 isomorphism class, or certifies a natural frozen-core boundary classification that survives novelty review and is useful to an identified R55 effort.",
+      "kill_if": "Embedding completeness cannot be independently established, normalization loses distinctions needed for sound blocking, resource projections exceed the lab budget without a justified decomposition, or the resulting family is arbitrary and externally uninformative.",
+      "fallback": "Use SAT Modulo Symmetries or another sourced canonical-generation framework, or select a nonlocal construction/theory challenger."
     },
     {
       "id": "canonical_boundary",
@@ -53,8 +74,8 @@
       "objective": "Replace labelled CEGAR blocks in the 426-bit order-42 boundary with sound isomorphism-class or canonical-subproblem blocking.",
       "cheapest_discriminator": "Measure canonical class reuse and checker agreement on a bounded corpus before any scale-up.",
       "required_artifact": "Canonical augmentation/blocking algorithm, coverage proof or one-sided safety proof, dual checker, and measured class-level reduction ledger.",
-      "promote_if": "Class/cube blocking yields at least 100x fewer repeated solves than labelled blocking or finds a dual-checked order-42 class absent from the supplied corpus.",
-      "kill_if": "No sound compact class block exists, or 256 class-level decisions yield only supplied classes without a reusable reduction.",
+      "promote_if": "Class/cube blocking completes a natural boundary classification, finds a dual-checked order-42 class absent from the supplied corpus, or provides a sound canonical component that SAT Modulo Symmetries or an identified R55 effort does not already supply.",
+      "kill_if": "No sound compact class block exists, the mechanism only repackages labelled blocking, or bounded decisions continue returning supplied classes without establishing a reusable reduction or coverage result.",
       "fallback": "Select the strongest eligible challenger from the tactical ledger."
     },
     {
@@ -64,8 +85,8 @@
       "objective": "Eliminate many K43 candidates at once using exact distribution constraints.",
       "cheapest_discriminator": "Derive one candidate inequality exactly and measure its incremental profile elimination beyond sourced constraints.",
       "required_artifact": "Integer/rational profile system, independently checked derivation, control-graph tests, and exact count or upper bound on eliminated profiles/cubes.",
-      "promote_if": "A new sourced inequality or exact filter removes at least 99% of pilot profiles or strengthens a certificate-carrying upper-bound decomposition.",
-      "kill_if": "Known inequalities subsume the filter, rationalization fails, or the surviving pilot space shrinks by less than 10x.",
+      "promote_if": "A new independently derived inequality excludes a previously viable natural profile, strengthens a published or expert-identified upper-bound decomposition, or yields a certificate component with a credible route to external use.",
+      "kill_if": "Known inequalities subsume the filter, rationalization fails, or the filter changes no downstream case decision in the recognized decomposition.",
       "fallback": "Select the strongest eligible challenger from the tactical ledger."
     },
     {
@@ -75,8 +96,8 @@
       "objective": "Test whether structural, linkage, or evolved-search operators improve Ramsey search under leakage-safe matched compute.",
       "cheapest_discriminator": "Freeze splits and run paired low-budget seeds against simulated annealing, tabu, and the strongest relevant published baseline.",
       "required_artifact": "Frozen class-level splits, appropriate prior-art baselines, matched evaluator-call and wall-clock budgets, paired seeds, ablations, and exact graph evaluation.",
-      "promote_if": "At least 2x median held-out time-to-recovery or a statistically robust lower exact K43 burden under matched calls, surviving ablation and a second implementation.",
-      "kill_if": "Gain is below 25%, disappears on held-out classes, depends on leakage, or loses to an appropriate prior-art baseline.",
+      "promote_if": "A predeclared paired analysis shows a statistically credible and practically consequential held-out gain under matched calls, the mechanism survives ablation and a second implementation, and the result would change a downstream search allocation or interest an identified algorithm maintainer.",
+      "kill_if": "The gain is statistically inconclusive at the predeclared budget, disappears on held-out classes, depends on leakage, fails ablation, or loses to an appropriate prior-art baseline.",
       "fallback": "Select the strongest eligible challenger from the tactical ledger."
     },
     {
@@ -107,6 +128,10 @@
     "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
     "https://www.nature.com/articles/s41467-018-07327-2",
     "https://arxiv.org/abs/2603.09172",
-    "https://arxiv.org/abs/2502.06055"
+    "https://arxiv.org/abs/2502.06055",
+    "https://aitp-conference.org/2025/abstract/AITP_2025_paper_3.pdf",
+    "https://www.cs.rit.edu/~spr/COURSES/CCOMP/srg_r55.pdf",
+    "https://bigcompute.science/experiments/ramsey-r55-lower-bound/",
+    "https://sat-modulo-symmetries.readthedocs.io/en/latest/"
   ]
 }

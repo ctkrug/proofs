@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from copy import deepcopy
 from collections import Counter
 from typing import Any
 
@@ -13,6 +14,8 @@ SCHEMA_VERSION = 5
 STRATEGY_STATUSES = {
     "proposed", "active", "promising", "blocked", "ruled_out", "exhausted", "superseded",
 }
+TERMINAL_STRATEGY_STATUSES = {"blocked", "ruled_out", "exhausted", "superseded"}
+_EMPTY_STRATEGY_VALUES = {"", "error", "none", "n/a", "not applicable", "unspecified"}
 
 
 def _text(value: Any, limit: int = 4000) -> str:
@@ -30,6 +33,85 @@ def mechanism_similarity(left: Any, right: Any) -> float:
     left_tokens = set(re.findall(r"[a-z0-9]+", _text(left).lower()))
     right_tokens = set(re.findall(r"[a-z0-9]+", _text(right).lower()))
     return len(left_tokens & right_tokens) / max(1, len(left_tokens | right_tokens))
+
+
+def strategy_is_meaningful(row: dict[str, Any]) -> bool:
+    """Return whether a route contains enough mechanism information to be actionable."""
+    if not isinstance(row, dict):
+        return False
+    mechanism = _text(row.get("mechanism"), 4000).lower()
+    family = _text(row.get("family"), 500).lower()
+    title = _text(row.get("title"), 1000).lower()
+    if mechanism in _EMPTY_STRATEGY_VALUES:
+        return False
+    if mechanism.startswith("error:") or title.startswith("error:"):
+        return False
+    return bool(family not in _EMPTY_STRATEGY_VALUES or title not in _EMPTY_STRATEGY_VALUES)
+
+
+def reconcile_value(state: dict[str, Any], *, reconciled_at: str | None = None) -> dict[str, Any]:
+    """Return a non-destructive, hygienic state view plus an inspectable change report.
+
+    This is intentionally a pure function so dashboards and tactical prompts can stop
+    advertising stale work without silently rewriting the durable ledger.
+    """
+    clean = deepcopy(state) if isinstance(state, dict) else {}
+    strategies = [row for row in clean.get("strategies", []) if isinstance(row, dict)]
+    strategy_by_id: dict[str, dict[str, Any]] = {}
+    invalid_strategy_ids: list[str] = []
+    for row in strategies:
+        strategy_id = _text(row.get("id"), 200)
+        if not strategy_is_meaningful(row):
+            row["status"] = "superseded"
+            row["ineligible_reason"] = "empty_or_error_strategy"
+            if strategy_id:
+                invalid_strategy_ids.append(strategy_id)
+        if strategy_id:
+            strategy_by_id[strategy_id] = row
+    clean["strategies"] = strategies
+
+    closed_lead_ids: list[str] = []
+    orphaned_lead_ids: list[str] = []
+    leads = [row for row in clean.get("open_leads", []) if isinstance(row, dict)]
+    for row in leads:
+        if _text(row.get("status"), 40).lower() != "open":
+            continue
+        strategy_id = _text(row.get("strategy_id"), 200)
+        strategy = strategy_by_id.get(strategy_id)
+        reason = ""
+        if not strategy_id:
+            reason = "missing_strategy_id"
+            orphaned_lead_ids.append(_text(row.get("id"), 200))
+        elif strategy is None:
+            reason = "orphaned_strategy"
+            orphaned_lead_ids.append(_text(row.get("id"), 200))
+        elif strategy and strategy.get("status") in TERMINAL_STRATEGY_STATUSES:
+            reason = "terminal_strategy"
+        if reason:
+            row["status"] = "closed"
+            row["closure_reason"] = reason
+            if reconciled_at:
+                row["closed_at"] = reconciled_at
+            closed_lead_ids.append(_text(row.get("id"), 200))
+    clean["open_leads"] = leads
+    return {
+        "state": clean,
+        "report": {
+            "invalid_strategy_ids": [value for value in invalid_strategy_ids if value],
+            "closed_lead_ids": [value for value in closed_lead_ids if value],
+            "orphaned_lead_ids": [value for value in orphaned_lead_ids if value],
+            "changed": bool(invalid_strategy_ids or closed_lead_ids),
+        },
+    }
+
+
+def reconcile(problem: dict[str, Any], *, write: bool = False) -> dict[str, Any]:
+    """CLI-ready stale-state reconciliation; dry-run by default, persist with ``write``."""
+    result = reconcile_value(load(problem), reconciled_at=store.now_iso())
+    if write and result["report"]["changed"]:
+        store.write_json_atomic(state_path(problem["id"]), result["state"])
+    result["report"]["written"] = bool(write and result["report"]["changed"])
+    return result
 
 
 def state_path(problem_id: str):
@@ -165,6 +247,14 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
     state["last_updated"] = now
     state["synthesis_summary"] = _text(attempt.get("summary"), 8000)
     state["recent_attempt_ids"] = (state.get("recent_attempt_ids", []) + [attempt["id"]])[-20:]
+    evidence_validation = attempt.get("evidence_validation")
+    if isinstance(evidence_validation, dict) and evidence_validation.get("status") != "valid":
+        state["synthesis_summary"] = (
+            "Attempt retained without durable claim projection because its evidence receipt did not validate: "
+            + state["synthesis_summary"]
+        )[:8000]
+        store.write_json_atomic(state_path(problem["id"]), state)
+        return state
     if attempt.get("phase") == "baseline" and attempt.get("outcome") != "error":
         state["baseline_review"] = {
             "status": "complete",
@@ -201,10 +291,19 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         "parent_ids": [_text(x, 100) for x in strategy.get("parent_ids", []) if _text(x, 100)][:10],
         "updated_at": now,
     }
+    route_evaluation = strategy.get("route_evaluation") or attempt.get("route_evaluation")
+    if isinstance(route_evaluation, dict):
+        strategy_row["route_evaluation"] = {
+            key: value for key, value in route_evaluation.items()
+            if key in {
+                "gate_proximity", "contribution_value", "decisiveness", "novelty_confidence",
+                "novelty_risk", "model_cost", "cpu_cost", "scope", "reuse_value",
+            } and isinstance(value, (int, float)) and not isinstance(value, bool)
+        }
     existing = next((row for row in state["strategies"] if row.get("fingerprint") == fingerprint), None)
     if existing:
         strategy_row["attempts"] = int(existing.get("attempts") or 0) + 1
-        for key in ("title", "mechanism", "hypothesis", "discriminating_test", "blocker", "reopen_condition", "parent_ids"):
+        for key in ("title", "mechanism", "hypothesis", "discriminating_test", "blocker", "reopen_condition", "parent_ids", "route_evaluation"):
             if not strategy_row.get(key):
                 strategy_row[key] = existing.get(key)
         state["strategies"] = [row for row in state["strategies"] if row.get("fingerprint") != fingerprint]
@@ -362,12 +461,16 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         "source_attempt_id": attempt["id"],
     }
 
+    # New projections should never reintroduce stale actionable work. Historical
+    # state remains available, but terminal-route leads and malformed strategies
+    # are persisted as closed/ineligible at the projection boundary.
+    state = reconcile_value(state, reconciled_at=now)["state"]
     store.write_json_atomic(state_path(problem["id"]), state)
     return state
 
 
 def compact_for_prompt(problem: dict[str, Any]) -> str:
-    state = load(problem)
+    state = reconcile_value(load(problem))["state"]
     payload = {
         "epoch_count": state.get("epoch_count"),
         "baseline_review": state.get("baseline_review", {}),
@@ -383,6 +486,7 @@ def compact_for_prompt(problem: dict[str, Any]) -> str:
 
 
 def summary_counts(state: dict[str, Any]) -> dict[str, int]:
+    state = reconcile_value(state)["state"]
     counts = Counter(str(row.get("status") or "unknown") for row in state.get("strategies", []))
     return {
         "promising": counts["promising"],

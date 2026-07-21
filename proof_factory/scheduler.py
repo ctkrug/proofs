@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, capacity, render, repositories, research_state, resources, store, usage
+from . import agent, brain, capacity, events, render, repositories, research_state, resources, store, usage
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -123,6 +123,14 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
         problem = choose_problem(lane, problems)
+        research_events = events.pending(problem["id"]) if lane == "hard" else []
+        if lane == "hard" and admission.get("mode") != "operator" and not research_events:
+            reason = "no unconsumed research event; clock time alone cannot start a model-backed R(5,5) pass"
+            store.update_runtime(hard_running=None, hard_event_policy={
+                "allowed": False, "reason": reason, "checked_at": store.now_iso(),
+            })
+            render.build()
+            return {"status": "deferred", "lane": lane, "reason": reason}
         if lane == "easy":
             problem = store.start_discovery_campaign(problem["id"])
         phase = "baseline" if research_state.needs_baseline(problem) else "technical"
@@ -148,11 +156,18 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         attempt = agent.run(problem, lane, phase=phase)
         store.record_attempt(attempt)
         repositories.record_attempt(problem, attempt)
+        consumed_events = events.consume(problem["id"], attempt["id"]) if lane == "hard" else []
         brain.refresh()
         store.update_runtime(**{
             f"{lane}_running": None,
             f"{lane}_last_attempt_at": attempt["finished_at"],
             f"{lane}_last_outcome": attempt["outcome"],
+            **({"hard_event_policy": {
+                "allowed": True,
+                "operator": admission.get("mode") == "operator",
+                "consumed_event_ids": [row["id"] for row in consumed_events],
+                "checked_at": store.now_iso(),
+            }} if lane == "hard" else {}),
         })
         render.build()
         if publish:
@@ -178,10 +193,11 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         issues.extend(capacity_policy["reasons"])
     if hard:
         last_hard = store.parse_iso(hard[-1].get("finished_at"))
-        if not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 1.5 * 3600:
-            issues.append("twice-hourly Ramsey campaign has no completed or active attempt in more than 1.5 hours")
-    elif not hard_in_flight and now.hour >= 2:
-        issues.append("twice-hourly Ramsey campaign has not completed its first attempt")
+        pending_hard_events = events.pending(hard[-1].get("problem_id"))
+        if pending_hard_events and not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 6 * 3600:
+            issues.append("Ramsey campaign has an unconsumed evidence event for more than 6 hours")
+    elif not hard_in_flight and any(events.pending(row["id"]) for row in store.load_problems() if row.get("lane") == "hard"):
+        issues.append("Ramsey campaign has evidence ready but has not completed its first review")
     easy_expected = os.environ.get("PROOF_EASY_EXPECTED", "1").strip().lower() not in {"0", "false", "no", "off"}
     if easy_expected:
         if easy:

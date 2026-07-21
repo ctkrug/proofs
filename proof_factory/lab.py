@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import capacity, repositories, store
+from . import capacity, events, repositories, store
 
 
 SCHEMA_VERSION = 1
@@ -194,6 +194,13 @@ def worker_once() -> dict[str, Any]:
                 store.write_json_atomic(archive / f"{spec['id']}.json", {**spec, "final_record": record})
                 status = "completed" if proc.returncode == 0 else "stopped"
             repositories.record_lab(spec["problem_id"], status, {**spec, **record})
+            if status == "completed":
+                event = events.enqueue(
+                    spec["problem_id"], "lab_completed",
+                    evidence=f"lab job {spec['id']} completed with returncode {proc.returncode}; {record['runner_result'][-1500:]}",
+                    source=f"state/labs/jobs.jsonl#{spec['id']}",
+                )
+                record["research_event_id"] = event["id"]
             return {"status": status, **record}
         except Exception as exc:
             record = {
