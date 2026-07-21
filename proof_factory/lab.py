@@ -417,8 +417,11 @@ def worker_once() -> dict[str, Any]:
             elif progress.get("complete"):
                 lifecycle = "completed_awaiting_review"
             else:
-                since_review = spec["segment"] - int(state.get("last_reviewed_segment") or 0)
-                tranche_limit = spec["segment"] >= spec["pilot_segments"] and since_review >= spec["review_every_segments"]
+                last_reviewed = int(state.get("last_reviewed_segment") or 0)
+                since_review = spec["segment"] - last_reviewed
+                pilot_due = last_reviewed == 0 and spec["segment"] >= spec["pilot_segments"]
+                periodic_due = last_reviewed > 0 and since_review >= spec["review_every_segments"]
+                tranche_limit = pilot_due or periodic_due
                 declared_end = bool(spec["max_segments"] and spec["segment"] >= spec["max_segments"])
                 lifecycle = "completed_awaiting_review" if tranche_limit or declared_end else "checkpointed"
 
