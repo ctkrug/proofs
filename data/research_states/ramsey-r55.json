@@ -15,8 +15,8 @@
     "Completing a structured-family sweep, accumulating UNSAT responses, or finding symmetry copies is not field progress without one of the five explicit contribution gates.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 17,
-  "last_updated": "2026-07-21T18:40:01.743266+00:00",
+  "epoch_count": 18,
+  "last_updated": "2026-07-21T19:53:09.309391+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -27,7 +27,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The two-record feasibility gate passed with exact three-way validation. The approximately 5.6-core-hour full supplied-class census is now approved and durably queued as checkpointed job lab-ramsey-r55-872a7c3ee855; a one-host lifecycle canary is queued ahead of it. Droplet execution is safely deferred while the separate build-cache volume remains below its 1 GiB reserve. No block was emitted and 43 <= R(5,5) <= 46 is unchanged.",
+  "synthesis_summary": "The mandatory segment-33 review passed. All 33 artifacts reconcile; six positive hosts contain twelve exact embeddings and eight distinct boundary vectors; fresh VF2 regenerated every positive mapping stream; both exact graph checkers accepted all eight graphs; and four mutations failed. The remaining 623 hosts are untouched, no block was emitted, and 43 <= R(5,5) <= 46 is unchanged.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -409,6 +409,30 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
       "updated_at": "2026-07-21T17:37:38.498366+00:00"
+    },
+    {
+      "claim": "The segment-33 census prefix covers canonical supplied hosts 0 through 32 exactly once and all saved hashes and byte counts reconcile.",
+      "evidence": "Standalone cold audit and durable segment receipt.",
+      "scope": "Exactly the first 33 supplied source hosts.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "claim": "Hosts 11, 17, 18, 19, 20, and 24 each have exactly two fixed-core embeddings under both production paths and fresh cold VF2.",
+      "evidence": "Six exact cold mapping-stream digest comparisons.",
+      "scope": "Those six supplied hosts under the fixed source-record-21 core.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "claim": "The twelve embeddings produce eight distinct valid Ramsey(5,5,42) labelled graphs.",
+      "evidence": "Independent pullback reconstruction plus direct-combinations Python and recursive-bitset C checkers.",
+      "scope": "The eight retained vectors from canonical hosts 0 through 32.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
     }
   ],
   "strategies": [
@@ -810,39 +834,34 @@
       "updated_at": "2026-07-21T17:37:38.498366+00:00"
     },
     {
-      "id": "strategy-r55-known-class-embedding-block",
+      "id": "strategy-r55knownclassembeddingblock2026",
       "family": "complete known-class boundary blocking",
       "fingerprint": "r55knownclassembeddingblock2026",
-      "title": "Enumerate and block every supplied-class boundary assignment induced by a fixed order-30 core",
-      "mechanism": "Enumerate every induced embedding of the fixed source-record-21 order-30 core into each of the supplied 656 order-42 Ramsey graphs, normalize the resulting 12-vertex boundary assignments under a separately checked quotient, add one complete finite block set, and then solve the residual boundary instance.",
+      "title": "Cold-review the mandatory segment-33 boundary of the checkpointed 656-host supplied-class embedding census before authorizing further computation.",
+      "mechanism": "Enumerate every induced embedding of the fixed source-record-21 order-30 core into each supplied order-42 graph and complement, expand every row-lex-compatible residual order, and retain exact 426-bit boundary pullbacks for a future complete supplied-class block.",
       "status": "promising",
-      "hypothesis": "For source records 21 and 12, two independent implementations agree exactly on the embedding count and the normalized boundary-assignment set, and the full supplied corpus remains small enough to enumerate before another SAT call.",
-      "discriminating_test": "Run a two-record pilot on source records 21 and 12; require identical counts and sorted assignment hashes from independent implementations plus successful replay of every assignment against the source graph and boundary mapping.",
-      "blocker": "The complete embedding and boundary-assignment corpus has not yet been generated or independently reconciled, so class-level exclusion is not established.",
+      "hypothesis": "The canonical 33-host census prefix is hash-consistent; fresh VF2 exactly regenerates every positive mapping stream and an empty control; every saved pullback reconstructs; all distinct vectors pass two exact five-set checkers; and four corruptions are rejected.",
+      "discriminating_test": "Independently parse the corpus, verify the segment receipt and every saved object, cold-regenerate the six positive VF2 mapping streams, cold-enumerate host 0, replay all saved pullbacks, run two exact K5 checkers, and inject four mutations.",
+      "blocker": "The remaining 623 supplied host representations and final cold coverage audit are incomplete; therefore no known-class block exists.",
       "reopen_condition": "",
-      "reopen_evidence": "The prior quotient experiments established that label-level and row-order blocks alone merely rediscover supplied classes; complete supplied-class embedding blocks are now the cheapest direct discriminator.",
-      "last_attempt_id": "",
-      "attempts": 0,
+      "reopen_evidence": "",
+      "last_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "attempts": 1,
       "parent_ids": [
         "strategy-a230b66ef386",
-        "strategy-r55controls2026"
+        "strategy-r55novel42basin2026"
       ],
-      "sources": [
-        "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
-        "https://users.cecs.anu.edu.au/~bdm/data/ramsey.html"
-      ],
-      "updated_at": "2026-07-21T18:00:00+00:00",
-      "rationale": "This turns the measured supplied-class rediscovery failure into a finite, independently checkable class-boundary exclusion rather than another arbitrary labelled-model cutoff.",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00",
       "route_evaluation": {
-        "gate_proximity": 0.85,
-        "contribution_value": 0.9,
+        "gate_proximity": 0.55,
+        "contribution_value": 0.4,
         "decisiveness": 0.95,
-        "novelty_confidence": 0.65,
-        "novelty_risk": 0.25,
-        "scope": 0.85,
-        "reuse_value": 0.85,
-        "model_cost": 0.35,
-        "cpu_cost": 0.7
+        "novelty_confidence": 0.45,
+        "novelty_risk": 0.35,
+        "scope": 0.25,
+        "reuse_value": 0.9,
+        "model_cost": 0.2,
+        "cpu_cost": 0.6
       }
     }
   ],
@@ -852,10 +871,12 @@
       "rationale": "This is the first route that directly converts repeated known-class rediscovery into a finite class-level exclusion with a decisive residual SAT test.",
       "next_experiment": "Pilot source records 21 and 12 with independent embedding enumeration and normalized-assignment hashes; stop on any count, mapping, or hash mismatch.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-r55-known-class-embedding-block",
       "strategy_id": "strategy-r55-known-class-embedding-block",
-      "updated_at": "2026-07-21T18:00:00+00:00"
+      "updated_at": "2026-07-21T18:00:00+00:00",
+      "closure_reason": "orphaned_strategy",
+      "closed_at": "2026-07-21T19:53:09.309391+00:00"
     },
     {
       "description": "Sweep the 20 exact two-orbit domain-wall slices obtained by releasing cyclic distance 6 with one additional distance orbit.",
@@ -1140,6 +1161,26 @@
       "updated_at": "2026-07-21T17:37:38.498366+00:00",
       "closure_reason": "terminal_strategy",
       "closed_at": "2026-07-21T18:14:29.129762+00:00"
+    },
+    {
+      "description": "Complete the checkpointed 656-host supplied-class embedding census.",
+      "rationale": "It is the direct prerequisite for one sound supplied-class boundary block and continues well above declared resource thresholds.",
+      "next_experiment": "Resume lab-ramsey-r55-872a7c3ee855 from next_host 33 and review the next immutable tranche.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-85ffef20d2",
+      "strategy_id": "strategy-r55knownclassembeddingblock2026",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "description": "Deletion-minimize one certified two-orbit raw K5-clause core.",
+      "rationale": "This remains a distinct structural challenger if the census loses correctness, feasibility, or decision value.",
+      "next_experiment": "Test the predeclared at-most-20-origin threshold on one retained slice.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-dcce5a03b4",
+      "strategy_id": "strategy-r55knownclassembeddingblock2026",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
     }
   ],
   "ruled_out": [
@@ -1416,6 +1457,24 @@
       "reopen_condition": "A proved class-level block or canonical augmentation, an artifact defect, or a predeclared experiment that directly meets a field-progress gate.",
       "attempt_id": "ramsey-r55-20260721-173738-495bea",
       "updated_at": "2026-07-21T17:37:38.498366+00:00"
+    },
+    {
+      "claim_or_route": "Treat the reviewed 33-host prefix as a complete supplied-class block.",
+      "scope": "The current fixed-core boundary census.",
+      "reason": "Only 33 of 656 supplied host representations have been processed.",
+      "evidence": "Checkpoint next_host is 33 and total_hosts is 656.",
+      "reopen_condition": "Complete and cold-audit all 656 canonical hosts.",
+      "attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
+    },
+    {
+      "claim_or_route": "Accept stored NetworkX summaries alone as offline proof of the second complete mapping stream.",
+      "scope": "The current per-host archive format.",
+      "reason": "The full NetworkX streams are not retained in host artifacts.",
+      "evidence": "Production driver inspection; cold regeneration was required for the six positive hosts.",
+      "reopen_condition": "Retain complete second-path sidecars or cold-regenerate every positive stream.",
+      "attempt_id": "ramsey-r55-20260721-195309-1f8700",
+      "updated_at": "2026-07-21T19:53:09.309391+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1426,11 +1485,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55-known-class-embedding-block",
-    "objective": "Complete and independently validate the checkpointed 656-host supplied-class embedding census before any residual SAT.",
-    "first_action": "When the host capacity reserve clears, run lifecycle canary lab-ramsey-r55-f314736c524b, review its durable completion event, then begin full job lab-ramsey-r55-872a7c3ee855 with a one-host measured pilot.",
-    "stop_condition": "Automatically pause on implementation mismatch, failed coverage/correctness, throughput below 0.001 host/second, per-segment artifact growth above 200 MB, or lost decision value. Preserve all verified host receipts. Before scaling beyond the supplied corpus, require a bounded residual-SAT discriminator and independent validation.",
-    "source_attempt_id": "ramsey-r55-20260721-173738-495bea"
+    "recommended_strategy_id": "strategy-r55knownclassembeddingblock2026",
+    "objective": "Complete and independently validate all 656 supplied host profiles before emitting any block.",
+    "first_action": "After the continue review is applied, inspect /root/proof-factory/state/labs/jobs/lab-ramsey-r55-872a7c3ee855.json and confirm resumption from next_host 33 with unchanged input hashes.",
+    "stop_condition": "Redirect on any implementation or cold-replay mismatch, host timeout, throughput below 0.001 host/s, segment artifact growth above 200 MB, or loss of decision value.",
+    "source_attempt_id": "ramsey-r55-20260721-195309-1f8700"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1449,10 +1508,11 @@
     "ramsey-r55-20260721-143151-8fb809",
     "ramsey-r55-20260721-164650-ef8c5a",
     "ramsey-r55-20260721-173738-495bea",
-    "ramsey-r55-20260721-184001-fccb60"
+    "ramsey-r55-20260721-184001-fccb60",
+    "ramsey-r55-20260721-195309-1f8700"
   ],
   "tactical_memory": {
-    "current_bottleneck": "The remaining boundary bottleneck is compact class-level canonical augmentation, not destroy-label redundancy.",
+    "current_bottleneck": "The current bottleneck is completing and reviewing the remaining 623 supplied host profiles, followed by a final 32-empty-host stratified cold sample.",
     "failure_signatures": [
       {
         "id": "8e93ec5473f4",
@@ -1461,6 +1521,14 @@
         "last_strategy_id": "strategy-a230b66ef386",
         "last_attempt_id": "ramsey-r55-20260721-173738-495bea",
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "id": "390b20bf5e94",
+        "signature": "Production archives preserve the full custom-DFS stream but only a NetworkX summary, so offline validation requires cold regeneration of every positive NetworkX stream.",
+        "count": 1,
+        "last_strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "last_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ],
     "reusable_assets": [
@@ -1477,6 +1545,27 @@
         "evidence": "checkers/novel42_lex_quotient_audit.py; SHA-256 89f92a8ec8577be526cab98b2153b848d5a4c7809b280dab870c7a154739778c",
         "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "name": "Known-class tranche cold auditor",
+        "use": "Verify prefix coverage, object hashes, positive mapping streams, tied-row pullbacks, graph properties, and corruption rejection.",
+        "evidence": "checkers/known_class_embedding_tranche_audit.py; SHA-256 69d01e8bd189498c70390404de034b354023ffe2fae812ee7c287c64b7c46687",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "name": "Segment-33 audit result",
+        "use": "Immutable reviewed profile of canonical hosts 0 through 32.",
+        "evidence": "artifacts/known_class_embedding_tranche33_audit.json; SHA-256 4bfbbedcc0dd23a688431969693274915e19c892f56c3b84139f43f04a872c98",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "name": "Eight reconstructed graphs",
+        "use": "Independent exact five-set regression corpus.",
+        "evidence": "artifacts/known_class_embedding_tranche33_graphs.g6; SHA-256 4e99010340746b1c2ffdd81fec3da6b51342891d8cd906d8669fe1ac27053bcf",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ],
     "constraints_learned": [
@@ -1486,6 +1575,20 @@
         "evidence": "Combinations-with-repetition count and exhaustive tied-row coverage.",
         "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "constraint": "A NetworkX summary hash is insufficient for offline reconstruction unless the complete stream is retained or regenerated.",
+        "scope": "The present per-host census archive format.",
+        "evidence": "Production driver inspection and successful cold regeneration of all six positive prefix streams.",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "constraint": "Future cold tranche audits belong in the checkpointed lab because the strengthened 33-host audit exceeded two minutes.",
+        "scope": "Audits that regenerate all positive VF2 streams.",
+        "evidence": ".proof-experiments/20260721-194527-481cfe recorded 139.167 seconds.",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ],
     "decision_history": [
@@ -1498,6 +1601,16 @@
         "surprise": "The delegate projection of 175 clauses per comparator was one too high. Exact reconstruction and truth-table testing establish 174 clauses: 30 order clauses, four first-prefix clauses, and 28 groups of five later-prefix clauses.",
         "next_discriminator": "Deletion-minimize one certified two-orbit raw clause set and stop if the first exact core exceeds 20 clauses.",
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "decision": "continue",
+        "prediction": "All 33 saved objects reconcile, six positive hosts contain twelve embeddings, fresh VF2 reproduces their complete mapping streams, the empty control remains empty, eight vectors pass both graph checkers, and all mutations fail.",
+        "observation": "Every predicted condition passed. Positive hosts were indices 11, 17, 18, 19, 20, and 24, each with two embeddings; their eight distinct vectors passed both exact graph checkers.",
+        "surprise": "The strengthened cold audit took 139.167 seconds, slightly beyond the two-minute interactive threshold.",
+        "next_discriminator": "Review the next durable census tranche; stop immediately on any hash, stream, pullback, timeout, throughput, growth, or decision-value failure.",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ],
     "reduction_ledger": [
@@ -1516,6 +1629,22 @@
         "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
         "strategy_id": "strategy-a230b66ef386",
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "ambient_space": "The 656 supplied host representations only; this is not the universe of order-42 Ramsey graphs.",
+        "represented_space_before": "656 supplied source/complement host representations pending exact pullback classification.",
+        "eliminated_or_quotiented": "No graph or boundary assignment was eliminated. Exact pullback profiles were computed and reviewed for canonical hosts 0 through 32.",
+        "represented_space_after": "623 supplied host representations remain unprocessed; 33 have reviewed profiles.",
+        "reduction_factor": "33/656 completed, not a mathematical elimination factor.",
+        "measurement_status": "exact",
+        "unit": "profiles",
+        "coverage_scope": "Exactly source records 1 through 33 in the maintained 328-record corpus, without complements.",
+        "soundness_basis": "Canonical manifest ordering, per-object SHA-256 validation, exact checkpoint equality, cold VF2 stream reproduction for every positive host, and independent pullback replay.",
+        "remaining_unknown": "Hosts 33 through 655, all unknown order-42 isomorphism classes, unsupplied fixed-boundary solutions, order-43 graphs, and the exact value of R(5,5).",
+        "next_bulk_elimination": "Complete and cold-audit all 656 supplied profiles before constructing one deduplicated supplied-class block.",
+        "source_attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -1537,6 +1666,26 @@
           "https://www.cs.rit.edu/~spr/ElJC/sur.pdf"
         ],
         "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "attempt_id": "ramsey-r55-20260721-195309-1f8700",
+        "strategy_id": "strategy-r55knownclassembeddingblock2026",
+        "nearest_method_ids": [
+          "mckay-delete-three-extend",
+          "exoo-incremental-simulated-annealing",
+          "incremental-tabu-search"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "This route creates a replayable fixed-core boundary-pullback profile for every supplied representative and complement; prior searches generated or extended the known graphs but did not publish this boundary-specific ledger.",
+        "duplicate_risk": "The census can only rediscover and block the supplied controls inside one frozen boundary; it cannot prove that the 656 classes are complete.",
+        "comparison_test": "Require exact recovery of known source-record controls and compare every production mapping digest with a fresh cold VF2 stream.",
+        "decision": "control_only",
+        "source_urls": [
+          "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+          "https://users.cecs.anu.edu.au/~bdm/data/ramsey.html",
+          "https://arxiv.org/abs/2409.15709"
+        ],
+        "updated_at": "2026-07-21T19:53:09.309391+00:00"
       }
     ]
   }
