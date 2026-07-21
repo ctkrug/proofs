@@ -19,6 +19,7 @@ RESEARCH = ROOT / "research"
 PROBLEMS_FILE = DATA / "problems.json"
 ATTEMPTS_FILE = DATA / "attempts.jsonl"
 RUNTIME_FILE = STATE / "runtime.json"
+DISCOVERY_CAMPAIGN_MIN_RUNS = 25
 
 
 def now_iso() -> str:
@@ -87,6 +88,31 @@ def save_problems(rows: list[dict[str, Any]]) -> None:
     write_json_atomic(PROBLEMS_FILE, rows)
 
 
+def start_discovery_campaign(problem_id: str) -> dict[str, Any]:
+    """Persist one discovery incumbent so scheduled passes cannot rotate away from it."""
+    with lock("state") as acquired:
+        if not acquired:
+            raise RuntimeError("state lock unavailable")
+        problems = load_problems()
+        problem = next((row for row in problems if row["id"] == problem_id), None)
+        if not problem or problem.get("lane") != "easy":
+            raise ValueError(f"unknown discovery problem: {problem_id}")
+        for row in problems:
+            if row.get("lane") != "easy" or row["id"] == problem_id:
+                continue
+            if row.get("campaign_state") == "active":
+                row["campaign_state"] = "superseded"
+                row["campaign_decision"] = "superseded by a newer persisted campaign"
+        if problem.get("campaign_state") != "active":
+            problem["campaign_state"] = "active"
+            problem["campaign_started_at"] = now_iso()
+            problem["campaign_start_research_attempt_count"] = int(problem.get("research_attempt_count") or 0)
+            problem["campaign_min_runs"] = DISCOVERY_CAMPAIGN_MIN_RUNS
+            problem["campaign_decision"] = "continue through the minimum campaign"
+        save_problems(problems)
+        return problem
+
+
 def load_attempts() -> list[dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
     if not ATTEMPTS_FILE.exists():
@@ -137,20 +163,56 @@ def record_attempt(attempt: dict[str, Any]) -> None:
         outcome = attempt["outcome"]
         if outcome != "error":
             problem["research_attempt_count"] = int(problem.get("research_attempt_count") or 0) + 1
+        actionable = any(
+            row.get("status") in {"proposed", "promising", "active"} and row.get("last_attempt_id") != attempt["id"]
+            for row in durable_state.get("strategies", [])
+        ) or any(row.get("status", "open") == "open" for row in durable_state.get("open_leads", []))
+        campaign = problem.get("lane") == "easy" and problem.get("campaign_state") == "active"
+        assessment = attempt.get("campaign_assessment") if isinstance(attempt.get("campaign_assessment"), dict) else {}
+        campaign_decision = str(assessment.get("decision") or "").strip().lower()
+        close_signal = str(assessment.get("close_signal") or "").strip()
+        if campaign and assessment:
+            problem["campaign_last_assessment"] = {
+                "attempt_id": attempt["id"],
+                "decision": campaign_decision,
+                "close_signal": close_signal[:2000],
+                "reason": str(assessment.get("reason") or "")[:2000],
+            }
+
         if outcome == "candidate":
             problem["status"] = "candidate"
             problem["candidate_attempt_id"] = attempt["id"]
+            if campaign:
+                problem["campaign_state"] = "review"
+                problem["campaign_decision"] = "candidate awaiting review"
+        elif campaign and outcome != "error":
+            completed = int(problem.get("research_attempt_count") or 0)
+            minimum = max(DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
+            problem["campaign_min_runs"] = minimum
+            if completed < minimum:
+                problem["status"] = "active" if outcome == "progress" else "attempted"
+                problem["campaign_decision"] = f"continue through run {minimum}"
+            else:
+                should_continue = (
+                    campaign_decision == "continue" and bool(close_signal)
+                ) or (
+                    not campaign_decision and outcome == "progress" and actionable
+                )
+                if should_continue:
+                    problem["status"] = "active"
+                    problem["campaign_state"] = "active"
+                    problem["campaign_decision"] = "continue: concrete close signal recorded"
+                else:
+                    problem["status"] = "parked"
+                    problem["campaign_state"] = "hold"
+                    problem["campaign_decision"] = "hold after minimum-run review"
         elif outcome == "progress":
             problem["status"] = "active"
         elif outcome in {"failed", "error", "no_progress"}:
-            actionable = any(
-                row.get("status") in {"proposed", "promising", "active"} and row.get("last_attempt_id") != attempt["id"]
-                for row in durable_state.get("strategies", [])
-            ) or any(row.get("status", "open") == "open" for row in durable_state.get("open_leads", []))
             if (
                 problem.get("lane") == "easy"
                 and outcome != "error"
-                and int(problem.get("research_attempt_count") or 0) >= 3
+                and int(problem.get("research_attempt_count") or 0) >= DISCOVERY_CAMPAIGN_MIN_RUNS
                 and not actionable
             ):
                 problem["status"] = "parked"

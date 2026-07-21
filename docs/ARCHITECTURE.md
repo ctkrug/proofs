@@ -74,8 +74,10 @@ stays available if the content box, Codex login, or an individual attempt fails.
 - Research services never receive Cloudflare or social credentials. A separate, serialized publisher
   service loads deployment credentials only after the research process exits; the research model runs
   with a minimal environment and a workspace-write sandbox.
-- Discovery problems receive three bounded non-error passes before being parked only if their map has
-  no live lead, promising route, or untried proposal. A daily,
+- Discovery problems run as persisted single-target campaigns for at least 25 non-error passes. The engine
+  cannot rotate to another target during that minimum. At run 25 and after, each result must choose
+  `continue` or `hold`; continuation requires a concrete close signal tied to the next bounded experiment,
+  while a hold parks the target and lets the selector start the highest-scoring remaining campaign. A daily,
   deterministic intake job refills the active frontier to 12 from the versioned `teorth/erdosproblems`
   catalog and exact statement HTML on erdosproblems.com; easier and formalized metadata rank first.
 - Persistent timers catch up after a reboot. The watchdog runs every two hours and reports missed hard-lane cadence rather

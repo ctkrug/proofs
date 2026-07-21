@@ -15,10 +15,13 @@ candidate, verified, and published attempt. The system separates two research la
   It currently targets `R(5,5)`. Each epoch uses two GPT-5.6 Terra/high reconnaissance delegates and
   one GPT-5.6 Sol/xhigh principal; a 43-vertex Ramsey graph is a compact lower-bound witness and upper
   bounds require checked exhaustive certificates.
-- **Discovery lane:** twelve daily Sol/high + Terra/high delegated passes rotate through approachable, objectively
-  checkable contributions. A daily source-only intake currently keeps a 12-problem frontier from
-  the versioned Erdős Problems database; the schema and selector support broader contribution types.
-  Three bounded non-error passes park a target only when no actionable lead or untried strategy remains.
+- **Discovery lane:** twelve daily Sol/high + Terra/high delegated passes form a focused campaign on one
+  approachable, objectively checkable contribution at a time. The selector starts with the target that has
+  the best expected verifiable contribution per unit effort, then persists that incumbent for at least 25
+  non-error research runs. At run 25 and after, it continues only while a structured campaign assessment
+  records concrete evidence that a verifiable contribution is close; otherwise the target goes on hold and
+  the next best campaign begins. A daily source-only intake keeps a 12-problem frontier from the versioned
+  Erdős Problems database; the schema and selector support broader contribution types.
 
 The system never equates model confidence with proof, and a model cannot promote its own output.
 `candidate` is a fail-closed contribution-gate result, not a confidence label: it requires a meaningful

@@ -16,7 +16,7 @@ STATUS_LABELS = {
     "queued": "Queued",
     "active": "Active / ongoing",
     "attempted": "Tried — still open",
-    "parked": "Paused after 3 passes",
+    "parked": "On hold after campaign review",
     "failed": "Failed route",
     "candidate": "Candidate — review needed",
     "internal_result": "Internal result — value unestablished",
@@ -135,13 +135,17 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state
     last = attempts[-1] if attempts else None
     status = str(problem.get("status") or "queued")
     lane = str(problem.get("lane") or "easy")
+    campaign_progress = ""
+    if lane == "easy" and problem.get("campaign_state") == "active":
+        minimum = max(store.DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
+        campaign_progress = f" · campaign {int(problem.get('research_attempt_count') or 0)}/{minimum}+"
     return f"""
 <article class="problem-card" data-status="{h(status)}" data-lane="{h(lane)}">
   <div class="card-top"><span class="lane lane-{h(lane)}">{h(_problem_tag(problem))}</span>{_badge(status)}</div>
   <h3><a href="/problems/{h(problem['id'])}/">{h(problem['title'])}</a></h3>
   <p>{h(problem.get('statement'))}</p>
   <div class="meter"><span style="width:{min(100, int(problem.get('difficulty') or 0) * 10)}%"></span></div>
-  <div class="card-meta"><span>Difficulty {h(problem.get('difficulty'))}/10</span><span>{h(problem.get('attempt_count', 0))} attempts · {h(research_state.summary_counts(state)['open_leads'])} open leads</span></div>
+  <div class="card-meta"><span>Difficulty {h(problem.get('difficulty'))}/10</span><span>{h(problem.get('attempt_count', 0))} attempts{h(campaign_progress)} · {h(research_state.summary_counts(state)['open_leads'])} open leads</span></div>
   <div class="last-note"><strong>Latest:</strong> {h((last or {}).get('summary') or 'No research pass yet.')}</div>
   <div class="card-actions"><a href="{h(problem.get('source_url'))}" rel="noopener">Official source ↗</a><a href="/problems/{h(problem['id'])}/">Full record →</a></div>
 </article>"""
@@ -200,7 +204,7 @@ def _index(
   <div class="operation-grid">{_lane_card('hard', live_snapshot['lanes']['hard'])}{_lane_card('easy', live_snapshot['lanes']['easy'])}</div>
 </section>
 <section id="ongoing" class="section-block">
-  <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) twice hourly · open-problem rotation 12× daily</span></div>
+  <div class="section-heading"><div><span class="overline">WORK UNDERWAY</span><h2>Ongoing work</h2></div><span class="section-note">R(5,5) twice hourly · focused open-problem campaign 12× daily</span></div>
   <div class="problem-grid">{''.join(_problem_card(row, by_problem[row['id']], states[row['id']]) for row in ongoing) or '<p class="empty">No research pass is currently open.</p>'}</div>
 </section>
 <section id="planned" class="section-block planned-block">

@@ -23,6 +23,9 @@ class ProofFactoryTests(unittest.TestCase):
         ]
         self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-first")
         frontier[0]["research_attempt_count"] = 1
+        self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-first")
+        frontier[1]["campaign_state"] = "active"
+        frontier[1]["campaign_started_at"] = "2026-07-21T00:00:00+00:00"
         self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-next")
 
     def test_parse_official_statement(self) -> None:
@@ -355,6 +358,74 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(problem["status"], "attempted")
                 with self.assertRaises(ValueError):
                     store.record_attempt(attempt)
+
+    def test_discovery_campaign_cannot_hold_before_25_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            problems_file = data / "problems.json"
+            attempts_file = data / "attempts.jsonl"
+            problems_file.parent.mkdir(parents=True)
+            problems_file.write_text(json.dumps([{
+                "id": "p", "lane": "easy", "status": "attempted", "attempt_count": 23,
+                "research_attempt_count": 23, "campaign_state": "active", "campaign_min_runs": 25,
+            }]))
+            attempts_file.write_text("")
+
+            def attempt(attempt_id: str) -> dict[str, object]:
+                return {
+                    "id": attempt_id, "problem_id": "p", "started_at": "2026-01-01T00:00:00+00:00",
+                    "finished_at": "2026-01-01T00:01:00+00:00", "lane": "easy",
+                    "outcome": "no_progress", "summary": "bounded route failed",
+                    "campaign_assessment": {"decision": "hold", "close_signal": "", "reason": "route exhausted"},
+                }
+
+            with patch.multiple(
+                store, ROOT=root, DATA=data, STATE=root / "state", RESEARCH=root / "research",
+                PROBLEMS_FILE=problems_file, ATTEMPTS_FILE=attempts_file,
+            ):
+                store.record_attempt(attempt("a24"))
+                problem = store.load_problems()[0]
+                self.assertEqual(problem["research_attempt_count"], 24)
+                self.assertNotEqual(problem["status"], "parked")
+                self.assertEqual(problem["campaign_state"], "active")
+
+                store.record_attempt(attempt("a25"))
+                problem = store.load_problems()[0]
+                self.assertEqual(problem["research_attempt_count"], 25)
+                self.assertEqual(problem["status"], "parked")
+                self.assertEqual(problem["campaign_state"], "hold")
+
+    def test_discovery_campaign_continues_after_25_with_close_signal(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            problems_file = data / "problems.json"
+            attempts_file = data / "attempts.jsonl"
+            problems_file.parent.mkdir(parents=True)
+            problems_file.write_text(json.dumps([{
+                "id": "p", "lane": "easy", "status": "attempted", "attempt_count": 24,
+                "research_attempt_count": 24, "campaign_state": "active", "campaign_min_runs": 25,
+            }]))
+            attempts_file.write_text("")
+            attempt = {
+                "id": "a25", "problem_id": "p", "started_at": "2026-01-01T00:00:00+00:00",
+                "finished_at": "2026-01-01T00:01:00+00:00", "lane": "easy",
+                "outcome": "no_progress", "summary": "one route failed but a certificate is nearly complete",
+                "campaign_assessment": {
+                    "decision": "continue", "close_signal": "The checker passes 99 of 100 exhaustive cubes.",
+                    "reason": "The final cube is bounded and uses the same verified encoding.",
+                },
+            }
+            with patch.multiple(
+                store, ROOT=root, DATA=data, STATE=root / "state", RESEARCH=root / "research",
+                PROBLEMS_FILE=problems_file, ATTEMPTS_FILE=attempts_file,
+            ):
+                store.record_attempt(attempt)
+                problem = store.load_problems()[0]
+                self.assertEqual(problem["research_attempt_count"], 25)
+                self.assertEqual(problem["status"], "active")
+                self.assertEqual(problem["campaign_state"], "active")
 
     def test_low_hanging_score_learns_from_accepted_techniques(self) -> None:
         win = {"id": "win", "accepted_result": True, "difficulty": 4, "techniques": ["SAT"], "contribution_type": "finite witness"}

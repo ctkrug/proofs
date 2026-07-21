@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import math
 import os
-import random
 import shlex
 import subprocess
 from datetime import datetime, timezone
@@ -56,29 +55,27 @@ def low_hanging_score(problem: dict[str, Any], problems: list[dict[str, Any]]) -
 
 
 def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
-    candidates = [row for row in problems if row.get("lane") == lane and row.get("status") in ACTIVE_STATUSES]
+    statuses = ACTIVE_STATUSES if lane == "hard" else {"queued", "active", "attempted"}
+    candidates = [row for row in problems if row.get("lane") == lane and row.get("status") in statuses]
     if not candidates:
         raise RuntimeError(f"no active {lane} problems")
     if lane == "hard":
         return max(candidates, key=lambda row: (int(row.get("priority") or 0), -int(row.get("attempt_count") or 0)))
 
-    solved = accepted_original_results(problems)
-    if solved < 2:
-        # Cycle the frontier while breaking ties by expected verifiable contribution per effort.
-        return min(
-            candidates,
-            key=lambda row: (
-                int(row.get("research_attempt_count") or 0),
-                -low_hanging_score(row, problems),
-            ),
-        )
+    incumbents = [row for row in candidates if row.get("campaign_state") == "active"]
+    if incumbents:
+        return max(incumbents, key=lambda row: str(row.get("campaign_started_at") or ""))
 
-    # Afterwards exploit patterns behind accepted wins while retaining an exploration chance.
-    attempt_total = sum(int(row.get("research_attempt_count") or 0) for row in problems)
-    rng = random.Random(f"{datetime.now(timezone.utc).date().isoformat()}-{attempt_total}")
-    floor = min(low_hanging_score(row, problems) for row in candidates)
-    weights = [max(0.25, low_hanging_score(row, problems) - floor + 0.25) ** 2 for row in candidates]
-    return rng.choices(candidates, weights=weights, k=1)[0]
+    # Start the next campaign on the target with the best expected verifiable contribution per effort.
+    # Once scheduler.tick persists that choice, every later dispatch stays on it until campaign review.
+    return max(
+        candidates,
+        key=lambda row: (
+            low_hanging_score(row, problems),
+            -int(row.get("research_attempt_count") or 0),
+            str(row.get("id") or ""),
+        ),
+    )
 
 
 def publish_if_configured() -> None:
@@ -103,6 +100,8 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
         problem = choose_problem(lane, problems)
+        if lane == "easy":
+            problem = store.start_discovery_campaign(problem["id"])
         phase = "baseline" if research_state.needs_baseline(problem) else "technical"
         repositories.ensure(problem)
         workspace = store.RESEARCH / problem["id"] / "workspace"

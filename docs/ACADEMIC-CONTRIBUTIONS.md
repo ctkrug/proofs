@@ -18,8 +18,9 @@ compute cost + human review burden
 
 The live heuristic begins with problem difficulty, certificate quality, likely contribution value,
 review cost, and novelty risk. It adds an exploration bonus and learns from accepted wins by boosting
-targets that share contribution types or techniques. It retains rotation so early guesses do not
-trap the portfolio.
+targets that share contribution types or techniques. Selection happens at campaign boundaries: the
+best-scoring target receives at least 25 non-error runs before the engine may put it on hold, and it
+continues beyond that minimum only while concrete evidence says a verifiable contribution is close.
 
 ## Ranked target classes
 

@@ -64,7 +64,7 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation", "candidate_profile"):
+    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
     return result
@@ -215,6 +215,20 @@ def build_prompt(
         "TECHNICAL PHASE. The source/status baseline is complete. Start from its live leads and exclusions; execute one "
         "bounded discriminator and update the durable map with exact evidence."
     )
+    completed_campaign_runs = int(problem.get("research_attempt_count") or 0)
+    campaign_minimum = max(
+        store.DISCOVERY_CAMPAIGN_MIN_RUNS,
+        int(problem.get("campaign_min_runs") or 0),
+    )
+    next_campaign_run = completed_campaign_runs + 1
+    campaign_contract = "" if hard else f"""
+DISCOVERY CAMPAIGN
+This is non-error research run {next_campaign_run} on this problem; the minimum review point is run {campaign_minimum}.
+Do not recommend switching problems before that minimum. At the end of every run, return `campaign_assessment`.
+Before run {campaign_minimum}, its decision must be `continue`. At or after run {campaign_minimum}, use `continue` only
+when `close_signal` names concrete evidence that the next bounded pass has a credible path to a verifiable contribution;
+otherwise use `hold`. A merely open problem, generic optimism, or a renamed dead route is not a close signal.
+"""
     return f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
 The campaign has no preset final number of epochs. This process has a {epoch_minutes}-minute safety ceiling, so leave a
 precise checkpoint that lets a future session continue without rediscovering your work. Never interpret the long horizon
@@ -236,6 +250,7 @@ Known techniques: {', '.join(problem.get('techniques') or [])}
 
 RESEARCH PHASE
 {phase_contract}
+{campaign_contract}
 
 LAB AUTHORITY
 You have network access and the installed mathematics toolchain inside a credential-isolated research service. Use them
@@ -351,6 +366,7 @@ WORK RULES
   "reopen_condition": "specific evidence required before retrying this strategy",
   "reopen_evidence": "new evidence satisfying the prior reopen condition, or blank",
   "continuation": {{"objective":"next epoch objective","first_action":"exact command/lemma/source to start with","stop_condition":"evidence that ends or redirects it"}},
+  "campaign_assessment": {{"decision":"continue|hold","close_signal":"concrete evidence of nearness, or blank when holding","reason":"why another bounded pass is or is not worth its compute"}},
   "strategy_proposals": [{{"family":"different family","mechanism":"concrete mechanism","hypothesis":"testable claim","discriminating_test":"cheap test","rationale":"why it may outperform current routes"}}],
   "candidate_profile": {{
     "contribution_class":"terminal_result|recognized_open_subproblem|bounded_extension|research_artifact",
@@ -513,6 +529,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "contribution_gate": gate,
         "contribution_status": "candidate_eligible" if outcome == "candidate" else ("internal_result" if result.get("outcome") == "candidate" else "research_attempt"),
         "continuation": result.get("continuation") if isinstance(result.get("continuation"), dict) else {},
+        "campaign_assessment": result.get("campaign_assessment") if isinstance(result.get("campaign_assessment"), dict) else {},
         "strategy_proposals": objects("strategy_proposals", 10),
         "tool_disclosure": disclosure[:4000],
         "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),

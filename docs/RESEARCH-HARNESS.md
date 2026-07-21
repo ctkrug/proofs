@@ -87,10 +87,11 @@ and first discriminator become durable state and feed the cross-problem research
   Terra/high delegate memos, continue the audited research map around the clock. Locks prevent overlap
   within the lane; missed starts are not fabricated. Construction and certificate-carrying reduction
   work remain distinct rather than extending an open-ended verification range.
-- **Discovery:** Erdős #647 first. A positive answer is one integer and a bounded divisor-count
-  certificate. Twelve daily Terra-delegate → Sol-principal epochs rotate through other finite-witness
-  problems using difficulty, source quality, formalization availability, and non-duplication of
-  existing AI attempts.
+- **Discovery:** One finite-witness or formalization target at a time receives twelve daily
+  Terra-delegate → Sol-principal epochs. The selector favors expected verifiable contribution per effort,
+  persists the chosen target for at least 25 non-error runs, and reviews it at run 25 and every run after.
+  A campaign continues only with a concrete close signal tied to a bounded next experiment; otherwise it
+  goes on hold and the next highest-scoring target begins.
 
 Long simulations never run through ad hoc `nohup`, `screen`, `tmux`, or shell backgrounding. Agents
 submit an argv-only lab job with a hypothesis, decisive signal, seed, memory/time ceiling, source URLs,
