@@ -262,6 +262,21 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "dead")["eligible"])
         self.assertEqual(brief["closed_routes"][0]["reopen_condition"], "new theorem")
 
+    def test_tactical_brief_honors_child_of_recommended_closed_route(self) -> None:
+        problem = {"id": "p", "statement": "Find x.", "verifiability": "Exact witness"}
+        state = research_state._initial(problem)
+        state["baseline_review"]["status"] = "complete"
+        state["next_session"] = {"recommended_strategy_id": "closed"}
+        state["strategies"] = [
+            {"id": "closed", "fingerprint": "closed", "family": "old", "mechanism": "labelled blocks", "status": "blocked", "attempts": 1},
+            {"id": "child", "fingerprint": "child", "family": "canonical", "mechanism": "class quotient", "status": "proposed", "attempts": 0, "parent_ids": ["closed"], "hypothesis": "quotient helps", "discriminating_test": "small orbit gate"},
+            {"id": "stale", "fingerprint": "stale", "family": "other", "mechanism": "untried idea", "status": "proposed", "attempts": 0, "hypothesis": "maybe", "discriminating_test": "pilot"},
+        ]
+        with patch.object(research_state, "load", return_value=state):
+            brief = tactics.build(problem)
+        self.assertEqual(brief["incumbent"]["strategy_id"], "child")
+        self.assertEqual(brief["incumbent"]["score_components"]["continuation_priority"], 30)
+
     def test_roadmap_selects_phase_from_tactical_incumbent(self) -> None:
         problem = {"id": "p"}
         value = {

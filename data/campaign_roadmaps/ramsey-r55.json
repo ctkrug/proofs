@@ -46,7 +46,7 @@
     },
     {
       "id": "canonical_boundary",
-      "strategy_fingerprints": ["4c792f58d4a3"],
+      "strategy_fingerprints": ["4c792f58d4a3", "a230b66ef386"],
       "enter_when": "A sound canonical representation can replace labelled CEGAR blocks on the order-42 boundary.",
       "objective": "Replace labelled CEGAR blocks in the 426-bit order-42 boundary with sound isomorphism-class or canonical-subproblem blocking.",
       "cheapest_discriminator": "Measure canonical class reuse and checker agreement on a bounded corpus before any scale-up.",

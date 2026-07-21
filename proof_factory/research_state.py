@@ -285,18 +285,9 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
         }])[-60:]
     state["tactical_memory"] = memory
 
-    continuation = attempt.get("continuation") if isinstance(attempt.get("continuation"), dict) else {}
-    if not continuation and attempt.get("next_steps"):
-        continuation = {"objective": attempt["next_steps"][0], "first_action": attempt["next_steps"][0]}
-    state["next_session"] = {
-        "recommended_strategy_id": strategy_row["id"],
-        "objective": _text(continuation.get("objective"), 2000),
-        "first_action": _text(continuation.get("first_action"), 2000),
-        "stop_condition": _text(continuation.get("stop_condition"), 2000),
-        "source_attempt_id": attempt["id"],
-    }
     proposals = _object_rows(attempt.get("strategy_proposals"), ("family", "mechanism", "hypothesis", "discriminating_test", "rationale"), 10)
     known = {row.get("fingerprint") for row in state["strategies"]}
+    added_proposal_ids: list[str] = []
     for proposal in proposals:
         proposal_fp = strategy_fingerprint(proposal.get("family"), proposal.get("mechanism"))
         if proposal_fp in known:
@@ -307,7 +298,22 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
             "parent_ids": [strategy_row["id"]], "updated_at": now,
         })
         state["strategies"].append(proposal)
+        added_proposal_ids.append(proposal["id"])
         known.add(proposal_fp)
+
+    continuation = attempt.get("continuation") if isinstance(attempt.get("continuation"), dict) else {}
+    if not continuation and attempt.get("next_steps"):
+        continuation = {"objective": attempt["next_steps"][0], "first_action": attempt["next_steps"][0]}
+    recommended_strategy_id = strategy_row["id"]
+    if decision == "redirect" and added_proposal_ids:
+        recommended_strategy_id = added_proposal_ids[0]
+    state["next_session"] = {
+        "recommended_strategy_id": recommended_strategy_id,
+        "objective": _text(continuation.get("objective"), 2000),
+        "first_action": _text(continuation.get("first_action"), 2000),
+        "stop_condition": _text(continuation.get("stop_condition"), 2000),
+        "source_attempt_id": attempt["id"],
+    }
 
     store.write_json_atomic(state_path(problem["id"]), state)
     return state

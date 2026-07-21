@@ -25,6 +25,12 @@ def _text(value: Any, limit: int = 1000) -> str:
 def _score_strategy(row: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
     status = _text(row.get("status"), 40) or "proposed"
     attempts = max(0, int(row.get("attempts") or 0))
+    recommended_id = _text(state.get("next_session", {}).get("recommended_strategy_id"), 200)
+    recommended_row = next((item for item in state.get("strategies", []) if item.get("id") == recommended_id), {})
+    follows_recommended_redirect = (
+        recommended_row.get("status") in TERMINAL_STATUSES
+        and recommended_id in (row.get("parent_ids") or [])
+    )
     components = {
         "status": STATUS_WEIGHT.get(status, 0),
         "cheap_discriminator": 10 if row.get("discriminating_test") else 0,
@@ -36,6 +42,7 @@ def _score_strategy(row: dict[str, Any], state: dict[str, Any]) -> dict[str, Any
         "repetition_cost": -min(attempts, 8) * 3,
         "unresolved_blocker": -8 if row.get("blocker") else 0,
         "reopen_evidence": 36 if status in TERMINAL_STATUSES and row.get("reopen_evidence") else 0,
+        "continuation_priority": 30 if row.get("id") == recommended_id or follows_recommended_redirect else 0,
     }
     eligible = status not in TERMINAL_STATUSES or bool(row.get("reopen_evidence"))
     return {
