@@ -6,6 +6,7 @@ records, workspaces, completed toolchains, and published artifacts are not.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import time
@@ -53,6 +54,33 @@ def _cache_probe() -> Path:
         if candidate.exists():
             return candidate
     return _existing_path(cache)
+
+
+def _lab_compute_active() -> bool:
+    """Return whether checkpointed lab compute is queued or in a segment.
+
+    The easy lane may invoke a cache-heavy Lean build.  It yields while the
+    priority lab worker owns compute, but completed jobs awaiting a human/model
+    review do not reserve the host.
+    """
+    root = Path(os.environ.get("PROOF_FACTORY_ROOT", "/root/proof-factory"))
+    research = root / "research"
+    try:
+        if next(research.glob("*/workspace/lab-queue/*.json"), None) is not None:
+            return True
+    except OSError:
+        pass
+    jobs = root / "state" / "labs" / "jobs"
+    try:
+        for path in jobs.glob("*.json"):
+            try:
+                if json.loads(path.read_text()).get("status") == "running":
+                    return True
+            except (OSError, ValueError, TypeError):
+                continue
+    except OSError:
+        pass
+    return False
 
 
 def _tree_size(path: Path) -> int:
@@ -125,8 +153,12 @@ def admission(lane: str, *, run_cleanup: bool = True, require_cache: bool = True
     required_memory = MEMORY_MIN_FREE_BYTES[lane]
     if memory_free < required_memory:
         reasons.append(f"available memory is below the {lane} reserve ({memory_free / 1024**2:.0f} MiB free)")
+    lab_compute_active = lane == "easy" and _lab_compute_active()
+    if lab_compute_active:
+        reasons.append("priority checkpointed lab compute is active; cache-heavy easy work will resume at its review boundary")
     return {"allowed": not reasons, "lane": lane, "reasons": reasons,
             "cache_required": require_cache,
             "root_free_bytes": root_free, "cache_free_bytes": cache_free,
             "memory_available_bytes": memory_free, "memory_required_bytes": required_memory,
+            "lab_compute_active": lab_compute_active,
             "cleanup": cleanup_result}

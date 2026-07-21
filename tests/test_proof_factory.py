@@ -782,6 +782,20 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertTrue(lab._requires_build_cache({"command": ["checks/run_lean_build.sh"]}))
         self.assertFalse(lab._requires_build_cache({"command": ["python3", "enumerate.py"]}))
 
+    def test_easy_lane_yields_to_priority_lab_compute(self) -> None:
+        gib = 1024**3
+        with patch.object(capacity, "cleanup", return_value={}), \
+                patch.object(capacity, "_free_bytes", return_value=20 * gib), \
+                patch.object(capacity, "_available_memory_bytes", return_value=4 * gib), \
+                patch.object(capacity, "_lab_compute_active", return_value=True):
+            easy = capacity.admission("easy")
+            hard = capacity.admission("hard")
+        self.assertFalse(easy["allowed"])
+        self.assertTrue(easy["lab_compute_active"])
+        self.assertIn("priority checkpointed lab compute", easy["reasons"][0])
+        self.assertTrue(hard["allowed"])
+        self.assertFalse(hard["lab_compute_active"])
+
     def test_lab_tranche_drains_checkpoints_until_review(self) -> None:
         with patch.object(lab, "worker_once", side_effect=[
             {"status": "checkpointed", "segment": 2},
