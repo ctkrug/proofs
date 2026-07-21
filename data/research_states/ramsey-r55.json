@@ -15,8 +15,8 @@
     "Completing a structured-family sweep, accumulating UNSAT responses, or finding symmetry copies is not field progress without one of the five explicit contribution gates.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 14,
-  "last_updated": "2026-07-21T14:31:51.614975+00:00",
+  "epoch_count": 16,
+  "last_updated": "2026-07-21T17:37:38.498366+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -27,7 +27,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "All eight formulas were SAT and produced valid order-42 Ramsey graphs at boundary distances 178–232. Every candidate was nevertheless one of eight distinct supplied classes. The novelty hypothesis therefore failed over exactly these eight first models. No Ramsey bound changed.",
+  "synthesis_summary": "The local quotient is sound and passed every distinct-row, tied-row, source, DIMACS, graph, isomorphism, and adversarial control. After blocking sorted source record 21, the single permitted model was supplied source record 12. No Ramsey bound changed.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -377,6 +377,38 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-143151-8fb809",
       "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "claim": "The retained frozen core has compatible valid completions in at least six supplied source classes.",
+      "evidence": "Retained graph6 witnesses and independent target isomorphisms in the cold audit.",
+      "scope": "The six observed classes only; not a complete embedding census.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-164650-ef8c5a",
+      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+    },
+    {
+      "claim": "The 64 retained labelled vectors occupy eight destroy-permutation normal forms.",
+      "evidence": "Independent row reconstruction and normal-form hashes in the cold audit.",
+      "scope": "Exactly the retained 64 models.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-164650-ef8c5a",
+      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+    },
+    {
+      "claim": "The record-21 boundary row quotient is covering and has exact represented size 2^66*C(2^30+11,12).",
+      "evidence": "Production report and independent adversarial cold audit.",
+      "scope": "The declared fixed-core boundary only.",
+      "status": "proved",
+      "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+      "updated_at": "2026-07-21T17:37:38.498366+00:00"
+    },
+    {
+      "claim": "The one post-block model is valid and isomorphic to supplied source record 12.",
+      "evidence": "Two exact graph checkers, physical DIMACS evaluation, nauty, and NetworkX.",
+      "scope": "The exact predeclared seed-1 solve.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+      "updated_at": "2026-07-21T17:37:38.498366+00:00"
     }
   ],
   "strategies": [
@@ -709,38 +741,62 @@
       "updated_at": "2026-07-21T14:31:51.614975+00:00"
     },
     {
-      "family": "canonical counterexample-guided exact repair",
-      "mechanism": "Iteratively solve one frozen boundary and block each complete labelled assignment that canonicalizes to a supplied class.",
-      "hypothesis": "After blocking finitely many supplied assignments, the boundary yields a valid graph outside all 656 controls.",
-      "discriminating_test": "A 64-model run yields a dual-checked novel graph or an exact rediscovery ledger.",
-      "rationale": "It changes the admissible model set in response to the observed failure rather than merely changing random seeds.",
-      "id": "strategy-4c792f58d4a3",
-      "fingerprint": "4c792f58d4a3",
-      "status": "proposed",
-      "title": "Iteratively solve one frozen boundary and block each complete labelled assignment that canonicalizes to a supplied class.",
-      "attempts": 0,
-      "parent_ids": [
-        "strategy-r55novel42basin2026"
-      ],
-      "updated_at": "2026-07-21T14:31:51.614975+00:00"
-    },
-    {
       "id": "strategy-r55-two-orbit-proof-compression",
       "family": "proof-core compression for structured Ramsey exclusions",
       "fingerprint": "r55tworbitproofcompress2026",
       "title": "Compress the certified two-orbit exclusions into a human theorem",
       "mechanism": "Strip symmetry and cardinality auxiliaries from the burden-zero formulas, deletion-minimize raw K5-clause cores, canonicalize their signed incidence hypergraphs, and derive parameterized obstruction templates across the 20 second distances.",
       "status": "proposed",
-      "hypothesis": "Every two-orbit burden-zero exclusion has a raw core of at most 20 clauses and the 20 distances collapse to at most five symbolic templates, permitting a concise human-checkable proof.",
-      "discriminating_test": "Continue only if exact deletion minimization meets both thresholds and every template maps deterministically back to valid K43 five-set clauses without SAT auxiliaries or symmetry assumptions.",
+      "hypothesis": "The first core has at most 20 clauses, and the 20 slices may collapse to at most five templates.",
+      "discriminating_test": "Test the at-most-20-clause threshold on one slice before constructing an atlas.",
       "blocker": "No minimized raw-core atlas or symbolic template proof exists yet.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
       "parent_ids": [
+        "strategy-a230b66ef386",
         "strategy-r55twocore2026"
       ],
-      "updated_at": "2026-07-21T02:22:03+00:00"
+      "updated_at": "2026-07-21T17:37:38.498366+00:00",
+      "rationale": "This redirects from known-class sampling toward a possible human-checkable structural lemma."
+    },
+    {
+      "id": "strategy-4c792f58d4a3",
+      "family": "canonical counterexample-guided exact repair",
+      "fingerprint": "4c792f58d4a3",
+      "title": "Incremental 64-model labelled-primary CEGAR within the retained source-record-21 frozen order-30 boundary.",
+      "mechanism": "Parse the immutable boundary CNF once and append one 426-literal clause blocking each verified supplied-corpus primary assignment.",
+      "status": "blocked",
+      "hypothesis": "Within 64 verified labelled completions, at least one valid Ramsey(5,5,42) graph is absent from the supplied 656 classes.",
+      "discriminating_test": "Enumerate at most 64 distinct primary vectors, require base-CNF and prior-block satisfaction plus two full graph checks, and accept novelty only after canonical nonmembership.",
+      "blocker": "One 426-literal clause excludes only one labelled vector; there is no checked isomorphism-class block or exhaustive boundary certificate.",
+      "reopen_condition": "A sound class-level block, exhaustively validated symmetry quotient, or demonstrated source/mapping/checker defect.",
+      "reopen_evidence": "The prior need for replayable primary blocking was satisfied; the resulting packet exposed label symmetry as the next blocker.",
+      "last_attempt_id": "ramsey-r55-20260721-164650-ef8c5a",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55novel42basin2026"
+      ],
+      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+    },
+    {
+      "id": "strategy-a230b66ef386",
+      "family": "symmetry-normalized exact boundary repair",
+      "fingerprint": "a230b66ef386",
+      "title": "Validated an exact S_12 destroyed-label row-order quotient for the retained source-record-21 frozen order-30 boundary, blocked the canonical source vector, and classified exactly one subsequent SAT model.",
+      "mechanism": "Remove the non-invariant Hamming counter, impose lexicographically nondecreasing 30-bit destroyed-to-core rows, exhaustively validate tied-row coverage, and permit one source-blocked SAT model.",
+      "status": "blocked",
+      "hypothesis": "The row-order quotient retains every boundary orbit, including tied rows, and one source-blocked model can be exactly classified without resuming labelled CEGAR.",
+      "discriminating_test": "Enumerate all 2^21 labelled four-core/three-destroyed graphs and the complete four-bit comparator truth table, verify the sorted source against the regenerated no-Hamming CNF, then run CaDiCaL once with seed 1 for 30 seconds.",
+      "blocker": "No sound compact isomorphism-class block or canonical augmentation exists for the boundary.",
+      "reopen_condition": "Provide a proved class-level block or canonical augmentation, or demonstrate a source, mapping, comparator, or checker defect.",
+      "reopen_evidence": "The previous labelled-block strategy's symmetry-quotient condition is satisfied by this packet; the remaining blocker is class-level rather than label-level.",
+      "last_attempt_id": "ramsey-r55-20260721-173738-495bea",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-4c792f58d4a3"
+      ],
+      "updated_at": "2026-07-21T17:37:38.498366+00:00"
     }
   ],
   "open_leads": [
@@ -975,6 +1031,26 @@
       "id": "lead-a9436addec",
       "strategy_id": "strategy-r55novel42basin2026",
       "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "description": "Quotient the boundary by sorting destroyed vertices on their frozen-core adjacency rows.",
+      "rationale": "Every completion has a row-sorted representative, and the current sample exhibits an exact 64-to-8 redundancy reduction.",
+      "next_experiment": "Implement the lex CNF without the Hamming constraint and exhaustively test tied-row orbit coverage.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-a31ba34df3",
+      "strategy_id": "strategy-4c792f58d4a3",
+      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+    },
+    {
+      "description": "Compress a certified two-orbit exclusion into a raw K5-clause obstruction theorem.",
+      "rationale": "A first core of at most 20 clauses is the cheapest discriminator for the named structural-theorem gate.",
+      "next_experiment": "Deletion-minimize one raw clause set with exact UNSAT checks and independently verify its five-set origins.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-2141575747",
+      "strategy_id": "strategy-a230b66ef386",
+      "updated_at": "2026-07-21T17:37:38.498366+00:00"
     }
   ],
   "ruled_out": [
@@ -1233,6 +1309,24 @@
       "reopen_condition": "Obtain complete catalogues or proved global feature bounds for every missing layer.",
       "attempt_id": "ramsey-r55-20260721-143151-8fb809",
       "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "claim_or_route": "Continue the identical labelled-blocking loop with a larger arbitrary cutoff.",
+      "scope": "The immutable record-21 base, incremental CaDiCaL configuration, and one-vector blocks.",
+      "reason": "The declared 64 vectors yielded no novel class and collapsed to eight S_12 normal forms; labelled blocks cannot exclude an isomorphism class.",
+      "evidence": "Production and cold reports.",
+      "reopen_condition": "Install a proved class-level block or sound symmetry quotient, or demonstrate an artifact defect.",
+      "attempt_id": "ramsey-r55-20260721-164650-ef8c5a",
+      "updated_at": "2026-07-21T16:46:50.059737+00:00"
+    },
+    {
+      "claim_or_route": "Continue the same quotient formula with an arbitrary larger individual-normal-form cutoff.",
+      "scope": "This record-21 fixed core and primary-vector blocks.",
+      "reason": "The quotient is not a class block, and the first post-source-block model is another supplied class.",
+      "evidence": "Production and cold reports.",
+      "reopen_condition": "A proved class-level block or canonical augmentation, an artifact defect, or a predeclared experiment that directly meets a field-progress gate.",
+      "attempt_id": "ramsey-r55-20260721-173738-495bea",
+      "updated_at": "2026-07-21T17:37:38.498366+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1243,11 +1337,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55novel42basin2026",
-    "objective": "Test whether canonical counterexample-guided blocking escapes the supplied classes within retained trial 1.",
-    "first_action": "Append a 426-literal block for each verified known boundary model and retain every model and canonical label up to a budget of 64.",
-    "stop_condition": "Stop on a dual-checked novel class, 64 verified rediscoveries, any checker discrepancy, or an uncertified solver conclusion.",
-    "source_attempt_id": "ramsey-r55-20260721-143151-8fb809"
+    "recommended_strategy_id": "strategy-r55-two-orbit-proof-compression",
+    "objective": "Test whether one certified two-orbit exclusion has a raw core of at most 20 clauses.",
+    "first_action": "Use the retained burden-zero slice artifacts to generate a raw-clause-only instance, then deletion-minimize with exact replay and independent origin mapping.",
+    "stop_condition": "Stop on a core larger than 20 clauses, an origin-map failure, or non-replayable UNSAT; consider the 20-distance atlas only after the first threshold passes.",
+    "source_attempt_id": "ramsey-r55-20260721-173738-495bea"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1263,6 +1357,97 @@
     "ramsey-r55-20260721-082900-aea66d",
     "ramsey-r55-20260721-103733-ba8afb",
     "ramsey-r55-20260721-123303-2aa131",
-    "ramsey-r55-20260721-143151-8fb809"
-  ]
+    "ramsey-r55-20260721-143151-8fb809",
+    "ramsey-r55-20260721-164650-ef8c5a",
+    "ramsey-r55-20260721-173738-495bea"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "The remaining boundary bottleneck is compact class-level canonical augmentation, not destroy-label redundancy.",
+    "failure_signatures": [
+      {
+        "id": "8e93ec5473f4",
+        "signature": "A sound label quotient still returns another supplied class because it does not block isomorphism classes.",
+        "count": 1,
+        "last_strategy_id": "strategy-a230b66ef386",
+        "last_attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "Record-21 lex quotient generator",
+        "use": "Regenerate the exact no-Hamming CNF and exhaustive tied-row gate.",
+        "evidence": "scripts/run_novel42_lex_quotient.py; SHA-256 67d248f3f25232a02ffa5c7c5ec413c1968a024f421e90fdf733766e94d163a8",
+        "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      },
+      {
+        "name": "Independent adversarial cold checker",
+        "use": "Reconstruct raw and lex clauses, evaluate the model, and verify target isomorphism.",
+        "evidence": "checkers/novel42_lex_quotient_audit.py; SHA-256 89f92a8ec8577be526cab98b2153b848d5a4c7809b280dab870c7a154739778c",
+        "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "Allowing tied rows gives exactly 2^66*C(2^30+11,12) sorted assignments, not 2^426/12!.",
+        "scope": "The fixed record-21 boundary primary universe.",
+        "evidence": "Combinations-with-repetition count and exhaustive tied-row coverage.",
+        "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "strategy_id": "strategy-a230b66ef386",
+        "decision": "redirect",
+        "prediction": "Every small orbit retains a sorted representative, the row-sorted source is a positive control, and one post-block model is exactly classifiable.",
+        "observation": "All controls passed. CaDiCaL found a valid model in 4.849 seconds, but nauty and NetworkX identify it as supplied source record 12.",
+        "surprise": "The delegate projection of 175 clauses per comparator was one too high. Exact reconstruction and truth-table testing establish 174 clauses: 30 order clauses, four first-prefix clauses, and 28 groups of five later-prefix clauses.",
+        "next_discriminator": "Deletion-minimize one certified two-orbit raw clause set and stop if the first exact core exceeds 20 clauses.",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "2^861 labelled graphs on the fixed 42-vertex set",
+        "represented_space_before": "2^426 boundary assignments after fixing the labelled order-30 core",
+        "eliminated_or_quotiented": "Destroy-label copies distinguished only by the order of their twelve 30-bit frozen-core rows",
+        "represented_space_after": "2^66*C(2^30+11,12) row-sorted boundary assignments",
+        "reduction_factor": "2^360/C(2^30+11,12) = 479001570.5570708...; exactly 12! on the distinct-row stratum",
+        "measurement_status": "exact",
+        "unit": "labelled assignments",
+        "coverage_scope": "The source-record-21 labelled frozen core and destroy set {2,3,10,12,14,25,27,30,36,37,38,41}",
+        "soundness_basis": "Every completion can be relabelled by sorting destroyed vertices. Exhaustive tied-row controls and an independent transposition audit verify implementation coverage.",
+        "remaining_unknown": "Core automorphisms, alternative embeddings, order-42 isomorphism classes, complete boundary solutions, and the global R(5,5) search are not covered.",
+        "next_bulk_elimination": "Test whether one certified two-orbit exclusion has a deletion-minimal raw K5-clause core of at most 20 clauses.",
+        "source_attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "strategy_id": "strategy-a230b66ef386",
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "ramsey-r55-20260721-173738-495bea",
+        "strategy_id": "strategy-a230b66ef386",
+        "nearest_method_ids": [
+          "common-edge-subgraph-neighborhoods",
+          "random-36-subgraph-extension",
+          "known-class-avoidance-bias"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "A static, explicitly coverage-checked S_12 boundary quotient; not a new Ramsey construction or class-exclusion mechanism.",
+        "duplicate_risk": "The solver may merely rediscover another supplied class; this occurred with source record 12.",
+        "comparison_test": "Use sorted source record 21 as a positive control, block it once, and classify exactly one subsequent model.",
+        "decision": "control_only",
+        "source_urls": [
+          "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+          "https://www.cs.rit.edu/~spr/ElJC/sur.pdf"
+        ],
+        "updated_at": "2026-07-21T17:37:38.498366+00:00"
+      }
+    ]
+  }
 }
