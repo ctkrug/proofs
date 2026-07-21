@@ -5,6 +5,7 @@ import json
 import os
 import re
 import subprocess
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -126,7 +127,16 @@ If no target survives current-status and external-channel checks, return this in
 """
 
 
-def run() -> dict[str, Any]:
+def run(*, now: datetime | None = None) -> dict[str, Any]:
+    now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    last = store.read_json(store.STATE / "scout-last.json", {})
+    last_finished = store.parse_iso(last.get("finished_at")) if isinstance(last, dict) else None
+    if last_finished and now - last_finished < timedelta(hours=24):
+        return {
+            "added": False, "reason": "daily scout already completed",
+            "last_finished_at": last_finished.isoformat(),
+            "next_eligible_at": (last_finished + timedelta(hours=24)).isoformat(),
+        }
     sources = store.read_json(SOURCES_FILE, [])
     if not isinstance(sources, list) or not sources:
         raise ValueError("source registry is empty")

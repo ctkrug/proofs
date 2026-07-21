@@ -39,11 +39,13 @@ install -m 0644 deploy/proof-factory-runtime-sync.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-runtime-sync.timer /etc/systemd/system/
 systemctl daemon-reload
 
-# Safe bring-up: render/watchdog may run; research timers are enabled only after a real canary.
+# The deployed portfolio has passed its canaries; enable the bounded production cadences.
 systemctl enable --now proof-factory-watchdog.timer
 systemctl enable --now proof-factory-capacity-guard.timer
 systemctl enable --now proof-factory-easy.timer
+systemctl enable --now proof-factory-hard.timer
 systemctl enable --now proof-factory-intake.timer
+systemctl enable --now proof-factory-scout.timer
 systemctl enable --now proof-factory-publish.timer
 systemctl enable --now proof-factory-publish.path
 systemctl enable --now proof-factory-lab.timer

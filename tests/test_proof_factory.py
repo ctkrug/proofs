@@ -834,7 +834,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertFalse(stopped["allowed"])
                 self.assertEqual(stopped["mode"], "paused")
 
-    def test_hard_priority_reallocates_pacing_but_not_provider_stop(self) -> None:
+    def test_removed_hard_priority_cannot_bypass_pacing_or_provider_stop(self) -> None:
         payload = {
             "ok": True, "checked_at": 1000.0,
             "week": {"used_pct": 90.0, "resets_at": 604800.0, "window_seconds": 604800.0},
@@ -842,12 +842,44 @@ class ProofFactoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             cache = Path(raw) / "usage.json"; cache.write_text(json.dumps(payload))
             with patch.dict("os.environ", {"PROOF_USAGE_CACHE_PATH": str(cache), "PROOF_HARD_PRIORITY": "true"}):
-                allowed = usage.admission("hard", monotonic_now=1000.0)
-                self.assertTrue(allowed["allowed"]); self.assertEqual(allowed["mode"], "priority")
-                easy = usage.admission("easy", monotonic_now=1000.0)
-                self.assertNotEqual(easy["mode"], "priority")
+                now = datetime(2026, 1, 1, 3, 0, tzinfo=timezone.utc)
+                allowed = usage.admission("hard", now=now, monotonic_now=1000.0)
+                self.assertFalse(allowed["allowed"]); self.assertEqual(allowed["mode"], "baseline")
+                self.assertNotIn("priority_authorized", allowed)
                 payload["spend_control_reached"] = True; cache.write_text(json.dumps(payload))
-                self.assertEqual(usage.admission("hard", monotonic_now=1000.0)["mode"], "paused")
+                self.assertEqual(usage.admission("hard", now=now, monotonic_now=1000.0)["mode"], "paused")
+
+    def test_usage_tie_break_prefers_discovery_without_preemption(self) -> None:
+        decisions = {"hard": {"allowed": True}, "easy": {"allowed": True}}
+        self.assertEqual(usage.preferred_lane(decisions), "easy")
+        self.assertEqual(usage.preferred_lane({"hard": {"allowed": True}}), "hard")
+        self.assertIsNone(usage.preferred_lane({"hard": {"allowed": False}, "easy": {"allowed": False}}))
+
+        payload = {
+            "ok": True, "checked_at": 302400.0,
+            "week": {"used_pct": 10.0, "resets_at": 604800.0, "window_seconds": 604800.0},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            cache = Path(raw) / "usage.json"; cache.write_text(json.dumps(payload))
+            with patch.dict("os.environ", {"PROOF_USAGE_CACHE_PATH": str(cache)}), \
+                    patch.object(store, "runtime", return_value={"easy_running": "erdos-530"}):
+                hard = usage.admission("hard", monotonic_now=302400.0)
+                easy = usage.admission("easy", monotonic_now=302400.0)
+        self.assertFalse(hard["allowed"])
+        self.assertEqual(hard["mode"], "portfolio")
+        self.assertTrue(easy["allowed"])
+
+    def test_scout_is_limited_to_one_completed_call_per_day(self) -> None:
+        now = datetime(2026, 7, 21, 12, 0, tzinfo=timezone.utc)
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "STATE", Path(raw)), \
+                patch.object(subprocess, "run") as run:
+            store.write_json_atomic(Path(raw) / "scout-last.json", {
+                "finished_at": (now - timedelta(hours=1)).isoformat(), "returncode": 0,
+            })
+            result = scout.run(now=now)
+        self.assertFalse(result["added"])
+        self.assertEqual(result["reason"], "daily scout already completed")
+        run.assert_not_called()
 
     def test_recent_hard_pass_satisfies_next_baseline_slot(self) -> None:
         recent = datetime.now(timezone.utc).isoformat()

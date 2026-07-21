@@ -13,6 +13,12 @@ from . import store
 
 DEFAULT_CACHE = Path("/root/project-factory/state/usage_cache.json")
 MAX_AGE_SECONDS = 30 * 60
+LANE_TIE_PRIORITY = ("easy", "hard")
+
+
+def preferred_lane(admissions: dict[str, dict[str, Any]]) -> str | None:
+    """Choose discovery first when multiple model lanes are simultaneously admissible."""
+    return next((lane for lane in LANE_TIE_PRIORITY if admissions.get(lane, {}).get("allowed")), None)
 
 
 def _cache_path() -> Path:
@@ -41,7 +47,6 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     payload = store.read_json(_cache_path(), {})
     baseline = _baseline_slot(lane, now)
     operator_authorized = os.environ.get("PROOF_OPERATOR_RUN", "").strip().lower() in {"1", "true", "yes"}
-    priority_authorized = lane == "hard" and os.environ.get("PROOF_HARD_PRIORITY", "").strip().lower() in {"1", "true", "yes"}
     result: dict[str, Any] = {
         "checked_at": payload.get("checked_at") if isinstance(payload, dict) else None,
         "mode": "baseline",
@@ -49,7 +54,8 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
         "lane": lane,
         "baseline_slot": baseline,
         "operator_authorized": operator_authorized,
-        "priority_authorized": priority_authorized,
+        "lane_tie_priority": list(LANE_TIE_PRIORITY),
+        "tie_break_rule": "discovery/easy wins simultaneous admissibility; no running lane is preempted",
         "reason": "usage snapshot unavailable; retaining baseline only",
     }
     if not isinstance(payload, dict) or not payload.get("ok"):
@@ -61,16 +67,16 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     if payload.get("rate_limit_reached_type") or payload.get("spend_control_reached"):
         result.update({"mode": "paused", "allowed": False, "reason": "provider usage limit or spend control reached"})
         return result
+    if lane == "hard" and store.runtime().get("easy_running"):
+        result.update({
+            "mode": "portfolio", "allowed": False,
+            "reason": "discovery lane is already running; it wins simultaneous admissibility without preemption",
+        })
+        return result
     if operator_authorized:
         result.update({
             "mode": "operator", "allowed": True,
             "reason": "one-shot operator-authorized pass; provider hard limits remain enforced",
-        })
-        return result
-    if priority_authorized:
-        result.update({
-            "mode": "priority", "allowed": True,
-            "reason": "R(5,5) priority allocation; provider hard limits and evidence gating remain enforced",
         })
         return result
     week = payload.get("week")

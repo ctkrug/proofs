@@ -99,3 +99,30 @@ Phase acceptance: 62 local tests pass, including repair success, unrepairable fa
 protected-field upgrade rejection, delegate admission, once-per-epoch briefing construction, emergency
 compaction, and constant-prefix ordering. Production must pass the same suite and a non-model dry-run
 must show the expected role counts and bounded prompt/brief sizes.
+
+Post-deployment result: all 62 production tests passed. The live non-model dry-run selected 0/1/2
+delegates for segment/lab-completion/new-evidence events respectively; the delegate and principal briefs
+were 13,823 and 21,393 characters, the schema began at character 7,018, and task-specific data began at
+15,762. The public endpoint returned HTTP 200.
+
+## Phase 3 — contribution-first portfolio reallocation
+
+- The standing `PROOF_HARD_PRIORITY` code and service override are removed. R(5,5) keeps checkpointed
+  low-priority lab CPU and evidence-gated reviews on the six-daily baseline; neither clock polls nor a
+  stale/missing usage snapshot manufacture an extra model call.
+- The discovery lane, sourced intake, and daily scout return to the deployed timer set. The active
+  campaign remains `scout-bdf77f43574b`, the Erdős #530 Lean formalization, with its 25-pass minimum;
+  scheduler incumbency means newly queued intake/scout rows cannot preempt it. Intake remains fixed at
+  12 active frontier problems.
+- Scout completion is now internally limited to one call per rolling 24 hours in addition to its daily
+  timer. Repeated/manual starts return the durable next-eligible time without invoking a model.
+- The usage governor declares discovery before hard in simultaneous-admissibility ties and defers a new
+  hard start while discovery is already running. It never interrupts an already running lane. Provider
+  hard limits, spend controls, stale-cache fallback, and the one-shot operator mechanism are unchanged.
+- The capacity plan now documents contribution-first allocation and the faster objective upstream path
+  for #530. Project Factory production and Proof Factory strategy-lab remain paused; backups, watchdogs,
+  lab, runtime sync, and publication remain active.
+
+Phase acceptance: 64 local tests pass. Production must show easy, intake, scout, hard, lab, watchdog,
+runtime-sync, and publish timers enabled; strategy-lab remains disabled; the hard unit contains no
+priority override; hard next-run cadence is four hours; and the active easy campaign remains Erdős #530.

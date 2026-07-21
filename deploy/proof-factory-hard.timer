@@ -2,8 +2,7 @@
 Description=Proof Factory - event-gated R(5,5) research review
 
 [Timer]
-OnBootSec=5min
-OnUnitInactiveSec=15min
+OnCalendar=*-*-* 00,04,08,12,16,20:00:00 UTC
 Persistent=true
 AccuracySec=1min
 Unit=proof-factory-hard.service

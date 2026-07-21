@@ -26,20 +26,19 @@ write that volume, so a full Lean cache no longer blocks unrelated Python/SAT en
 Do not run arbitrary search merely to keep CPUs busy. The durable queue should remain available
 continuously, but only qualified experiments consume it.
 
-## R(5,5)-priority allocation
+## Contribution-first portfolio allocation
 
-While R(5,5) is Charlie's highest-priority project, its deterministic lab receives one continuously
-available low-priority CPU core and drains each approved tranche without timer gaps. The second core is
-reserved for the OS, dashboards, checkpoint publication, validation, and event review. Competing model
-programs are paused: Project Factory production work, the Proof Factory discovery lane, scouting,
-strategy-lab exploration, and intake. Their state and timers remain recoverable. Backups, watchdogs,
-capacity checks, runtime sync, public publication, and read-only dashboards remain active.
+The north star is externally verified credit per unit compute. The active Erdős #530 Lean campaign keeps
+the discovery lane because its upstream pull-request path is faster and more objective than the current
+R(5,5) acceptance path. Discovery runs retain their 25-pass campaign discipline, the sourced intake keeps
+a 12-problem frontier, and scouting is limited to one completed call per 24 hours. New intake and scout rows
+remain queued and cannot preempt an active campaign.
 
-The R(5,5) hard reviewer polls every 15 minutes but remains evidence-gated: no completion/source event
-means no model call. Provider-usage admission and evidence validation remain mandatory. This directs model
-quota to completed R(5,5) tranches without manufacturing clock-driven research epochs.
-While the explicit priority allocation is active, the hard lane may run ahead of proportional weekly pacing;
-provider rate-limit and spend-control signals still stop it immediately. No other lane receives this override.
+R(5,5) retains checkpointed low-priority lab CPU plus event-gated model reviews at the six-daily baseline.
+It has no weekly-pacing override. A hard review still requires a completion/source/route event, fresh usage
+telemetry (or the conservative baseline), and all evidence gates. If both model lanes are simultaneously
+admissible, discovery wins the tie; an already running lane is not preempted. Backups, watchdogs, capacity
+checks, runtime sync, and public publication remain active for both programs.
 
 ## Upgrade triggers
 
