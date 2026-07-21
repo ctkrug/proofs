@@ -734,10 +734,10 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_live_schedule_and_snapshot(self) -> None:
         now = datetime(2026, 7, 20, 20, 40, tzinfo=timezone.utc)
-        self.assertEqual(live.next_hard_after(now).isoformat(), "2026-07-20T21:00:00+00:00")
+        self.assertEqual(live.next_hard_after(now).isoformat(), "2026-07-21T00:00:00+00:00")
         self.assertEqual(
             live.next_hard_after(datetime(2026, 7, 20, 20, 10, tzinfo=timezone.utc)).isoformat(),
-            "2026-07-20T20:30:00+00:00",
+            "2026-07-21T00:00:00+00:00",
         )
         self.assertEqual(live.next_easy_after(now).isoformat(), "2026-07-20T22:30:00+00:00")
         exact = datetime(2026, 7, 20, 22, 30, tzinfo=timezone.utc)
