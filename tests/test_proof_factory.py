@@ -670,6 +670,16 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertFalse(stopped["allowed"])
                 self.assertEqual(stopped["mode"], "paused")
 
+    def test_recent_hard_pass_satisfies_next_baseline_slot(self) -> None:
+        recent = datetime.now(timezone.utc).isoformat()
+        with patch.object(capacity, "admission", return_value={"allowed": True}), \
+                patch.object(usage, "admission", return_value={"allowed": True, "mode": "baseline"}), \
+                patch.object(store, "runtime", return_value={"hard_last_attempt_at": recent}), \
+                patch.object(store, "update_runtime"), patch.object(render, "build"):
+            result = scheduler.tick("hard")
+        self.assertEqual(result["status"], "deferred")
+        self.assertIn("already satisfied", result["usage_policy"]["reason"])
+
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             site = Path(raw) / "site"

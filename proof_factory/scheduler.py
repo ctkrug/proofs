@@ -107,6 +107,13 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         render.build()
         return {"status": "deferred", "lane": lane, "capacity_policy": capacity_policy}
     admission = usage.admission(lane)
+    if lane == "hard" and admission.get("allowed") and admission.get("mode") == "baseline":
+        last_hard = store.parse_iso(store.runtime().get("hard_last_attempt_at"))
+        if last_hard and (datetime.now(timezone.utc) - last_hard).total_seconds() < 90 * 60:
+            admission.update({
+                "allowed": False,
+                "reason": "baseline slot already satisfied by a recent hard-lane pass",
+            })
     store.update_runtime(usage_policy=admission)
     if not admission["allowed"]:
         render.build()

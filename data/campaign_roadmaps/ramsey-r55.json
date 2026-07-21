@@ -8,10 +8,11 @@
   "portfolio_rule": "The named stages are a current evidence-backed portfolio, not an exhaustive list of permissible ideas. A new composite route may enter at any epoch when it identifies concrete inputs from R(5,5), another problem, or another field; states a mechanism-level transfer hypothesis; clears prior-art comparison; and has a bounded falsifier. It does not displace the active incumbent until evidence from that discriminator supports redirecting.",
   "confidence_calibration": {
     "basis": "Current evidence as of 2026-07-21; update after decisive observations rather than after an arbitrary number of sessions.",
-    "meaningful_gate_candidate_probability": 0.22,
-    "credible_interval": [0.12, 0.35],
-    "external_acceptance_probability": 0.10,
+    "meaningful_gate_candidate_probability": 0.20,
+    "credible_interval": [0.10, 0.32],
+    "external_acceptance_probability": 0.09,
     "ramsey_bound_improvement_probability": 0.01,
+    "last_update": "Epoch 16 proved an exact 479,001,570.557x labelled-assignment quotient for one fixed-core boundary, but its sole post-block model was another known class. This closes label-only boundary normalization as a field-progress route and slightly lowers the planning prior.",
     "interpretation": "Subjective planning probabilities, not mathematical confidence. Meaningful means plausibly satisfying a configured field-progress gate after independent validation; external acceptance is stricter.",
     "increase_if": [
       "proof cores collapse to at most five human-checkable parameterized types",
