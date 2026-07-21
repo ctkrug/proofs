@@ -1,6 +1,7 @@
 # R(5,5) research dossier
 
-> Status audited: 2026-07-20. This is operational research memory, not a proof or originality claim.
+> Status audited: 2026-07-20; cross-field method scan integrated 2026-07-20. This is operational
+> research memory, not a proof or originality claim.
 > Every automated epoch should use the compact map in `data/research_states/ramsey-r55.json` first,
 > then consult this dossier for the source trail and fuller context before opening a new route.
 
@@ -393,6 +394,92 @@ and stop when the discriminator resolves it.
 - **Terminal meaning:** a zero witness proves `R(5,5)>=44`; a checked global lower bound of one proves
   `R(5,5)=43`. Anything else is a scoped multiplicity result.
 
+### S13. LDPC trapping-set atlas for recurrent Ramsey failure cores
+
+**Transfer source.** In iterative error-correcting-code decoding, the global error floor can be dominated
+by small, recurrent, decoder-dependent subgraphs called trapping sets. Richardson's original workflow is
+especially relevant: enumerate candidate failure cores up to symmetry, measure which cores dominate, and
+study overlapping clusters rather than treating every failed trajectory as unrelated. This is an analogy,
+not a claim that Ramsey constraints are parity checks.
+
+- **Ramsey representation:** use the 903 edge-color bits at `n=43` as variable nodes. Use violated `K5`
+  checks and one-flip-from-violated `9:1` five-sets as colored active check nodes. From the final window of
+  each failed deterministic run, retain edges that oscillate or remain incident to active checks and
+  canonicalize the resulting colored bipartite core under vertex relabeling.
+- **Hypothesis:** a small number of canonical active-core types account for a disproportionate fraction of
+  low-energy stalls. Small exact MaxSAT solves on a core plus its boundary can then produce escape
+  templates that transfer to held-out trajectories.
+- **Cheapest discriminator:** collect fixed-seed traces from damaged held-out order-42 controls before a
+  frontier run. Compare core recurrence with label-shuffled controls, then train templates on one split and
+  require improved paired held-out time-to-escape or best exact burden under identical evaluator calls.
+- **Stop conditions:** discard the transfer if active cores almost always percolate, are nearly unique, or
+  template moves merely cycle. Never use a core score as witness validation; the full exact checkers remain
+  the validity gate.
+
+Primary source: https://web.stanford.edu/class/ee388/papers/ErrorFloors.pdf
+
+### S14. Linkage-tree optimal mixing for overlapping edge epistasis
+
+**Transfer source.** Gene-pool Optimal Mixing Evolutionary Algorithms learn which variables should be moved
+together and greedily test donor subsets. Direct MAX-SAT experiments found that dynamically learned linkage
+can outperform a fixed decomposition even when the visible factor structure is known. That warning fits
+Ramsey search: every edge belongs to many overlapping five-set constraints, so “same `K5`” is not
+automatically the best recombination block.
+
+- **Mechanism:** retain a diverse population of exact low-burden colorings. Each generation, build separate
+  linkage trees from elite-population mutual information, active-constraint co-occurrence, and a hybrid of
+  the two. Traverse subsets from small to large, copy a subset from a donor, and retain it only when the
+  exact incremental evaluator and an explicit archive-diversity rule accept it. Include univariate and
+  uniform-crossover arms as negative controls.
+- **Hypothesis:** learned multi-edge blocks preserve useful epistatic partial structures and escape
+  single-edge local minima more reliably than ordinary crossover or exact-delta tabu.
+- **Cheapest discriminator:** split complement pairs and isomorphism families before creating 6-to-12-edge
+  damaged order-42 controls. Under paired seeds and equal evaluator calls, require higher held-out valid-42
+  recovery and lower median burden than univariate mixing, uniform crossover, and tabu before using K43
+  budget.
+- **Failure modes:** near-clonal populations produce false linkage; dense overlap collapses the tree into
+  unhelpful giant blocks; greedy acceptance forbids necessary uphill moves; damaged-42 recovery fails to
+  predict K43 behavior. Treat each as an ablation, not a tuning excuse.
+
+Primary sources: https://ir.cwi.nl/pub/22078 and https://arxiv.org/abs/2109.05259
+
+### S15. Adjacency-row code moments and a Terwilliger-style upper-route filter
+
+**Transfer source.** Coding theory bounds a binary code through exact weight, distance, and triple-
+intersection distributions; Schrijver's Terwilliger-algebra SDP strengthens pairwise Delsarte bounds and has
+a constant-weight form. A Ramsey adjacency matrix supplies a constrained binary code—its rows—but not an
+ordinary free code, so off-the-shelf numerical bounds are only a first relaxation.
+
+For adjacency rows `a_u,a_v`, degrees `d_u,d_v`, and `c_uv=|N(u) intersect N(v)|`, the exact identity is
+
+```text
+d_H(a_u,a_v) = d_u + d_v - 2 c_uv.
+```
+
+There is also an elementary pair constraint from `R(3,5)=14`:
+
+- if `uv` is an edge, its common-neighbor graph contains neither a triangle (which would complete a `K5`
+  with `u,v`) nor an independent 5-set, so `c_uv<=13`;
+- if `uv` is a nonedge, its common-nonneighbor graph contains neither an independent triple (which would
+  complete an independent 5-set with `u,v`) nor a `K5`, so that set also has size at most 13.
+
+This is a proved input constraint, not a new Ramsey bound.
+
+- **Hypothesis:** pair and triple row-code moments exclude at least one degree/common-neighbor profile that
+  survives the current scalar degree and excess constraints.
+- **Cheapest discriminator:** extract exact row weight/intersection distributions from all authenticated
+  order-42 controls. First solve a rational pair-distance LP for hypothetical `n=43..45` profiles. Stop and
+  archive the negative result if it cuts nothing new. Only after a nonempty exact cut, add Schrijver-style
+  triple-intersection PSD blocks and finally a colored edge/nonedge refinement.
+- **Validity gate:** every known control must remain feasible. Floating-point duals are conjecture generators
+  only; rationalize any useful dual into an exact inequality or checked pseudo-Boolean certificate.
+- **Main risk:** an ordinary code relaxation loses adjacency symmetry, the zero diagonal, and the edge/
+  nonedge pair color. Do not invest in the custom coherent-configuration model unless the cheap relaxation
+  changes at least one profile decision.
+
+Primary sources: https://ir.cwi.nl/pub/14098 and the `R(3,5)=14` entry in
+https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf
+
 ## 9. Combining ideas without making analogy soup
 
 Use at most three transfers in one epoch and attach a prediction to each:
@@ -407,6 +494,9 @@ Use at most three transfers in one epoch and attach a prediction to each:
 | Violation hypergraph + hitting set | High-overlap violation transversals identify productive compound moves | Compare predicted versus actual burden delta on controls. |
 | Almost-regular conjecture + unknown-42 implication | A constrained 42 search reaches a basin absent from the 656 | SAT/MaxSAT at 42 with explicit degree-spread constraint and canonical novelty checks. |
 | Two-conflict core + exact local branching | Small nonlocal repair neighborhoods reveal whether the best seed is locally rigid | Certify success or minimum two for increasing destroy sets. |
+| LDPC trapping sets + exact core MaxSAT | A few canonical active cores dominate stalled trajectories | Recurrence versus shuffled cores, then held-out template escape under matched calls. |
+| GOMEA linkage learning + exact delta evaluation | Learned edge blocks transfer useful epistatic structure better than whole-bitstring crossover | Leakage-safe damaged-42 recovery tournament before K43. |
+| Coding-theory moments + adjacency-row identities | Pair/triple distributions remove profiles missed by scalar counts | Rational pair LP first; stop before SDP if it cuts nothing. |
 
 Discard a transfer when the stated prediction fails. Do not preserve it as inspirational prose.
 
@@ -517,6 +607,17 @@ is appropriate.
 - Engström, subgraph-count identities as an inequality source:
   https://arxiv.org/abs/1002.4304
 
+### Cross-field method sources
+
+- Richardson, *Error Floors of LDPC Codes* (trapping-set enumeration and clustered failure cores):
+  https://web.stanford.edu/class/ee388/papers/ErrorFloors.pdf
+- Sadowski–Bosman–Thierens, *On the Usefulness of Linkage Processing for Solving MAX-SAT*:
+  https://ir.cwi.nl/pub/22078
+- Dushatskiy et al., *Parameterless Gene-pool Optimal Mixing Evolutionary Algorithms*:
+  https://arxiv.org/abs/2109.05259
+- Schrijver, *New Code Upper Bounds from the Terwilliger Algebra and Semidefinite Programming*:
+  https://ir.cwi.nl/pub/14098
+
 ### Upper bounds and computational proof
 
 - Angeltveit–McKay, `R(5,5)<=46`: https://arxiv.org/abs/2409.15709
@@ -552,6 +653,7 @@ Before original search:
 4. Reconstruct and verify the public 13- and 9-violation K43 controls from the Exoo study.
 5. Record the first mismatch and stop; do not silently repair source data.
 
-Only after these controls pass should the engine choose among S3–S12. The default first constructive
-route is S3 (unknown-42 basin), with S4 (the verified two-conflict core) as the highest-value direct
-K43 experiment.
+Only after these controls pass should the engine choose among S3–S15. The authenticated order-42 corpus
+now permits the held-out-control discriminators in S13–S15 even while the Springer two-conflict seed remains
+source-gated. The default first constructive route is S3 (unknown-42 basin), with S4 (the verified
+two-conflict core) as the highest-value direct K43 experiment once its publisher artifact is authenticated.

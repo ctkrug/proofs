@@ -161,6 +161,13 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260720-224631-ebf6f8",
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "claim": "For adjacency rows a_u and a_v of any (5,5,n) graph, d_H(a_u,a_v)=d(u)+d(v)-2|N(u) intersect N(v)|. If uv is an edge then the common-neighbor set has size at most 13; if uv is a nonedge then the common-nonneighbor set has size at most 13.",
+      "evidence": "Direct neighborhood argument using R(3,5)=14: an adjacent pair's common neighbors contain neither a K3 nor an independent 5-set; the complement of a nonadjacent pair's common-nonneighbor graph has the same prohibition. R(3,5)=14 is recorded in Dynamic Survey DS1.18, https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf.",
+      "scope": "All hypothetical and known (5,5,n) graphs; this is a pairwise row-code constraint, not an existence or nonexistence result.",
+      "status": "proved",
+      "updated_at": "2026-07-20T18:02:09-06:00"
     }
   ],
   "strategies": [
@@ -287,6 +294,73 @@
         "strategy-r55-controls"
       ],
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "id": "strategy-r55-trapping-atlas",
+      "family": "decoder trapping-set analysis transferred from LDPC error-floor research",
+      "fingerprint": "r55trappingatlas2026",
+      "title": "Canonicalize recurrent Ramsey failure cores before designing escape moves",
+      "mechanism": "Treat the 903 edge bits as variable nodes and monochromatic or one-flip-from-monochromatic 5-sets as active check nodes. From deterministic failed K43 trajectories, retain the edges that oscillate or remain in active checks over the final window, build a colored bipartite core, canonicalize it under vertex relabeling, and cluster recurrent core types. For each frequent type, solve a small exact core-plus-boundary MaxSAT neighborhood to obtain an escape template; apply templates only as move proposals and re-evaluate the complete graph exactly.",
+      "status": "proposed",
+      "hypothesis": "A small number of canonical active-core types explain a disproportionate share of low-energy search stalls, and exact core-conditioned escape templates transfer to held-out trajectories better than generic persistent-conflict weighting.",
+      "discriminating_test": "Run a fixed-seed trace corpus on damaged held-out order-42 controls and low-burden K43 starts. Continue only if canonical cores recur above label-shuffled controls and templates learned on one split improve paired held-out time-to-escape or best exact burden under the same evaluator-call budget; otherwise discard the analogy.",
+      "blocker": "Needs trace capture, colored-core canonicalization, and a matched exact-delta baseline; the authenticated order-42 controls are now available.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55-breakout",
+        "strategy-r55-conflict-core"
+      ],
+      "sources": [
+        "https://web.stanford.edu/class/ee388/papers/ErrorFloors.pdf"
+      ],
+      "updated_at": "2026-07-20T18:02:09-06:00"
+    },
+    {
+      "id": "strategy-r55-linkage-mixing",
+      "family": "linkage-tree gene-pool optimal mixing for gray-box Ramsey MaxSAT",
+      "fingerprint": "r55linkagemixing2026",
+      "title": "Learn and transfer interacting edge blocks instead of crossing whole graph bitstrings",
+      "mechanism": "Maintain a diverse population of exact low-burden colorings. Rebuild a linkage tree each generation from elite-population mutual information, active-K5 co-occurrence, or a hybrid of both. Traverse its edge subsets from small to large, copy one subset from a donor, and accept only moves that pass the exact incremental burden evaluator and the archive's diversity rule. Compare learned, gray-box, hybrid, univariate, and uniform-crossover masks rather than assuming the visible K5 factorization is the best linkage model.",
+      "status": "proposed",
+      "hypothesis": "Dynamic linkage learning identifies epistatic edge blocks whose coordinated transfer preserves useful partial structure and escapes single-edge stalls more reliably than uniform crossover or univariate mixing.",
+      "discriminating_test": "Split complement pairs and isomorphism families before constructing 6-to-12-edge-damaged order-42 controls. Under identical evaluator calls and seeds, require learned or hybrid masks to improve held-out valid-42 recovery and median exact burden over univariate mixing, uniform crossover, and exact-delta tabu before spending any K43 budget.",
+      "blocker": "Needs an exact incremental evaluator, population-diversity guard, leakage-safe held-out controls, and a small linkage-tree implementation.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55-program-evolution",
+        "strategy-r55-breakout"
+      ],
+      "sources": [
+        "https://ir.cwi.nl/pub/22078",
+        "https://arxiv.org/abs/2109.05259"
+      ],
+      "updated_at": "2026-07-20T18:02:09-06:00"
+    },
+    {
+      "id": "strategy-r55-row-code-sdp",
+      "family": "coding-theory distance distributions and Terwilliger moment bounds",
+      "fingerprint": "r55rowcodesdp2026",
+      "title": "Use adjacency rows as a constrained binary code to search for exact profile exclusions",
+      "mechanism": "Represent the n adjacency rows as binary words with weights equal to degrees and pairwise distances d(u)+d(v)-2c(u,v). Add the proved edge/common-neighbor and nonedge/common-nonneighbor bounds from R(3,5)=14, then test a hierarchy: exact rational pair-distance LP first, Schrijver-style triple-intersection positive-semidefinite moments second, and colored edge/nonedge moments only if the relaxed stages cut a profile. Known order-42 graphs are mandatory positive controls; every numerical dual must be rationalized into an exact inequality or checked pseudo-Boolean certificate.",
+      "status": "proposed",
+      "hypothesis": "The adjacency-row pair and triple moment cone excludes at least one degree/common-neighbor profile still admitted by scalar degree and excess constraints, supplying a new structural reduction for an upper-bound slice.",
+      "discriminating_test": "Generate exact row weight/intersection distributions for all authenticated controls and enumerate the current hypothetical profiles. Park the route immediately if the rational pair-moment relaxation cuts no new profile; escalate to SDP only after a nonempty exact cut, and reject any cut that fails a known control or cannot be rationalized.",
+      "blocker": "The off-the-shelf code bound does not encode adjacency symmetry or the edge/nonedge relation; the first relaxed LP must show information gain before a custom colored moment system is justified.",
+      "reopen_condition": "",
+      "last_attempt_id": "",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55-inequality"
+      ],
+      "sources": [
+        "https://ir.cwi.nl/pub/14098",
+        "https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf"
+      ],
+      "updated_at": "2026-07-20T18:02:09-06:00"
     }
   ],
   "open_leads": [
@@ -398,6 +472,36 @@
       "id": "lead-3a1dd469bb",
       "strategy_id": "strategy-r55controls2026",
       "updated_at": "2026-07-20T22:46:31.902547+00:00"
+    },
+    {
+      "description": "Build an LDPC-style atlas of recurrent active failure cores in low-burden Ramsey search trajectories.",
+      "rationale": "If a few small decoder-dependent cores dominate stalls, exact core-plus-boundary escape templates are a sharper intervention than globally reweighting every persistent conflict.",
+      "next_experiment": "Instrument deterministic damaged-42 and K43 runs; define active checks as violated and 9:1 five-sets; canonicalize final-window colored bipartite cores; compare recurrence against shuffled controls and exact escape templates on held-out runs.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-r55-trapping-atlas",
+      "strategy_id": "strategy-r55-trapping-atlas",
+      "updated_at": "2026-07-20T18:02:09-06:00"
+    },
+    {
+      "description": "Benchmark linkage-tree optimal mixing on leakage-safe damaged order-42 controls before using it at 43.",
+      "rationale": "The Ramsey objective has explicit overlapping epistasis among edge bits, while ordinary graph-bitstring crossover destroys interacting partial structures.",
+      "next_experiment": "Implement univariate, uniform, mutual-information linkage, factor-derived linkage, and hybrid masks; split complement/isomorphism families; compare exact recovery rate and burden under paired seeds and matched evaluator calls.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-r55-linkage-mixing",
+      "strategy_id": "strategy-r55-linkage-mixing",
+      "updated_at": "2026-07-20T18:02:09-06:00"
+    },
+    {
+      "description": "Test the cheapest adjacency-row coding-theory relaxation before building a custom SDP.",
+      "rationale": "The row-code identity and R(3,5)=14 give exact pair constraints; a small rational LP can cheaply show whether coding-theory moments add anything beyond existing degree/excess restrictions.",
+      "next_experiment": "Extract exact degree, common-neighbor, and row-distance distributions from all authenticated controls; formulate the relaxed pair-distance LP for hypothetical n=43..45 profiles; record every newly cut profile or stop with a reusable negative result if none are cut.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-r55-row-code-sdp",
+      "strategy_id": "strategy-r55-row-code-sdp",
+      "updated_at": "2026-07-20T18:02:09-06:00"
     }
   ],
   "ruled_out": [
