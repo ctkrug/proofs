@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 1,
-  "last_updated": "2026-07-20T19:52:51.807779+00:00",
+  "epoch_count": 2,
+  "last_updated": "2026-07-21T18:57:48.713116+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The mandatory baseline was completed. A May 2026 preprint postdating the official page's last edit was identified and incorporated. A Lean candidate defines IsSidon, GuaranteedSidonSize, ell via Nat.findGreatest, maximality API lemmas, three controls, and the answer(sorry)-scoped asymptotic declaration. Two independent semantic encodings agreed on all 512 subsets of {-4,...,4}; all seven adversarial controls passed. The Lean candidate was not elaborated because this environment lacks FormalConjectures and Mathlib. Two low-memory diagnostics also failed while creating a Lean thread; a controlled 4096 MB single-thread run reached the actual unknown-module error.",
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The candidate was not falsified. Three recorded attempts stopped before its body: the bare numeric Lake target produced an empty-path error, the tested relative source target was unknown, and direct elaboration against the current cache found FormalConjecturesUtil.olean missing while bootstrap was still compiling. Lake's +module grammar was captured independently. The corrected target +FormalConjectures.ErdosProblems.«530» is queued as lab-scout-bdf77f43574b-eec7321621e3.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -165,6 +165,16 @@
     "source_attempt_id": "scout-bdf77f43574b-20260720-195251-a9f2d4"
   },
   "recent_attempt_ids": [
-    "scout-bdf77f43574b-20260720-195251-a9f2d4"
-  ]
+    "scout-bdf77f43574b-20260720-195251-a9f2d4",
+    "scout-bdf77f43574b-20260721-185748-323167"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "",
+    "failure_signatures": [],
+    "reusable_assets": [],
+    "constraints_learned": [],
+    "decision_history": [],
+    "reduction_ledger": [],
+    "prior_art_decisions": []
+  }
 }

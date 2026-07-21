@@ -461,10 +461,10 @@
       "asymptotic notation"
     ],
     "lane": "easy",
-    "status": "active",
+    "status": "attempted",
     "priority": 40,
-    "attempt_count": 1,
-    "research_attempt_count": 1,
+    "attempt_count": 2,
+    "research_attempt_count": 2,
     "accepted_result": false,
     "added_at": "2026-07-20T17:25:05.376727+00:00",
     "source_checked_at": "2026-07-20T17:25:05.376753+00:00",
@@ -476,12 +476,18 @@
       "output_tokens": 2010,
       "reasoning_output_tokens": 1031
     },
-    "last_attempt_at": "2026-07-20T19:52:51.807779+00:00",
+    "last_attempt_at": "2026-07-21T18:57:48.713116+00:00",
     "campaign_state": "active",
     "campaign_started_at": "2026-07-21T15:14:41.303998+00:00",
     "campaign_start_research_attempt_count": 1,
     "campaign_min_runs": 25,
-    "campaign_decision": "resumed after easier candidate #3688 was screened out for an active upstream PR; continue the focused campaign while the next easier unclaimed issue is audited"
+    "campaign_decision": "continue through run 25",
+    "campaign_last_assessment": {
+      "attempt_id": "scout-bdf77f43574b-20260721-185748-323167",
+      "decision": "continue",
+      "close_signal": "A one-segment warning-fatal build of the corrected numeric target is already queued with a driver that records checkout commit, tool version, and matching candidate hashes.",
+      "reason": "This is run 2, before the mandatory review point, and the next bounded pass has a concrete kernel-verification discriminator."
+    }
   },
   {
     "id": "scout-1b950f384759",
