@@ -42,7 +42,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
-{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"tactical_learning":{"prediction":"lemma holds","observation":"lemma holds","surprise":"none","failure_signature":"none","bottleneck_update":"next lemma","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"test next lemma"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"internal lemma","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"proof check","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"space_reduction":{"ambient_space":"proof states","represented_space_before":"one goal","eliminated_or_quotiented":"one lemma discharged","represented_space_after":"next goal","reduction_factor":"not applicable","measurement_status":"not_applicable","unit":"proof states","coverage_scope":"single lemma","soundness_basis":"ordinary proof checking","remaining_unknown":"remaining theorem","next_bulk_elimination":"derive next lemma"},"tactical_learning":{"prediction":"lemma holds","observation":"lemma holds","surprise":"none","failure_signature":"none","bottleneck_update":"next lemma","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"test next lemma"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"internal lemma","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"proof check","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         result = agent.extract_result(text)
         self.assertEqual(result["outcome"], "progress")
@@ -56,9 +56,16 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_structured_result_requires_tactical_learning(self) -> None:
         text = '''```proof_result
-{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only","reductions_considered":["symbolic"],"chosen_mechanism":"direct","estimated_or_measured_savings":"n/a","soundness_guard":"proof check"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only","reductions_considered":["symbolic"],"chosen_mechanism":"direct","estimated_or_measured_savings":"n/a","soundness_guard":"proof check"},"space_reduction":{"ambient_space":"proof states","represented_space_before":"one goal","eliminated_or_quotiented":"none","represented_space_after":"one goal","reduction_factor":"none","measurement_status":"not_applicable","unit":"proof states","coverage_scope":"one goal","soundness_basis":"none","remaining_unknown":"goal","next_bulk_elimination":"prove lemma"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         with self.assertRaisesRegex(ValueError, "tactical_learning"):
+            agent.extract_result(text)
+
+    def test_structured_result_requires_space_reduction_ledger(self) -> None:
+        text = '''```proof_result
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only","reductions_considered":["symbolic"],"chosen_mechanism":"direct","estimated_or_measured_savings":"n/a","soundness_guard":"proof check"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+```'''
+        with self.assertRaisesRegex(ValueError, "space_reduction"):
             agent.extract_result(text)
 
     def test_rejects_self_declared_solved_outcome(self) -> None:
@@ -150,6 +157,8 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("submit_lab.py", prompt)
         self.assertIn("SEARCH-EFFICIENCY PASS", prompt)
         self.assertIn("search_efficiency", prompt)
+        self.assertIn("space_reduction", prompt)
+        self.assertIn("bulk class/cube/profile elimination", prompt)
         self.assertIn("DETERMINISTIC TACTICAL BRIEF", prompt)
         self.assertIn("tactical_learning", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
@@ -168,7 +177,7 @@ class ProofFactoryTests(unittest.TestCase):
             "rationale": "Compact certificate", "verifiability": "Exact checker", "techniques": [],
         }
         principal = '''```proof_result
-{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"tactical_learning":{"prediction":"find signal","observation":"bounded result","surprise":"none","failure_signature":"none","bottleneck_update":"larger exact test","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"larger pilot"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"verified internal experiment","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"scalar replay","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"space_reduction":{"ambient_space":"finite test space","represented_space_before":"100 cases","eliminated_or_quotiented":"50 exact failures","represented_space_after":"50 cases","reduction_factor":"2x","measurement_status":"exact","unit":"labelled assignments","coverage_scope":"bounded fixture","soundness_basis":"independent scalar replay","remaining_unknown":"50 cases","next_bulk_elimination":"canonicalize classes"},"tactical_learning":{"prediction":"find signal","observation":"bounded result","surprise":"none","failure_signature":"none","bottleneck_update":"larger exact test","reusable_assets":[],"constraints_learned":[],"route_decision":"continue","next_discriminator":"larger pilot"},"field_progress_assessment":{"status":"not_met","gate_id":"none","contribution_class":"verified internal experiment","closest_prior_result":"baseline","measurable_improvement":"none","independent_validation":"scalar replay","external_audience":"none","remains_unproved":"target","route_recommendation":"continue bounded route"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         calls = []
 
@@ -212,6 +221,13 @@ class ProofFactoryTests(unittest.TestCase):
                     "constraints_learned": [{"constraint": "class 5 remains", "scope": "mod 6", "evidence": "checker.py"}],
                     "route_decision": "redirect", "next_discriminator": "test mod 12",
                 },
+                "space_reduction": {
+                    "ambient_space": "all residue classes", "represented_space_before": "6 classes",
+                    "eliminated_or_quotiented": "5 classes", "represented_space_after": "1 class",
+                    "reduction_factor": "6x upper bound", "measurement_status": "exact", "unit": "profiles",
+                    "coverage_scope": "mod 6", "soundness_basis": "exact identity",
+                    "remaining_unknown": "class 5", "next_bulk_elimination": "refine to mod 12",
+                },
             }
             with patch.multiple(store, ROOT=root, DATA=data):
                 first = research_state.update_from_attempt(problem, attempt)
@@ -223,6 +239,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(second["next_session"]["first_action"], "run residues.py")
                 self.assertEqual(second["tactical_memory"]["failure_signatures"][0]["count"], 2)
                 self.assertEqual(second["tactical_memory"]["reusable_assets"][0]["name"], "residue checker")
+                self.assertEqual(second["tactical_memory"]["reduction_ledger"][0]["represented_space_after"], "1 class")
                 prompt_state = research_state.compact_for_prompt(problem)
                 self.assertIn("allow degree two", prompt_state)
                 self.assertEqual(first["problem_id"], "p")

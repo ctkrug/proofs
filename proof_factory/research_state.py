@@ -9,7 +9,7 @@ from typing import Any
 from . import store
 
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 STRATEGY_STATUSES = {
     "proposed", "active", "promising", "blocked", "ruled_out", "exhausted", "superseded",
 }
@@ -62,6 +62,7 @@ def _initial(problem: dict[str, Any]) -> dict[str, Any]:
             "reusable_assets": [],
             "constraints_learned": [],
             "decision_history": [],
+            "reduction_ledger": [],
         },
     }
 
@@ -82,7 +83,7 @@ def load(problem: dict[str, Any]) -> dict[str, Any]:
     else:
         memory = _initial(problem)["tactical_memory"]
         memory.update(seeded["tactical_memory"])
-        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history"):
+        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history", "reduction_ledger"):
             if not isinstance(memory.get(key), list):
                 memory[key] = []
         seeded["tactical_memory"] = memory
@@ -244,6 +245,21 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
     for row in constraints:
         row.update({"source_attempt_id": attempt["id"], "updated_at": now})
     memory["constraints_learned"] = _dedupe(memory["constraints_learned"] + constraints, ("constraint", "scope"), 80)
+    reduction = attempt.get("space_reduction") if isinstance(attempt.get("space_reduction"), dict) else {}
+    if reduction:
+        reduction_row = {
+            key: _text(reduction.get(key), 2000)
+            for key in (
+                "ambient_space", "represented_space_before", "eliminated_or_quotiented",
+                "represented_space_after", "reduction_factor", "measurement_status", "unit",
+                "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
+            )
+        }
+        reduction_row.update({"source_attempt_id": attempt["id"], "strategy_id": strategy_row["id"], "updated_at": now})
+        memory["reduction_ledger"] = _dedupe(
+            memory["reduction_ledger"] + [reduction_row],
+            ("ambient_space", "represented_space_after", "coverage_scope"), 60,
+        )
     decision = _text(learning.get("route_decision"), 40)
     if decision:
         memory["decision_history"] = (memory["decision_history"] + [{

@@ -105,6 +105,13 @@ unrequested cutoffs remain honest negative experiments or infrastructure results
 Operators can inspect the exact next-epoch decision at any time with
 `python3 -m proof_factory tactics-show --problem PROBLEM_ID`.
 
+The structured result also carries a cumulative search-space reduction ledger. Every computational
+epoch must identify its ambient universe, exact expression or honest bound before and after, what was
+eliminated or quotient-identified, the unit being counted (labelled assignments, isomorphism classes,
+cubes, profiles, families, or proof states), coverage scope, soundness basis, remaining unknown, and
+next bulk elimination. This prevents a long list of labelled point blocks from masquerading as a
+material reduction and prioritizes class-, cube-, profile-, or family-level compression.
+
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
   checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
   witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,

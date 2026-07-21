@@ -64,7 +64,7 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "tactical_learning", "field_progress_assessment"):
+    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "field_progress_assessment"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
     efficiency = result.get("search_efficiency")
@@ -76,6 +76,19 @@ def extract_result(text: str) -> dict[str, Any]:
         raise ValueError(f"search_efficiency missing fields: {missing_efficiency}")
     if not isinstance(efficiency.get("reductions_considered"), list) or not efficiency["reductions_considered"]:
         raise ValueError("search_efficiency.reductions_considered must be a nonempty list")
+    reduction = result.get("space_reduction")
+    if not isinstance(reduction, dict):
+        raise ValueError("space_reduction must be an object")
+    required_reduction = (
+        "ambient_space", "represented_space_before", "eliminated_or_quotiented",
+        "represented_space_after", "reduction_factor", "measurement_status", "unit",
+        "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
+    )
+    missing_reduction = [key for key in required_reduction if not str(reduction.get(key) or "").strip()]
+    if missing_reduction:
+        raise ValueError(f"space_reduction missing fields: {missing_reduction}")
+    if reduction.get("measurement_status") not in {"exact", "upper_bound", "estimate", "not_applicable"}:
+        raise ValueError("space_reduction.measurement_status must be exact|upper_bound|estimate|not_applicable")
     learning = result.get("tactical_learning")
     if not isinstance(learning, dict):
         raise ValueError("tactical_learning must be an object")
@@ -381,6 +394,10 @@ WORK RULES
    dominance/monotone bounds, cheap sound prefilters, and learned-clause/proof-prefix reuse. Choose the best combination,
    record projected and observed reduction or throughput, and independently check shortcut soundness and coverage. Do not
    scale brute force until this pass is written; do not use an unsound shortcut to support a mathematical claim.
+   Maintain the reduction ledger: distinguish labelled assignments, isomorphism classes, cubes, profiles, and whole
+   families; give exact expressions or honest upper bounds before and after; state coverage and the independent soundness
+   basis. Prefer bulk class/cube/profile elimination over accumulating point blocks. Never present a local-family fraction
+   as a reduction of the global target space.
 5. Test examples and edge cases. Try to falsify every central lemma. A computation is evidence only for the exact range checked.
 6. A suspiciously short proof, unused hypothesis, stronger-than-requested conclusion, or mismatch with the source is a red flag.
 7. Cite prior human work and disclose every automated tool used. Do not optimize for publicity.
@@ -398,6 +415,7 @@ WORK RULES
   "hypothesis": "falsifiable claim tested this epoch",
   "discriminating_test": "cheapest observation that separates success from failure",
   "search_efficiency": {{"naive_space":"candidate count and bottleneck","reductions_considered":["symmetry/compression/batching/vectorization/incremental/decomposition/pruning/reuse options"],"chosen_mechanism":"bulk-elimination design","estimated_or_measured_savings":"reduction ratio or throughput","soundness_guard":"independent equivalence or one-sided coverage check"}},
+  "space_reduction": {{"ambient_space":"exact reference universe, such as 2^903 labelled K43 graphs","represented_space_before":"exact expression or honest bound before this epoch","eliminated_or_quotiented":"what this epoch removed or identified","represented_space_after":"exact expression or honest bound after this epoch","reduction_factor":"exact factor, bound, estimate, or none","measurement_status":"exact|upper_bound|estimate|not_applicable","unit":"labelled assignments|isomorphism classes|cubes|profiles|families|proof states|not applicable","coverage_scope":"precise family or global scope","soundness_basis":"proof/check establishing safe elimination or quotient coverage","remaining_unknown":"what is not counted or excluded","next_bulk_elimination":"next class/cube/profile/family-level reduction"}},
   "tactical_learning": {{"prediction":"predeclared expected signal","observation":"what occurred","surprise":"difference from prediction, or none","failure_signature":"reusable failure pattern, or none","bottleneck_update":"current limiting uncertainty or operation","reusable_assets":[{{"name":"artifact/checker/dataset","use":"future use","evidence":"path/hash/check"}}],"constraints_learned":[{{"constraint":"exact restriction learned","scope":"valid scope","evidence":"support"}}],"route_decision":"continue|hold|redirect|close","next_discriminator":"cheapest next test"}},
   "field_progress_assessment": {{"status":"met|not_met","gate_id":"exact configured gate number/name, or none","contribution_class":"exact contribution class or verified negative/infrastructure result","closest_prior_result":"closest prior result or baseline","measurable_improvement":"quantified delta, or none","independent_validation":"validator and result, or not yet independently validated","external_audience":"accepted audience/channel, or none","remains_unproved":"precise remaining gap","route_recommendation":"close|broaden|redirect|continue and why"}},
   "strategy_status": "proposed|active|promising|blocked|ruled_out|exhausted|superseded",
@@ -533,6 +551,13 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
                 "chosen_mechanism": "not reached", "estimated_or_measured_savings": "not reached",
                 "soundness_guard": "no mathematical claim accepted",
             },
+            "space_reduction": {
+                "ambient_space": "research epoch", "represented_space_before": "not reached",
+                "eliminated_or_quotiented": "none", "represented_space_after": "unchanged",
+                "reduction_factor": "none", "measurement_status": "not_applicable", "unit": "not applicable",
+                "coverage_scope": "no mathematical search completed", "soundness_basis": "no claim accepted",
+                "remaining_unknown": "the full target", "next_bulk_elimination": "repair the epoch before search",
+            },
             "tactical_learning": {
                 "prediction": "produce a valid bounded epoch", "observation": "output contract or infrastructure failure",
                 "surprise": "the epoch failed before evaluation", "failure_signature": f"{type(exc).__name__}: invalid epoch output",
@@ -598,6 +623,14 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "chosen_mechanism": str(result["search_efficiency"].get("chosen_mechanism") or "")[:2000],
             "estimated_or_measured_savings": str(result["search_efficiency"].get("estimated_or_measured_savings") or "")[:2000],
             "soundness_guard": str(result["search_efficiency"].get("soundness_guard") or "")[:2000],
+        },
+        "space_reduction": {
+            key: str(result["space_reduction"].get(key) or "")[:4000]
+            for key in (
+                "ambient_space", "represented_space_before", "eliminated_or_quotiented",
+                "represented_space_after", "reduction_factor", "measurement_status", "unit",
+                "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
+            )
         },
         "tactical_learning": {
             "prediction": str(result["tactical_learning"].get("prediction") or "")[:2000],

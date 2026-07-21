@@ -101,12 +101,14 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
             "open_leads": sum(1 for row in state.get("open_leads", []) if row.get("status", "open") == "open"),
             "failure_signatures": memory.get("failure_signatures", [])[-12:],
             "reusable_assets": memory.get("reusable_assets", [])[-12:],
+            "reduction_ledger": memory.get("reduction_ledger", [])[-12:],
             "current_bottleneck": _text(memory.get("current_bottleneck"), 1500),
         },
         "closed_routes": [row for row in ranked if not row["eligible"]][:12],
         "execution_contract": {
             "predeclare": ["prediction", "cheapest discriminator", "success signal", "failure signal", "redirect signal"],
             "one_epoch_limit": "One bounded discriminator; scale only after measured pilot throughput and shortcut validation.",
+            "reduction_priority": "Prefer a sound class/cube/profile/family elimination over many labelled point blocks. Report exact expressions or honest upper bounds; never imply local-family coverage is global.",
             "end_state": "Record surprise, failure signature, exact constraints learned, reusable assets, route decision, and next discriminator.",
         },
     }
