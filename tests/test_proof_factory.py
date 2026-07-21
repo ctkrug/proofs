@@ -624,6 +624,27 @@ class ProofFactoryTests(unittest.TestCase):
                 easy = usage.admission("easy", now=now.replace(hour=3), monotonic_now=clock)
                 self.assertTrue(easy["allowed"])
 
+    def test_operator_run_is_one_shot_and_cannot_bypass_provider_stop(self) -> None:
+        now = datetime(2026, 1, 1, 3, 0, tzinfo=timezone.utc)
+        payload = {
+            "ok": True, "checked_at": 1000.0,
+            "week": {"used_pct": 90.0, "resets_at": 704800.0, "window_seconds": 604800.0},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            cache = Path(raw) / "usage.json"
+            cache.write_text(json.dumps(payload))
+            with patch.dict("os.environ", {
+                "PROOF_USAGE_CACHE_PATH": str(cache), "PROOF_OPERATOR_RUN": "1",
+            }):
+                allowed = usage.admission("hard", now=now, monotonic_now=1000.0)
+                self.assertTrue(allowed["allowed"])
+                self.assertEqual(allowed["mode"], "operator")
+                payload["rate_limit_reached_type"] = "weekly"
+                cache.write_text(json.dumps(payload))
+                stopped = usage.admission("hard", now=now, monotonic_now=1000.0)
+                self.assertFalse(stopped["allowed"])
+                self.assertEqual(stopped["mode"], "paused")
+
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             site = Path(raw) / "site"

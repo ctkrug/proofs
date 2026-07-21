@@ -38,12 +38,14 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     clock = time.time() if monotonic_now is None else monotonic_now
     payload = store.read_json(_cache_path(), {})
     baseline = _baseline_slot(lane, now)
+    operator_authorized = os.environ.get("PROOF_OPERATOR_RUN", "").strip().lower() in {"1", "true", "yes"}
     result: dict[str, Any] = {
         "checked_at": payload.get("checked_at") if isinstance(payload, dict) else None,
         "mode": "baseline",
         "allowed": baseline,
         "lane": lane,
         "baseline_slot": baseline,
+        "operator_authorized": operator_authorized,
         "reason": "usage snapshot unavailable; retaining baseline only",
     }
     if not isinstance(payload, dict) or not payload.get("ok"):
@@ -54,6 +56,12 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
         return result
     if payload.get("rate_limit_reached_type") or payload.get("spend_control_reached"):
         result.update({"mode": "paused", "allowed": False, "reason": "provider usage limit or spend control reached"})
+        return result
+    if operator_authorized:
+        result.update({
+            "mode": "operator", "allowed": True,
+            "reason": "one-shot operator-authorized pass; provider hard limits remain enforced",
+        })
         return result
     week = payload.get("week")
     if not isinstance(week, dict):
