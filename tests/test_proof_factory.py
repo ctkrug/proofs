@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
-from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, scheduler, scout, store, strategy_lab, tactics, usage
+from proof_factory import agent, brain, capacity, cli, contribution_gate, intake, lab, live, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics, usage
 
 
 class ProofFactoryTests(unittest.TestCase):
@@ -160,6 +160,8 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("space_reduction", prompt)
         self.assertIn("bulk class/cube/profile elimination", prompt)
         self.assertIn("DETERMINISTIC TACTICAL BRIEF", prompt)
+        self.assertIn("AUTOMATED CAMPAIGN ROADMAP", prompt)
+        self.assertIn("core_theorem", prompt)
         self.assertIn("tactical_learning", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
@@ -257,6 +259,24 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(brief["incumbent"]["strategy_id"], "live")
         self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "dead")["eligible"])
         self.assertEqual(brief["closed_routes"][0]["reopen_condition"], "new theorem")
+
+    def test_roadmap_selects_phase_from_completed_epoch_count(self) -> None:
+        problem = {"id": "p"}
+        value = {
+            "schema_version": 1, "problem_id": "p", "start_after_epoch": 10, "horizon_sessions": 4,
+            "phases": [
+                {"id": "first", "sessions": [1, 2]},
+                {"id": "second", "sessions": [3, 4]},
+            ],
+        }
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "DATA", Path(raw)), \
+                patch.object(research_state, "load", return_value={"epoch_count": 12}):
+            folder = Path(raw) / "campaign_roadmaps"
+            folder.mkdir()
+            (folder / "p.json").write_text(json.dumps(value))
+            selected = roadmap.current(problem)
+        self.assertEqual(selected["next_roadmap_session"], 3)
+        self.assertEqual(selected["active_phase"]["id"], "second")
 
     def test_baseline_review_is_required_then_completed(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

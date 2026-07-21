@@ -9,7 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import brain, contribution_gate, research_state, store, tactics
+from . import brain, contribution_gate, research_state, roadmap, store, tactics
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -345,6 +345,9 @@ CROSS-PROBLEM RESEARCH BRAIN (links are transfer hypotheses, not evidence)
 
 DETERMINISTIC TACTICAL BRIEF (inspectable priorities, not probabilities)
 {tactics.compact_for_prompt(problem)}
+
+AUTOMATED CAMPAIGN ROADMAP (phase budgets are caps; evidence may advance or kill a phase early)
+{roadmap.compact_for_prompt(problem)}
 
 REUSABLE STRATEGY LIBRARY
 {json.dumps(strategy_library, indent=2, ensure_ascii=False)[:18000]}

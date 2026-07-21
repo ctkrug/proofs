@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import brain, capacity, intake, lab, publication, render, repositories, research_state, scheduler, scout, store, strategy_lab, tactics
+from . import brain, capacity, intake, lab, publication, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics
 
 
 EXTERNAL_STATES = {
@@ -195,6 +195,8 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("brain-build")
     tactical = sub.add_parser("tactics-show")
     tactical.add_argument("--problem", required=True)
+    roadmap_parser = sub.add_parser("roadmap-show")
+    roadmap_parser.add_argument("--problem", required=True)
     repo_init = sub.add_parser("repo-init")
     repo_init.add_argument("--problem")
     repo_init.add_argument("--all", action="store_true")
@@ -282,6 +284,12 @@ def main(argv: list[str] | None = None) -> int:
         if not problem:
             raise ValueError(f"unknown problem: {args.problem}")
         print(json.dumps(tactics.build(problem), indent=2))
+        return 0
+    if args.command == "roadmap-show":
+        problem = next((row for row in store.load_problems() if row["id"] == args.problem), None)
+        if not problem:
+            raise ValueError(f"unknown problem: {args.problem}")
+        print(json.dumps(roadmap.current(problem), indent=2))
         return 0
     if args.command == "repo-init":
         if args.all == bool(args.problem):

@@ -112,6 +112,13 @@ cubes, profiles, families, or proof states), coverage scope, soundness basis, re
 next bulk elimination. This prevents a long list of labelled point blocks from masquerading as a
 material reduction and prioritizes class-, cube-, profile-, or family-level compression.
 
+Long-running hard campaigns may also carry a versioned machine-readable roadmap under
+`data/campaign_roadmaps/`. The R55 roadmap gives each phase a maximum session budget, required
+artifact, objective promote/kill criteria, and fallback. It is injected beside the adaptive tactical
+brief: the roadmap supplies portfolio discipline and a finite review horizon, while live evidence and
+the tactical ledger may end or redirect a phase early. Its probability estimates are planning priors,
+not mathematical confidence or evidence.
+
 - **Hard:** Exact `R(5,5)`, because the remaining question is finite and every meaningful result has a
   checkable artifact. A 43-vertex graph with no 5-clique or independent 5-set gives a compact lower-bound
   witness; an upper-bound improvement requires a deterministic encoding, checked SAT/UNSAT leaf proofs,

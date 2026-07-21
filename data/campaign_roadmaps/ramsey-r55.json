@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "problem_id": "ramsey-r55",
+  "created_at": "2026-07-21",
+  "start_after_epoch": 14,
+  "horizon_sessions": 100,
+  "operating_rule": "Phases are maximum budgets, not entitlements. Execute one cheapest discriminator per session. Exit a phase early on its promote or kill condition; terminal evidence enters contribution review immediately. Never use remaining session budget to repeat a failed mechanism.",
+  "confidence_calibration": {
+    "horizon": "next 100 completed R(5,5) cloud sessions",
+    "meaningful_gate_candidate_probability": 0.22,
+    "credible_interval": [0.12, 0.35],
+    "external_acceptance_probability": 0.10,
+    "ramsey_bound_improvement_probability": 0.01,
+    "interpretation": "Subjective planning probabilities, not mathematical confidence. Meaningful means plausibly satisfying at least one configured field-progress gate after independent validation; external acceptance is stricter.",
+    "increase_if": [
+      "proof cores collapse to at most five human-checkable parameterized types",
+      "canonical blocking removes whole classes at least 100 times faster than labelled blocking",
+      "a leakage-safe method beats prior-art baselines by at least 2x on held-out controls",
+      "a checked cube/profile system certifies a material accepted search-space reduction"
+    ],
+    "decrease_if": [
+      "proof-core compression misses either predeclared threshold",
+      "canonical boundary search continues rediscovering supplied classes after class-level blocking",
+      "held-out gains disappear under matched evaluator calls or stronger baselines",
+      "no route yields a class/profile/cube-level reduction by session 60"
+    ]
+  },
+  "portfolio_allocation": {
+    "structural_and_exact_compression": 0.35,
+    "held_out_algorithm_benchmark": 0.30,
+    "certificate_carrying_global_reduction": 0.25,
+    "adversarial_validation_and_novelty": 0.10
+  },
+  "phases": [
+    {
+      "id": "core_theorem",
+      "sessions": [1, 6],
+      "objective": "Determine whether the 20 certified two-orbit exclusions compress into a concise structural theorem.",
+      "required_artifact": "Deletion-minimal raw K5-clause cores, canonical signed-incidence types, deterministic maps for all 20 distances, and a human-readable theorem draft with an instantiation checker.",
+      "promote_if": "Every distance maps to at most five parameterized core types of at most 20 clauses, with no SAT auxiliaries or unproved symmetry premise.",
+      "kill_if": "Either threshold fails after exact minimization, or the templates do not yield a shorter human-checkable argument than the finite certificates.",
+      "fallback": "heldout_benchmark"
+    },
+    {
+      "id": "canonical_boundary",
+      "sessions": [7, 18],
+      "objective": "Replace labelled CEGAR blocks in the 426-bit order-42 boundary with sound isomorphism-class or canonical-subproblem blocking.",
+      "required_artifact": "Canonical augmentation/blocking algorithm, coverage proof or one-sided safety proof, dual checker, and measured class-level reduction ledger.",
+      "promote_if": "Class/cube blocking yields at least 100x fewer repeated solves than labelled blocking or finds a dual-checked order-42 class absent from the supplied corpus.",
+      "kill_if": "No sound compact class block exists, or 256 class-level decisions yield only supplied classes without a reusable reduction.",
+      "fallback": "profile_reduction"
+    },
+    {
+      "id": "profile_reduction",
+      "sessions": [19, 32],
+      "objective": "Eliminate many K43 candidates at once using exact degree, codegree, and small-subgraph distribution constraints.",
+      "required_artifact": "Integer/rational profile system derived from Ramsey identities, independently checked derivation, control-graph tests, and exact count or upper bound on eliminated profiles/cubes.",
+      "promote_if": "A new sourced inequality or exact filter removes at least 99% of pilot profiles or strengthens a certificate-carrying upper-bound decomposition.",
+      "kill_if": "Known inequalities subsume the filter, rationalization fails, or the surviving pilot space shrinks by less than 10x.",
+      "fallback": "heldout_benchmark"
+    },
+    {
+      "id": "heldout_benchmark",
+      "sessions": [33, 60],
+      "objective": "Test whether canonical trapping-set, linkage, or evolved-search operators improve Ramsey search under leakage-safe matched compute.",
+      "required_artifact": "Frozen class-level train/validation/test split, simulated-annealing/tabu/current-local-search and published algorithmic baselines, matched evaluator-call and wall-clock budgets, paired seeds, ablations, and exact graph evaluation.",
+      "promote_if": "At least 2x median held-out time-to-recovery or a statistically robust lower exact K43 burden under matched calls, surviving ablation and a second implementation.",
+      "kill_if": "Gain is below 25%, disappears on held-out classes, depends on leakage, or loses to an appropriate prior-art baseline.",
+      "fallback": "certified_cubes"
+    },
+    {
+      "id": "certified_cubes",
+      "sessions": [61, 82],
+      "objective": "Turn successful structural/profile reductions into deterministic canonical cubes with checked proof logs and sound coverage.",
+      "required_artifact": "Generator-to-CNF correspondence, canonical cube cover, checked LRAT/DRAT leaves, independent cover checker, and quantified fraction of an accepted R(5,5) search decomposition.",
+      "promote_if": "A pilot certifies a material externally intelligible reduction with projected proof size and runtime inside the lab budget.",
+      "kill_if": "Coverage cannot be independently checked, proof growth extrapolates beyond storage/compute limits, or the cubes cover only another arbitrary local family.",
+      "fallback": "synthesis"
+    },
+    {
+      "id": "synthesis",
+      "sessions": [83, 100],
+      "objective": "Attack the strongest surviving result, rerun novelty searches, obtain outside evaluation, and close or redirect R55 honestly.",
+      "required_artifact": "Reproducibility packet, closest-prior comparison, independent validation, named external channel, remaining-gap statement, and next-problem transfer memo.",
+      "promote_if": "A configured field-progress gate passes the fail-closed contribution review.",
+      "kill_if": "No gate-worthy result survives isolated review by session 100.",
+      "fallback": "park R55 and transfer the best verified method to a more tractable Ramsey cell"
+    }
+  ],
+  "sources": [
+    "https://www.cs.rit.edu/~spr/ElJC/sur.pdf",
+    "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+    "https://www.nature.com/articles/s41467-018-07327-2",
+    "https://arxiv.org/abs/2603.09172",
+    "https://arxiv.org/abs/2502.06055"
+  ]
+}
