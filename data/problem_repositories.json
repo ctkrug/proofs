@@ -106,12 +106,14 @@
       "url": "https://github.com/ctkrug/proofs-erdos-398",
       "visibility": "PUBLIC",
       "commit": "e02f75297b431349a362be7ad0ab3ed1f8e0af90"
-    }
-  ],
-  "errors": [
+    },
     {
       "problem_id": "scout-bdf77f43574b",
-      "error": "RuntimeError: git push --set-upstream origin main failed in /root/proof-factory/research/scout-bdf77f43574b/workspace: To https://github.com/ctkrug/proofs-scout-bdf77f43574b\n ! [rejected]        main -> main (fetch first)\nerror: failed to push some refs to 'https://github.com/ctkrug/proofs-scout-bdf77f43574b'\nhint: Updates were rejected because the remote contains work that you do not\nhint: have locally. This is usually caused by another repository pushing to\nhint: the same ref. If you want to integrate the remote changes, use\nhint: 'git pull' before pushing again.\nhint: See the 'Note about fast-forwards' in 'git push --help' for details."
+      "repository": "ctkrug/proofs-scout-bdf77f43574b",
+      "url": "https://github.com/ctkrug/proofs-scout-bdf77f43574b",
+      "visibility": "PUBLIC",
+      "commit": "b2a0f0f2c8408f389f27c724998f296c4c57792b"
     }
-  ]
+  ],
+  "errors": []
 }
