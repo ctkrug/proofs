@@ -10,14 +10,168 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T07:02:53.261098+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T07:02:53.261098+00:00",
+    "source_attempt_id": "erdos-1041-20260721-070253-0e83fd",
+    "source_status": "falsifiable",
+    "facts_recorded": 3,
+    "exclusions_recorded": 3,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The original 1958 statement, strict inequalities, current open status, closest recent work, failed gradient-flow route, and Lean semantics were audited. The inherited Terra script was found to test unnormalized products and omit the degree-dependent separation condition, so its reported degree 4-7 samples were rejected. A corrected deterministic script with analytic, quartic, invariance, and dense-grid controls accepted 32 degree-five configurations after 951 attempts and found no failure. The largest second-smallest arm maximum was 0.9992275819269636. This is not a proof. The required Formal Conjectures bootstrap failed twice for lack of decompression space; invalid generated caches were removed and 5.6 GB free space restored.",
+  "established_facts": [
+    {
+      "claim": "EHP state that some component of {|f|<1} contains at least two zeros.",
+      "evidence": "Original paper, page 139 immediately above Problem 5.",
+      "scope": "Connectivity only; no metric bound.",
+      "status": "proved",
+      "source_attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "claim": "A root pair at distance d<2^((4-n)/2) is connected by its straight segment inside {|f|<1}.",
+      "evidence": "Along the segment, the pair factors are at most d^2/4 and each remaining factor is strictly below 2.",
+      "scope": "Every degree n>=2 polynomial whose roots lie in the open unit disk.",
+      "status": "proved",
+      "source_attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "claim": "No normalized radial-star failure occurred in the recorded 32-sample degree-five run.",
+      "evidence": ".proof-experiments/20260721-065430-2d945b/stdout.txt",
+      "scope": "Only the stated deterministic float64 samples and tolerance.",
+      "status": "computed",
+      "source_attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-normalized-med-radial-star-v1",
+      "family": "counterexample and witness search",
+      "fingerprint": "normalized-med-radial-star-v1",
+      "title": "Mandatory source/status baseline followed by a controlled audit of the minimum-enclosing-disk radial-star route underlying the June 2026 quartic preprint.",
+      "mechanism": "Normalize configurations by their minimum enclosing disk, enforce the complement of the elementary close-pair reduction, and compute the maximum product along every radial arm from stationary points of the squared-modulus polynomial.",
+      "status": "active",
+      "hypothesis": "For each of 32 deterministic degree-five samples whose normalized pair distances are at least 1/sqrt(2), at least two radial arms have dimensionless product maximum at most 1 within the declared floating margin.",
+      "discriminating_test": "Compute all normalized arm maxima; a configuration whose second-smallest maximum exceeds 1 rejects the sampled stronger radial lemma, while no such configuration establishes only finite-sample survival.",
+      "blocker": "The mathematical blocker is a dimension-five selection lemma or a rigorously certified failure of it. The practical formalization blocker is insufficient temporary disk space for the pinned mathlib cache and the current target's incorrect unrestricted length semantics.",
+      "reopen_condition": "Not applicable to the active radial strategy. For formal compilation, provide at least 8 GB free or a streaming cache bootstrap; for the flow-tree route, satisfy its explicit critical-network and length-estimate condition.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "family": "exact semialgebraic barrier certification",
+      "mechanism": "Represent {|f|<1} as a real semialgebraic domain and certify barriers or variational lower bounds for all paths between specified roots.",
+      "hypothesis": "A structured exact root configuration may admit a finite barrier certificate proving all relevant intrinsic distances are at least 2.",
+      "discriminating_test": "On a toy quadratic or quartic instance with known short paths, require the encoding to return the correct lower bound or explicit violating path before applying it to candidates.",
+      "rationale": "This is the certificate surface ultimately required for a genuine counterexample, unlike grid shortest paths.",
+      "id": "strategy-22e3ef3c371f",
+      "fingerprint": "22e3ef3c371f",
+      "status": "proposed",
+      "title": "Represent {|f|<1} as a real semialgebraic domain and certify barriers or variational lower bounds for all paths between specified roots.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-normalized-med-radial-star-v1"
+      ],
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "family": "formal statement repair",
+      "mechanism": "Replace range Hausdorff measure with parametrized variation/rectifiable length or restrict to polygonal paths with a proved equivalence.",
+      "hypothesis": "A compiling, semantically equivalent statement can be expressed using existing mathlib curve-length infrastructure.",
+      "discriminating_test": "Compile a retracing-path regression example where range measure is strictly smaller than variation, then show the repaired predicate distinguishes them.",
+      "rationale": "It offers a bounded research-software contribution independent of solving the conjecture.",
+      "id": "strategy-22cf9d4ed5d1",
+      "fingerprint": "22cf9d4ed5d1",
+      "status": "proposed",
+      "title": "Replace range Hausdorff measure with parametrized variation/rectifiable length or restrict to polygonal paths with a proved equivalence.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-normalized-med-radial-star-v1"
+      ],
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Degree-five normalized minimum-enclosing-disk radial lemma.",
+      "rationale": "It directly extends the closest quartic method and has a cheap falsifier.",
+      "next_experiment": "Build the exact rational checker, then optimize the second-smallest arm maximum over a fixed adversarial family portfolio.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-9231b9b92c",
+      "strategy_id": "strategy-normalized-med-radial-star-v1",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "description": "Exact radial-failure certificate format.",
+      "rationale": "It converts a cheap numerical lead into a rigorous scoped route elimination.",
+      "next_experiment": "Verify rational points, exact disk support, pair separation, and rational t witnesses using fraction arithmetic and polynomial sign checks.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-fc37ee82b7",
+      "strategy_id": "strategy-normalized-med-radial-star-v1",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "description": "Correct the Formal Conjectures length semantics.",
+      "rationale": "This is an independently useful formalization/software contribution and prevents an invalid acceptance surface.",
+      "next_experiment": "After ensuring at least 8 GB free, rerun bootstrap and identify the mathlib rectifiable-curve or variation API.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-53429c5aab",
+      "strategy_id": "strategy-normalized-med-radial-star-v1",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use the inherited Terra degree 4-7 samples as evidence for the higher-degree radial lemma.",
+      "scope": "The unlogged inherited script and its reported samples.",
+      "reason": "It evaluated unnormalized products, omitted the relevant separation condition, and could suppress maxima through the missing scale factor.",
+      "evidence": "Initial script SHA-256 b0034686b1bdd598a1b1ac052e721edb2ac19b3182e790b6a382b4fce6b1ff66 and the audited replacement note.",
+      "reopen_condition": "None; use the corrected normalized implementation or a materially independent encoding.",
+      "attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "claim_or_route": "Generic gradient-flow lines plus the area integral automatically form a short root-connecting tree.",
+      "scope": "The March 2026 forum strategy relying on Proposition 12 and strip topology.",
+      "reason": "Generic flow lines do not form the asserted tree, and removing a sufficiently large critical neighborhood destroys the length budget.",
+      "evidence": "https://www.erdosproblems.com/forum/thread/1041",
+      "reopen_condition": "Provide an explicit critical-point connection rule and a quantitative length bound that works already for z^2-r^2.",
+      "attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    },
+    {
+      "claim_or_route": "Treat the current Formal Conjectures file as a proof or exact formal acceptance target.",
+      "scope": "Audited commit b8b5208aa5d01f5f91c49ca516bf09cae8d93693.",
+      "reason": "Both theorems contain sorry and the length semantics undercount general retracing paths.",
+      "evidence": "Audited file SHA-256 a8f0fdbcc5f50e74fd2dc9aabef7291dd037c40432ca7ef9b73793fd1483dc5a.",
+      "reopen_condition": "A successful no-sorry build with corrected parametrized-length semantics or a proved equivalence for the restricted path class.",
+      "attempt_id": "erdos-1041-20260721-070253-0e83fd",
+      "updated_at": "2026-07-21T07:02:53.261098+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-normalized-med-radial-star-v1",
+    "objective": "Adversarially test the degree-five normalized radial-star lemma with an exact certificate path ready.",
+    "first_action": "Run `python3 tools/radial_star_discriminator.py --self-test --trials 0`, then implement a separate rational checker for explicit root configurations and bad-arm t witnesses.",
+    "stop_condition": "Stop and exact-certify if the second-smallest maximum exceeds 1+1e-4; otherwise stop numerical work after the predefined adversarial families and one fixed-budget optimizer.",
+    "source_attempt_id": "erdos-1041-20260721-070253-0e83fd"
+  },
+  "recent_attempt_ids": [
+    "erdos-1041-20260721-070253-0e83fd"
+  ]
 }

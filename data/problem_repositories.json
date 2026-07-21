@@ -21,7 +21,7 @@
       "repository": "ctkrug/proofs-ramsey-r55",
       "url": "https://github.com/ctkrug/proofs-ramsey-r55",
       "visibility": "PUBLIC",
-      "commit": "bc078a081c8eed5d4d3aa995ebe33a1ad8ee32d3"
+      "commit": "8774ffd261edff23648e6d090320a61f9d1f18e8"
     },
     {
       "problem_id": "erdos-647",
@@ -56,7 +56,7 @@
       "repository": "ctkrug/proofs-erdos-1041",
       "url": "https://github.com/ctkrug/proofs-erdos-1041",
       "visibility": "PUBLIC",
-      "commit": "8cf78ce75d3bdc4e14a9edcd9e72c4f0c22dda46"
+      "commit": "37dfaab2733db24047791ebcccf5fc598338195c"
     },
     {
       "problem_id": "erdos-1082",

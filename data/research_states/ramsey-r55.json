@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 9,
-  "last_updated": "2026-07-21T04:34:22.440967+00:00",
+  "epoch_count": 10,
+  "last_updated": "2026-07-21T06:35:40.877332+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The hypothesis was falsified at its exact scope. All 20 slices are UNSAT under both independent encodings. The authenticated publisher assignment has burden two in every slice, so every slice has exact minimum burden two. This concerns only the declared fixed-background family and changes no Ramsey bound.",
+  "synthesis_summary": "The formula and verification stack passed all controls, but CaDiCaL returned UNKNOWN after 300.319 seconds. Peak child memory was 582,876 KiB. No witness or exclusion was obtained, and the maintained bound remains 43 <= R(5,5) <= 46.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -256,6 +256,30 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-043422-7a2274",
       "updated_at": "2026-07-21T04:34:22.440967+00:00"
+    },
+    {
+      "claim": "The supplied 328 graphs and their complements all have degree spread exactly 3.",
+      "evidence": "Dual-parser corpus degree gate in artifacts/almost_regular_42_q20_report.json",
+      "scope": "Exactly the supplied 656 controls; not a complete classification",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
+    },
+    {
+      "claim": "The retained unsymmetrized q=20 encoding has 71,421 variables and 1,844,052 clauses.",
+      "evidence": "Independent count reconstruction and C Ramsey-ledger audit",
+      "scope": "The declared order-42 degree-{20,21} CNF",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
+    },
+    {
+      "claim": "Every degree-{20,21} order-42 graph is equivalent under complementation and relabeling to one with N(0)={1,...,20}.",
+      "evidence": "Choose a degree-20 vertex; if none exists, complement the 21-regular graph, then relabel the chosen vertex and its neighbors.",
+      "scope": "All simple order-42 graphs whose degrees lie in {20,21}",
+      "status": "proved",
+      "source_attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
     }
   ],
   "strategies": [
@@ -524,20 +548,39 @@
       "updated_at": "2026-07-21T04:34:22.440967+00:00"
     },
     {
-      "family": "novel order-42 basin discovery",
-      "mechanism": "Combine exact Ramsey clauses with an almost-regular degree constraint, using proof logging for exclusions and independent full scans for models.",
-      "hypothesis": "The almost-regular order-42 slice contains a valid graph outside the authenticated supplied corpus.",
-      "discriminating_test": "A small-control-validated, 300-second proof-logging SAT pilot.",
-      "rationale": "It is a structurally specified, potentially witness-producing slice and avoids automatic escalation of the exhausted orbit family.",
       "id": "strategy-33eb5acd3b31",
+      "family": "novel order-42 basin discovery",
       "fingerprint": "33eb5acd3b31",
-      "status": "proposed",
-      "title": "Combine exact Ramsey clauses with an almost-regular degree constraint, using proof logging for exclusions and independent full scans for models.",
-      "attempts": 0,
+      "title": "Unsymmetrized proof-logging SAT pilot for the almost-regular order-42 q=20 degree band",
+      "mechanism": "Encode every order-42 Ramsey constraint and require each degree to be 20 or 21; validate the encoding on exhaustive small controls, then run bounded proof-logging SAT.",
+      "status": "active",
+      "hypothesis": "There exists a Ramsey(5,5,42) graph in which every vertex has degree 20 or 21.",
+      "discriminating_test": "Run the audited 1,844,052-clause CNF through CaDiCaL for 300 seconds and accept only a dual-checked model or a DRAT/LRAT-checked refutation.",
+      "blocker": "The unsymmetrized production solver returned UNKNOWN; there is neither a decoded model nor a completed proof.",
+      "reopen_condition": "Change the exact search configuration using the proved fixed-neighborhood normalization, a materially different encoding or solver, or justified additional resources.",
+      "reopen_evidence": "",
+      "last_attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "attempts": 1,
       "parent_ids": [
         "strategy-r55twoorbitdomainwall2026"
       ],
-      "updated_at": "2026-07-21T04:34:22.440967+00:00"
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
+    },
+    {
+      "family": "symmetry-normalized certificate-carrying SAT",
+      "mechanism": "Quotient the q=20 branch by complementation and vertex relabeling using a proved fixed degree-20 root neighborhood, while retaining unsymmetrized Ramsey clauses and proof logging.",
+      "hypothesis": "The fixed-neighborhood representative is materially easier than the unsymmetrized q=20 formula.",
+      "discriminating_test": "Compare solver resolution or conflict progress under the same 300-second/1-GiB budget after all normalization obligations pass.",
+      "rationale": "It changes the effective search space using an exact coverage lemma rather than merely increasing runtime.",
+      "id": "strategy-e81525840a9b",
+      "fingerprint": "e81525840a9b",
+      "status": "proposed",
+      "title": "Quotient the q=20 branch by complementation and vertex relabeling using a proved fixed degree-20 root neighborhood, while retaining unsymmetrized Ramsey clauses and proof logging.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-33eb5acd3b31"
+      ],
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
     }
   ],
   "open_leads": [
@@ -682,6 +725,26 @@
       "id": "lead-118e4c9764",
       "strategy_id": "strategy-r55twoorbitdomainwall2026",
       "updated_at": "2026-07-21T04:34:22.440967+00:00"
+    },
+    {
+      "description": "Run the symmetry-normalized q=20 SAT pilot with N(0) fixed to vertices 1 through 20.",
+      "rationale": "The normalization has a short coverage proof and should remove a large vertex/complement symmetry burden.",
+      "next_experiment": "Add exactly 41 unit clauses, independently audit coverage and mapping, then run the same 300-second/1-GiB proof-logging gate.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-9e52429f16",
+      "strategy_id": "strategy-33eb5acd3b31",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
+    },
+    {
+      "description": "Test representative bands q=17,18,19 only after the normalized q=20 cost is known.",
+      "rationale": "These complete the complement-reduced almost-regular slice, but premature execution would ignore the observed symmetry bottleneck.",
+      "next_experiment": "Reuse the audited generator with band-specific normalization only after q=20 redirects the cost model.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-f587d6f453",
+      "strategy_id": "strategy-33eb5acd3b31",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
     }
   ],
   "ruled_out": [
@@ -859,6 +922,24 @@
       "reopen_condition": "Demonstrate a source, raw-origin multiplicity, specialization, cardinality, graph-mapping, proof-checker, or distance-coverage defect.",
       "attempt_id": "ramsey-r55-20260721-043422-7a2274",
       "updated_at": "2026-07-21T04:34:22.440967+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the identical unsymmetrized q=20 CaDiCaL 1.7.3 run under the same 300-second/1-GiB budget.",
+      "scope": "This exact formula, solver, options, and resource limit",
+      "reason": "The solver returned UNKNOWN, so an identical replay has low information value.",
+      "evidence": ".proof-experiments/20260721-062032-96649a",
+      "reopen_condition": "Use a sound symmetry normalization, materially different encoding or solver, justified larger budget, or identify an artifact defect.",
+      "attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
+    },
+    {
+      "claim_or_route": "Treat the retained partial DRAT stream as an UNSAT certificate.",
+      "scope": "The 35,732,187-byte timeout stream",
+      "reason": "Fresh drat-trim returned 1 and did not verify it.",
+      "evidence": "artifacts/almost_regular_42_q20_audit.json",
+      "reopen_condition": "Only a completed independently verified proof can establish UNSAT.",
+      "attempt_id": "ramsey-r55-20260721-063540-e1ccef",
+      "updated_at": "2026-07-21T06:35:40.877332+00:00"
     }
   ],
   "unresolved_questions": [
@@ -869,11 +950,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55twoorbitdomainwall2026",
-    "objective": "Run the cheapest exact feasibility discriminator for the almost-regular order-42 slice.",
-    "first_action": "Hash-lock artifacts/authenticated_corpus_report.json, extract all supplied degree spreads, and implement a small-control-tested degree-spread-at-most-one counter.",
-    "stop_condition": "Stop on any corpus, graph6, degree-counter, CNF-to-graph, proof, or full-scan mismatch; otherwise stop after a dual-checked new graph, a checked bounded exclusion, or the 300-second/1-GiB pilot timeout.",
-    "source_attempt_id": "ramsey-r55-20260721-043422-7a2274"
+    "recommended_strategy_id": "strategy-33eb5acd3b31",
+    "objective": "Determine whether sound symmetry normalization makes the q=20 almost-regular branch decidable within the bounded pilot budget.",
+    "first_action": "Extend checkers/almost_regular_42_cnf.py to emit x_{0,i}=1 for i=1..20 and x_{0,i}=0 for i=21..41 under an explicit normalization flag, then add an independent coverage audit.",
+    "stop_condition": "Stop on any coverage, mapping, model, or proof mismatch; otherwise stop after checked SAT, checked UNSAT, or 300-second/1-GiB timeout.",
+    "source_attempt_id": "ramsey-r55-20260721-063540-e1ccef"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -884,6 +965,7 @@
     "ramsey-r55-20260721-001847-bbfd27",
     "manual-local-radius2-domain-wall-2026-07-20",
     "ramsey-r55-20260721-023427-94891a",
-    "ramsey-r55-20260721-043422-7a2274"
+    "ramsey-r55-20260721-043422-7a2274",
+    "ramsey-r55-20260721-063540-e1ccef"
   ]
 }
