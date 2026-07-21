@@ -45,6 +45,16 @@ def _existing_path(path: Path) -> Path:
     return path
 
 
+def _cache_probe() -> Path:
+    """Probe the actual build-cache target, including a symlinked subcache."""
+    cache = _cache_root()
+    for name in ("formal-conjectures", "lean"):
+        candidate = cache / name
+        if candidate.exists():
+            return candidate
+    return _existing_path(cache)
+
+
 def _tree_size(path: Path) -> int:
     try:
         if path.is_file() or path.is_symlink():
@@ -105,7 +115,7 @@ def admission(lane: str, *, run_cleanup: bool = True) -> dict[str, Any]:
         raise ValueError("lane must be easy or hard")
     cleanup_result = cleanup() if run_cleanup else None
     root_free = _free_bytes(Path("/"))
-    cache_free = _free_bytes(_existing_path(_cache_root()))
+    cache_free = _free_bytes(_cache_probe())
     memory_free = _available_memory_bytes()
     reasons: list[str] = []
     if root_free < ROOT_MIN_FREE_BYTES:
