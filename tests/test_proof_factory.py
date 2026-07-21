@@ -42,10 +42,17 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_extract_structured_result(self) -> None:
         text = '''work\n```proof_result
-{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","search_efficiency":{"naive_space":"proof-only; no candidate sweep","reductions_considered":["symbolic simplification"],"chosen_mechanism":"direct lemma","estimated_or_measured_savings":"not applicable","soundness_guard":"ordinary proof checking"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         result = agent.extract_result(text)
         self.assertEqual(result["outcome"], "progress")
+
+    def test_structured_result_requires_search_efficiency_audit(self) -> None:
+        text = '''```proof_result
+{"outcome":"progress","approach":"one lemma","summary":"bounded result","rationale":"exact check","claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+```'''
+        with self.assertRaisesRegex(ValueError, "search_efficiency"):
+            agent.extract_result(text)
 
     def test_rejects_self_declared_solved_outcome(self) -> None:
         text = '''```proof_result
@@ -134,10 +141,13 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("Use an exact checker before scaling.", prompt)
         self.assertIn("CROSS-PROBLEM RESEARCH BRAIN", prompt)
         self.assertIn("submit_lab.py", prompt)
+        self.assertIn("SEARCH-EFFICIENCY PASS", prompt)
+        self.assertIn("search_efficiency", prompt)
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
         self.assertIn("cheapest decisive experiment", delegate)
         self.assertIn("may not promote a result", delegate)
+        self.assertIn("search-efficiency pass", delegate)
         baseline = agent.build_prompt(problem, "hard", Path("/tmp/research/workspace"), phase="baseline")
         self.assertIn("MANDATORY BASELINE PHASE", baseline)
         self.assertIn("Do not try to solve the problem", baseline)
@@ -149,7 +159,7 @@ class ProofFactoryTests(unittest.TestCase):
             "rationale": "Compact certificate", "verifiability": "Exact checker", "techniques": [],
         }
         principal = '''```proof_result
-{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
+{"outcome":"progress","approach":"checked route","summary":"bounded result","rationale":"exact control","search_efficiency":{"naive_space":"finite test space","reductions_considered":["bitsets"],"chosen_mechanism":"batched exact checker","estimated_or_measured_savings":"2x expected","soundness_guard":"independent scalar replay"},"claims":[],"evidence":[],"next_steps":[],"citations":[],"techniques":[]}
 ```'''
         calls = []
 
@@ -256,7 +266,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
         text = '''```strategy_proposal
-{"outcome":"proposal","action":"add","target_id":"","family":"finite model finding","use_when":"a bounded structure decides a lemma","mechanism":"enumerate canonical models and emit certificates","first_discriminator":"reproduce one known model","experiment_template":"p -> H -> SAT -> model -> first UNSAT","failure_modes":["bad encoding","shared checker"],"sources":["https://example.test/paper"],"change_rationale":"new exact evaluator"}
+{"outcome":"proposal","action":"add","target_id":"","family":"finite model finding","use_when":"a bounded structure decides a lemma","mechanism":"enumerate canonical models and emit certificates","first_discriminator":"reproduce one known model","efficiency_plan":"quotient isomorphisms, batch bitsets, then independently replay canonical coverage","experiment_template":"p -> H -> SAT -> model -> first UNSAT","failure_modes":["bad encoding","shared checker"],"sources":["https://example.test/paper"],"change_rationale":"new exact evaluator"}
 ```'''
         self.assertEqual(strategy_lab.extract_proposal(text)["action"], "add")
 

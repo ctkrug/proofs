@@ -29,7 +29,7 @@ def extract_proposal(text: str) -> dict[str, Any]:
         return value
     if value.get("action") not in {"add", "improve"}:
         raise ValueError("action must be add or improve")
-    required = ("family", "use_when", "mechanism", "first_discriminator")
+    required = ("family", "use_when", "mechanism", "first_discriminator", "efficiency_plan")
     missing = [key for key in required if not str(value.get(key) or "").strip()]
     if missing:
         raise ValueError(f"proposal missing fields: {missing}")
@@ -73,7 +73,9 @@ TASK
 Browse current primary sources (papers, official project documentation, or maintained repositories). Propose exactly one
 new strategy or a concrete improvement to one existing entry. It must include: when to use it; the actual information-
 generating mechanism; the cheapest discriminating test; at least two likely failure modes; and a direct experiment template
-that one of the current problems could execute in its next bounded epoch. Cite direct URLs. An improvement must materially
+that one of the current problems could execute in its next bounded epoch. For any large search space it must also give a
+quantified efficiency plan covering safe symmetry reduction, compression, batching/vectorization, incremental evaluation,
+decomposition, pruning, or reusable solver/proof state, plus the check that makes the shortcut sound. Cite direct URLs. An improvement must materially
 change selection, evaluation, preservation of diversity, or falsification—not merely wording.
 
 Return exactly one block:
@@ -86,6 +88,7 @@ Return exactly one block:
   "use_when":"observable applicability condition",
   "mechanism":"concrete information-generating loop",
   "first_discriminator":"cheapest test before scale-up",
+  "efficiency_plan":"naive space and bottleneck -> safe compression/batching/vectorization/decomposition/pruning/reuse mechanism -> estimated savings -> soundness check; say not applicable with reason for a non-search strategy",
   "experiment_template":"problem id -> hypothesis -> command/tool -> expected decisive signal -> stop condition",
   "failure_modes":["specific failure"],
   "sources":["direct primary-source URL"],

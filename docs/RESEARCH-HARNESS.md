@@ -27,6 +27,14 @@ and stop condition. Useful outputs include:
 - a formally stated lemma;
 - a rigorously falsified approach that should not be repeated.
 
+Every large-space attempt starts with a search-efficiency pass. The worker estimates the naive
+candidate volume and dominant operation, then looks for bulk elimination through proved symmetry and
+canonicalization, invariants and dominance bounds, decomposition or meet-in-the-middle, compressed
+representations, bitsets and vectorized batches, incremental scoring, memoization, learned-clause or
+proof-prefix reuse, and cheap sound filters ahead of exact verification. The experiment records the
+projected and observed reduction or throughput and independently checks the shortcut's equivalence or
+one-sided safety. Scaling the same brute-force loop without this pass is not an acceptable strategy.
+
 The approach archive follows the useful part of AlphaEvolve's pattern: preserve candidate programs
 and strategies, score them only through objective evaluators, and let future runs mutate the most
 promising artifacts. Eloquence is never an evaluator.

@@ -64,9 +64,18 @@ def extract_result(text: str) -> dict[str, Any]:
     ):
         if not isinstance(result.get(key, []), list):
             raise ValueError(f"{key} must be a list")
-    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment"):
+    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency"):
         if not isinstance(result.get(key, {}), dict):
             raise ValueError(f"{key} must be an object")
+    efficiency = result.get("search_efficiency")
+    if not isinstance(efficiency, dict):
+        raise ValueError("search_efficiency must be an object")
+    required_efficiency = ("naive_space", "chosen_mechanism", "estimated_or_measured_savings", "soundness_guard")
+    missing_efficiency = [key for key in required_efficiency if not str(efficiency.get(key) or "").strip()]
+    if missing_efficiency:
+        raise ValueError(f"search_efficiency missing fields: {missing_efficiency}")
+    if not isinstance(efficiency.get("reductions_considered"), list) or not efficiency["reductions_considered"]:
+        raise ValueError("search_efficiency.reductions_considered must be a nonempty list")
     return result
 
 
@@ -159,7 +168,9 @@ RULES
 3. Distinguish sourced fact, reported computation, inference, and proposal. Preserve direct source URLs.
 4. Do not declare a proof, disproof, or candidate. Do not edit the durable research map or append-only ledger.
 5. Return a memo under 1,500 words with: best live route; exact rationale; cheapest discriminator; controls; failure modes;
-   reusable artifact; stop condition; and what the Sol principal should reject or verify independently.
+   reusable artifact; stop condition; and what the Sol principal should reject or verify independently. For any large
+   search, include a search-efficiency pass covering symmetry/canonicalization, compression, batching/vectorization,
+   incremental evaluation, decomposition, pruning, and reusable solver state; quantify the best safe reduction.
 6. This research service has network access and installed lab tools, but no deployment, GitHub, or personal credentials.
    If a source or tool is practically missing, try the safe, reproducible repair or retrieval first and preserve its URL,
    command, and hash. Do not end a pass by merely reporting a fixable access restriction.
@@ -331,14 +342,20 @@ WORK RULES
    write its checkpoint. Queueing compute is not evidence; a later epoch must inspect its exact record and artifacts.
 3. Choose the cheapest discriminating test first. Use programs for enumeration and repetition; reserve reasoning for models,
    invariants, decompositions, experiment design, and interpreting failures. Record negative controls and exact bounds.
-4. Test examples and edge cases. Try to falsify every central lemma. A computation is evidence only for the exact range checked.
-5. A suspiciously short proof, unused hypothesis, stronger-than-requested conclusion, or mismatch with the source is a red flag.
-6. Cite prior human work and disclose every automated tool used. Do not optimize for publicity.
-7. Report concrete lemmas, equations, maps, programs, certificates, and counterexamples. Reject vague “promising direction” language.
-8. A larger arbitrary cutoff is not a contribution. It becomes candidate-eligible only if it improves
+4. SEARCH-EFFICIENCY PASS: before any large-space run, estimate the naive candidate count, memory traffic, and dominant
+   operation. Explicitly consider proved symmetry quotients/canonical forms, compressed or sparse representations,
+   batching/vectorization/bitsets, incremental delta evaluation and memoization, meet-in-the-middle or cube decomposition,
+   dominance/monotone bounds, cheap sound prefilters, and learned-clause/proof-prefix reuse. Choose the best combination,
+   record projected and observed reduction or throughput, and independently check shortcut soundness and coverage. Do not
+   scale brute force until this pass is written; do not use an unsound shortcut to support a mathematical claim.
+5. Test examples and edge cases. Try to falsify every central lemma. A computation is evidence only for the exact range checked.
+6. A suspiciously short proof, unused hypothesis, stronger-than-requested conclusion, or mismatch with the source is a red flag.
+7. Cite prior human work and disclose every automated tool used. Do not optimize for publicity.
+8. Report concrete lemmas, equations, maps, programs, certificates, and counterexamples. Reject vague “promising direction” language.
+9. A larger arbitrary cutoff is not a contribution. It becomes candidate-eligible only if it improves
    the actual best-known result, answers a source's explicit request, has confirmed expert interest,
    or yields a new structural result. “We did not find it in a quick search” is not novelty evidence.
-9. End with exactly one fenced JSON block in this schema:
+10. End with exactly one fenced JSON block in this schema:
 
 ```proof_result
 {{
@@ -347,6 +364,7 @@ WORK RULES
   "strategy": {{"family":"named approach family","fingerprint":"reuse existing or blank for deterministic creation","mechanism":"what actually generates information","parent_ids":["strategy-id if combined"]}},
   "hypothesis": "falsifiable claim tested this epoch",
   "discriminating_test": "cheapest observation that separates success from failure",
+  "search_efficiency": {{"naive_space":"candidate count and bottleneck","reductions_considered":["symmetry/compression/batching/vectorization/incremental/decomposition/pruning/reuse options"],"chosen_mechanism":"bulk-elimination design","estimated_or_measured_savings":"reduction ratio or throughput","soundness_guard":"independent equivalence or one-sided coverage check"}},
   "strategy_status": "proposed|active|promising|blocked|ruled_out|exhausted|superseded",
   "summary": "what actually happened, including limits",
   "rationale": "why the evidence supports this outcome",
@@ -506,6 +524,13 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "strategy": result.get("strategy") if isinstance(result.get("strategy"), dict) else {},
         "hypothesis": str(result.get("hypothesis") or "")[:4000],
         "discriminating_test": str(result.get("discriminating_test") or "")[:4000],
+        "search_efficiency": {
+            "naive_space": str(result["search_efficiency"].get("naive_space") or "")[:2000],
+            "reductions_considered": [str(x)[:500] for x in result["search_efficiency"].get("reductions_considered", [])][:20],
+            "chosen_mechanism": str(result["search_efficiency"].get("chosen_mechanism") or "")[:2000],
+            "estimated_or_measured_savings": str(result["search_efficiency"].get("estimated_or_measured_savings") or "")[:2000],
+            "soundness_guard": str(result["search_efficiency"].get("soundness_guard") or "")[:2000],
+        },
         "strategy_status": str(result.get("strategy_status") or "active")[:100],
         "summary": result["summary"].strip()[:8000],
         "rationale": result["rationale"].strip()[:4000],
