@@ -185,3 +185,31 @@ filesystems, produce the pinned support OLean from a clean/hash-matching checkou
 #530 target build with durable lab records, and complete one real discovery epoch whose evidence receipt
 is valid. The superseded hand-written #530 queue spec correctly failed closed as an unknown job after the
 new durable lab-state requirement; it is not reused or rewritten.
+
+## Phase 6 — easier-hard successor selection (prepared in parallel; execution gated)
+
+- The successor criterion now prefers the smallest meaningful finite uncertainty with two decisive,
+  independently checkable outcomes over the most prestigious frontier. Eleven current exact, record,
+  and certification targets were compared on novelty, 90-day contribution odds, certificate cost,
+  acceptance path, and measured-compute fit. The probabilities are explicit strategic judgments, not
+  measured frequencies.
+- Exact covering number `C(12,6,4)` replaces cage `n(4,9)` as the recommendation. The maintained live
+  bracket is `40 <= C(12,6,4) <= 41`; there are 924 candidate blocks and 495 coverage constraints. At a
+  hypothetical size 40, every point has degree exactly 20 and the 66 pairs share only six excess
+  incidences above multiplicity nine. A 40-block witness or a complete independently checked exclusion
+  of 40 therefore resolves the same exact target.
+- The 90-day field-usable-contribution estimate is 62% for `C(12,6,4)`, compared with 14% for a new
+  `n(4,9)` cage contribution. The compact covering-record portfolio and a reusable Lean covering-design
+  verifier are ranked second and third but are less decisive or are not new mathematics.
+- The only authorized first computation is a 1–4 core-hour, dual-encoding pilot after Phase 5 closes:
+  direct set-cover SAT/PB with exact degree and pair constraints, plus a materially separate link-first
+  canonical augmentation. Positive output needs a tiny non-importing checker; negative output needs an
+  unsymmetrized semantic bridge, checked cube/orbit coverage, and LRAT or equivalent proof evidence.
+- `docs/PHASE6-SUCCESSOR-CANDIDATES-DRAFT.md` contains the full sourced baseline, rankings, resource
+  envelope, acceptance channels, and redirect conditions. No successor search has started. The Charlie
+  decision task remains deliberately unqueued until the current R(5,5) census and residual-SAT gate are
+  complete, as required by the directive.
+
+The reusable design guidelines now encode this ease-first policy and permit parallel source review,
+adversarial audit, independent checker construction, documentation, and packet tooling while serializing
+shared ledgers, deployments, final assembly, and CPU/cache-conflicting computation.
