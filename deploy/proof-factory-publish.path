@@ -1,0 +1,9 @@
+[Unit]
+Description=Proof Factory - publish after a durable research attempt
+
+[Path]
+PathChanged=/root/proof-factory/data/attempts.jsonl
+Unit=proof-factory-publish.service
+
+[Install]
+WantedBy=multi-user.target

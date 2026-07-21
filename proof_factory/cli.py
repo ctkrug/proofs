@@ -202,6 +202,12 @@ def parser() -> argparse.ArgumentParser:
     reconcile_parser = sub.add_parser("state-reconcile")
     reconcile_parser.add_argument("--problem", required=True)
     reconcile_parser.add_argument("--write", action="store_true")
+    close_leads_parser = sub.add_parser("state-close-leads")
+    close_leads_parser.add_argument("--problem", required=True)
+    close_leads_parser.add_argument("--lead", action="append", required=True)
+    close_leads_parser.add_argument("--reason", required=True)
+    close_leads_parser.add_argument("--evidence", required=True)
+    close_leads_parser.add_argument("--actor", default="operator")
     event_parser = sub.add_parser("research-event")
     event_parser.add_argument("--problem", required=True)
     event_parser.add_argument("--kind", choices=sorted(events.ALLOWED_KINDS), required=True)
@@ -222,6 +228,11 @@ def parser() -> argparse.ArgumentParser:
     lab_review.add_argument("--decision", choices=sorted(lab.REVIEW_DECISIONS), required=True)
     lab_review.add_argument("--reason", required=True)
     lab_review.add_argument("--reviewer", default="operator")
+    lab_retune = sub.add_parser("lab-retune-review")
+    lab_retune.add_argument("--job", required=True)
+    lab_retune.add_argument("--review-every-segments", required=True, type=int)
+    lab_retune.add_argument("--reason", required=True)
+    lab_retune.add_argument("--actor", default="operator")
     lab_submit = sub.add_parser("lab-submit")
     lab_submit.add_argument("--problem", required=True)
     lab_submit.add_argument("--name", required=True)
@@ -328,6 +339,14 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(f"unknown problem: {args.problem}")
         print(json.dumps(research_state.reconcile(problem, write=args.write), indent=2))
         return 0
+    if args.command == "state-close-leads":
+        problem = next((row for row in store.load_problems() if row["id"] == args.problem), None)
+        if not problem:
+            raise ValueError(f"unknown problem: {args.problem}")
+        print(json.dumps(research_state.close_leads(
+            problem, args.lead, reason=args.reason, evidence=args.evidence, actor=args.actor,
+        ), indent=2))
+        return 0
     if args.command == "research-event":
         print(json.dumps(events.enqueue(
             args.problem, args.kind, evidence=args.evidence, source=args.source,
@@ -359,6 +378,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "lab-review":
         print(json.dumps(lab.apply_review(args.job, args.decision, reason=args.reason, reviewer=args.reviewer), indent=2))
+        return 0
+    if args.command == "lab-retune-review":
+        print(json.dumps(lab.retune_review_interval(
+            args.job, args.review_every_segments, reason=args.reason, actor=args.actor,
+        ), indent=2))
         return 0
     if args.command == "lab-submit":
         command = list(args.argv)

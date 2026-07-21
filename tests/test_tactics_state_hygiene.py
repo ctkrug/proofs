@@ -106,6 +106,26 @@ class ResearchStateReconciliationTests(unittest.TestCase):
             self.assertTrue(written["report"]["written"])
             self.assertEqual(store.read_json(path, {})["open_leads"][0]["status"], "closed")
 
+    def test_close_named_leads_records_reason_and_evidence(self) -> None:
+        problem = {"id": "p", "statement": "Find x."}
+        state = research_state._initial(problem)
+        state["open_leads"] = [
+            {"id": "resolved", "description": "authenticate corpus", "status": "open"},
+            {"id": "keep", "description": "run discriminator", "status": "open"},
+        ]
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "DATA", Path(raw)):
+            path = research_state.state_path("p")
+            path.parent.mkdir(parents=True)
+            store.write_json_atomic(path, state)
+            result = research_state.close_leads(
+                problem, ["resolved"], reason="control completed", evidence="sha256 manifest", actor="test",
+            )
+            saved = store.read_json(path, {})
+        self.assertEqual(result["closed_lead_ids"], ["resolved"])
+        self.assertEqual(saved["open_leads"][0]["closure_evidence"], "sha256 manifest")
+        self.assertEqual(saved["open_leads"][1]["status"], "open")
+        self.assertEqual(saved["tactical_memory"]["decision_history"][-1]["actor"], "test")
+
 
 if __name__ == "__main__":
     unittest.main()

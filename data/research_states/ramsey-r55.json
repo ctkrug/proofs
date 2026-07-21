@@ -957,10 +957,13 @@
       "rationale": "Every novelty and canonical-comparison claim depends on this immutable control set.",
       "next_experiment": "Place unchanged bytes at sources/r55_42some.g6 and run the authenticated-corpus command in CHECKPOINT.md.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-3637dfa055",
       "strategy_id": "strategy-r55controls2026",
-      "updated_at": "2026-07-20T19:46:11.008003+00:00"
+      "updated_at": "2026-07-20T19:46:11.008003+00:00",
+      "closure_reason": "The frozen 328-record McKay corpus and all 328 complements have passed the declared control checks; repeated authentication leads are resolved.",
+      "closure_evidence": "R55 DOSSIER section 13; full-census immutable corpus hash 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb; monitored pilot and checkpointed census receipts.",
+      "closed_at": "2026-07-21T20:24:03.760139+00:00"
     },
     {
       "description": "Enter the unknown-order-42 basin only after controls pass.",
@@ -977,20 +980,26 @@
       "rationale": "Every novelty and canonical-comparison claim depends on these controls.",
       "next_experiment": "Place unchanged bytes at sources/r55_42some.g6 and run the command in CHECKPOINT.md.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-1c7eaa0320",
       "strategy_id": "strategy-r55controls2026",
-      "updated_at": "2026-07-20T20:18:53.875368+00:00"
+      "updated_at": "2026-07-20T20:18:53.875368+00:00",
+      "closure_reason": "The frozen 328-record McKay corpus and all 328 complements have passed the declared control checks; repeated authentication leads are resolved.",
+      "closure_evidence": "R55 DOSSIER section 13; full-census immutable corpus hash 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb; monitored pilot and checkpointed census receipts.",
+      "closed_at": "2026-07-21T20:24:03.760139+00:00"
     },
     {
       "description": "Authenticate the 328 McKay records and their complements.",
       "rationale": "Every novelty and canonical-comparison claim depends on these controls.",
       "next_experiment": "Place unchanged bytes with provenance at sources/r55_42some.g6 and run the exact CHECKPOINT.md command.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-151bcf320d",
       "strategy_id": "strategy-r55controls2026",
-      "updated_at": "2026-07-20T21:17:02.574731+00:00"
+      "updated_at": "2026-07-20T21:17:02.574731+00:00",
+      "closure_reason": "The frozen 328-record McKay corpus and all 328 complements have passed the declared control checks; repeated authentication leads are resolved.",
+      "closure_evidence": "R55 DOSSIER section 13; full-census immutable corpus hash 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb; monitored pilot and checkpointed census receipts.",
+      "closed_at": "2026-07-21T20:24:03.760139+00:00"
     },
     {
       "description": "Build an LDPC-style atlas of recurrent active failure cores in low-burden Ramsey search trajectories.",
@@ -1611,6 +1620,18 @@
         "surprise": "The strengthened cold audit took 139.167 seconds, slightly beyond the two-minute interactive threshold.",
         "next_discriminator": "Review the next durable census tranche; stop immediately on any hash, stream, pullback, timeout, throughput, growth, or decision-value failure.",
         "updated_at": "2026-07-21T19:53:09.309391+00:00"
+      },
+      {
+        "recorded_at": "2026-07-21T20:24:03.760139+00:00",
+        "actor": "remediation-2026-07-21",
+        "decision": "close_resolved_leads",
+        "lead_ids": [
+          "lead-151bcf320d",
+          "lead-1c7eaa0320",
+          "lead-3637dfa055"
+        ],
+        "reason": "The frozen 328-record McKay corpus and all 328 complements have passed the declared control checks; repeated authentication leads are resolved.",
+        "evidence": "R55 DOSSIER section 13; full-census immutable corpus hash 067902e853d87b49bcef0d1d4c0e3bbadd238ee18bc65341b079a3ca4780eccb; monitored pilot and checkpointed census receipts."
       }
     ],
     "reduction_ledger": [

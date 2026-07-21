@@ -114,6 +114,39 @@ def reconcile(problem: dict[str, Any], *, write: bool = False) -> dict[str, Any]
     return result
 
 
+def close_leads(problem: dict[str, Any], lead_ids: list[str], *, reason: str, evidence: str,
+                actor: str = "operator") -> dict[str, Any]:
+    """Close named projection leads with an explicit, durable decision record."""
+    requested = {str(value).strip() for value in lead_ids if str(value).strip()}
+    if not requested or not str(reason).strip() or not str(evidence).strip():
+        raise ValueError("lead ids, reason, and evidence are required")
+    state = load(problem)
+    closed: list[str] = []
+    found: set[str] = set()
+    now = store.now_iso()
+    for row in state.get("open_leads", []):
+        lead_id = _text(row.get("id"), 200)
+        if lead_id not in requested:
+            continue
+        found.add(lead_id)
+        if _text(row.get("status"), 40).lower() == "open":
+            row["status"] = "closed"
+            row["closure_reason"] = _text(reason, 2000)
+            row["closure_evidence"] = _text(evidence, 2000)
+            row["closed_at"] = now
+            closed.append(lead_id)
+    missing = sorted(requested - found)
+    if missing:
+        raise ValueError(f"unknown lead ids: {', '.join(missing)}")
+    if closed:
+        state.setdefault("tactical_memory", {}).setdefault("decision_history", []).append({
+            "recorded_at": now, "actor": _text(actor, 200), "decision": "close_resolved_leads",
+            "lead_ids": sorted(closed), "reason": _text(reason, 2000), "evidence": _text(evidence, 2000),
+        })
+        store.write_json_atomic(state_path(problem["id"]), state)
+    return {"problem_id": problem["id"], "closed_lead_ids": sorted(closed), "already_closed": sorted(found - set(closed))}
+
+
 def state_path(problem_id: str):
     return store.DATA / "research_states" / f"{problem_id}.json"
 

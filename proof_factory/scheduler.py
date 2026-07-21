@@ -12,6 +12,7 @@ from . import agent, brain, capacity, events, lab, render, repositories, researc
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
+MAX_RENDER_LAG_SECONDS = 4 * 3600
 
 
 def _reviewable_events(problem_id: str) -> list[dict[str, Any]]:
@@ -94,6 +95,29 @@ def publish_if_configured() -> None:
     proc = subprocess.run(shlex.split(command), cwd=store.ROOT, text=True, capture_output=True, timeout=900)
     if proc.returncode != 0:
         raise RuntimeError(f"publish failed: {(proc.stdout + proc.stderr)[-2000:]}")
+
+
+def rendered_attempt_freshness(attempts: list[dict[str, Any]], *, now: datetime) -> dict[str, Any]:
+    """Compare the newest durable attempt with its generated public page."""
+    eligible = [
+        row for row in attempts
+        if str(row.get("id") or "").strip() and store.parse_iso(row.get("finished_at"))
+    ]
+    if not eligible:
+        return {"status": "not_applicable", "lag_seconds": 0, "latest_attempt_id": None}
+    latest = max(eligible, key=lambda row: store.parse_iso(row.get("finished_at")))
+    finished = store.parse_iso(latest.get("finished_at"))
+    assert finished is not None
+    page = store.SITE / "attempts" / str(latest["id"]) / "index.html"
+    lag_seconds = max(0.0, (now - finished).total_seconds()) if not page.is_file() else 0.0
+    return {
+        "status": "stale" if lag_seconds > MAX_RENDER_LAG_SECONDS else "fresh",
+        "lag_seconds": round(lag_seconds, 1),
+        "latest_attempt_id": str(latest["id"]),
+        "latest_finished_at": latest.get("finished_at"),
+        "page": str(page),
+        "page_exists": page.is_file(),
+    }
 
 
 def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
@@ -214,6 +238,7 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
     hard = [row for row in attempts if row.get("lane") == "hard"]
     easy = [row for row in attempts if row.get("lane") == "easy"]
     current_runtime = store.runtime()
+    site_freshness = rendered_attempt_freshness(attempts, now=now)
     capacity_policy = capacity.admission("easy")
     hard_started = store.parse_iso(current_runtime.get("hard_started_at"))
     hard_in_flight = bool(
@@ -224,6 +249,11 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
     issues: list[str] = []
     if not capacity_policy["allowed"]:
         issues.extend(capacity_policy["reasons"])
+    if site_freshness["status"] == "stale":
+        issues.append(
+            f"newest durable attempt {site_freshness['latest_attempt_id']} has no rendered page "
+            f"after {site_freshness['lag_seconds'] / 3600:.1f} hours"
+        )
     if hard:
         last_hard = store.parse_iso(hard[-1].get("finished_at"))
         pending_hard_events = _reviewable_events(str(hard[-1].get("problem_id")))
@@ -240,7 +270,10 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
         elif now.hour >= 3:
             issues.append("open-problem program has not completed its first attempt")
     health = "degraded" if issues else "healthy"
-    report = store.update_runtime(health=health, health_issues=issues, watchdog_at=store.now_iso(), capacity_policy=capacity_policy)
+    report = store.update_runtime(
+        health=health, health_issues=issues, watchdog_at=store.now_iso(),
+        capacity_policy=capacity_policy, site_freshness=site_freshness,
+    )
     render.build()
     if publish:
         publish_if_configured()

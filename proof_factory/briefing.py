@@ -138,5 +138,53 @@ def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000) -> st
             }
         text = json.dumps(payload, indent=2, ensure_ascii=False)
     if len(text) > max_chars:
-        raise ValueError(f"canonical research brief exceeds {max_chars} characters after compaction")
+        phase = payload.get("active_roadmap_phase")
+        if isinstance(phase, dict):
+            phase = {
+                "id": phase.get("id"),
+                "objective": _trim(phase.get("objective"), 500),
+                "required_artifact": _trim(phase.get("required_artifact"), 500),
+                "promote_if": _trim(phase.get("promote_if"), 500),
+            }
+        payload = {
+            "schema_version": payload.get("schema_version"),
+            "rule": payload.get("rule"),
+            "problem": {
+                **payload.get("problem", {}),
+                "statement": _trim(payload.get("problem", {}).get("statement"), 700),
+                "field_progress_gates": [
+                    _trim(value, 500) for value in payload.get("problem", {}).get("field_progress_gates", [])[:3]
+                ],
+            },
+            "state": {
+                "epoch_count": payload.get("state", {}).get("epoch_count"),
+                "last_updated": payload.get("state", {}).get("last_updated"),
+                "summary": _trim(payload.get("state", {}).get("summary"), 700),
+                "next_session": payload.get("state", {}).get("next_session", {}),
+                "current_bottleneck": _trim(payload.get("state", {}).get("current_bottleneck"), 500),
+                "newest_facts": payload.get("state", {}).get("newest_facts", [])[-1:],
+                "newest_exclusions": payload.get("state", {}).get("newest_exclusions", [])[-1:],
+                "eligible_open_leads": payload.get("state", {}).get("eligible_open_leads", [])[-2:],
+            },
+            "tactics": payload.get("tactics", {}),
+            "active_roadmap_phase": phase,
+            "research_events": [{
+                "id": row.get("id"), "kind": row.get("kind"), "created_at": row.get("created_at"),
+                "evidence": _trim(row.get("evidence"), 600), "source": _trim(row.get("source"), 300),
+            } for row in payload.get("research_events", [])[-3:]],
+            "lab_experiments": [{
+                "id": row.get("id"), "name": row.get("name"), "status": row.get("status"),
+                "segment": row.get("segment"), "decision_value": _trim(row.get("decision_value"), 300),
+                "latest_progress": {
+                    key: row.get("latest_progress", {}).get(key)
+                    for key in ("completed_units", "total_units", "throughput_per_second", "artifact_growth_bytes",
+                                "correctness_checks_passed", "decision_value_active", "complete", "message")
+                },
+                "stop_reason": _trim(row.get("stop_reason"), 300), "state_source": row.get("state_source"),
+            } for row in payload.get("lab_experiments", [])[-3:]],
+            "prior_art": payload.get("prior_art", [])[:2],
+        }
+        text = json.dumps(payload, indent=2, ensure_ascii=False)
+    if len(text) > max_chars:
+        raise ValueError(f"canonical research brief exceeds {max_chars} characters after emergency compaction")
     return text

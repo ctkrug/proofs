@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -19,14 +19,24 @@ class ProofFactoryTests(unittest.TestCase):
         packet = briefing.compact_for_prompt(problem)
         decoded = json.loads(packet)
         self.assertLessEqual(len(packet), 24000)
-        self.assertEqual(
-            decoded["tactics"]["incumbent"]["strategy_id"],
-            "strategy-r55-known-class-embedding-block",
-        )
+        self.assertEqual(decoded["tactics"]["incumbent"]["fingerprint"], "r55knownclassembeddingblock2026")
         prompt = agent.build_prompt(problem, "hard", store.RESEARCH / problem["id"] / "workspace", phase="research")
         self.assertLessEqual(len(prompt), 50000)
         self.assertIn("deliberately invalidates the", prompt)
         self.assertIn("records/research-state.json", prompt)
+
+    def test_ramsey_brief_emergency_compaction_handles_event_accumulation(self) -> None:
+        problem = next(row for row in store.load_problems() if row["id"] == "ramsey-r55")
+        payload = briefing.build(problem)
+        payload["research_events"] = [
+            {"id": f"event-{index}", "kind": "lab_completed", "created_at": store.now_iso(),
+             "evidence": "e" * 4000, "source": "state/labs/jobs/job.json"}
+            for index in range(10)
+        ]
+        with patch.object(briefing, "build", return_value=payload):
+            compact = briefing.compact_for_prompt(problem, max_chars=18000)
+        self.assertLessEqual(len(compact), 18000)
+        self.assertEqual(len(json.loads(compact)["research_events"]), 3)
 
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
@@ -431,7 +441,16 @@ class ProofFactoryTests(unittest.TestCase):
                 })
                 first = lab.worker_once()
                 self.assertEqual(first["status"], "completed_awaiting_review")
+                retuned = lab.retune_review_interval(
+                    submitted["id"], 8, reason="pilot throughput supports a longer tranche", actor="test",
+                )
+                self.assertEqual(retuned["configuration_change"]["old"], 1)
+                self.assertEqual(retuned["configuration_change"]["new"], 8)
                 self.assertEqual(lab.apply_review(submitted["id"], "continue", reason="pilot passed")["status"], "queued")
+                queued_spec = json.loads(
+                    (research / "p" / "workspace" / "lab-queue" / f"{submitted['id']}.json").read_text()
+                )
+                self.assertEqual(queued_spec["review_every_segments"], 8)
                 second = lab.worker_once()
                 self.assertEqual(second["status"], "completed_awaiting_review")
                 self.assertEqual(lab.apply_review(submitted["id"], "validate", reason="complete and checked")["status"], "validated")
@@ -631,6 +650,23 @@ class ProofFactoryTests(unittest.TestCase):
             report = scheduler.watchdog()
         self.assertEqual(report["health"], "healthy")
         self.assertEqual(report["health_issues"], [])
+
+    def test_watchdog_flags_attempt_page_missing_for_four_hours(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            site = Path(raw) / "site"
+            old = (datetime.now(timezone.utc) - timedelta(hours=5)).isoformat()
+            attempts = [{"id": "missing-page", "lane": "hard", "problem_id": "p", "finished_at": old}]
+            with patch.object(store, "SITE", site), \
+                    patch.object(store, "load_attempts", return_value=attempts), \
+                    patch.object(store, "load_problems", return_value=[]), \
+                    patch.object(store, "runtime", return_value={}), \
+                    patch.object(store, "update_runtime", side_effect=lambda **fields: fields), \
+                    patch.object(render, "build"), \
+                    patch.object(capacity, "admission", return_value={"allowed": True}), \
+                    patch.dict("os.environ", {"PROOF_EASY_EXPECTED": "0"}):
+                report = scheduler.watchdog()
+            self.assertEqual(report["site_freshness"]["status"], "stale")
+            self.assertIn("no rendered page", report["health_issues"][0])
 
     def test_capacity_admission_defers_when_memory_reserve_is_low(self) -> None:
         with patch.object(capacity, "cleanup", return_value={}), \

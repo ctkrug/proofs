@@ -33,6 +33,12 @@ EFFICIENCY_FIELDS = {
     "naive_cost", "opportunities_considered", "chosen_reductions",
     "expected_throughput_gain", "soundness_basis", "remains_uncompressed",
 }
+SPEC_FIELDS = (
+    "schema_version", "id", "problem_id", "name", "hypothesis", "expected_signal", "decision_value",
+    "efficiency_design", "source_urls", "command", "seed", "segment_seconds", "memory_mb", "max_segments",
+    "segment", "pilot_segments", "review_every_segments", "checkpoint_path", "progress_path",
+    "continuation_thresholds", "submitted_at", "workspace_git_commit", "input_sha256",
+)
 
 
 def _workspace(problem_id: str) -> Path:
@@ -108,6 +114,14 @@ def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
         except OSError:
             continue
     return dict(sorted(identities.items()))
+
+
+def _spec_sha256(value: dict[str, Any]) -> str:
+    identity = {key: value.get(key) for key in SPEC_FIELDS}
+    identity.pop("segment", None)
+    return hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    ).hexdigest()
 
 
 def _validate_efficiency(value: Any, *, substantial: bool) -> dict[str, Any]:
@@ -228,11 +242,7 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
     }
     if not normalized["name"] or not normalized["hypothesis"] or not normalized["expected_signal"]:
         raise ValueError("name, hypothesis, and expected_signal are required")
-    identity = dict(normalized)
-    identity.pop("segment", None)
-    normalized["spec_sha256"] = hashlib.sha256(
-        json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
-    ).hexdigest()
+    normalized["spec_sha256"] = _spec_sha256(normalized)
     return normalized
 
 
@@ -538,12 +548,7 @@ def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "op
         state["status"] = "queued"
         queue = workspace / "lab-queue"
         queue.mkdir(parents=True, exist_ok=True)
-        spec = {key: state[key] for key in (
-            "schema_version", "id", "problem_id", "name", "hypothesis", "expected_signal", "decision_value",
-            "efficiency_design", "source_urls", "command", "seed", "segment_seconds", "memory_mb", "max_segments",
-            "segment", "pilot_segments", "review_every_segments", "checkpoint_path", "progress_path",
-            "continuation_thresholds", "submitted_at", "workspace_git_commit", "input_sha256", "spec_sha256",
-        )}
+        spec = {key: state[key] for key in (*SPEC_FIELDS, "spec_sha256")}
         store.write_json_atomic(queue / f"{job_id}.json", spec)
     elif decision in {"validate", "promote"}:
         if not state.get("latest_progress", {}).get("complete"):
@@ -558,6 +563,41 @@ def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "op
                     "status": state["status"], "review": review})
     repositories.record_lab(str(state["problem_id"]), state["status"], {"id": job_id, "review": review})
     return {"status": state["status"], "job_id": job_id, "review": review}
+
+
+def retune_review_interval(job_id: str, review_every_segments: int, *, reason: str,
+                           actor: str = "operator") -> dict[str, Any]:
+    """Change review cadence only at a durable safety boundary and retain an audit record."""
+    interval = int(review_every_segments)
+    if interval < 1:
+        raise ValueError("review_every_segments must be positive")
+    if not str(reason).strip():
+        raise ValueError("retuning requires a reason")
+    state = _read_state(job_id)
+    if state.get("status") != "completed_awaiting_review":
+        raise ValueError("review cadence may change only at a completed-awaiting-review boundary")
+    progress = state.get("latest_progress") if isinstance(state.get("latest_progress"), dict) else {}
+    if not progress.get("correctness_checks_passed") or not progress.get("decision_value_active", True):
+        raise ValueError("review cadence cannot expand after a correctness or decision-value failure")
+    old = int(state.get("review_every_segments") or 1)
+    change = {
+        "changed_at": store.now_iso(), "actor": str(actor)[:200], "field": "review_every_segments",
+        "old": old, "new": interval, "reason": str(reason)[:4000],
+        "at_segment": int(state.get("segment") or 1),
+    }
+    state["review_every_segments"] = interval
+    state["spec_sha256"] = _spec_sha256(state)
+    state.setdefault("configuration_changes", []).append(change)
+    _write_state(state)
+    record = {
+        "recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
+        "status": "configuration_updated", "configuration_change": change,
+        "spec_sha256": state["spec_sha256"],
+    }
+    _append_record(record)
+    repositories.record_lab(str(state["problem_id"]), "configuration_updated", record)
+    return {"status": state["status"], "job_id": job_id, "configuration_change": change,
+            "spec_sha256": state["spec_sha256"]}
 
 
 def status(problem_id: str | None = None) -> dict[str, Any]:

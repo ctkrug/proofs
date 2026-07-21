@@ -35,3 +35,33 @@ Recorded at 2026-07-21 20:12 UTC from the canonical local repositories and the l
 
 Phase result: baseline established. One stale premise was corrected: the census was not at the
 previously documented 43/656; it had durably advanced to 49/656 and was awaiting its next review.
+
+## Phase 1 — operational integrity
+
+- Publication lag was a batching gap, not a failed deploy: the two-hour publisher was healthy, but a
+  completed attempt could remain local until the next `:50` run. A systemd path trigger now queues the
+  isolated publisher whenever `data/attempts.jsonl` changes; the timer remains as a fallback. The
+  watchdog also records the newest-attempt page state and becomes degraded if a durable attempt lacks
+  a rendered page for more than four hours.
+- Segment 49 was a genuine safety boundary, but its reviewer failed before a model call because ten
+  accumulated events made the canonical brief exceed 18,000 characters. Emergency compaction now
+  retains bounded events, live job progress, the active route, and the decisive roadmap fields while
+  producing valid JSON within the ceiling.
+- Review cadence can now be retuned only at a correctness-passing, decision-value-active
+  `completed_awaiting_review` boundary. Every change updates the spec identity and appends an audit
+  record. The measured R(5,5) census will move from 16 to 256 segments per periodic review after the
+  segment-49 boundary, while per-segment mismatch, coverage, throughput, growth, and checkpoint gates
+  remain unchanged.
+- The three resolved corpus-authentication leads (`lead-3637dfa055`, `lead-1c7eaa0320`, and
+  `lead-151bcf320d`) are closed with the frozen corpus hash and control receipts. The distinct unknown-
+  basin lead remains open. DOSSIER section 13 now names the full 656-host census and bounded residual
+  SAT as the next discriminators.
+- The scoped local duplicate premise was low: 76 Finder/iCloud artifacts existed (36 generated-site
+  entries and 40 empty certificate directories), totaling about 80 KB. All had canonical counterparts;
+  they were moved to macOS Trash and are recoverable. No canonical certificate or unrelated duplicate
+  was touched.
+
+Phase acceptance: 60 local tests must pass; the deployed reviewer must serialize an under-18,000-
+character brief, apply the audited 256-segment cadence only at segment 49, complete a model-backed
+continue/redirect decision without losing its event, and expose the new path trigger and freshness
+record on the live host.
