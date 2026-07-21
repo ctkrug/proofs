@@ -474,7 +474,7 @@ WORK RULES
   "rationale": "why the evidence supports this outcome",
   "claims": ["precise claim, if any"],
   "evidence": ["file/command/check and exact scope"],
-  "evidence_files": ["normalized workspace-relative immutable file path; list every file supporting a computed claim"],
+  "evidence_files": ["normalized workspace-relative immutable file path; list every decisive file supporting a computed claim"],
   "next_steps": ["specific next move"],
   "citations": ["direct URL"],
   "techniques": ["technique used"],
@@ -509,6 +509,13 @@ WORK RULES
 ```
 
 Do not include a confidence score. Correct uncertainty is part of the result.
+
+EVIDENCE FILE RULE: `evidence_files` must contain immutable source, script, checker,
+experiment, certificate, and result-artifact paths only. Never include mutable projections
+or aggregate state such as `.git/**`, `.venv/**`, `.delegates/**`, `CHECKPOINT.md`, `README.md`,
+`docs/DOSSIER.md`, `records/problem.json`, or `records/research-state.json`. Those files may
+be updated for navigation, but claiming any of them as evidence deliberately invalidates the
+receipt and downgrades the epoch. Keep the list decisive and minimal.
 """
 
 

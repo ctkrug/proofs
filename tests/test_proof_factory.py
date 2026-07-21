@@ -25,6 +25,8 @@ class ProofFactoryTests(unittest.TestCase):
         )
         prompt = agent.build_prompt(problem, "hard", store.RESEARCH / problem["id"] / "workspace", phase="research")
         self.assertLessEqual(len(prompt), 50000)
+        self.assertIn("deliberately invalidates the", prompt)
+        self.assertIn("records/research-state.json", prompt)
 
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
