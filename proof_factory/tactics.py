@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import math
 from typing import Any
 
@@ -203,7 +202,3 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
             "end_state": "Record surprise, failure signature, exact constraints learned, reusable assets, route decision, and next discriminator.",
         },
     }
-
-
-def compact_for_prompt(problem: dict[str, Any]) -> str:
-    return json.dumps(build(problem), indent=2, ensure_ascii=False)

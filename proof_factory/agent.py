@@ -23,6 +23,75 @@ DELEGATE_ROLES = {
     "hard": ("challenger-prior-art", "experiment-verification"),
     "easy": ("source-discriminator",),
 }
+ROUTE_DECISION_EVENT_KINDS = {"route_authorized", "source_changed", "external_feedback", "evidence_repaired"}
+REPAIR_TIMEOUT_SECONDS = 180
+
+
+def _original_protected_fields(text: str) -> dict[str, str]:
+    patterns = {
+        "outcome": r'"outcome"\s*:\s*"([^"]+)"',
+        "prior_art_classification": r'"classification"\s*:\s*"([^"]+)"',
+        "field_progress_status": r'"field_progress_assessment"\s*:\s*\{.*?"status"\s*:\s*"([^"]+)"',
+    }
+    return {
+        key: match.group(1)
+        for key, pattern in patterns.items()
+        if (match := re.search(pattern, text or "", re.DOTALL))
+    }
+
+
+def _enforce_repair_guard(original_text: str, repaired: dict[str, Any]) -> None:
+    protected = _original_protected_fields(original_text)
+    if protected.get("outcome") not in OUTCOMES:
+        raise ValueError("JSON repair cannot recover a missing or invalid original outcome")
+    if protected.get("prior_art_classification") not in {
+        "genuinely_different", "material_modification", "replication_control",
+    }:
+        raise ValueError("JSON repair cannot recover a missing or invalid original prior-art classification")
+    if protected.get("field_progress_status") not in {"met", "not_met"}:
+        raise ValueError("JSON repair cannot recover a missing or invalid original field-progress status")
+    repaired_fields = {
+        "outcome": str(repaired.get("outcome") or ""),
+        "prior_art_classification": str(repaired.get("prior_art_check", {}).get("classification") or ""),
+        "field_progress_status": str(repaired.get("field_progress_assessment", {}).get("status") or ""),
+    }
+    for key, original in protected.items():
+        if repaired_fields.get(key) != original:
+            raise ValueError(f"JSON repair changed protected field {key}: {original!r} -> {repaired_fields.get(key)!r}")
+
+
+def _repair_prompt(original_text: str, validation_error: Exception) -> str:
+    return f"""You repair serialization only. Do not change, add, reinterpret, strengthen, or upgrade substantive content.
+Emit exactly one fenced `proof_result` JSON object and no other prose.
+
+SCHEMA CONTRACT
+- outcome is failed|no_progress|progress|candidate and must remain exactly the original value.
+- approach, summary, and rationale are nonempty strings.
+- claims, evidence, evidence_files, next_steps, citations, techniques, experiments, transfer_insights,
+  established_facts, ruled_out, open_leads, strategy_proposals, and synthesis_candidates are arrays.
+- strategy, continuation, candidate_profile, campaign_assessment, search_efficiency, space_reduction,
+  tactical_learning, prior_art_check, field_progress_assessment, and lab_review are objects.
+- prior_art_check.classification and field_progress_assessment.status must remain exactly their original values.
+- Fill only structurally missing JSON fields with neutral empty/default values; never invent evidence or a stronger class.
+
+VALIDATION ERROR
+{type(validation_error).__name__}: {str(validation_error)[:2000]}
+
+ORIGINAL OUTPUT
+{(original_text or '')[-32000:]}
+"""
+
+
+def repair_result(text: str, validation_error: Exception, *, model: str, workspace: Path,
+                  timeout: int) -> tuple[dict[str, Any], dict[str, Any]]:
+    repaired_text, usage = _run_codex(
+        _repair_prompt(text, validation_error), model=model, effort="low", workspace=workspace,
+        timeout=min(REPAIR_TIMEOUT_SECONDS, timeout),
+        telemetry_meta={"role": "json-repair", "lane": "repair", "problem_id": workspace.parent.name, "phase": "repair"},
+    )
+    result = extract_result(repaired_text)
+    _enforce_repair_guard(text, result)
+    return result, usage
 
 
 def _codex_text(raw: str) -> tuple[str, dict[str, Any], bool]:
@@ -160,41 +229,23 @@ def _research_contract() -> str:
         raise RuntimeError(f"computational researcher skill unavailable: {exc}") from exc
 
 
-def _workspace_artifacts(workspace: Path) -> dict[str, str]:
-    """Hash bounded, research-created artifacts without archiving environments or caches."""
-    hashes: dict[str, str] = {}
-    ignored = {".git", ".venv", "venv", ".delegates", "__pycache__", "node_modules", ".mypy_cache", ".pytest_cache"}
-    for path in sorted(workspace.rglob("*")):
-        if path.is_symlink() or not path.is_file() or any(part in ignored for part in path.relative_to(workspace).parts):
-            continue
-        try:
-            path.resolve().relative_to(workspace.resolve())
-            if path.stat().st_size > 50 * 1024 * 1024:
-                continue
-            relative = path.relative_to(workspace).as_posix()
-            hashes[relative] = store.sha256_file(path)
-        except (OSError, ValueError):
-            continue
-        if len(hashes) >= 250:
-            break
-    return hashes
-
-
-def _prior_context(problem_id: str) -> str:
-    rows = [row for row in store.load_attempts() if row.get("problem_id") == problem_id][-12:]
-    if not rows:
-        return "No prior attempts."
-    lines = []
-    for row in rows:
-        lines.append(
-            f"- {row.get('finished_at')} [{row.get('outcome')}]: {row.get('approach')}\n"
-            f"  Result: {row.get('summary')}\n  Next: {'; '.join(row.get('next_steps') or [])}"
-        )
-    return "\n".join(lines)
+def delegate_roles(lane: str, admitting_events: list[dict[str, Any]] | None = None) -> tuple[str, ...]:
+    """Spend challenger calls only when the admitting evidence can change the route."""
+    if lane != "hard":
+        return DELEGATE_ROLES[lane]
+    kinds = {str(row.get("kind") or "") for row in (admitting_events or [])}
+    if kinds.intersection(ROUTE_DECISION_EVENT_KINDS):
+        return DELEGATE_ROLES["hard"]
+    if kinds and kinds.issubset({"lab_segment_completed"}):
+        return ()
+    if kinds and kinds.issubset({"lab_segment_completed", "lab_completed"}):
+        return ("experiment-verification",)
+    return DELEGATE_ROLES["hard"]
 
 
 def build_delegate_prompt(
     problem: dict[str, Any], lane: str, workspace: Path, role: str, phase: str = "technical",
+    canonical_brief: str | None = None,
 ) -> str:
     dossier = store.RESEARCH / problem["id"] / "DOSSIER.md"
     role_job = {
@@ -231,7 +282,7 @@ DELEGATE ROLE: {role}
 {role_job}
 
 CANONICAL ROUTE BRIEF
-{briefing.compact_for_prompt(problem, max_chars=18000)}
+{canonical_brief if canonical_brief is not None else briefing.compact_for_prompt(problem, max_chars=18000)}
 
 PRIOR-ART ANTI-REDISCOVERY REGISTER
 The current compact register is embedded in the canonical route brief. Open the full JSON only for the selected route.
@@ -290,10 +341,36 @@ def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout
     return text, usage
 
 
+def _constant_prefix_first(prompt: str) -> str:
+    """Move invariant principal contracts ahead of every epoch-specific value."""
+    skill_marker = "OPERATING SKILL\n"
+    current_marker = "CURRENT TASK STATEMENT\n"
+    if skill_marker not in prompt or current_marker not in prompt:
+        return prompt
+    intro, body = prompt.split(skill_marker, 1)
+    body = skill_marker + body
+    spans: list[tuple[int, int, str]] = []
+    for start_marker, end_marker in (
+        ("ACCEPTABLE CONTRIBUTIONS\n", "LANE AND THIS EPOCH'S JOB\n"),
+        ("SOL-TERRA ORCHESTRATION\n", "TERRA DELEGATE MEMOS\n"),
+    ):
+        start = body.index(start_marker)
+        end = body.index(end_marker, start)
+        spans.append((start, end, body[start:end]))
+    schema_start = body.index("11. End with exactly one fenced JSON block in this schema:\n")
+    spans.append((schema_start, len(body), body[schema_start:]))
+    for start, end, _ in sorted(spans, reverse=True):
+        body = body[:start] + body[end:]
+    insertion = body.index(current_marker)
+    constant_blocks = "\n".join(block for _, _, block in spans)
+    return body[:insertion] + constant_blocks + "\n" + intro + body[insertion:]
+
+
 def build_prompt(
     problem: dict[str, Any], lane: str, workspace: Path,
     delegate_memos: list[dict[str, Any]] | None = None,
     phase: str = "technical",
+    canonical_brief: str | None = None,
 ) -> str:
     hard = lane == "hard"
     epoch_minutes = 120 if hard else 60
@@ -322,7 +399,7 @@ Before run {campaign_minimum}, its decision must be `continue`. At or after run 
 when `close_signal` names concrete evidence that the next bounded pass has a credible path to a verifiable contribution;
 otherwise use `hold`. A merely open problem, generic optimism, or a renamed dead route is not a close signal.
 """
-    return f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
+    prompt = f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
 The campaign has no preset final number of epochs. This process has a {epoch_minutes}-minute safety ceiling, so leave a
 precise checkpoint that lets a future session continue without rediscovering your work. Never interpret the long horizon
 as permission to inflate a claim, repeat a dead route, or hide uncertainty.
@@ -380,7 +457,7 @@ TERRA DELEGATE MEMOS
 {json.dumps(delegated, indent=2, ensure_ascii=False)[:12000] if delegated else '(No delegate memo survived; proceed, but record the orchestration failure.)'}
 
 CANONICAL ROUTE BRIEF
-{briefing.compact_for_prompt(problem)}
+{canonical_brief if canonical_brief is not None else briefing.compact_for_prompt(problem)}
 
 DURABLE RESEARCH STATE
 Summarized in the canonical route brief; load the versioned state file only for a selected fact.
@@ -530,9 +607,11 @@ or aggregate state such as `.git/**`, `.venv/**`, `.delegates/**`, `CHECKPOINT.m
 be updated for navigation, but claiming any of them as evidence deliberately invalidates the
 receipt and downgrades the epoch. Keep the list decisive and minimal.
 """
+    return _constant_prefix_first(prompt)
 
 
-def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict[str, Any]:
+def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
+        admitting_events: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     model = SOL_MODEL
     effort = "high"
     ceiling = int(os.environ.get("PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
@@ -549,13 +628,24 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
     epoch_key = f"{started[:19].replace(':', '').replace('-', '').replace('T', '-')}-{uuid.uuid4().hex[:6]}"
     delegate_root = workspace / ".delegates" / epoch_key
     delegate_records: list[dict[str, Any]] = []
+    repair_attempted = False
+    repair_used = False
+    repair_usage: dict[str, Any] = {}
+    repair_error = ""
+    repair_timeout_seconds = min(
+        REPAIR_TIMEOUT_SECONDS,
+        int(os.environ.get("PROOF_JSON_REPAIR_TIMEOUT_SEC", str(REPAIR_TIMEOUT_SECONDS))),
+    )
+    brief_payload = briefing.build(problem)
+    delegate_brief = briefing.compact_for_prompt(problem, max_chars=18000, payload=brief_payload)
+    principal_brief = briefing.compact_for_prompt(problem, payload=brief_payload)
 
     def run_delegate(role: str) -> dict[str, Any]:
         delegate_workspace = delegate_root / role
         delegate_workspace.mkdir(parents=True, exist_ok=True)
         try:
             memo, delegate_usage = _run_codex(
-                build_delegate_prompt(problem, lane, workspace, role, phase),
+                build_delegate_prompt(problem, lane, workspace, role, phase, canonical_brief=delegate_brief),
                 model=TERRA_MODEL, effort="high", workspace=delegate_workspace, timeout=delegate_ceiling,
                 telemetry_meta={"role": f"delegate:{role}", "lane": lane, "problem_id": problem["id"], "phase": phase},
             )
@@ -575,18 +665,34 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "memo": memo, "usage": delegate_usage, "error": error_note,
         }
 
-    roles = DELEGATE_ROLES[lane]
-    with ThreadPoolExecutor(max_workers=len(roles)) as pool:
-        futures = {pool.submit(run_delegate, role): role for role in roles}
-        completed = {futures[future]: future.result() for future in as_completed(futures)}
+    roles = delegate_roles(lane, admitting_events)
+    completed: dict[str, dict[str, Any]] = {}
+    if roles:
+        with ThreadPoolExecutor(max_workers=len(roles)) as pool:
+            futures = {pool.submit(run_delegate, role): role for role in roles}
+            completed = {futures[future]: future.result() for future in as_completed(futures)}
     delegate_records = [completed[role] for role in roles]
-    prompt = build_prompt(problem, lane, workspace, delegate_records, phase)
+    prompt = build_prompt(
+        problem, lane, workspace, delegate_records, phase, canonical_brief=principal_brief,
+    )
     try:
         text, usage = _run_codex(
             prompt, model=model, effort=effort, workspace=workspace, timeout=ceiling,
             telemetry_meta={"role": "principal", "lane": lane, "problem_id": problem["id"], "phase": phase},
         )
-        result = extract_result(text)
+        try:
+            result = extract_result(text)
+        except (ValueError, json.JSONDecodeError) as exc:
+            repair_attempted = True
+            try:
+                result, repair_usage = repair_result(
+                    text, exc, model=model, workspace=workspace,
+                    timeout=repair_timeout_seconds,
+                )
+                repair_used = True
+            except (OSError, subprocess.SubprocessError, RuntimeError, ValueError, json.JSONDecodeError) as repair_exc:
+                repair_error = f"{type(repair_exc).__name__}: {repair_exc}"[:2000]
+                raise
         outcome = result["outcome"]
         policy_flags: list[str] = []
         strategy = result.get("strategy") if isinstance(result.get("strategy"), dict) else {}
@@ -702,6 +808,11 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
             "delegate_model": TERRA_MODEL,
             "delegate_roles": [row["role"] for row in delegate_records],
             "delegate_statuses": {row["role"]: row["status"] for row in delegate_records},
+            "delegate_admission": {
+                "event_kinds": sorted({str(row.get("kind") or "") for row in (admitting_events or [])}),
+                "selected_roles": list(roles),
+                "route_decision_event_kinds": sorted(ROUTE_DECISION_EVENT_KINDS),
+            },
         },
         "delegates": [{
             "role": row["role"], "model": row["model"], "effort": row["effort"],
@@ -786,6 +897,12 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical") -> dict
         "tool_disclosure": disclosure[:4000],
         "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),
         "usage": usage,
+        "json_repair": {
+            "attempted": repair_attempted, "used": repair_used, "model": model if repair_attempted else None,
+            "effort": "low" if repair_attempted else None, "timeout_seconds": repair_timeout_seconds,
+            "usage": repair_usage, "error": repair_error,
+            "policy": "serialization-only; protected outcome and classification fields must remain unchanged",
+        },
         "error": error,
         "artifact_hashes": {},
     }

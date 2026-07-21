@@ -59,9 +59,43 @@ previously documented 43/656; it had durably advanced to 49/656 and was awaiting
 - The scoped local duplicate premise was low: 76 Finder/iCloud artifacts existed (36 generated-site
   entries and 40 empty certificate directories), totaling about 80 KB. All had canonical counterparts;
   they were moved to macOS Trash and are recoverable. No canonical certificate or unrelated duplicate
-  was touched.
+  was touched. Keep the active workspace outside iCloud synchronization (or explicitly exclude it) to
+  prevent Finder conflict copies from recurring.
 
 Phase acceptance: 60 local tests must pass; the deployed reviewer must serialize an under-18,000-
 character brief, apply the audited 256-segment cadence only at segment 49, complete a model-backed
 continue/redirect decision without losing its event, and expose the new path trigger and freshness
 record on the live host.
+
+Post-deployment result: all 60 production tests passed, the live brief was 14,447 characters, and the
+path unit published attempt `ramsey-r55-20260721-204644-7cb261` within seconds. Its fresh cold replay
+accepted every saved host through 49, then correctly chose `redirect`: the old job spec had not hashed
+both imported enumerators, had not recorded historical worktree dirtiness, and did not enforce the
+intended aggregate 30-second host gate. The valid prefix is preserved as calibration evidence; the job
+is `stopped_with_reason` and must restart under the fail-closed wrapper in Phase 5. This is a safety-gate
+success and a correction to the expected continuation premise, not a mathematical setback or result.
+
+## Phase 2 — cheap engine-efficiency fixes
+
+- A malformed principal result now receives at most one 180-second, low-effort serialization-repair
+  call on the same Sol model. The original outcome, prior-art classification, and field-progress status
+  must all be present, valid, and byte-for-byte unchanged; otherwise the epoch remains an error. The
+  attempt records whether repair was attempted/used, its usage, and any repair error.
+- Delegate admission is now event-driven. A routine segment event uses zero delegates, a lab-completion
+  review uses only the experiment verifier, and source/route/external/evidence-change events retain the
+  challenger-plus-verifier pair. The admitting kinds and selected roles are persisted in every attempt.
+  On the last R(5,5) review, avoiding the unnecessary prior-art challenger would have avoided about
+  1.12M input tokens (1.03M cached) and 6,478 output tokens.
+- The canonical briefing packet is built once per epoch and serialized from that immutable snapshot at
+  the 18k delegate and 24k principal caps. Compaction retries no longer repeat its disk-heavy build.
+- Zero-reference checks preceded removal of four superseded module-level `compact_for_prompt` helpers,
+  `brain.context_for_problem`, and two unused agent context/hash helpers. The canonical briefing remains
+  the only prompt compactor; the research brain still builds the dashboard graph.
+- The invariant principal prefix now places the computational-research skill, static contribution and
+  orchestration contracts, and the full output schema before epoch-specific task, memo, and brief data.
+  Two unlike problem prompts share a measured 15,526-character prefix.
+
+Phase acceptance: 62 local tests pass, including repair success, unrepairable fail-closed behavior,
+protected-field upgrade rejection, delegate admission, once-per-epoch briefing construction, emergency
+compaction, and constant-prefix ordering. Production must pass the same suite and a non-model dry-run
+must show the expected role counts and bounded prompt/brief sizes.

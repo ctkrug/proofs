@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from . import store
@@ -18,7 +17,3 @@ def load(problem: dict[str, Any]) -> dict[str, Any]:
     value["configured"] = True
     value["methods"] = methods
     return value
-
-
-def compact_for_prompt(problem: dict[str, Any]) -> str:
-    return json.dumps(load(problem), indent=2, ensure_ascii=False)

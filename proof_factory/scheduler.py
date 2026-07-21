@@ -185,7 +185,7 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         brain.refresh()
         render.build()
         try:
-            attempt = agent.run(problem, lane, phase=phase)
+            attempt = agent.run(problem, lane, phase=phase, admitting_events=research_events)
         except Exception as exc:
             store.update_runtime(**{
                 f"{lane}_running": None,

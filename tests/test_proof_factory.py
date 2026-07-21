@@ -188,6 +188,10 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertIn("PRIOR-ART ANTI-REDISCOVERY REGISTER", prompt)
         self.assertIn("prior_art_check", prompt)
         self.assertIn("tactical_learning", prompt)
+        self.assertLess(prompt.index("OPERATING SKILL"), prompt.index("CURRENT TASK STATEMENT"))
+        self.assertLess(prompt.index("ACCEPTABLE CONTRIBUTIONS"), prompt.index("CURRENT TASK STATEMENT"))
+        self.assertLess(prompt.index("11. End with exactly one fenced JSON block"), prompt.index("CURRENT TASK STATEMENT"))
+        self.assertLess(prompt.index("SOL-TERRA ORCHESTRATION"), prompt.index("CURRENT TASK STATEMENT"))
         delegate = agent.build_delegate_prompt(problem, "hard", Path("/tmp/research/workspace"), "experiment-verification")
         self.assertIn("GPT-5.6 Terra delegate", delegate)
         self.assertIn("cheapest decisive experiment", delegate)
@@ -213,21 +217,74 @@ class ProofFactoryTests(unittest.TestCase):
             calls.append((model, effort, workspace.name))
             if model == agent.TERRA_MODEL:
                 return "Delegate memo with one falsifiable test.", {"output_tokens": 10}
+            if effort == "high":
+                return ('{"outcome":"progress","classification":"material_modification",'
+                        '"field_progress_assessment":{"status":"not_met"}'), {"output_tokens": 5}
             return principal, {"output_tokens": 20}
 
         with tempfile.TemporaryDirectory() as raw, patch.object(store, "RESEARCH", Path(raw)), \
-                patch.object(agent, "_run_codex", side_effect=fake_run):
+                patch.object(agent, "_run_codex", side_effect=fake_run), \
+                patch.object(briefing, "build", wraps=briefing.build) as briefing_build:
             attempt = agent.run(problem, "hard")
 
             self.assertEqual([row[0] for row in calls].count(agent.TERRA_MODEL), 2)
-            self.assertEqual(calls[-1][0], agent.SOL_MODEL)
-        self.assertEqual(calls[-1][1], "high")
+            self.assertEqual([row[:2] for row in calls[-2:]], [
+                (agent.SOL_MODEL, "high"), (agent.SOL_MODEL, "low"),
+            ])
+            self.assertEqual(briefing_build.call_count, 1)
         self.assertEqual(attempt["orchestration"]["architecture"], "sol-principal-terra-delegates")
         self.assertEqual(attempt["orchestration"]["delegate_statuses"], {
                 "challenger-prior-art": "completed", "experiment-verification": "completed",
         })
         self.assertEqual(attempt["model"], agent.SOL_MODEL)
+        self.assertTrue(attempt["json_repair"]["attempted"])
+        self.assertTrue(attempt["json_repair"]["used"])
         self.assertTrue(all(row["memo_sha256"] for row in attempt["delegates"]))
+
+    def test_delegate_count_adapts_to_admitting_event(self) -> None:
+        self.assertEqual(agent.delegate_roles("hard", [{"kind": "lab_segment_completed"}]), ())
+        self.assertEqual(
+            agent.delegate_roles("hard", [{"kind": "lab_completed"}]),
+            ("experiment-verification",),
+        )
+        self.assertEqual(
+            agent.delegate_roles("hard", [{"kind": "source_changed"}]),
+            ("challenger-prior-art", "experiment-verification"),
+        )
+        self.assertEqual(agent.delegate_roles("easy", []), ("source-discriminator",))
+
+    def test_json_repair_fails_closed_and_cannot_upgrade(self) -> None:
+        repaired = {
+            "outcome": "candidate",
+            "prior_art_check": {"classification": "genuinely_different"},
+            "field_progress_assessment": {"status": "met"},
+        }
+        original = ('{"outcome":"no_progress","classification":"replication_control",'
+                    '"field_progress_assessment":{"status":"not_met"}}')
+        with self.assertRaisesRegex(ValueError, "protected field outcome"):
+            agent._enforce_repair_guard(original, repaired)
+
+        problem = {
+            "id": "repair-failure", "title": "Finite test", "statement": "Check one case.",
+            "source_url": "https://example.test/problem", "problem_state": "open",
+            "rationale": "Exact", "verifiability": "Exact checker", "techniques": [],
+        }
+        calls = []
+
+        def never_repairs(prompt, *, model, effort, workspace, timeout, telemetry_meta=None):
+            calls.append((model, effort))
+            if model == agent.TERRA_MODEL:
+                return "memo", {}
+            return ('{"outcome":"no_progress","classification":"replication_control",'
+                    '"field_progress_assessment":{"status":"not_met"}'), {}
+
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "RESEARCH", Path(raw)), \
+                patch.object(agent, "_run_codex", side_effect=never_repairs):
+            attempt = agent.run(problem, "hard")
+        self.assertEqual(attempt["outcome"], "error")
+        self.assertTrue(attempt["json_repair"]["attempted"])
+        self.assertFalse(attempt["json_repair"]["used"])
+        self.assertEqual(calls[-1], (agent.SOL_MODEL, "low"))
 
     def test_research_state_is_resumable_and_deduplicates_strategy(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -282,8 +339,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(second["tactical_memory"]["failure_signatures"][0]["count"], 2)
                 self.assertEqual(second["tactical_memory"]["reusable_assets"][0]["name"], "residue checker")
                 self.assertEqual(second["tactical_memory"]["reduction_ledger"][0]["represented_space_after"], "1 class")
-                prompt_state = research_state.compact_for_prompt(problem)
-                self.assertIn("allow degree two", prompt_state)
+                self.assertIn("allow degree two", json.dumps(second))
                 self.assertEqual(first["problem_id"], "p")
 
     def test_tactical_brief_blocks_closed_routes_and_prefers_challenger(self) -> None:

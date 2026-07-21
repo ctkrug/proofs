@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from copy import deepcopy
 from collections import Counter
@@ -500,22 +499,6 @@ def update_from_attempt(problem: dict[str, Any], attempt: dict[str, Any]) -> dic
     state = reconcile_value(state, reconciled_at=now)["state"]
     store.write_json_atomic(state_path(problem["id"]), state)
     return state
-
-
-def compact_for_prompt(problem: dict[str, Any]) -> str:
-    state = reconcile_value(load(problem))["state"]
-    payload = {
-        "epoch_count": state.get("epoch_count"),
-        "baseline_review": state.get("baseline_review", {}),
-        "synthesis_summary": state.get("synthesis_summary"),
-        "established_facts": state.get("established_facts", [])[-20:],
-        "strategy_registry": state.get("strategies", [])[-30:],
-        "open_leads": state.get("open_leads", [])[-20:],
-        "ruled_out": state.get("ruled_out", [])[-20:],
-        "tactical_memory": state.get("tactical_memory", {}),
-        "next_session": state.get("next_session", {}),
-    }
-    return json.dumps(payload, indent=2, ensure_ascii=False)
 
 
 def summary_counts(state: dict[str, Any]) -> dict[str, int]:

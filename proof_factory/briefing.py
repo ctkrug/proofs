@@ -108,10 +108,13 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000) -> str:
-    text = json.dumps(build(problem), indent=2, ensure_ascii=False)
+def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000,
+                       payload: dict[str, Any] | None = None) -> str:
+    """Serialize one canonical packet; callers may reuse a once-per-epoch build."""
+    source = payload if payload is not None else build(problem)
+    text = json.dumps(source, indent=2, ensure_ascii=False)
     if len(text) > max_chars:
-        payload = build(problem)
+        payload = json.loads(json.dumps(source, ensure_ascii=False))
         payload["prior_art"] = payload["prior_art"][:7]
         payload["state"]["newest_facts"] = payload["state"]["newest_facts"][-3:]
         payload["state"]["newest_exclusions"] = payload["state"]["newest_exclusions"][-3:]

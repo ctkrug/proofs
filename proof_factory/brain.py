@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from collections import defaultdict
 from itertools import combinations
@@ -151,35 +150,6 @@ def refresh() -> dict[str, Any]:
     graph = build()
     store.write_json_atomic(store.STATE / BRAIN_FILE, graph)
     return graph
-
-
-def context_for_problem(problem: dict[str, Any], *, max_linked: int = 6) -> str:
-    graph = build()
-    problem_id = str(problem["id"])
-    node_by_id = {row["id"]: row for row in graph["nodes"]}
-    source_id = f"problem:{problem_id}"
-    outgoing = [row for row in graph["edges"] if row["source"] == source_id]
-    linked = []
-    for row in outgoing:
-        if row["relation"] != "shares_concepts":
-            continue
-        target = node_by_id.get(row["target"], {})
-        linked.append({
-            "problem_id": target.get("problem_id"), "title": target.get("label"),
-            "status": target.get("status"), "shared_concepts": row.get("concepts", []),
-            "current_summary": target.get("summary"),
-        })
-    state = research_state.load(problem)
-    payload = {
-        "brain_rule": "Use links as hypotheses for transfer, never as proof. State source concept -> prediction -> test.",
-        "baseline_review": state.get("baseline_review", {}),
-        "concepts": [node_by_id[row["target"]]["label"] for row in outgoing if row["relation"] == "uses_concept"],
-        "linked_problems": linked[:max_linked],
-        "current_facts": state.get("established_facts", [])[-8:],
-        "current_exclusions": state.get("ruled_out", [])[-8:],
-        "current_leads": state.get("open_leads", [])[-8:],
-    }
-    return json.dumps(payload, indent=2, ensure_ascii=False)
 
 
 def summary(graph: dict[str, Any] | None = None) -> dict[str, int]:

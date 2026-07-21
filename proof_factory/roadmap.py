@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from . import store, tactics
@@ -44,7 +43,3 @@ def current(problem: dict[str, Any]) -> dict[str, Any]:
         "confidence_calibration": value.get("confidence_calibration"),
         "sources": value.get("sources", []),
     }
-
-
-def compact_for_prompt(problem: dict[str, Any]) -> str:
-    return json.dumps(current(problem), indent=2, ensure_ascii=False)
