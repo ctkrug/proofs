@@ -268,7 +268,7 @@ class ProofFactoryTests(unittest.TestCase):
         state["baseline_review"]["status"] = "complete"
         state["next_session"] = {"recommended_strategy_id": "closed"}
         state["strategies"] = [
-            {"id": "closed", "fingerprint": "closed", "family": "old", "mechanism": "labelled blocks", "status": "blocked", "attempts": 1},
+            {"id": "closed", "fingerprint": "closed", "family": "old", "mechanism": "labelled blocks", "status": "blocked", "attempts": 1, "reopen_evidence": "evidence consumed by the failed retry"},
             {"id": "child", "fingerprint": "child", "family": "canonical", "mechanism": "class quotient", "status": "proposed", "attempts": 0, "parent_ids": ["closed"], "hypothesis": "quotient helps", "discriminating_test": "small orbit gate"},
             {"id": "stale", "fingerprint": "stale", "family": "other", "mechanism": "untried idea", "status": "proposed", "attempts": 0, "hypothesis": "maybe", "discriminating_test": "pilot"},
         ]
@@ -276,6 +276,7 @@ class ProofFactoryTests(unittest.TestCase):
             brief = tactics.build(problem)
         self.assertEqual(brief["incumbent"]["strategy_id"], "child")
         self.assertEqual(brief["incumbent"]["score_components"]["continuation_priority"], 30)
+        self.assertFalse(next(row for row in brief["portfolio"] if row["strategy_id"] == "closed")["eligible"])
 
     def test_roadmap_selects_phase_from_tactical_incumbent(self) -> None:
         problem = {"id": "p"}

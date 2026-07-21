@@ -41,10 +41,13 @@ def _score_strategy(row: dict[str, Any], state: dict[str, Any]) -> dict[str, Any
         ) else 0,
         "repetition_cost": -min(attempts, 8) * 3,
         "unresolved_blocker": -8 if row.get("blocker") else 0,
-        "reopen_evidence": 36 if status in TERMINAL_STATUSES and row.get("reopen_evidence") else 0,
+        "reopen_evidence": 0,
         "continuation_priority": 30 if row.get("id") == recommended_id or follows_recommended_redirect else 0,
     }
-    eligible = status not in TERMINAL_STATUSES or bool(row.get("reopen_evidence"))
+    # Reopen evidence is consumed by the attempt that tests it. If that attempt
+    # ends terminal again, continue through a new child mechanism rather than
+    # silently making the same closed route eligible forever.
+    eligible = status not in TERMINAL_STATUSES
     return {
         "strategy_id": row.get("id"),
         "fingerprint": row.get("fingerprint"),
@@ -91,7 +94,7 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "schema_version": 1,
-        "decision_rule": "Transparent heuristic priority, not a probability or proof. Closed routes are ineligible without reopen evidence.",
+        "decision_rule": "Transparent heuristic priority, not a probability or proof. Terminal routes remain ineligible; a materially new child strategy records any justified reopening.",
         "contribution_target": {
             "objective": _text(state.get("objective") or problem.get("statement"), 2000),
             "acceptance_tests": problem.get("field_progress_gates") or state.get("completion_criteria", []),
