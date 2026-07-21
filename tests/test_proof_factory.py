@@ -649,6 +649,8 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertTrue(report["allowed"])
         self.assertFalse(report["cache_required"])
         self.assertEqual(report["cache_free_bytes"], 0)
+        self.assertTrue(lab._requires_build_cache({"command": ["checks/run_lean_build.sh"]}))
+        self.assertFalse(lab._requires_build_cache({"command": ["python3", "enumerate.py"]}))
 
     def test_capacity_cleanup_candidates_exclude_fresh_and_system_tmp(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
