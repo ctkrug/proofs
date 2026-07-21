@@ -366,7 +366,10 @@ def worker_once() -> dict[str, Any]:
         queue = queued_specs()
         if not queue:
             return {"status": "idle", "recovered": recovered}
-        capacity_policy = capacity.admission("hard")
+        # Lab jobs are workspace-confined and the systemd unit cannot write the
+        # separate build cache. A full Lean cache must not block unrelated
+        # Python/SAT enumeration; root-disk and memory reserves still apply.
+        capacity_policy = capacity.admission("hard", require_cache=False)
         if not capacity_policy["allowed"]:
             return {"status": "deferred", "reason": "host capacity reserve",
                     "capacity_policy": capacity_policy, "queued_job": str(queue[0])}

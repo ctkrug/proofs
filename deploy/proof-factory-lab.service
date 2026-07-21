@@ -11,7 +11,7 @@ Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory lab-worker
 Nice=19
 CPUWeight=1
-CPUQuota=60%
+CPUQuota=100%
 IOWeight=5
 MemoryHigh=900M
 MemoryMax=1300M

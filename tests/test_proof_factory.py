@@ -640,6 +640,16 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertFalse(report["allowed"])
         self.assertIn("available memory", report["reasons"][0])
 
+    def test_workspace_lab_can_ignore_unrelated_full_build_cache(self) -> None:
+        gib = 1024**3
+        with patch.object(capacity, "cleanup", return_value={}), \
+                patch.object(capacity, "_free_bytes", side_effect=[20 * gib, 0]), \
+                patch.object(capacity, "_available_memory_bytes", return_value=4 * gib):
+            report = capacity.admission("hard", require_cache=False)
+        self.assertTrue(report["allowed"])
+        self.assertFalse(report["cache_required"])
+        self.assertEqual(report["cache_free_bytes"], 0)
+
     def test_capacity_cleanup_candidates_exclude_fresh_and_system_tmp(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             tmp = Path(raw)

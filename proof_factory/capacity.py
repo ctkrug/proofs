@@ -110,7 +110,7 @@ def _cleanup_candidates(tmp: Path, now: float) -> list[Path]:
     return result
 
 
-def admission(lane: str, *, run_cleanup: bool = True) -> dict[str, Any]:
+def admission(lane: str, *, run_cleanup: bool = True, require_cache: bool = True) -> dict[str, Any]:
     if lane not in MEMORY_MIN_FREE_BYTES:
         raise ValueError("lane must be easy or hard")
     cleanup_result = cleanup() if run_cleanup else None
@@ -120,12 +120,13 @@ def admission(lane: str, *, run_cleanup: bool = True) -> dict[str, Any]:
     reasons: list[str] = []
     if root_free < ROOT_MIN_FREE_BYTES:
         reasons.append(f"root disk reserve is below 8 GiB ({root_free / 1024**3:.1f} GiB free)")
-    if cache_free < CACHE_MIN_FREE_BYTES:
+    if require_cache and cache_free < CACHE_MIN_FREE_BYTES:
         reasons.append(f"build-cache volume reserve is below 1 GiB ({cache_free / 1024**3:.1f} GiB free)")
     required_memory = MEMORY_MIN_FREE_BYTES[lane]
     if memory_free < required_memory:
         reasons.append(f"available memory is below the {lane} reserve ({memory_free / 1024**2:.0f} MiB free)")
     return {"allowed": not reasons, "lane": lane, "reasons": reasons,
+            "cache_required": require_cache,
             "root_free_bytes": root_free, "cache_free_bytes": cache_free,
             "memory_available_bytes": memory_free, "memory_required_bytes": required_memory,
             "cleanup": cleanup_result}
