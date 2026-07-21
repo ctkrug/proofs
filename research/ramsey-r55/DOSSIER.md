@@ -487,6 +487,59 @@ This is a proved input constraint, not a new Ramsey bound.
 Primary sources: https://ir.cwi.nl/pub/14098 and the `R(3,5)=14` entry in
 https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf
 
+### S16. Prior-art audit of the three cross-field routes (2026-07-20)
+
+**Claim discipline.** This audit can establish located precedents, but a negative literature search
+cannot establish that nobody has ever tried a method privately or under different terminology. The safe
+labels below are therefore **previously applied**, **partial/adjacent precedent**, and **no located full
+application**. Do not describe any route as historically novel without an expert literature check.
+
+| Route | Direct and mechanism-equivalent precedents located | What was not located | Audit verdict |
+|---|---|---|---|
+| LDPC-style trapping-set atlas | At `R(5,5)`, Molnar et al. already use time-dependent weights for persistently unsatisfied Ramsey clauses and report the two-conflict K43 core on six vertices. Piwakowski uses a tabu list in Ramsey search. In a different Ramsey cell, the public AlphaEvolve file `ramsey_4_13_138.py` identifies high-violation vertices, hill-climbs the induced subgraph, and grafts it back after stagnation. | No inspected R55 paper, current survey, or public Ramsey code canonicalizes final-window variable/check cores under graph isomorphism, measures type recurrence against shuffled controls, or learns exact core-plus-boundary repair templates and tests their transfer on held-out runs. | **Partial precedent; no located full R55 application.** The violation-local repair idea is already present. The defensible new test is the canonical recurrent-core atlas plus exact, held-out template transfer—not “repair a bad local subgraph.” |
+| GOMEA/linkage-tree optimal mixing | Kunkel applied a population GA directly to R55 using point mutation and standard one-point crossover. The public AlphaEvolve file `ramsey_4_15_158.py` keeps marginal edge and distance-orbit success frequencies called a “gene pool” and uses them for initialization and move scoring. GOMEA/LTGA itself has been tested on generic MAX-SAT and overlapping interaction structures. | Across the inspected Ramsey papers and all nine public AlphaEvolve Ramsey programs, no GOMEA, linkage tree, mutual-information linkage model, donor-subset optimal-mixing traversal, or exact greedy block acceptance was located. | **Adjacent evolutionary precedent; no located Ramsey GOMEA application.** Population search, crossover, and marginal gene-pool memory are not new here. The untested component is learned multi-edge linkage plus donor-block optimal mixing, with exact burden and diversity gates. |
+| Adjacency-row code/Terwilliger moments | The row identity `d_H(a_u,a_v)=d(u)+d(v)-2|N(u) intersect N(v)|` appears as Theorem 2.1 in Ali–Suwilo–Mardiningsih (2019), so it is not new. Integer/linear programming and degree, triangle, neighborhood, and induced-subgraph identities have been applied directly to R55 since McKay–Radziszowski and remain central to the `R(5,5)<=46` proof. Flag-algebra SDP has also proved other small exact Ramsey numbers. Schrijver's Terwilliger SDP supplies the coding-theory machinery. | No inspected R55 source applies Schrijver's Hamming-scheme/Terwilliger triple distribution to the set of adjacency rows, with the row/column symmetry, zero diagonal, and edge/nonedge pair colors retained. | **Most precedent-adjacent; no located exact formulation.** Neither “use LP/SDP” nor the pair identity is new. The only defensible research contribution would be a Ramsey-specific colored row-moment inequality that cuts a profile missed by the established subgraph LP. |
+
+#### Consequences for experiments
+
+1. **Rename the trapping experiment internally as an atlas/transfer ablation.** Include AlphaEvolve's
+   violation-focused induced-subgraph graft and Molnar-style persistent clause weighting as baselines. If
+   canonicalization plus learned templates does not beat them on held-out controls, the cross-field
+   transfer has added nothing.
+2. **Make marginal gene-pool memory a required GOMEA baseline.** Compare against the AlphaEvolve-style
+   edge/orbit frequencies as well as Kunkel-style uniform/one-point crossover, univariate mixing, and
+   exact-delta tabu. Credit only the learned block model and optimal-mixing acceptance for any gain.
+3. **Downgrade the row-code route from a novelty claim to a cheap filter.** First reproduce the known
+   adjacency-row identity and existing R55 degree/subgraph constraints. Run the rational pair LP. Escalate
+   only if it excludes a profile not excluded by the established LP; then compare any triple-moment cut
+   with flag-algebra/subgraph-count consequences before claiming new information.
+
+#### Search trail and coverage
+
+The audit inspected the current small-Ramsey survey; the primary R55 papers on integer/linear programming,
+subgraph identities, MaxSAT, genetic search, and the current 46 upper bound; Piwakowski's Ramsey tabu
+paper; the AlphaEvolve Ramsey paper and all nine public construction programs; the primary GOMEA MAX-SAT
+paper; Schrijver's Terwilliger paper; and the small-Ramsey flag-algebra SDP paper. Exact-name and
+mechanism searches included `Ramsey GOMEA`, `Ramsey linkage tree`, `Ramsey optimal mixing`, `Ramsey
+trapping set`, `Ramsey failure core`, `R(5,5) Terwilliger`, `R(5,5) Delsarte`, `R(5,5) association
+scheme`, and adjacency-row/Hamming-code variants. Global public GitHub code searches found no Ramsey
+occurrence of GOMEA, linkage-tree optimal mixing, trapping-set terminology, or R55 Terwilliger code;
+the official AlphaEvolve tree was then inspected directly because repository code uses idiosyncratic
+names. The negative findings remain bounded by public, indexed literature and repositories.
+
+Additional primary sources:
+
+- AlphaEvolve violation-focused subgraph graft (`ramsey_4_13_138.py`):
+  https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_13_138.py
+- AlphaEvolve marginal edge/orbit gene pool (`ramsey_4_15_158.py`):
+  https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_15_158.py
+- Ali–Suwilo–Mardiningsih, adjacency-row Hamming identity:
+  https://doi.org/10.1088/1742-6596/1255/1/012044
+- McKay–Radziszowski, *Linear Programming in Some Ramsey Problems*:
+  https://www.cs.rit.edu/~spr/PUBL/paper29.pdf
+- Lidicky–Pfender, *Semidefinite Programming and Ramsey Numbers*:
+  https://arxiv.org/abs/1704.03592
+
 ## 9. Combining ideas without making analogy soup
 
 Use at most three transfers in one epoch and attach a prediction to each:

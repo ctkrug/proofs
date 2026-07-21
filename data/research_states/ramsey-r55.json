@@ -15,7 +15,7 @@
     "A candidate is not a solution until independent and human review are recorded."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-21T00:18:47.104341+00:00",
+  "last_updated": "2026-07-20T18:30:56-06:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -192,6 +192,30 @@
       "scope": "All hypothetical and known (5,5,n) graphs; this is a pairwise row-code constraint, not an existence or nonexistence result.",
       "status": "proved",
       "updated_at": "2026-07-20T18:02:09-06:00"
+    },
+    {
+      "claim": "A 2026-07-20 primary-source and public-code audit found mechanism-level Ramsey precedents for two parts of the proposed trapping-set route: Molnar et al. use adaptive weights on unsatisfied R(5,5) clauses, and AlphaEvolve's public ramsey_4_13_138.py performs a violation-focused induced-subgraph hill climb and graft after stagnation. No inspected source canonicalizes recurrent R55 failure cores, builds an isomorphism-type atlas, or tests exact core-conditioned templates on held-out trajectories.",
+      "evidence": "https://doi.org/10.1038/s41467-018-07327-2 and https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_13_138.py",
+      "scope": "Public indexed literature and repositories inspected in DOSSIER S16; absence is not proof of historical nonuse.",
+      "status": "audited-partial-precedent",
+      "source_attempt_id": "manual-prior-art-audit-2026-07-20",
+      "updated_at": "2026-07-20T18:30:56-06:00"
+    },
+    {
+      "claim": "Evolutionary search is established in Ramsey work: Kunkel used a standard population GA and one-point crossover directly on R(5,5), while AlphaEvolve's public ramsey_4_15_158.py uses marginal edge/orbit success frequencies as a gene pool. No GOMEA, linkage tree, mutual-information linkage model, donor-subset optimal mixing, or exact greedy block acceptance was located in the inspected Ramsey sources or nine public AlphaEvolve programs.",
+      "evidence": "https://www.micsymposium.org/mics_2003/Kunkel.PDF and https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_15_158.py",
+      "scope": "Public indexed literature and repositories inspected in DOSSIER S16; the unlocated component is learned multi-edge linkage plus optimal mixing, not generic genetic search or gene-pool memory.",
+      "status": "audited-adjacent-precedent",
+      "source_attempt_id": "manual-prior-art-audit-2026-07-20",
+      "updated_at": "2026-07-20T18:30:56-06:00"
+    },
+    {
+      "claim": "The adjacency-row Hamming identity is published general graph theory, and LP/subgraph-count machinery has already been applied directly to R(5,5); flag-algebra SDP has been applied to other small Ramsey numbers. No inspected R55 source applies a Schrijver/Terwilliger triple-distance relaxation to adjacency rows while retaining matrix symmetry, zero diagonal, and edge/nonedge pair colors.",
+      "evidence": "https://doi.org/10.1088/1742-6596/1255/1/012044, https://www.cs.rit.edu/~spr/PUBL/paper29.pdf, https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf, https://arxiv.org/abs/2409.15709, and https://arxiv.org/abs/1704.03592",
+      "scope": "Public indexed literature inspected in DOSSIER S16; the pair identity and generic LP/SDP framing are not novelty claims.",
+      "status": "audited-adjacent-precedent",
+      "source_attempt_id": "manual-prior-art-audit-2026-07-20",
+      "updated_at": "2026-07-20T18:30:56-06:00"
     }
   ],
   "strategies": [
@@ -363,6 +387,9 @@
       "hypothesis": "A small number of canonical active-core types explain a disproportionate share of low-energy search stalls, and exact core-conditioned escape templates transfer to held-out trajectories better than generic persistent-conflict weighting.",
       "discriminating_test": "Run a fixed-seed trace corpus on damaged held-out order-42 controls and low-burden K43 starts. Continue only if canonical cores recur above label-shuffled controls and templates learned on one split improve paired held-out time-to-escape or best exact burden under the same evaluator-call budget; otherwise discard the analogy.",
       "blocker": "Needs trace capture, colored-core canonicalization, and a matched exact-delta baseline; the authenticated order-42 controls and publisher K43 seed are now available.",
+      "prior_art_status": "Partial precedent; no located full R55 application as of the 2026-07-20 public-source audit.",
+      "closest_prior_work": "Molnar et al. adaptively weight unsatisfied R55 clauses; Piwakowski uses Ramsey tabu memory; AlphaEvolve ramsey_4_13_138.py selects high-violation vertices, hill-climbs their induced subgraph, and grafts it back after stagnation.",
+      "novelty_boundary": "Do not claim violation-local repair as new. Test only whether isomorphism-canonical recurrent-core types plus exact core-boundary templates transfer on held-out runs beyond persistent weighting and AlphaEvolve-style subgraph graft baselines.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
@@ -371,9 +398,12 @@
         "strategy-r55twocore2026"
       ],
       "sources": [
-        "https://web.stanford.edu/class/ee388/papers/ErrorFloors.pdf"
+        "https://web.stanford.edu/class/ee388/papers/ErrorFloors.pdf",
+        "https://doi.org/10.1038/s41467-018-07327-2",
+        "https://doi.org/10.37236/1230",
+        "https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_13_138.py"
       ],
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     },
     {
       "id": "strategy-r55-linkage-mixing",
@@ -385,6 +415,9 @@
       "hypothesis": "Dynamic linkage learning identifies epistatic edge blocks whose coordinated transfer preserves useful partial structure and escapes single-edge stalls more reliably than uniform crossover or univariate mixing.",
       "discriminating_test": "Split complement pairs and isomorphism families before constructing 6-to-12-edge-damaged order-42 controls. Under identical evaluator calls and seeds, require learned or hybrid masks to improve held-out valid-42 recovery and median exact burden over univariate mixing, uniform crossover, and exact-delta tabu before spending any K43 budget.",
       "blocker": "Needs an exact incremental evaluator, population-diversity guard, leakage-safe held-out controls, and a small linkage-tree implementation.",
+      "prior_art_status": "Adjacent evolutionary precedent; no located Ramsey GOMEA/linkage-tree optimal-mixing application as of the 2026-07-20 public-source audit.",
+      "closest_prior_work": "Kunkel applies point mutation and standard one-point crossover directly to R55. AlphaEvolve ramsey_4_15_158.py retains marginal edge and distance-orbit success frequencies as a gene pool. GOMEA/LTGA is established on generic MAX-SAT.",
+      "novelty_boundary": "Population search, crossover, and marginal gene-pool memory are already applied. Credit only learned multi-edge linkage, donor-subset traversal, and exact optimal-mixing acceptance if they beat those named baselines.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
@@ -394,9 +427,11 @@
       ],
       "sources": [
         "https://ir.cwi.nl/pub/22078",
-        "https://arxiv.org/abs/2109.05259"
+        "https://arxiv.org/abs/2109.05259",
+        "https://www.micsymposium.org/mics_2003/Kunkel.PDF",
+        "https://github.com/google-research/google-research/blob/master/ramsey_number_bounds/code/ramsey_4_15_158.py"
       ],
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     },
     {
       "id": "strategy-r55-row-code-sdp",
@@ -408,6 +443,9 @@
       "hypothesis": "The adjacency-row pair and triple moment cone excludes at least one degree/common-neighbor profile still admitted by scalar degree and excess constraints, supplying a new structural reduction for an upper-bound slice.",
       "discriminating_test": "Generate exact row weight/intersection distributions for all authenticated controls and enumerate the current hypothetical profiles. Park the route immediately if the rational pair-moment relaxation cuts no new profile; escalate to SDP only after a nonempty exact cut, and reject any cut that fails a known control or cannot be rationalized.",
       "blocker": "The off-the-shelf code bound does not encode adjacency symmetry or the edge/nonedge relation; the first relaxed LP must show information gain before a custom colored moment system is justified.",
+      "prior_art_status": "Most precedent-adjacent; no located R55 adjacency-row Terwilliger formulation as of the 2026-07-20 public-source audit.",
+      "closest_prior_work": "The adjacency-row Hamming identity is Theorem 2.1 of Ali-Suwilo-Mardiningsih (2019). R55 upper bounds already use integer/linear programming and degree, neighborhood, triangle, and induced-subgraph counts. Flag-algebra SDP has proved other small Ramsey numbers; Schrijver supplies the coding SDP.",
+      "novelty_boundary": "Neither the row identity nor generic LP/SDP is new. Treat this as a cheap filter unless a colored row-moment inequality cuts a profile missed by the established R55 subgraph LP and is rationalized exactly.",
       "reopen_condition": "",
       "last_attempt_id": "",
       "attempts": 0,
@@ -416,9 +454,14 @@
       ],
       "sources": [
         "https://ir.cwi.nl/pub/14098",
-        "https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf"
+        "https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf",
+        "https://doi.org/10.1088/1742-6596/1255/1/012044",
+        "https://www.cs.rit.edu/~spr/PUBL/paper29.pdf",
+        "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
+        "https://arxiv.org/abs/2409.15709",
+        "https://arxiv.org/abs/1704.03592"
       ],
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     }
   ],
   "open_leads": [
@@ -543,33 +586,33 @@
     },
     {
       "description": "Build an LDPC-style atlas of recurrent active failure cores in low-burden Ramsey search trajectories.",
-      "rationale": "If a few small decoder-dependent cores dominate stalls, exact core-plus-boundary escape templates are a sharper intervention than globally reweighting every persistent conflict.",
-      "next_experiment": "Instrument deterministic damaged-42 and authenticated-seed K43 runs; define active checks as violated and 9:1 five-sets; canonicalize final-window colored bipartite cores; compare recurrence against shuffled controls and exact escape templates on held-out runs.",
+      "rationale": "Violation-focused repair is already present in Molnar-style adaptive weights and an AlphaEvolve induced-subgraph graft. This lead earns compute only if canonical recurrent types and exact templates add held-out transfer beyond those baselines.",
+      "next_experiment": "Instrument deterministic damaged-42 and authenticated-seed K43 runs; define active checks as violated and 9:1 five-sets; canonicalize final-window colored bipartite cores; compare recurrence against shuffled controls, persistent clause weighting, and AlphaEvolve-style high-violation induced-subgraph grafts; test exact templates only on held-out runs.",
       "priority": "high",
       "status": "open",
       "id": "lead-r55-trapping-atlas",
       "strategy_id": "strategy-r55-trapping-atlas",
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     },
     {
       "description": "Benchmark linkage-tree optimal mixing on leakage-safe damaged order-42 controls before using it at 43.",
-      "rationale": "The Ramsey objective has explicit overlapping epistasis among edge bits, while ordinary graph-bitstring crossover destroys interacting partial structures.",
-      "next_experiment": "Implement univariate, uniform, mutual-information linkage, factor-derived linkage, and hybrid masks; split complement/isomorphism families; compare exact recovery rate and burden under paired seeds and matched evaluator calls.",
+      "rationale": "Standard R55 crossover and marginal edge/orbit gene-pool memory already exist. This lead earns compute only if learned multi-edge linkage and optimal mixing improve on both precedents under leakage-safe evaluation.",
+      "next_experiment": "Implement Kunkel-style crossover, AlphaEvolve-style marginal edge/orbit memory, univariate mixing, mutual-information linkage, factor-derived linkage, and hybrid masks; split complement/isomorphism families; compare exact recovery rate and burden under paired seeds and matched evaluator calls.",
       "priority": "high",
       "status": "open",
       "id": "lead-r55-linkage-mixing",
       "strategy_id": "strategy-r55-linkage-mixing",
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     },
     {
       "description": "Test the cheapest adjacency-row coding-theory relaxation before building a custom SDP.",
-      "rationale": "The row-code identity and R(3,5)=14 give exact pair constraints; a small rational LP can cheaply show whether coding-theory moments add anything beyond existing degree/excess restrictions.",
-      "next_experiment": "Extract exact degree, common-neighbor, and row-distance distributions from all authenticated controls; formulate the relaxed pair-distance LP for hypothetical n=43..45 profiles; record every newly cut profile or stop with a reusable negative result if none are cut.",
+      "rationale": "The row identity and generic LP/SDP are established prior art. A small rational LP is justified only as a cheap information-gain test against the existing R55 subgraph-count LP.",
+      "next_experiment": "Reproduce the published adjacency-row Hamming identity and current R55 degree/subgraph constraints; extract exact distributions from all controls; formulate the pair-distance LP for n=43..45; count only profiles not already excluded by the established LP, and stop before SDP if there are none.",
       "priority": "normal",
       "status": "open",
       "id": "lead-r55-row-code-sdp",
       "strategy_id": "strategy-r55-row-code-sdp",
-      "updated_at": "2026-07-20T18:02:09-06:00"
+      "updated_at": "2026-07-20T18:30:56-06:00"
     }
   ],
   "ruled_out": [
