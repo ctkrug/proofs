@@ -59,6 +59,13 @@ def extract_candidate(text: str) -> dict[str, Any]:
     probability = float(value.get("estimated_success_probability") or 0)
     if probability <= 0 or probability > 1:
         raise ValueError("estimated_success_probability must be in (0, 1]")
+    work = value.get("upstream_work_check")
+    if not isinstance(work, dict) or work.get("active_prs") != 0:
+        raise ValueError("candidate requires an upstream_work_check with active_prs=0")
+    if not isinstance(work.get("checked_url"), str) or not work["checked_url"].startswith(("http://", "https://")):
+        raise ValueError("upstream_work_check requires a checked_url")
+    if not isinstance(work.get("checked_at"), str) or not work["checked_at"].strip():
+        raise ValueError("upstream_work_check requires checked_at")
     return value
 
 
@@ -77,6 +84,7 @@ SOURCE ROUTES
 
 RULES
 1. Browse current primary sources and recent literature. Never infer open status from an old list.
+2. For any repository target, inspect the issue's linked/open pull requests and relevant branch/PR search. Reject it if any active PR claims the same work.
 2. Prefer a finite witness, exact optimum, one-step classification extension, useful correction,
    formalization gap tied to research, or narrow explicit question from a recent paper.
 3. Identify a real outside acceptance path. A self-published web record alone has zero credit.
@@ -99,6 +107,7 @@ RULES
   "rationale": "why this is unusually tractable and potentially new",
   "external_channel": "specific repository, maintainer, workshop, or journal",
   "external_url": "channel URL",
+  "upstream_work_check": {"active_prs":0,"checked_url":"direct issue/PR search URL","checked_at":"ISO date","evidence":"what linked/open PR search showed"},
   "estimated_success_probability": 0.01,
   "difficulty": 1,
   "verification_score": 1,

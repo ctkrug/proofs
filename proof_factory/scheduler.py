@@ -57,6 +57,10 @@ def low_hanging_score(problem: dict[str, Any], problems: list[dict[str, Any]]) -
 def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
     statuses = ACTIVE_STATUSES if lane == "hard" else {"queued", "active", "attempted"}
     candidates = [row for row in problems if row.get("lane") == lane and row.get("status") in statuses]
+    # A duplicate upstream formalization is not a contribution. Scout rows carry
+    # a current PR check; keep any later-discovered competing work out of dispatch.
+    candidates = [row for row in candidates if not isinstance(row.get("upstream_work_check"), dict)
+                  or int(row["upstream_work_check"].get("active_prs") or 0) == 0]
     if not candidates:
         raise RuntimeError(f"no active {lane} problems")
     if lane == "hard":
