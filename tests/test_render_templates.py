@@ -1,0 +1,86 @@
+from __future__ import annotations
+
+import unittest
+from string import Template
+
+from proof_factory import render
+from proof_factory.html_templates import HTMLFragment, html_fragment, render as render_template
+
+
+class HTMLTemplateTests(unittest.TestCase):
+    def test_substitutions_escape_by_default_and_fragments_are_explicit(self) -> None:
+        template = Template('<h1 title="$title">$title</h1><main>$body</main>')
+
+        output = render_template(
+            template,
+            title='"><script>alert(1)</script>',
+            body=html_fragment("<p>reviewed</p>"),
+        )
+
+        self.assertNotIn("<script>", output)
+        self.assertIn("&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;", output)
+        self.assertIn("<main><p>reviewed</p></main>", output)
+        self.assertIsInstance(html_fragment("<b>x</b>"), HTMLFragment)
+
+    def test_layout_escapes_metadata_but_preserves_rendered_body(self) -> None:
+        output = render._layout(
+            'Title <img src=x onerror="bad">',
+            "<section>safe fragment</section>",
+            description='description"><script>bad()</script>',
+        )
+
+        self.assertIn("<main id=\"content\"><section>safe fragment</section></main>", output)
+        self.assertNotIn("<img src=x", output)
+        self.assertNotIn("<script>bad()", output)
+        self.assertIn("Title &lt;img src=x onerror=&quot;bad&quot;&gt;", output)
+        self.assertIn("description&quot;&gt;&lt;script&gt;bad()&lt;/script&gt;", output)
+        self.assertIn("inlineMath:[['$','$']", output)
+
+    def test_brain_page_smoke_and_untrusted_graph_values_are_escaped(self) -> None:
+        graph = {
+            "nodes": [
+                {
+                    "id": "problem:unsafe",
+                    "type": "problem",
+                    "problem_id": 'unsafe\"><script>problem()</script>',
+                    "baseline_status": "complete<script>status()</script>",
+                    "lane": "easy",
+                    "url": '/problems/unsafe/\" onmouseover=\"url()',
+                    "label": "Unsafe <img src=x onerror=label()>",
+                    "summary": "Summary <script>summary()</script>",
+                },
+                {
+                    "id": "concept:unsafe",
+                    "type": "concept",
+                    "problem_id": 'target\"><script>target()</script>',
+                    "label": "Target <script>label()</script>",
+                },
+            ],
+            "edges": [
+                {
+                    "source": "problem:unsafe",
+                    "target": "concept:unsafe",
+                    "relation": "shares_concepts",
+                    "concepts": ["graph<script>concept()</script>"],
+                },
+                {
+                    "source": "problem:unsafe",
+                    "target": "concept:unsafe",
+                    "relation": "uses_concept",
+                },
+            ],
+        }
+
+        output = render._brain_page(graph)
+
+        self.assertIn("Research brain · Proof Factory", output)
+        self.assertIn("2 nodes · 2 edges · 1 concepts", output)
+        self.assertIn("Unsafe &lt;img src=x onerror=label()&gt;", output)
+        self.assertIn("Summary &lt;script&gt;summary()&lt;/script&gt;", output)
+        self.assertIn("graph&lt;script&gt;concept()&lt;/script&gt;", output)
+        self.assertNotIn("<script>summary()", output)
+        self.assertNotIn("<script>concept()", output)
+
+
+if __name__ == "__main__":
+    unittest.main()

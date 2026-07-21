@@ -7,6 +7,8 @@ cd "$PROOF_ROOT"
 # systemd resolves ReadWritePaths before Python can create these runtime directories.
 install -d -m 0700 state state/locks
 install -d -m 0755 site research data publications
+install -d -m 0755 /etc/proof-factory
+install -m 0644 deploy/proof-factory.env /etc/proof-factory/proof-factory.env
 
 python3 -m venv .venv
 .venv/bin/pip install --disable-pip-version-check -r requirements.txt

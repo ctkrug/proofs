@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import brain, capacity, events, intake, lab, prior_art, publication, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics
+from . import brain, capacity, config, contribution_gate, events, intake, lab, prior_art, publication, render, repositories, research_state, roadmap, scheduler, scout, store, strategy_lab, tactics
 
 
 EXTERNAL_STATES = {
@@ -21,7 +21,7 @@ EXTERNAL_STATES = {
 def _doctor() -> dict[str, Any]:
     problems = store.load_problems()
     attempts = store.load_attempts()
-    codex_bin = os.environ.get("CODEX_BIN", "codex")
+    codex_bin = config.get_text("CODEX_BIN", "codex")
     lab_python = store.ROOT / ".lab-venv" / "bin" / "python"
     repo_status = repositories.status()
     repo_registry = store.read_json(store.DATA / "problem_repositories.json", {})
@@ -84,9 +84,11 @@ def _review(
             raise ValueError("only a candidate attempt can be accepted as a result")
         if decision == "accept" and prior_reviews and prior_reviews[-1].get("display_status") == "internal_result":
             raise ValueError("an internal result must pass a new contribution gate before it can be accepted")
-        gate = attempt.get("contribution_gate") if isinstance(attempt.get("contribution_gate"), dict) else {}
-        if decision == "accept" and gate and not gate.get("passed"):
-            raise ValueError("the attempt did not pass the contribution gate")
+        if decision == "accept":
+            gate = attempt.get("contribution_gate")
+            if not isinstance(gate, dict):
+                raise ValueError("acceptance requires a present current-schema contribution gate")
+            contribution_gate.validate(gate, require_passed=True)
         if decision == "accept" and not note.strip():
             raise ValueError("accepting a result requires a human review note")
         if release and decision != "accept":
@@ -228,6 +230,7 @@ def parser() -> argparse.ArgumentParser:
     lab_review.add_argument("--decision", choices=sorted(lab.REVIEW_DECISIONS), required=True)
     lab_review.add_argument("--reason", required=True)
     lab_review.add_argument("--reviewer", default="operator")
+    lab_review.add_argument("--validation-receipt", default="")
     lab_retune = sub.add_parser("lab-retune-review")
     lab_retune.add_argument("--job", required=True)
     lab_retune.add_argument("--review-every-segments", required=True, type=int)
@@ -377,7 +380,10 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(lab.worker_tranche() if args.drain else lab.worker_once(), indent=2))
         return 0
     if args.command == "lab-review":
-        print(json.dumps(lab.apply_review(args.job, args.decision, reason=args.reason, reviewer=args.reviewer), indent=2))
+        print(json.dumps(lab.apply_review(
+            args.job, args.decision, reason=args.reason, reviewer=args.reviewer,
+            validation_receipt=args.validation_receipt,
+        ), indent=2))
         return 0
     if args.command == "lab-retune-review":
         print(json.dumps(lab.retune_review_interval(

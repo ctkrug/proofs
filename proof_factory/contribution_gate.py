@@ -3,6 +3,11 @@ from __future__ import annotations
 from typing import Any
 from urllib.parse import urlparse
 
+from . import schemas
+
+
+SCHEMA_VERSION = 1
+
 
 CONTRIBUTION_CLASSES = {
     "terminal_result",
@@ -16,6 +21,12 @@ INDEPENDENT_VALIDATORS = {
     "repository_ci",
     "external_expert",
 }
+GATE_STATUSES = {"candidate_eligible", "internal_result", "not_requested"}
+GATE_FIELDS = frozenset({
+    "schema_version", "passed", "status", "reasons", "contribution_class",
+    "meaningful_delta", "scholarly_question", "external_recipient",
+    "independent_validation_types",
+})
 
 
 def _text(value: Any) -> str:
@@ -24,9 +35,71 @@ def _text(value: Any) -> str:
 
 def _http_url(value: Any) -> bool:
     try:
-        return urlparse(_text(value)).scheme in {"http", "https"}
+        parsed = urlparse(_text(value))
+        return bool(
+            parsed.scheme in {"http", "https"}
+            and parsed.netloc
+            and parsed.hostname
+            and not parsed.username
+            and not parsed.password
+        )
     except ValueError:
         return False
+
+
+def validate(value: Any, *, require_passed: bool = False) -> dict[str, Any]:
+    """Validate a persisted gate decision before any acceptance boundary."""
+    gate = schemas.require_object(value, kind="contribution gate")
+    schemas.require_current_version(gate, kind="contribution gate", current=SCHEMA_VERSION)
+    schemas.require_fields(gate, GATE_FIELDS, kind="contribution gate")
+    if not isinstance(gate.get("passed"), bool):
+        raise schemas.SchemaError("contribution gate.passed must be bool")
+    if gate.get("status") not in GATE_STATUSES:
+        raise schemas.SchemaError(f"invalid contribution gate status: {gate.get('status')!r}")
+    contribution_class = schemas.require_type(
+        gate, "contribution_class", str, kind="contribution gate",
+    )
+    if contribution_class not in CONTRIBUTION_CLASSES | {"unspecified"}:
+        raise schemas.SchemaError(f"invalid contribution gate contribution_class: {contribution_class!r}")
+    for field in ("meaningful_delta", "scholarly_question", "external_recipient"):
+        schemas.require_type(gate, field, str, kind="contribution gate")
+    reasons = schemas.require_type(gate, "reasons", list, kind="contribution gate")
+    if not all(isinstance(reason, str) and reason.strip() for reason in reasons):
+        raise schemas.SchemaError("contribution gate.reasons must contain nonempty strings")
+    validations = schemas.require_type(
+        gate, "independent_validation_types", list, kind="contribution gate",
+    )
+    if not all(isinstance(item, str) and item in INDEPENDENT_VALIDATORS for item in validations):
+        raise schemas.SchemaError("contribution gate has invalid independent_validation_types")
+    if gate["passed"] != (gate["status"] == "candidate_eligible"):
+        raise schemas.SchemaError("contribution gate passed/status fields disagree")
+    if gate["passed"] and reasons:
+        raise schemas.SchemaError("a passed contribution gate cannot contain rejection reasons")
+    if gate["passed"] and (
+        contribution_class not in CONTRIBUTION_CLASSES
+        or not gate["meaningful_delta"].strip()
+        or not gate["scholarly_question"].strip()
+        or not gate["external_recipient"].strip()
+        or not validations
+    ):
+        raise schemas.SchemaError("passed contribution gate is missing required acceptance evidence")
+    if require_passed and not gate["passed"]:
+        raise schemas.SchemaError("the attempt did not pass the contribution gate")
+    return gate
+
+
+def not_requested() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "passed": False,
+        "status": "not_requested",
+        "reasons": [],
+        "contribution_class": "unspecified",
+        "meaningful_delta": "",
+        "scholarly_question": "",
+        "external_recipient": "",
+        "independent_validation_types": [],
+    }
 
 
 def assess(result: dict[str, Any]) -> dict[str, Any]:
@@ -79,19 +152,27 @@ def assess(result: dict[str, Any]) -> dict[str, Any]:
         )
 
     relevance = profile.get("relevance") if isinstance(profile.get("relevance"), dict) else {}
+    relevance_fields = (
+        "settles_exact_open_target", "improves_best_known_result", "source_explicitly_requests_result",
+        "expert_interest_confirmed", "new_structural_result",
+    )
+    invalid_relevance = [key for key in relevance_fields if not isinstance(relevance.get(key, False), bool)]
+    if invalid_relevance:
+        reasons.append("Scholarly-relevance flags must be JSON booleans: " + ", ".join(invalid_relevance) + ".")
     relevance_claims = {
-        "settles_exact_open_target": bool(relevance.get("settles_exact_open_target")),
-        "improves_best_known_result": bool(relevance.get("improves_best_known_result")),
-        "source_explicitly_requests_result": bool(relevance.get("source_explicitly_requests_result")),
-        "expert_interest_confirmed": bool(relevance.get("expert_interest_confirmed")),
-        "new_structural_result": bool(relevance.get("new_structural_result")),
+        key: relevance.get(key, False) if isinstance(relevance.get(key, False), bool) else False
+        for key in relevance_fields
     }
     if not any(relevance_claims.values()):
         reasons.append("No evidence that the result settles, improves, answers, or structurally advances a recognized target.")
     if any(relevance_claims.values()) and not _http_url(relevance.get("evidence_url")):
         reasons.append("The claimed scholarly relevance has no supporting source URL.")
 
-    if bool(profile.get("arbitrary_cutoff_extension")):
+    cutoff = profile.get("arbitrary_cutoff_extension", False)
+    if not isinstance(cutoff, bool):
+        reasons.append("arbitrary_cutoff_extension must be a JSON boolean.")
+        cutoff = True
+    if cutoff:
         reasons.append("A larger unrequested cutoff alone is an internal experiment, not a candidate contribution.")
     if contribution_class == "bounded_extension" and not any(
         relevance_claims[key] for key in (
@@ -101,8 +182,8 @@ def assess(result: dict[str, Any]) -> dict[str, Any]:
     ):
         reasons.append("A bounded extension needs a best-known improvement, explicit request, expert interest, or structural result.")
 
-    return {
-        "schema_version": 1,
+    gate = {
+        "schema_version": SCHEMA_VERSION,
         "passed": not reasons,
         "status": "candidate_eligible" if not reasons else "internal_result",
         "reasons": reasons,
@@ -112,3 +193,4 @@ def assess(result: dict[str, Any]) -> dict[str, Any]:
         "external_recipient": _text(channel.get("recipient"))[:500],
         "independent_validation_types": sorted({str(row.get("type")) for row in valid_validations}),
     }
+    return validate(gate)

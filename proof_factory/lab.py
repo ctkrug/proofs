@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -10,10 +12,11 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from . import capacity, events, repositories, store
+from . import capacity, events, repositories, schemas, store
 
 
 SCHEMA_VERSION = 2
+_SAFE_JOB_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 RUNNER = store.ROOT / "skills" / "computational-researcher" / "scripts" / "run_experiment.py"
 ALLOWED_EXECUTABLES = {
     "python", "python3", "pypy3", "julia", "sage", "lean", "lake",
@@ -34,6 +37,7 @@ LIFECYCLE_STATES = {
     "validated", "stopped_with_reason",
 }
 REVIEW_DECISIONS = {"continue", "validate", "promote", "redirect"}
+VALIDATION_RECEIPT_SCHEMA_VERSION = 1
 EFFICIENCY_FIELDS = {
     "naive_cost", "opportunities_considered", "chosen_reductions",
     "expected_throughput_gain", "soundness_basis", "remains_uncompressed",
@@ -71,13 +75,35 @@ def _state_root() -> Path:
 
 
 def _state_path(job_id: str) -> Path:
+    if not _SAFE_JOB_ID.fullmatch(job_id):
+        raise schemas.SchemaError(f"invalid lab job id: {job_id!r}")
     return _state_root() / f"{job_id}.json"
 
 
 def _read_state(job_id: str) -> dict[str, Any]:
-    value = store.read_json(_state_path(job_id), None)
-    if not isinstance(value, dict):
+    path = _state_path(job_id)
+    if not path.exists():
         raise ValueError(f"unknown lab job: {job_id}")
+    value = schemas.load_json_object(path, kind="lab persisted state")
+    schemas.require_current_version(value, kind="lab persisted state", current=SCHEMA_VERSION)
+    schemas.require_fields(
+        value,
+        frozenset((*SPEC_FIELDS, "spec_sha256", "status", "segments", "last_reviewed_segment", "created_at")),
+        kind="lab persisted state",
+    )
+    if value.get("id") != job_id:
+        raise schemas.SchemaError(
+            f"lab persisted state id {value.get('id')!r} does not match filename job {job_id!r}"
+        )
+    if not _SAFE_JOB_ID.fullmatch(job_id):
+        raise schemas.SchemaError(f"lab persisted state has invalid job id: {job_id!r}")
+    if value.get("status") not in LIFECYCLE_STATES:
+        raise schemas.SchemaError(f"lab persisted state has invalid lifecycle status: {value.get('status')!r}")
+    schemas.require_type(value, "segments", list, kind="lab persisted state")
+    _validate_input_hashes(value.get("input_sha256"), kind="lab persisted state")
+    expected = str(value.get("spec_sha256") or "")
+    if len(expected) != 64 or expected != _spec_sha256(value):
+        raise schemas.SchemaError("lab persisted state spec_sha256 mismatch")
     return value
 
 
@@ -127,6 +153,23 @@ def _spec_sha256(value: dict[str, Any]) -> str:
     return hashlib.sha256(
         json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
     ).hexdigest()
+
+
+def _validate_input_hashes(value: Any, *, kind: str) -> None:
+    if not isinstance(value, dict):
+        raise schemas.SchemaError(f"{kind}.input_sha256 must be dict")
+    for relative, digest in value.items():
+        candidate = Path(relative) if isinstance(relative, str) else Path("..")
+        if (
+            not isinstance(relative, str) or not relative or candidate.is_absolute()
+            or ".." in candidate.parts or candidate.as_posix() != relative
+        ):
+            raise schemas.SchemaError(f"{kind}.input_sha256 has invalid relative path: {relative!r}")
+        if (
+            not isinstance(digest, str) or len(digest) != 64
+            or any(char not in "0123456789abcdef" for char in digest)
+        ):
+            raise schemas.SchemaError(f"{kind}.input_sha256[{relative!r}] must be lowercase SHA-256")
 
 
 def _validate_efficiency(value: Any, *, substantial: bool) -> dict[str, Any]:
@@ -247,7 +290,29 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
     }
     if not normalized["name"] or not normalized["hypothesis"] or not normalized["expected_signal"]:
         raise ValueError("name, hypothesis, and expected_signal are required")
+    if not _SAFE_JOB_ID.fullmatch(normalized["id"]):
+        raise ValueError(f"invalid lab job id: {normalized['id']}")
+    _validate_input_hashes(normalized["input_sha256"], kind="lab spec")
     normalized["spec_sha256"] = _spec_sha256(normalized)
+    return normalized
+
+
+def _load_persisted_spec(path: Path, *, source_path: Path | None = None) -> dict[str, Any]:
+    """Load a queued spec without synthesizing fields for historical schemas.
+
+    Lab v1 did not bind the full continuation/efficiency contract. It remains
+    viewable in durable state but cannot be executed or accepted as if it were v2.
+    """
+    raw = schemas.load_json_object(path, kind="lab persisted spec")
+    schemas.require_current_version(raw, kind="lab persisted spec", current=SCHEMA_VERSION)
+    schemas.require_fields(raw, frozenset((*SPEC_FIELDS, "spec_sha256")), kind="lab persisted spec")
+    _validate_input_hashes(raw.get("input_sha256"), kind="lab persisted spec")
+    expected = str(raw.get("spec_sha256") or "")
+    if len(expected) != 64 or expected != _spec_sha256(raw):
+        raise schemas.SchemaError("lab persisted spec spec_sha256 mismatch")
+    normalized = _validate(raw, source_path=source_path)
+    if normalized != raw:
+        raise schemas.SchemaError("lab persisted spec is not in canonical current-schema form")
     return normalized
 
 
@@ -322,21 +387,71 @@ def _requires_build_cache(raw: dict[str, Any]) -> bool:
     return any(token in value for value in command for token in ("lean", "lake", "formal-conjectures"))
 
 
-def _progress(workspace: Path, spec: dict[str, Any], previous: dict[str, Any], duration: float) -> tuple[dict[str, Any], list[str]]:
+def _tree_bytes(root: Path) -> int:
+    """Measure regular-file bytes without following cache or external symlinks."""
+    total = 0
+    for path in root.rglob("*"):
+        try:
+            if path.is_file() and not path.is_symlink():
+                total += path.stat().st_size
+        except OSError:
+            continue
+    return total
+
+
+def _progress(
+    workspace: Path,
+    spec: dict[str, Any],
+    previous: dict[str, Any],
+    duration: float,
+    *,
+    measured_growth_bytes: int = 0,
+) -> tuple[dict[str, Any], list[str]]:
     if not spec["progress_path"]:
+        measured = max(0, int(measured_growth_bytes))
         return {"complete": True, "completed_units": 1, "total_units": 1,
-                "correctness_checks_passed": True, "decision_value_active": True}, []
+                "correctness_checks_passed": True, "decision_value_active": True,
+                "artifact_bytes": measured, "artifact_growth_bytes": measured,
+                "measured_artifact_growth_bytes": measured}, []
     path = workspace / spec["progress_path"]
-    value = store.read_json(path, None)
-    if not isinstance(value, dict):
-        return {}, ["progress record missing or invalid"]
-    completed = float(value.get("completed_units") or 0)
-    total = float(value.get("total_units") or 0)
+    try:
+        value = schemas.load_json_object(path, kind="lab progress record")
+
+        def number(field: str) -> float:
+            item = value.get(field)
+            if isinstance(item, bool) or not isinstance(item, (int, float)):
+                raise schemas.SchemaError(f"lab progress record.{field} must be a number")
+            result = float(item)
+            if not math.isfinite(result) or result < 0:
+                raise schemas.SchemaError(f"lab progress record.{field} must be finite and nonnegative")
+            return result
+
+        def boolean(field: str) -> bool:
+            item = value.get(field)
+            if not isinstance(item, bool):
+                raise schemas.SchemaError(f"lab progress record.{field} must be bool")
+            return item
+
+        completed = number("completed_units")
+        total = number("total_units")
+        reported_artifact_bytes = value.get("artifact_bytes")
+        if isinstance(reported_artifact_bytes, bool) or not isinstance(reported_artifact_bytes, int):
+            raise schemas.SchemaError("lab progress record.artifact_bytes must be int")
+        if reported_artifact_bytes < 0:
+            raise schemas.SchemaError("lab progress record.artifact_bytes must be nonnegative")
+        declared_complete = boolean("complete")
+        correctness_passed = boolean("correctness_checks_passed")
+        decision_value_active = boolean("decision_value_active")
+    except (OSError, schemas.SchemaError) as exc:
+        return {}, [f"progress record missing or invalid: {exc}"]
+
     prior_completed = float(previous.get("completed_units") or 0)
-    artifact_bytes = int(value.get("artifact_bytes") or path.stat().st_size)
-    prior_bytes = int(previous.get("artifact_bytes") or 0)
+    prior_bytes = int(previous.get("reported_artifact_bytes", previous.get("artifact_bytes") or 0))
     delta = completed - prior_completed
     throughput = delta / max(duration, 0.001)
+    reported_growth = reported_artifact_bytes - prior_bytes
+    independently_measured_growth = max(0, int(measured_growth_bytes))
+    effective_growth = max(0, reported_growth, independently_measured_growth)
     progress = {
         "path": spec["progress_path"],
         "sha256": _sha256(path),
@@ -344,17 +459,28 @@ def _progress(workspace: Path, spec: dict[str, Any], previous: dict[str, Any], d
         "total_units": total,
         "delta_units": delta,
         "throughput_per_second": throughput,
-        "artifact_bytes": artifact_bytes,
-        "artifact_growth_bytes": max(0, artifact_bytes - prior_bytes),
-        "complete": bool(value.get("complete") or (total > 0 and completed >= total)),
-        "correctness_checks_passed": bool(value.get("correctness_checks_passed")),
-        "decision_value_active": bool(value.get("decision_value_active", True)),
+        "artifact_bytes": reported_artifact_bytes,
+        "reported_artifact_bytes": reported_artifact_bytes,
+        "reported_artifact_growth_bytes": max(0, reported_growth),
+        "measured_artifact_growth_bytes": independently_measured_growth,
+        "artifact_growth_bytes": effective_growth,
+        "complete": declared_complete,
+        "correctness_checks_passed": correctness_passed,
+        "decision_value_active": decision_value_active,
         "message": str(value.get("message") or "")[:2000],
     }
     failures: list[str] = []
     limits = spec["continuation_thresholds"]
+    if total <= 0:
+        failures.append("total units must be positive")
+    if total > 0 and declared_complete != (completed >= total):
+        failures.append("declared completion disagrees with completed and total units")
+    if completed > total and total > 0:
+        failures.append("completed units exceed total units")
     if delta <= 0 and not progress["complete"]:
         failures.append("completed units did not increase")
+    if reported_growth < 0:
+        failures.append("reported artifact bytes decreased")
     if limits["min_throughput_per_second"] and throughput < limits["min_throughput_per_second"]:
         failures.append("measured throughput fell below the declared continuation threshold")
     if limits["max_artifact_growth_bytes"] and progress["artifact_growth_bytes"] > limits["max_artifact_growth_bytes"]:
@@ -371,7 +497,7 @@ def _emit_segment_event(spec: dict[str, Any], status: str, record: dict[str, Any
     return events.enqueue(
         spec["problem_id"], kind,
         evidence=(
-            f"lab job {spec['id']} segment {spec['segment']} entered {status}; "
+            f"lab job {spec['id']} segment {record.get('segment', spec['segment'])} entered {status}; "
             f"progress={json.dumps(record.get('progress', {}), sort_keys=True)[:2500]}"
         ),
         source=f"state/labs/jobs/{spec['id']}.json",
@@ -407,11 +533,14 @@ def worker_once() -> dict[str, Any]:
         running = source.with_suffix(".running.json")
         os.replace(source, running)
         try:
-            raw = json.loads(running.read_text())
-            spec = _validate(raw, source_path=source)
+            spec = _load_persisted_spec(running, source_path=source)
             workspace = _workspace(spec["problem_id"])
             _verify_immutable_inputs(spec, workspace)
             state = _read_state(spec["id"])
+            if state.get("status") not in {"queued", "checkpointed"}:
+                raise schemas.SchemaError(
+                    f"lab job {spec['id']} is not executable from state {state.get('status')!r}"
+                )
             state["status"] = "running"
             state["running_segment"] = spec["segment"]
             _write_state(state)
@@ -431,6 +560,7 @@ def worker_once() -> dict[str, Any]:
                 "HOME", "PATH", "LANG", "LC_ALL", "SSL_CERT_FILE", "SSL_CERT_DIR",
             }}
             env["PROOF_EXPERIMENT_MAX_SECONDS"] = str(MAX_SEGMENT_SECONDS)
+            workspace_bytes_before = _tree_bytes(workspace)
             started = store.parse_iso(store.now_iso())
             proc = subprocess.run(command, cwd=workspace, env=env, text=True, capture_output=True,
                                   timeout=spec["segment_seconds"] + 120)
@@ -439,7 +569,10 @@ def worker_once() -> dict[str, Any]:
             checkpoint_path = workspace / spec["checkpoint_path"] if spec["checkpoint_path"] else None
             checkpoint_exists = bool(checkpoint_path and checkpoint_path.is_file())
             previous = state.get("segments", [])[-1].get("progress", {}) if state.get("segments") else {}
-            progress, threshold_failures = _progress(workspace, spec, previous, duration)
+            measured_growth = max(0, _tree_bytes(workspace) - workspace_bytes_before)
+            progress, threshold_failures = _progress(
+                workspace, spec, previous, duration, measured_growth_bytes=measured_growth,
+            )
             if spec["checkpoint_path"] and not checkpoint_exists and not progress.get("complete"):
                 threshold_failures.append("checkpoint file missing")
             record = {
@@ -475,10 +608,13 @@ def worker_once() -> dict[str, Any]:
             state["running_segment"] = None
             state["latest_progress"] = progress
             state["stop_reason"] = "; ".join(threshold_failures)
+            next_spec: dict[str, Any] | None = None
             if lifecycle == "checkpointed":
                 spec["segment"] += 1
+                spec["spec_sha256"] = _spec_sha256(spec)
                 state["segment"] = spec["segment"]
-                store.write_json_atomic(source, spec)
+                state["spec_sha256"] = spec["spec_sha256"]
+                next_spec = spec
             else:
                 archive = workspace / "lab-archive"
                 archive.mkdir(parents=True, exist_ok=True)
@@ -488,25 +624,42 @@ def worker_once() -> dict[str, Any]:
             _write_state(state)
             _append_record({**record, "status": lifecycle})
             repositories.record_lab(spec["problem_id"], lifecycle, {**spec, **record})
+            # Publish executable work only after the event, state, append-only
+            # ledger, and repository receipt are durable. A late failure can no
+            # longer leave a stopped job queued.
+            if next_spec is not None:
+                store.write_json_atomic(source, next_spec)
             return {"status": lifecycle, **record}
         except Exception as exc:
             error = f"{type(exc).__name__}: {exc}"
+            failed_id = running.stem.replace(".running", "")
+            failed_problem = ""
             try:
-                failed_spec = json.loads(running.read_text())
-                failed_id = str(failed_spec.get("id") or running.stem.replace(".running", ""))
-                failed_problem = str(failed_spec.get("problem_id") or "")
+                failed_spec = store.read_json(running, {})
+                if isinstance(failed_spec, dict):
+                    failed_id = str(failed_spec.get("id") or failed_id)
+                    failed_problem = str(failed_spec.get("problem_id") or "")
+            except Exception:
+                pass
+            try:
                 state = _read_state(failed_id)
                 state["status"] = "stopped_with_reason"
                 state["stop_reason"] = error
                 _write_state(state)
-                if failed_problem:
+            except Exception:
+                # An incompatible historical state is retained byte-for-byte for
+                # viewing; the append-only record and event carry the rejection.
+                pass
+            if failed_problem:
+                try:
                     events.enqueue(failed_problem, "lab_completed", evidence=f"lab job {failed_id} stopped: {error}",
                                    source=f"state/labs/jobs/{failed_id}.json")
-            except Exception:
-                failed_id, failed_problem = running.stem.replace(".running", ""), ""
+                except Exception:
+                    pass
             record = {"recorded_at": store.now_iso(), "job_id": failed_id, "problem_id": failed_problem,
                       "status": "stopped_with_reason", "error": error}
             _append_record(record)
+            source.unlink(missing_ok=True)
             rejected = running.parent.parent / "lab-rejected"
             rejected.mkdir(parents=True, exist_ok=True)
             shutil.move(str(running), str(rejected / running.name))
@@ -536,7 +689,76 @@ def worker_tranche(*, max_segments: int | None = None) -> dict[str, Any]:
     }
 
 
-def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "operator") -> dict[str, Any]:
+def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[str, Any], str]:
+    """Verify an independently produced receipt against the completed job and current artifacts."""
+    workspace = _workspace(str(state["problem_id"]))
+    candidate = Path(str(relative or ""))
+    if not relative or candidate.is_absolute() or ".." in candidate.parts:
+        raise schemas.SchemaError("validation receipt must be a relative workspace path")
+    path = (workspace / candidate).resolve()
+    if not _inside(path, workspace) or not path.is_file() or path.is_symlink():
+        raise schemas.SchemaError("validation receipt must be a regular file inside the workspace")
+    receipt = schemas.load_json_object(path, kind="lab validation receipt")
+    schemas.require_current_version(
+        receipt, kind="lab validation receipt", current=VALIDATION_RECEIPT_SCHEMA_VERSION,
+    )
+    schemas.require_fields(receipt, frozenset({
+        "schema_version", "job_id", "segment", "progress_sha256", "result", "validator",
+        "checker_path", "checker_sha256", "checked_artifacts", "independence_basis", "created_at",
+    }), kind="lab validation receipt")
+    if receipt["job_id"] != state["id"] or receipt["segment"] != state["segment"]:
+        raise schemas.SchemaError("lab validation receipt is not bound to the completed job segment")
+    if receipt["result"] != "passed":
+        raise schemas.SchemaError("lab validation receipt result is not passed")
+    if receipt["progress_sha256"] != state.get("latest_progress", {}).get("sha256"):
+        raise schemas.SchemaError("lab validation receipt does not bind the final progress record")
+    if not isinstance(receipt["validator"], str) or not receipt["validator"].strip():
+        raise schemas.SchemaError("lab validation receipt.validator must be nonempty")
+    if not isinstance(receipt["independence_basis"], str) or not receipt["independence_basis"].strip():
+        raise schemas.SchemaError("lab validation receipt.independence_basis must be nonempty")
+    if not store.parse_iso(receipt["created_at"] if isinstance(receipt["created_at"], str) else ""):
+        raise schemas.SchemaError("lab validation receipt.created_at must be an ISO timestamp")
+
+    checker_relative = receipt["checker_path"]
+    if not isinstance(checker_relative, str):
+        raise schemas.SchemaError("lab validation receipt.checker_path must be a relative path")
+    checker = (workspace / checker_relative).resolve()
+    if (
+        Path(checker_relative).is_absolute() or ".." in Path(checker_relative).parts
+        or not _inside(checker, workspace) or not checker.is_file() or checker.is_symlink()
+    ):
+        raise schemas.SchemaError("lab validation checker must be a regular workspace file")
+    if receipt["checker_sha256"] != _sha256(checker):
+        raise schemas.SchemaError("lab validation checker hash mismatch")
+    if receipt["checker_sha256"] in set(state.get("input_sha256", {}).values()):
+        raise schemas.SchemaError("lab validation checker must differ from the experiment inputs")
+
+    artifacts = receipt["checked_artifacts"]
+    if not isinstance(artifacts, dict) or not artifacts:
+        raise schemas.SchemaError("lab validation receipt.checked_artifacts must be a nonempty object")
+    for artifact_relative, expected in artifacts.items():
+        if not isinstance(artifact_relative, str) or not isinstance(expected, str):
+            raise schemas.SchemaError("lab validation artifact paths and hashes must be strings")
+        artifact = (workspace / artifact_relative).resolve()
+        if (
+            Path(artifact_relative).is_absolute() or ".." in Path(artifact_relative).parts
+            or not _inside(artifact, workspace) or not artifact.is_file() or artifact.is_symlink()
+            or len(expected) != 64 or any(char not in "0123456789abcdef" for char in expected)
+        ):
+            raise schemas.SchemaError(f"invalid lab validation artifact: {artifact_relative!r}")
+        if _sha256(artifact) != expected:
+            raise schemas.SchemaError(f"lab validation artifact hash mismatch: {artifact_relative}")
+    return receipt, _sha256(path)
+
+
+def apply_review(
+    job_id: str,
+    decision: str,
+    *,
+    reason: str,
+    reviewer: str = "operator",
+    validation_receipt: str = "",
+) -> dict[str, Any]:
     decision = str(decision).strip()
     if decision not in REVIEW_DECISIONS:
         raise ValueError(f"review decision must be one of {sorted(REVIEW_DECISIONS)}")
@@ -547,6 +769,11 @@ def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "op
         raise ValueError(f"job {job_id} is not awaiting review or stopped")
     review = {"decision": decision, "reason": str(reason)[:4000], "reviewer": str(reviewer)[:200],
               "reviewed_at": store.now_iso(), "segment": int(state.get("segment") or 1)}
+    if decision in {"validate", "promote"}:
+        receipt, receipt_sha256 = _validated_lab_receipt(state, validation_receipt)
+        review["validation_receipt"] = validation_receipt
+        review["validation_receipt_sha256"] = receipt_sha256
+        review["independent_validator"] = receipt["validator"]
     state.setdefault("reviews", []).append(review)
     workspace = _workspace(str(state["problem_id"]))
     if decision == "continue":
@@ -557,6 +784,7 @@ def apply_review(job_id: str, decision: str, *, reason: str, reviewer: str = "op
         if state.get("max_segments") and state["segment"] > int(state["max_segments"]):
             state["max_segments"] = state["segment"] + int(state.get("review_every_segments") or 1) - 1
         state["status"] = "queued"
+        state["spec_sha256"] = _spec_sha256(state)
         queue = workspace / "lab-queue"
         queue.mkdir(parents=True, exist_ok=True)
         spec = {key: state[key] for key in (*SPEC_FIELDS, "spec_sha256")}
@@ -615,8 +843,19 @@ def status(problem_id: str | None = None) -> dict[str, Any]:
     states: list[dict[str, Any]] = []
     for path in sorted(_state_root().glob("*.json")):
         value = store.read_json(path, None)
-        if isinstance(value, dict) and (not problem_id or value.get("problem_id") == problem_id):
-            states.append(value)
+        if not isinstance(value, dict) or (problem_id and value.get("problem_id") != problem_id):
+            continue
+        try:
+            current = _read_state(path.stem)
+            current["schema_compatible"] = True
+            states.append(current)
+        except (ValueError, schemas.SchemaError) as exc:
+            # Historical records remain inspectable, but no mutation/acceptance
+            # path uses this permissive display view.
+            visible = dict(value)
+            visible["schema_compatible"] = False
+            visible["schema_error"] = str(exc)[:1000]
+            states.append(visible)
     counts = {name: sum(1 for row in states if row.get("status") == name) for name in sorted(LIFECYCLE_STATES)}
     return {
         "counts": counts,

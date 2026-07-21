@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import store
+from . import config, store
 
 
 DEFAULT_CACHE = Path("/root/project-factory/state/usage_cache.json")
@@ -22,7 +21,7 @@ def preferred_lane(admissions: dict[str, dict[str, Any]]) -> str | None:
 
 
 def _cache_path() -> Path:
-    return Path(os.environ.get("PROOF_USAGE_CACHE_PATH", str(DEFAULT_CACHE)))
+    return config.get_path("PROOF_USAGE_CACHE_PATH", DEFAULT_CACHE)
 
 
 def _baseline_slot(lane: str, now: datetime) -> bool:
@@ -46,7 +45,7 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     clock = time.time() if monotonic_now is None else monotonic_now
     payload = store.read_json(_cache_path(), {})
     baseline = _baseline_slot(lane, now)
-    operator_authorized = os.environ.get("PROOF_OPERATOR_RUN", "").strip().lower() in {"1", "true", "yes"}
+    operator_authorized = config.get_bool("PROOF_OPERATOR_RUN", False)
     result: dict[str, Any] = {
         "checked_at": payload.get("checked_at") if isinstance(payload, dict) else None,
         "mode": "baseline",

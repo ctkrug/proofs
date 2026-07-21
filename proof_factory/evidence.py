@@ -31,6 +31,8 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any, Iterable, Mapping
 
+from . import schemas
+
 
 SCHEMA_VERSION = 1
 _SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -81,6 +83,198 @@ def _scoped_file(workspace: Path, relative: str) -> Path:
 def _is_mutable(relative: str, patterns: tuple[str, ...]) -> bool:
     path = PurePosixPath(relative)
     return any(path.match(pattern) for pattern in patterns)
+
+
+def _validate_manifest_schema(value: dict[str, Any]) -> None:
+    schemas.require_fields(value, frozenset({
+        "schema_version", "kind", "attempt_id", "created_at", "workspace",
+        "mutable_projection_patterns", "claimed_evidence_paths", "artifact_count",
+        "artifacts", "content_sha256",
+    }), kind="attempt evidence manifest")
+    if value.get("kind") != "proof-factory-attempt-delta-manifest":
+        raise schemas.SchemaError(f"invalid attempt evidence manifest kind: {value.get('kind')!r}")
+    attempt_id = schemas.require_type(value, "attempt_id", str, kind="attempt evidence manifest")
+    if not _SAFE_ID.fullmatch(attempt_id):
+        raise schemas.SchemaError(f"invalid attempt evidence manifest attempt_id: {attempt_id!r}")
+    if not schemas.require_type(value, "workspace", str, kind="attempt evidence manifest"):
+        raise schemas.SchemaError("attempt evidence manifest.workspace must be nonempty")
+    if not schemas.require_type(value, "created_at", str, kind="attempt evidence manifest"):
+        raise schemas.SchemaError("attempt evidence manifest.created_at must be nonempty")
+    patterns = schemas.require_type(
+        value, "mutable_projection_patterns", list, kind="attempt evidence manifest",
+    )
+    claimed = schemas.require_type(value, "claimed_evidence_paths", list, kind="attempt evidence manifest")
+    artifacts = schemas.require_type(value, "artifacts", list, kind="attempt evidence manifest")
+    count = schemas.require_type(value, "artifact_count", int, kind="attempt evidence manifest")
+    if count < 0 or count != len(artifacts):
+        raise schemas.SchemaError("attempt evidence manifest artifact_count mismatch")
+    if not all(isinstance(item, str) for item in (*patterns, *claimed)):
+        raise schemas.SchemaError("attempt evidence manifest paths and patterns must be strings")
+    try:
+        normalized_patterns = [_relative_path(item) for item in patterns]
+        normalized_claimed = [_relative_path(item) for item in claimed]
+    except (TypeError, ValueError) as exc:
+        raise schemas.SchemaError(str(exc)) from exc
+    if len(set(normalized_patterns)) != len(normalized_patterns):
+        raise schemas.SchemaError("attempt evidence manifest has duplicate projection patterns")
+    if len(set(normalized_claimed)) != len(normalized_claimed):
+        raise schemas.SchemaError("attempt evidence manifest has duplicate claimed paths")
+    seen_paths: set[str] = set()
+    indexed_claims: set[str] = set()
+    for index, artifact in enumerate(artifacts):
+        if not isinstance(artifact, dict):
+            raise schemas.SchemaError(f"attempt evidence manifest artifact {index} must be an object")
+        schemas.require_fields(
+            artifact, frozenset({"path", "role", "change", "claimed_evidence"}),
+            kind=f"attempt evidence manifest artifact {index}",
+        )
+        if not isinstance(artifact["path"], str):
+            raise schemas.SchemaError(f"attempt evidence manifest artifact {index}.path must be str")
+        try:
+            relative = _relative_path(artifact["path"])
+        except (TypeError, ValueError) as exc:
+            raise schemas.SchemaError(str(exc)) from exc
+        if relative in seen_paths:
+            raise schemas.SchemaError(f"attempt evidence manifest has duplicate artifact path: {relative}")
+        seen_paths.add(relative)
+        if artifact.get("role") not in {"mutable_projection", "immutable_artifact"}:
+            raise schemas.SchemaError(f"attempt evidence manifest artifact {index} has invalid role")
+        if artifact.get("change") not in {"added", "modified", "deleted", "unchanged"}:
+            raise schemas.SchemaError(f"attempt evidence manifest artifact {index} has invalid change")
+        if not isinstance(artifact.get("claimed_evidence"), bool):
+            raise schemas.SchemaError(
+                f"attempt evidence manifest artifact {index}.claimed_evidence must be bool"
+            )
+        if artifact["claimed_evidence"]:
+            indexed_claims.add(relative)
+        change = artifact["change"]
+        required_metadata = (
+            ("after",) if change == "added" else
+            ("before",) if change == "deleted" else
+            ("before", "after")
+        )
+        for field in required_metadata:
+            metadata = artifact.get(field)
+            if not isinstance(metadata, dict):
+                raise schemas.SchemaError(
+                    f"attempt evidence manifest artifact {index}.{field} must be an object"
+                )
+            if metadata.get("kind") == "file":
+                digest = metadata.get("sha256")
+                size = metadata.get("size")
+                if (
+                    not isinstance(digest, str) or len(digest) != 64
+                    or any(char not in "0123456789abcdef" for char in digest)
+                    or isinstance(size, bool) or not isinstance(size, int) or size < 0
+                ):
+                    raise schemas.SchemaError(
+                        f"attempt evidence manifest artifact {index}.{field} has invalid file metadata"
+                    )
+            elif metadata.get("kind") == "symlink":
+                if not isinstance(metadata.get("target"), str):
+                    raise schemas.SchemaError(
+                        f"attempt evidence manifest artifact {index}.{field} has invalid symlink metadata"
+                    )
+            else:
+                raise schemas.SchemaError(
+                    f"attempt evidence manifest artifact {index}.{field} has invalid metadata kind"
+                )
+    if indexed_claims != set(normalized_claimed):
+        raise schemas.SchemaError("attempt evidence manifest claimed evidence index mismatch")
+    content = dict(value)
+    expected = str(content.pop("content_sha256", ""))
+    if (
+        len(expected) != 64 or any(char not in "0123456789abcdef" for char in expected)
+        or _json_sha256(content) != expected
+    ):
+        raise schemas.SchemaError("attempt evidence manifest content hash mismatch")
+
+
+def load_attempt_manifest(path: Path | str) -> dict[str, Any]:
+    """Strictly load a current-schema evidence manifest."""
+    return schemas.validate_loaded(
+        path, kind="attempt evidence manifest", current=SCHEMA_VERSION,
+        validator=_validate_manifest_schema,
+    )
+
+
+def _validate_receipt_schema(value: dict[str, Any]) -> None:
+    schemas.require_fields(value, frozenset({
+        "schema_version", "kind", "attempt_id", "checked_at", "manifest_path",
+        "manifest_file_sha256", "manifest_content_hash_valid", "workspace", "status",
+        "errors", "artifact_count", "claimed_evidence_count", "mutable_projection_count", "checks",
+    }), kind="evidence receipt")
+    if value.get("kind") != "proof-factory-evidence-receipt":
+        raise schemas.SchemaError(f"invalid evidence receipt kind: {value.get('kind')!r}")
+    attempt_id = schemas.require_type(value, "attempt_id", str, kind="evidence receipt")
+    if not _SAFE_ID.fullmatch(attempt_id):
+        raise schemas.SchemaError(f"invalid evidence receipt attempt_id: {attempt_id!r}")
+    for field in ("checked_at", "manifest_path", "workspace"):
+        if not schemas.require_type(value, field, str, kind="evidence receipt"):
+            raise schemas.SchemaError(f"evidence receipt.{field} must be nonempty")
+    if value.get("status") not in {"valid", "invalid"}:
+        raise schemas.SchemaError(f"invalid evidence receipt status: {value.get('status')!r}")
+    if not isinstance(value.get("manifest_content_hash_valid"), bool):
+        raise schemas.SchemaError("evidence receipt.manifest_content_hash_valid must be bool")
+    for field in ("errors", "checks"):
+        schemas.require_type(value, field, list, kind="evidence receipt")
+    if not all(isinstance(error, str) and error for error in value["errors"]):
+        raise schemas.SchemaError("evidence receipt.errors must contain nonempty strings")
+    for field in ("artifact_count", "claimed_evidence_count", "mutable_projection_count"):
+        count = schemas.require_type(value, field, int, kind="evidence receipt")
+        if count < 0:
+            raise schemas.SchemaError(f"evidence receipt.{field} must be nonnegative")
+    if value["artifact_count"] != len(value["checks"]):
+        raise schemas.SchemaError("evidence receipt artifact_count mismatch")
+    claimed_count = 0
+    mutable_count = 0
+    immutable_valid = True
+    for index, check in enumerate(value["checks"]):
+        if not isinstance(check, dict):
+            raise schemas.SchemaError(f"evidence receipt check {index} must be an object")
+        schemas.require_fields(
+            check,
+            frozenset({"path", "role", "change", "claimed_evidence", "scope_valid", "exists", "hash_matches", "valid"}),
+            kind=f"evidence receipt check {index}",
+        )
+        if check.get("role") not in {"mutable_projection", "immutable_artifact"}:
+            raise schemas.SchemaError(f"evidence receipt check {index} has invalid role")
+        if not isinstance(check.get("path"), str):
+            raise schemas.SchemaError(f"evidence receipt check {index}.path must be str")
+        try:
+            _relative_path(check["path"])
+        except ValueError as exc:
+            raise schemas.SchemaError(str(exc)) from exc
+        if check.get("change") not in {"added", "modified", "deleted", "unchanged"}:
+            raise schemas.SchemaError(f"evidence receipt check {index} has invalid change")
+        for field in ("claimed_evidence", "scope_valid", "exists", "valid"):
+            if not isinstance(check.get(field), bool):
+                raise schemas.SchemaError(f"evidence receipt check {index}.{field} must be bool")
+        if check.get("hash_matches") is not None and not isinstance(check.get("hash_matches"), bool):
+            raise schemas.SchemaError(f"evidence receipt check {index}.hash_matches must be bool or null")
+        claimed_count += int(check["claimed_evidence"])
+        mutable_count += int(check["role"] == "mutable_projection")
+        if check["role"] == "immutable_artifact":
+            immutable_valid = immutable_valid and check["valid"]
+    if value["claimed_evidence_count"] != claimed_count:
+        raise schemas.SchemaError("evidence receipt claimed_evidence_count mismatch")
+    if value["mutable_projection_count"] != mutable_count:
+        raise schemas.SchemaError("evidence receipt mutable_projection_count mismatch")
+    manifest_hash = schemas.require_type(value, "manifest_file_sha256", str, kind="evidence receipt")
+    if len(manifest_hash) != 64 or any(char not in "0123456789abcdef" for char in manifest_hash):
+        raise schemas.SchemaError("evidence receipt.manifest_file_sha256 must be lowercase SHA-256")
+    if value["status"] == "valid" and (
+        value["errors"] or not value["manifest_content_hash_valid"] or not immutable_valid
+    ):
+        raise schemas.SchemaError("valid evidence receipt contains errors or an invalid manifest hash")
+
+
+def load_evidence_receipt(path: Path | str) -> dict[str, Any]:
+    """Strictly load a current-schema evidence receipt."""
+    return schemas.validate_loaded(
+        path, kind="evidence receipt", current=SCHEMA_VERSION,
+        validator=_validate_receipt_schema,
+    )
 
 
 def capture_workspace_snapshot(workspace: Path | str) -> dict[str, dict[str, Any]]:
@@ -212,7 +406,7 @@ def validate_attempt_manifest(
 ) -> dict[str, Any]:
     """Validate manifest integrity and every artifact against the live workspace."""
     path = Path(manifest_path).resolve()
-    manifest = json.loads(path.read_text())
+    manifest = load_attempt_manifest(path)
     root = Path(workspace or manifest.get("workspace", "")).resolve()
     errors: list[str] = []
     expected_content_hash = str(manifest.get("content_sha256") or "")

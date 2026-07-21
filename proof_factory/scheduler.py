@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import shlex
 import subprocess
 from datetime import datetime, timezone
 from typing import Any
 
-from . import agent, brain, capacity, events, lab, render, repositories, research_state, resources, store, usage
+from . import agent, brain, capacity, config, events, lab, render, repositories, research_state, resources, store, usage
 
 
 ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
@@ -28,6 +27,12 @@ def _apply_lab_review(attempt: dict[str, Any]) -> str:
         or attempt.get("evidence_validation", {}).get("status") != "valid"
     ):
         return ""
+    if lab_decision.get("decision") in {"validate", "promote"}:
+        attempt.setdefault("policy_flags", []).append(
+            "Automated lab review may recommend validate/promote, but only an operator may apply it "
+            "with an independent validation receipt."
+        )
+        return ""
     try:
         attempt["lab_review_applied"] = lab.apply_review(
             str(lab_decision.get("job_id")), str(lab_decision.get("decision")),
@@ -43,18 +48,27 @@ def _consumable_event_ids(research_events: list[dict[str, Any]], pending_events:
                           *, reviewed_job: str, evidence_valid: bool) -> set[str]:
     if not evidence_valid:
         return set()
+    def matches_job(row: dict[str, Any]) -> bool:
+        return bool(
+            reviewed_job
+            and (
+                row.get("job_id") == reviewed_job
+                or row.get("source") == f"state/labs/jobs/{reviewed_job}.json"
+            )
+        )
+
     selected = {
         str(row["id"])
         for row in research_events
         if row.get("kind") != "lab_completed"
-        or (reviewed_job and reviewed_job in f"{row.get('source', '')} {row.get('evidence', '')}")
+        or matches_job(row)
     }
     if reviewed_job:
         selected.update(
             str(row["id"])
             for row in pending_events
             if row.get("kind") == "lab_segment_completed"
-            and reviewed_job in f"{row.get('source', '')} {row.get('evidence', '')}"
+            and matches_job(row)
         )
     return selected
 
@@ -128,7 +142,7 @@ def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def publish_if_configured() -> None:
-    command = os.environ.get("PROOF_FACTORY_PUBLISH_CMD", "").strip()
+    command = config.get_text("PROOF_FACTORY_PUBLISH_CMD", "", allow_empty=True)
     if not command:
         return
     proc = subprocess.run(shlex.split(command), cwd=store.ROOT, text=True, capture_output=True, timeout=900)
@@ -295,7 +309,7 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
             issues.append("Ramsey campaign has an unconsumed evidence event for more than 6 hours")
     elif not hard_in_flight and any(_reviewable_events(row["id"]) for row in store.load_problems() if row.get("lane") == "hard"):
         issues.append("Ramsey campaign has evidence ready but has not completed its first review")
-    easy_expected = os.environ.get("PROOF_EASY_EXPECTED", "1").strip().lower() not in {"0", "false", "no", "off"}
+    easy_expected = config.get_bool("PROOF_EASY_EXPECTED", True)
     if easy_expected:
         if easy:
             last_easy = store.parse_iso(easy[-1].get("finished_at"))

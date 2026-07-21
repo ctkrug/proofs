@@ -7,11 +7,12 @@ records, workspaces, completed toolchains, and published artifacts are not.
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import time
 from pathlib import Path
 from typing import Any
+
+from . import config
 
 
 ROOT_MIN_FREE_BYTES = 8 * 1024**3
@@ -36,7 +37,7 @@ def _available_memory_bytes() -> int:
 
 
 def _cache_root() -> Path:
-    return Path(os.environ.get("PROOF_FACTORY_CACHE_DIR", "/root/.cache/proof-factory"))
+    return config.get_path("PROOF_FACTORY_CACHE_DIR", "/root/.cache/proof-factory")
 
 
 def _existing_path(path: Path) -> Path:
@@ -63,7 +64,7 @@ def _lab_compute_active() -> bool:
     priority lab worker owns compute, but completed jobs awaiting a human/model
     review do not reserve the host.
     """
-    root = Path(os.environ.get("PROOF_FACTORY_ROOT", "/root/proof-factory"))
+    root = config.get_path("PROOF_FACTORY_ROOT", "/root/proof-factory")
     research = root / "research"
     try:
         if next(research.glob("*/workspace/lab-queue/*.json"), None) is not None:
@@ -105,7 +106,7 @@ def cleanup(*, now: float | None = None) -> dict[str, Any]:
             reclaimed += size
         except OSError:
             continue
-    elan_home = Path(os.environ.get("ELAN_HOME", str(_cache_root() / "lean" / "elan")))
+    elan_home = config.get_path("ELAN_HOME", _cache_root() / "lean" / "elan")
     try:
         incomplete = list((elan_home / "toolchains").glob("*.tmp"))
     except OSError:

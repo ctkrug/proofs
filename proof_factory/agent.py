@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-from . import briefing, contribution_gate, evidence as evidence_layer, research_state, store, telemetry
+from . import briefing, config, contribution_gate, evidence as evidence_layer, research_state, schemas, store, telemetry
 
 
 RESULT_RE = re.compile(r"```proof_result\s*(\{.*?\})\s*```", re.DOTALL)
@@ -25,6 +25,195 @@ DELEGATE_ROLES = {
 }
 ROUTE_DECISION_EVENT_KINDS = {"route_authorized", "source_changed", "external_feedback", "evidence_repaired"}
 REPAIR_TIMEOUT_SECONDS = 180
+
+
+def _text_projection(max_chars: int, *, default: str = "", strip: bool = False) -> dict[str, Any]:
+    return {"kind": "text", "max_chars": max_chars, "default": default, "strip": strip}
+
+
+def _string_list_projection(max_items: int, max_chars: int) -> dict[str, Any]:
+    return {"kind": "string_list", "max_items": max_items, "max_chars": max_chars}
+
+
+def _object_list_projection(max_items: int) -> dict[str, Any]:
+    return {"kind": "object_list", "max_items": max_items}
+
+
+def _object_projection(
+    fields: dict[str, dict[str, Any]] | None = None, *, default: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    return {"kind": "object", "fields": fields, "default": default or {}}
+
+
+# One contract owns accepted result shapes, failure defaults, and the bounded attempt
+# projection. Fields without a projection are consumed only while enforcing policy.
+RESULT_SCHEMA: dict[str, dict[str, Any]] = {
+    "outcome": {"kind": "enum", "choices": OUTCOMES, "default": "failed"},
+    "approach": {"kind": "string", "required_nonempty": True, "default": "", "projection": _text_projection(4000, strip=True)},
+    "summary": {"kind": "string", "required_nonempty": True, "default": "", "projection": _text_projection(8000, strip=True)},
+    "rationale": {"kind": "string", "required_nonempty": True, "default": "", "projection": _text_projection(4000, strip=True)},
+    "claims": {"kind": "list", "default": [], "projection": _string_list_projection(20, 2000)},
+    "evidence": {"kind": "list", "default": [], "projection": _string_list_projection(30, 2000)},
+    "evidence_files": {"kind": "list", "default": [], "projection": _string_list_projection(2000, 1000)},
+    "next_steps": {"kind": "list", "default": [], "projection": _string_list_projection(20, 2000)},
+    "citations": {"kind": "list", "default": [], "projection": _string_list_projection(30, 1000)},
+    "techniques": {"kind": "list", "default": [], "projection": _string_list_projection(30, 200)},
+    "experiments": {"kind": "list", "default": [], "projection": _string_list_projection(30, 2000)},
+    "transfer_insights": {"kind": "list", "default": [], "projection": _string_list_projection(20, 2000)},
+    "established_facts": {"kind": "list", "default": [], "projection": _object_list_projection(30)},
+    "ruled_out": {"kind": "list", "default": [], "projection": _object_list_projection(30)},
+    "open_leads": {"kind": "list", "default": [], "projection": _object_list_projection(30)},
+    "strategy_proposals": {"kind": "list", "default": [], "projection": _object_list_projection(10)},
+    "synthesis_candidates": {
+        "kind": "list", "default": [], "projection": _object_list_projection(30),
+        "item": {
+            "kind": "object",
+            "required_nonempty": (
+                "family", "mechanism", "source_inputs", "transfer_hypothesis",
+                "discriminating_test", "falsification_signal",
+            ),
+            "list_fields": {"parent_strategy_ids": False},
+        },
+    },
+    "strategy": {"kind": "object", "default": {}, "projection": _object_projection()},
+    "continuation": {"kind": "object", "default": {}, "projection": _object_projection()},
+    "candidate_profile": {"kind": "object", "default": {}, "projection": _object_projection()},
+    "campaign_assessment": {"kind": "object", "default": {}, "projection": _object_projection()},
+    "search_efficiency": {
+        "kind": "object", "required": True, "default": {},
+        "required_nonempty": ("naive_space", "chosen_mechanism", "estimated_or_measured_savings", "soundness_guard"),
+        "list_fields": {"reductions_considered": True},
+        "projection": _object_projection({
+            "naive_space": _text_projection(2000),
+            "reductions_considered": _string_list_projection(20, 500),
+            "chosen_mechanism": _text_projection(2000),
+            "estimated_or_measured_savings": _text_projection(2000),
+            "soundness_guard": _text_projection(2000),
+        }),
+    },
+    "space_reduction": {
+        "kind": "object", "required": True, "default": {},
+        "required_nonempty": (
+            "ambient_space", "represented_space_before", "eliminated_or_quotiented",
+            "represented_space_after", "reduction_factor", "measurement_status", "unit",
+            "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
+        ),
+        "enum_fields": {"measurement_status": {"exact", "upper_bound", "estimate", "not_applicable"}},
+        "projection": _object_projection({
+            key: _text_projection(4000) for key in (
+                "ambient_space", "represented_space_before", "eliminated_or_quotiented",
+                "represented_space_after", "reduction_factor", "measurement_status", "unit",
+                "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
+            )
+        }),
+    },
+    "tactical_learning": {
+        "kind": "object", "required": True, "default": {},
+        "required_nonempty": (
+            "prediction", "observation", "surprise", "failure_signature", "bottleneck_update",
+            "route_decision", "next_discriminator",
+        ),
+        "list_fields": {"reusable_assets": False, "constraints_learned": False},
+        "enum_fields": {"route_decision": {"continue", "hold", "redirect", "close"}},
+        "projection": _object_projection({
+            "prediction": _text_projection(2000),
+            "observation": _text_projection(2000),
+            "surprise": _text_projection(2000),
+            "failure_signature": _text_projection(2000),
+            "bottleneck_update": _text_projection(2000),
+            "reusable_assets": _object_list_projection(20),
+            "constraints_learned": _object_list_projection(20),
+            "route_decision": _text_projection(40),
+            "next_discriminator": _text_projection(2000),
+        }),
+    },
+    "prior_art_check": {
+        "kind": "object", "required": True, "default": {},
+        "required_nonempty": ("exact_delta", "duplicate_risk", "comparison_test"),
+        "list_fields": {"nearest_method_ids": True, "source_urls": False},
+        "enum_fields": {
+            "classification": {"genuinely_different", "material_modification", "replication_control"},
+            "decision": {"proceed", "control_only", "stop"},
+        },
+        "projection": _object_projection({
+            "nearest_method_ids": _string_list_projection(20, 200),
+            "classification": _text_projection(80),
+            "exact_delta": _text_projection(3000),
+            "duplicate_risk": _text_projection(3000),
+            "comparison_test": _text_projection(3000),
+            "decision": _text_projection(40),
+            "source_urls": _string_list_projection(20, 1000),
+        }),
+    },
+    "field_progress_assessment": {
+        "kind": "object", "required": True, "default": {},
+        "required_nonempty": (
+            "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
+            "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
+        ),
+        "enum_fields": {"status": {"met", "not_met"}},
+        "projection": _object_projection({
+            key: _text_projection(4000) for key in (
+                "status", "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
+                "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
+            )
+        }),
+    },
+    "lab_review": {
+        "kind": "object", "default": {"decision": "none"},
+        "enum_fields": {"decision": {"none", "continue", "validate", "promote", "redirect"}},
+        "actionable_required": ("job_id", "reason"),
+        "projection": _object_projection(default={"decision": "none"}),
+    },
+    "hypothesis": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+    "discriminating_test": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+    "strategy_status": {"kind": "any", "default": "active", "projection": _text_projection(100, default="active")},
+    "research_mode": {"kind": "any", "default": "unspecified", "projection": _text_projection(100, default="unspecified")},
+    "independent_checker": {"kind": "any", "default": "not provided", "projection": _text_projection(4000, default="not provided")},
+    "blocker": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+    "reopen_condition": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+    "reopen_evidence": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+    "tool_disclosure": {"kind": "any", "default": "", "projection": _text_projection(4000)},
+}
+
+
+def _result_defaults() -> dict[str, Any]:
+    return {
+        name: value.copy() if isinstance((value := spec.get("default")), (dict, list)) else value
+        for name, spec in RESULT_SCHEMA.items()
+    }
+
+
+def _project_value(value: Any, projection: dict[str, Any]) -> Any:
+    kind = projection["kind"]
+    if kind == "text":
+        default = projection.get("default", "")
+        rendered = str(value or default)
+        if projection.get("strip"):
+            rendered = rendered.strip()
+        return rendered[:projection["max_chars"]]
+    if kind == "string_list":
+        rows = value if isinstance(value, list) else []
+        return [str(row)[:projection["max_chars"]] for row in rows][:projection["max_items"]]
+    if kind == "object_list":
+        rows = value if isinstance(value, list) else []
+        return [row for row in rows if isinstance(row, dict)][:projection["max_items"]]
+    if kind == "object":
+        if not isinstance(value, dict):
+            return projection.get("default", {}).copy()
+        fields = projection.get("fields")
+        if fields is None:
+            return value
+        return {name: _project_value(value.get(name), field) for name, field in fields.items()}
+    raise ValueError(f"unknown result projection kind: {kind}")
+
+
+def _project_result(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        name: _project_value(result.get(name, spec.get("default")), spec["projection"])
+        for name, spec in RESULT_SCHEMA.items()
+        if "projection" in spec
+    }
 
 
 def _original_protected_fields(text: str) -> dict[str, str]:
@@ -42,13 +231,11 @@ def _original_protected_fields(text: str) -> dict[str, str]:
 
 def _enforce_repair_guard(original_text: str, repaired: dict[str, Any]) -> None:
     protected = _original_protected_fields(original_text)
-    if protected.get("outcome") not in OUTCOMES:
+    if protected.get("outcome") not in RESULT_SCHEMA["outcome"]["choices"]:
         raise ValueError("JSON repair cannot recover a missing or invalid original outcome")
-    if protected.get("prior_art_classification") not in {
-        "genuinely_different", "material_modification", "replication_control",
-    }:
+    if protected.get("prior_art_classification") not in RESULT_SCHEMA["prior_art_check"]["enum_fields"]["classification"]:
         raise ValueError("JSON repair cannot recover a missing or invalid original prior-art classification")
-    if protected.get("field_progress_status") not in {"met", "not_met"}:
+    if protected.get("field_progress_status") not in RESULT_SCHEMA["field_progress_assessment"]["enum_fields"]["status"]:
         raise ValueError("JSON repair cannot recover a missing or invalid original field-progress status")
     repaired_fields = {
         "outcome": str(repaired.get("outcome") or ""),
@@ -120,105 +307,140 @@ def extract_result(text: str) -> dict[str, Any]:
     matches = RESULT_RE.findall(text or "")
     if not matches:
         raise ValueError("missing final proof_result JSON block")
-    result = json.loads(matches[-1])
-    if not isinstance(result, dict):
-        raise ValueError("proof_result must be an object")
-    if result.get("outcome") not in OUTCOMES:
+    result = schemas.parse_json_object(matches[-1], kind="proof_result")
+    if result.get("outcome") not in RESULT_SCHEMA["outcome"]["choices"]:
         raise ValueError(f"invalid outcome: {result.get('outcome')!r}")
-    for key in ("approach", "summary", "rationale"):
-        if not isinstance(result.get(key), str) or not result[key].strip():
-            raise ValueError(f"missing result field: {key}")
-    for key in (
-        "claims", "evidence", "evidence_files", "next_steps", "citations", "techniques", "experiments", "transfer_insights",
-        "established_facts", "ruled_out", "open_leads", "strategy_proposals", "synthesis_candidates",
-    ):
-        if not isinstance(result.get(key, []), list):
+    for key, spec in RESULT_SCHEMA.items():
+        if spec.get("kind") == "string" and spec.get("required_nonempty"):
+            if not isinstance(result.get(key), str) or not result[key].strip():
+                raise ValueError(f"missing result field: {key}")
+    for key, spec in RESULT_SCHEMA.items():
+        if spec.get("kind") == "list" and not isinstance(result.get(key, spec["default"]), list):
             raise ValueError(f"{key} must be a list")
     for candidate in result.get("synthesis_candidates", []):
         if not isinstance(candidate, dict):
             raise ValueError("synthesis_candidates entries must be objects")
-        required_candidate = (
-            "family", "mechanism", "source_inputs", "transfer_hypothesis",
-            "discriminating_test", "falsification_signal",
-        )
+        candidate_schema = RESULT_SCHEMA["synthesis_candidates"]["item"]
+        required_candidate = candidate_schema["required_nonempty"]
         missing_candidate = [key for key in required_candidate if not str(candidate.get(key) or "").strip()]
         if missing_candidate:
             raise ValueError(f"synthesis candidate missing fields: {missing_candidate}")
-        if not isinstance(candidate.get("parent_strategy_ids", []), list):
-            raise ValueError("synthesis_candidate.parent_strategy_ids must be a list")
-    for key in ("strategy", "continuation", "candidate_profile", "campaign_assessment", "search_efficiency", "space_reduction", "tactical_learning", "prior_art_check", "field_progress_assessment"):
-        if not isinstance(result.get(key, {}), dict):
+        for key in candidate_schema["list_fields"]:
+            if not isinstance(candidate.get(key, []), list):
+                raise ValueError(f"synthesis_candidate.{key} must be a list")
+    for key, spec in RESULT_SCHEMA.items():
+        if spec.get("kind") != "object" or key == "lab_review":
+            continue
+        value = result.get(key) if spec.get("required") else result.get(key, spec["default"])
+        if not isinstance(value, dict):
             raise ValueError(f"{key} must be an object")
     lab_review = result.get("lab_review", {})
     if not isinstance(lab_review, dict):
         raise ValueError("lab_review must be an object")
-    if lab_review.get("decision", "none") not in {"none", "continue", "validate", "promote", "redirect"}:
+    lab_schema = RESULT_SCHEMA["lab_review"]
+    if lab_review.get("decision", "none") not in lab_schema["enum_fields"]["decision"]:
         raise ValueError("lab_review.decision is invalid")
     if lab_review.get("decision", "none") != "none" and not all(
-        str(lab_review.get(key) or "").strip() for key in ("job_id", "reason")
+        str(lab_review.get(key) or "").strip() for key in lab_schema["actionable_required"]
     ):
         raise ValueError("an actionable lab_review requires job_id and reason")
-    efficiency = result.get("search_efficiency")
-    if not isinstance(efficiency, dict):
-        raise ValueError("search_efficiency must be an object")
-    required_efficiency = ("naive_space", "chosen_mechanism", "estimated_or_measured_savings", "soundness_guard")
+    efficiency = result["search_efficiency"]
+    efficiency_schema = RESULT_SCHEMA["search_efficiency"]
+    required_efficiency = efficiency_schema["required_nonempty"]
     missing_efficiency = [key for key in required_efficiency if not str(efficiency.get(key) or "").strip()]
     if missing_efficiency:
         raise ValueError(f"search_efficiency missing fields: {missing_efficiency}")
-    if not isinstance(efficiency.get("reductions_considered"), list) or not efficiency["reductions_considered"]:
+    if not isinstance(efficiency.get("reductions_considered"), list) or (
+        efficiency_schema["list_fields"]["reductions_considered"] and not efficiency["reductions_considered"]
+    ):
         raise ValueError("search_efficiency.reductions_considered must be a nonempty list")
-    reduction = result.get("space_reduction")
-    if not isinstance(reduction, dict):
-        raise ValueError("space_reduction must be an object")
-    required_reduction = (
-        "ambient_space", "represented_space_before", "eliminated_or_quotiented",
-        "represented_space_after", "reduction_factor", "measurement_status", "unit",
-        "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
-    )
+    reduction = result["space_reduction"]
+    reduction_schema = RESULT_SCHEMA["space_reduction"]
+    required_reduction = reduction_schema["required_nonempty"]
     missing_reduction = [key for key in required_reduction if not str(reduction.get(key) or "").strip()]
     if missing_reduction:
         raise ValueError(f"space_reduction missing fields: {missing_reduction}")
-    if reduction.get("measurement_status") not in {"exact", "upper_bound", "estimate", "not_applicable"}:
+    if reduction.get("measurement_status") not in reduction_schema["enum_fields"]["measurement_status"]:
         raise ValueError("space_reduction.measurement_status must be exact|upper_bound|estimate|not_applicable")
-    learning = result.get("tactical_learning")
-    if not isinstance(learning, dict):
-        raise ValueError("tactical_learning must be an object")
-    required_learning = ("prediction", "observation", "surprise", "failure_signature", "bottleneck_update", "route_decision", "next_discriminator")
+    learning = result["tactical_learning"]
+    learning_schema = RESULT_SCHEMA["tactical_learning"]
+    required_learning = learning_schema["required_nonempty"]
     missing_learning = [key for key in required_learning if not str(learning.get(key) or "").strip()]
     if missing_learning:
         raise ValueError(f"tactical_learning missing fields: {missing_learning}")
-    if learning.get("route_decision") not in {"continue", "hold", "redirect", "close"}:
+    if learning.get("route_decision") not in learning_schema["enum_fields"]["route_decision"]:
         raise ValueError("tactical_learning.route_decision must be continue|hold|redirect|close")
-    for key in ("reusable_assets", "constraints_learned"):
+    for key in learning_schema["list_fields"]:
         if not isinstance(learning.get(key), list):
             raise ValueError(f"tactical_learning.{key} must be a list")
-    prior = result.get("prior_art_check")
-    if not isinstance(prior, dict):
-        raise ValueError("prior_art_check must be an object")
-    required_prior = ("exact_delta", "duplicate_risk", "comparison_test")
+    prior = result["prior_art_check"]
+    prior_schema = RESULT_SCHEMA["prior_art_check"]
+    required_prior = prior_schema["required_nonempty"]
     missing_prior = [key for key in required_prior if not str(prior.get(key) or "").strip()]
     if missing_prior:
         raise ValueError(f"prior_art_check missing fields: {missing_prior}")
-    if not isinstance(prior.get("nearest_method_ids"), list) or not prior["nearest_method_ids"]:
+    if not isinstance(prior.get("nearest_method_ids"), list) or (
+        prior_schema["list_fields"]["nearest_method_ids"] and not prior["nearest_method_ids"]
+    ):
         raise ValueError("prior_art_check.nearest_method_ids must be a nonempty list")
     if not isinstance(prior.get("source_urls"), list):
         raise ValueError("prior_art_check.source_urls must be a list")
-    if prior.get("classification") not in {"genuinely_different", "material_modification", "replication_control"}:
+    if prior.get("classification") not in prior_schema["enum_fields"]["classification"]:
         raise ValueError("prior_art_check.classification must be genuinely_different|material_modification|replication_control")
-    if prior.get("decision") not in {"proceed", "control_only", "stop"}:
+    if prior.get("decision") not in prior_schema["enum_fields"]["decision"]:
         raise ValueError("prior_art_check.decision must be proceed|control_only|stop")
-    field_progress = result.get("field_progress_assessment")
-    if not isinstance(field_progress, dict):
-        raise ValueError("field_progress_assessment must be an object")
-    if field_progress.get("status") not in {"met", "not_met"}:
+    field_progress = result["field_progress_assessment"]
+    progress_schema = RESULT_SCHEMA["field_progress_assessment"]
+    if field_progress.get("status") not in progress_schema["enum_fields"]["status"]:
         raise ValueError("field_progress_assessment.status must be met|not_met")
-    required_progress = (
-        "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
-        "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
-    )
+    required_progress = progress_schema["required_nonempty"]
     missing_progress = [key for key in required_progress if not str(field_progress.get(key) or "").strip()]
     if missing_progress:
         raise ValueError(f"field_progress_assessment missing fields: {missing_progress}")
+    return result
+
+
+def _error_result(problem: dict[str, Any], model: str, exc: Exception) -> dict[str, Any]:
+    result = _result_defaults()
+    result.update({
+        "approach": "Headless research pass",
+        "summary": f"The pass did not produce a valid research result: {type(exc).__name__}: {exc}",
+        "rationale": "Infrastructure or output-contract failure is not mathematical progress.",
+        "search_efficiency": {
+            "naive_space": "not reached", "reductions_considered": ["not reached"],
+            "chosen_mechanism": "not reached", "estimated_or_measured_savings": "not reached",
+            "soundness_guard": "no mathematical claim accepted",
+        },
+        "space_reduction": {
+            "ambient_space": "research epoch", "represented_space_before": "not reached",
+            "eliminated_or_quotiented": "none", "represented_space_after": "unchanged",
+            "reduction_factor": "none", "measurement_status": "not_applicable", "unit": "not applicable",
+            "coverage_scope": "no mathematical search completed", "soundness_basis": "no claim accepted",
+            "remaining_unknown": "the full target", "next_bulk_elimination": "repair the epoch before search",
+        },
+        "tactical_learning": {
+            "prediction": "produce a valid bounded epoch", "observation": "output contract or infrastructure failure",
+            "surprise": "the epoch failed before evaluation", "failure_signature": f"{type(exc).__name__}: invalid epoch output",
+            "bottleneck_update": "repair the epoch failure before further research",
+            "reusable_assets": [], "constraints_learned": [], "route_decision": "hold",
+            "next_discriminator": "rerun the smallest valid output-contract control",
+        },
+        "prior_art_check": {
+            "nearest_method_ids": ["not-applicable"], "classification": "replication_control",
+            "exact_delta": "none; the epoch failed before comparison", "duplicate_risk": "unknown",
+            "comparison_test": "repair and rerun the smallest output-contract control", "decision": "stop",
+            "source_urls": [problem["source_url"]],
+        },
+        "field_progress_assessment": {
+            "status": "not_met", "gate_id": "none", "contribution_class": "infrastructure failure",
+            "closest_prior_result": "previous valid epoch", "measurable_improvement": "none",
+            "independent_validation": "not applicable", "external_audience": "none",
+            "remains_unproved": "the full research target", "route_recommendation": "hold and repair the epoch failure",
+        },
+        "next_steps": ["Repair the failed pass and rerun."],
+        "citations": [problem["source_url"]],
+        "tool_disclosure": f"Codex {model} principal with {TERRA_MODEL} delegates; run failed before a valid disclosure was returned.",
+    })
     return result
 
 
@@ -316,8 +538,11 @@ def _minimal_env() -> dict[str, str]:
 def _run_codex(prompt: str, *, model: str, effort: str, workspace: Path, timeout: int,
                telemetry_meta: dict[str, str] | None = None) -> tuple[str, dict[str, Any]]:
     command = [
-        os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
-        "--sandbox", os.environ.get("PROOF_CODEX_SANDBOX", "danger-full-access"),
+        config.get_text("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
+        "--sandbox", config.get_text(
+            "PROOF_CODEX_SANDBOX", "danger-full-access",
+            choices={"read-only", "workspace-write", "danger-full-access"},
+        ),
         "-c", 'approval_policy="never"',
         "-c", 'forced_login_method="chatgpt"',
         "-c", f'model_reasoning_effort="{effort}"',
@@ -616,17 +841,23 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
         admitting_events: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     model = SOL_MODEL
     effort = "high"
-    ceiling = int(os.environ.get("PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
-                                 "7200" if lane == "hard" else "3600"))
+    ceiling = config.get_int(
+        "PROOF_HARD_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_TIMEOUT_SEC",
+        7200 if lane == "hard" else 3600,
+        minimum=1,
+        maximum=86_400,
+    )
     workspace = store.RESEARCH / problem["id"] / "workspace"
     workspace.mkdir(parents=True, exist_ok=True)
     before_snapshot = evidence_layer.capture_workspace_snapshot(workspace)
     started = store.now_iso()
     start = time.monotonic()
-    delegate_ceiling = int(os.environ.get(
+    delegate_ceiling = config.get_int(
         "PROOF_HARD_DELEGATE_TIMEOUT_SEC" if lane == "hard" else "PROOF_EASY_DELEGATE_TIMEOUT_SEC",
-        "1200" if lane == "hard" else "600",
-    ))
+        1200 if lane == "hard" else 600,
+        minimum=1,
+        maximum=86_400,
+    )
     epoch_key = f"{started[:19].replace(':', '').replace('-', '').replace('T', '-')}-{uuid.uuid4().hex[:6]}"
     delegate_root = workspace / ".delegates" / epoch_key
     delegate_records: list[dict[str, Any]] = []
@@ -636,7 +867,9 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
     repair_error = ""
     repair_timeout_seconds = min(
         REPAIR_TIMEOUT_SECONDS,
-        int(os.environ.get("PROOF_JSON_REPAIR_TIMEOUT_SEC", str(REPAIR_TIMEOUT_SECONDS))),
+        config.get_int(
+            "PROOF_JSON_REPAIR_TIMEOUT_SEC", REPAIR_TIMEOUT_SECONDS, minimum=1, maximum=3600,
+        ),
     )
     brief_payload = briefing.build(problem)
     delegate_brief = briefing.compact_for_prompt(problem, max_chars=18000, payload=brief_payload)
@@ -731,9 +964,11 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
         if result.get("outcome") == "candidate" and field_progress.get("status") != "met":
             policy_flags.append("Candidate outcome did not identify a satisfied configured field-progress gate.")
             outcome = "progress"
-        gate = contribution_gate.assess(result) if result.get("outcome") == "candidate" else {
-            "schema_version": 1, "passed": False, "status": "not_requested", "reasons": [],
-        }
+        gate = (
+            contribution_gate.assess(result)
+            if result.get("outcome") == "candidate"
+            else contribution_gate.not_requested()
+        )
         if result.get("outcome") == "candidate" and not gate["passed"]:
             policy_flags.extend(f"Contribution gate: {reason}" for reason in gate["reasons"])
             if outcome == "candidate":
@@ -741,58 +976,19 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
         error = ""
     except (OSError, subprocess.SubprocessError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
         usage = {}
-        result = {
-            "approach": "Headless research pass",
-            "summary": f"The pass did not produce a valid research result: {type(exc).__name__}: {exc}",
-            "rationale": "Infrastructure or output-contract failure is not mathematical progress.",
-            "search_efficiency": {
-                "naive_space": "not reached", "reductions_considered": ["not reached"],
-                "chosen_mechanism": "not reached", "estimated_or_measured_savings": "not reached",
-                "soundness_guard": "no mathematical claim accepted",
-            },
-            "space_reduction": {
-                "ambient_space": "research epoch", "represented_space_before": "not reached",
-                "eliminated_or_quotiented": "none", "represented_space_after": "unchanged",
-                "reduction_factor": "none", "measurement_status": "not_applicable", "unit": "not applicable",
-                "coverage_scope": "no mathematical search completed", "soundness_basis": "no claim accepted",
-                "remaining_unknown": "the full target", "next_bulk_elimination": "repair the epoch before search",
-            },
-            "tactical_learning": {
-                "prediction": "produce a valid bounded epoch", "observation": "output contract or infrastructure failure",
-                "surprise": "the epoch failed before evaluation", "failure_signature": f"{type(exc).__name__}: invalid epoch output",
-                "bottleneck_update": "repair the epoch failure before further research",
-                "reusable_assets": [], "constraints_learned": [], "route_decision": "hold",
-                "next_discriminator": "rerun the smallest valid output-contract control",
-            },
-            "prior_art_check": {
-                "nearest_method_ids": ["not-applicable"], "classification": "replication_control",
-                "exact_delta": "none; the epoch failed before comparison", "duplicate_risk": "unknown",
-                "comparison_test": "repair and rerun the smallest output-contract control", "decision": "stop",
-                "source_urls": [problem["source_url"]],
-            },
-            "field_progress_assessment": {
-                "status": "not_met", "gate_id": "none", "contribution_class": "infrastructure failure",
-                "closest_prior_result": "previous valid epoch", "measurable_improvement": "none",
-                "independent_validation": "not applicable", "external_audience": "none",
-                "remains_unproved": "the full research target", "route_recommendation": "hold and repair the epoch failure",
-            },
-            "claims": [], "evidence": [], "evidence_files": [], "next_steps": ["Repair the failed pass and rerun."],
-            "citations": [problem["source_url"]], "techniques": [],
-            "tool_disclosure": f"Codex {model} principal with {TERRA_MODEL} delegates; run failed before a valid disclosure was returned.",
-        }
+        result = _error_result(problem, model, exc)
         outcome = "error"
         error = str(exc)
         policy_flags = []
-        gate = {"schema_version": 1, "passed": False, "status": "not_requested", "reasons": []}
+        gate = contribution_gate.not_requested()
 
     finished = store.now_iso()
     stamp = finished[:19].replace(":", "").replace("-", "").replace("T", "-")
     attempt_id = f"{problem['id']}-{stamp}-{uuid.uuid4().hex[:6]}"
-    def objects(name: str, limit: int = 30) -> list[dict[str, Any]]:
-        return [row for row in result.get(name, []) if isinstance(row, dict)][:limit]
     disclosure = str(result.get("tool_disclosure") or "")[:3200]
     if TERRA_MODEL not in disclosure:
         disclosure = (disclosure + f"; orchestration: {model} principal with {TERRA_MODEL} delegates.").lstrip("; ")
+    projected_result = _project_result({**result, "tool_disclosure": disclosure})
 
     attempt = {
         "id": attempt_id,
@@ -823,80 +1019,10 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
             "error": row["error"],
         } for row in delegate_records],
         "outcome": outcome,
-        "approach": result["approach"].strip()[:4000],
-        "strategy": result.get("strategy") if isinstance(result.get("strategy"), dict) else {},
-        "hypothesis": str(result.get("hypothesis") or "")[:4000],
-        "discriminating_test": str(result.get("discriminating_test") or "")[:4000],
-        "search_efficiency": {
-            "naive_space": str(result["search_efficiency"].get("naive_space") or "")[:2000],
-            "reductions_considered": [str(x)[:500] for x in result["search_efficiency"].get("reductions_considered", [])][:20],
-            "chosen_mechanism": str(result["search_efficiency"].get("chosen_mechanism") or "")[:2000],
-            "estimated_or_measured_savings": str(result["search_efficiency"].get("estimated_or_measured_savings") or "")[:2000],
-            "soundness_guard": str(result["search_efficiency"].get("soundness_guard") or "")[:2000],
-        },
-        "space_reduction": {
-            key: str(result["space_reduction"].get(key) or "")[:4000]
-            for key in (
-                "ambient_space", "represented_space_before", "eliminated_or_quotiented",
-                "represented_space_after", "reduction_factor", "measurement_status", "unit",
-                "coverage_scope", "soundness_basis", "remaining_unknown", "next_bulk_elimination",
-            )
-        },
-        "tactical_learning": {
-            "prediction": str(result["tactical_learning"].get("prediction") or "")[:2000],
-            "observation": str(result["tactical_learning"].get("observation") or "")[:2000],
-            "surprise": str(result["tactical_learning"].get("surprise") or "")[:2000],
-            "failure_signature": str(result["tactical_learning"].get("failure_signature") or "")[:2000],
-            "bottleneck_update": str(result["tactical_learning"].get("bottleneck_update") or "")[:2000],
-            "reusable_assets": [row for row in result["tactical_learning"].get("reusable_assets", []) if isinstance(row, dict)][:20],
-            "constraints_learned": [row for row in result["tactical_learning"].get("constraints_learned", []) if isinstance(row, dict)][:20],
-            "route_decision": str(result["tactical_learning"].get("route_decision") or "")[:40],
-            "next_discriminator": str(result["tactical_learning"].get("next_discriminator") or "")[:2000],
-        },
-        "prior_art_check": {
-            "nearest_method_ids": [str(x)[:200] for x in result["prior_art_check"].get("nearest_method_ids", [])][:20],
-            "classification": str(result["prior_art_check"].get("classification") or "")[:80],
-            "exact_delta": str(result["prior_art_check"].get("exact_delta") or "")[:3000],
-            "duplicate_risk": str(result["prior_art_check"].get("duplicate_risk") or "")[:3000],
-            "comparison_test": str(result["prior_art_check"].get("comparison_test") or "")[:3000],
-            "decision": str(result["prior_art_check"].get("decision") or "")[:40],
-            "source_urls": [str(x)[:1000] for x in result["prior_art_check"].get("source_urls", [])][:20],
-        },
-        "field_progress_assessment": {
-            key: str(result["field_progress_assessment"].get(key) or "")[:4000]
-            for key in (
-                "status", "gate_id", "contribution_class", "closest_prior_result", "measurable_improvement",
-                "independent_validation", "external_audience", "remains_unproved", "route_recommendation",
-            )
-        },
-        "lab_review": result.get("lab_review") if isinstance(result.get("lab_review"), dict) else {"decision": "none"},
-        "strategy_status": str(result.get("strategy_status") or "active")[:100],
-        "summary": result["summary"].strip()[:8000],
-        "rationale": result["rationale"].strip()[:4000],
-        "claims": [str(x)[:2000] for x in result.get("claims", [])][:20],
-        "evidence": [str(x)[:2000] for x in result.get("evidence", [])][:30],
-        "evidence_files": [str(x)[:1000] for x in result.get("evidence_files", [])][:2000],
-        "next_steps": [str(x)[:2000] for x in result.get("next_steps", [])][:20],
-        "citations": [str(x)[:1000] for x in result.get("citations", [])][:30],
-        "techniques": [str(x)[:200] for x in result.get("techniques", [])][:30],
-        "research_mode": str(result.get("research_mode") or "unspecified")[:100],
-        "experiments": [str(x)[:2000] for x in result.get("experiments", [])][:30],
-        "independent_checker": str(result.get("independent_checker") or "not provided")[:4000],
-        "transfer_insights": [str(x)[:2000] for x in result.get("transfer_insights", [])][:20],
-        "established_facts": objects("established_facts"),
-        "ruled_out": objects("ruled_out"),
-        "open_leads": objects("open_leads"),
-        "blocker": str(result.get("blocker") or "")[:4000],
-        "reopen_condition": str(result.get("reopen_condition") or "")[:4000],
-        "reopen_evidence": str(result.get("reopen_evidence") or "")[:4000],
+        **projected_result,
         "policy_flags": policy_flags,
-        "candidate_profile": result.get("candidate_profile") if isinstance(result.get("candidate_profile"), dict) else {},
         "contribution_gate": gate,
         "contribution_status": "candidate_eligible" if outcome == "candidate" else ("internal_result" if result.get("outcome") == "candidate" else "research_attempt"),
-        "continuation": result.get("continuation") if isinstance(result.get("continuation"), dict) else {},
-        "campaign_assessment": result.get("campaign_assessment") if isinstance(result.get("campaign_assessment"), dict) else {},
-        "strategy_proposals": objects("strategy_proposals", 10),
-        "tool_disclosure": disclosure[:4000],
         "review_status": "needs isolated skeptic review" if outcome == "candidate" else ("internal result; not a contribution candidate" if result.get("outcome") == "candidate" else "not a result claim"),
         "usage": usage,
         "json_repair": {
@@ -923,8 +1049,8 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
             manifest_root=workspace / "evidence",
         )
         receipt_path = evidence_layer.create_evidence_receipt(manifest_path, workspace=workspace)
-        receipt = json.loads(receipt_path.read_text())
-        manifest = json.loads(manifest_path.read_text())
+        receipt = evidence_layer.load_evidence_receipt(receipt_path)
+        manifest = evidence_layer.load_attempt_manifest(manifest_path)
         attempt["artifact_hashes"] = {
             row["path"]: row.get("after", {}).get("sha256")
             for row in manifest.get("artifacts", [])

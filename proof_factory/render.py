@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from . import brain, live, research_state, store
+from .html_templates import BRAIN_CARD, BRAIN_LINK, BRAIN_PAGE, LAYOUT, html_fragment, render as render_template
 
 
 STATUS_ORDER = ["candidate", "active", "attempted", "internal_result", "failed", "queued", "parked", "verified", "published"]
@@ -57,30 +58,7 @@ def _problem_tag(problem: dict[str, Any]) -> str:
 
 
 def _layout(title: str, body: str, *, description: str = "Ongoing and planned AI-assisted mathematics research.") -> str:
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#f4f1e8">
-  <title>{h(title)} · Proof Factory</title>
-  <meta name="description" content="{h(description)}">
-  <link rel="stylesheet" href="/assets/site-v4.css">
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{{"token":"153bb72472fb49d8863fb2f8f08f6b2b"}}'></script>
-  <script>MathJax={{tex:{{inlineMath:[['$','$'],['\\(','\\)']]}}}};</script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <script defer src="/assets/site-v4.js"></script>
-</head>
-<body>
-  <a class="skip-link" href="#content">Skip to content</a>
-  <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">PF</span><span>Proof Factory</span><small>Open mathematics research</small></a>
-    <nav aria-label="Primary"><a href="/#operations">Status</a><a href="/#ongoing">Work</a><a href="/#runs">Runs</a><a href="/about/">About</a></nav>
-  </header>
-  <main id="content">{body}</main>
-  <footer><span>Proof Factory / AI-assisted mathematics research</span><span>Seeking useful contributions, small or large</span><span>UTC · <a href="https://github.com/ctkrug/proofs">Source</a></span></footer>
-</body>
-</html>"""
+    return render_template(LAYOUT, title=title, description=description, body=html_fragment(body))
 
 
 def _effective_outcome(attempt: dict[str, Any], reviews: list[dict[str, Any]]) -> str:
@@ -138,7 +116,7 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state
     campaign_progress = ""
     if lane == "easy" and problem.get("campaign_state") == "active":
         minimum = max(store.DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
-        campaign_progress = f" · campaign {int(problem.get('research_attempt_count') or 0)}/{minimum}+"
+        campaign_progress = f" · campaign {store.discovery_campaign_run_count(problem)}/{minimum}+"
     return f"""
 <article class="problem-card" data-status="{h(status)}" data-lane="{h(lane)}">
   <div class="card-top"><span class="lane lane-{h(lane)}">{h(_problem_tag(problem))}</span>{_badge(status)}</div>
@@ -433,23 +411,36 @@ def _brain_page(graph: dict[str, Any]) -> str:
             target = nodes.get(str(edge.get("target")), {})
             if edge.get("relation") == "shares_concepts":
                 links.append(
-                    f'<li><a href="/problems/{h(target.get("problem_id"))}/">{h(target.get("label"))}</a><br>'
-                    f'{h(", ".join(edge.get("concepts") or []))}</li>'
+                    render_template(
+                        BRAIN_LINK,
+                        problem_id=target.get("problem_id"),
+                        label=target.get("label"),
+                        concepts=", ".join(edge.get("concepts") or []),
+                    )
                 )
             elif edge.get("relation") == "uses_concept":
                 concepts.append(str(target.get("label") or ""))
-        cards.append(f"""
-<article id="problem-{h(problem.get('problem_id'))}"><span class="overline">{h(problem.get('baseline_status'))} baseline · {h(problem.get('lane'))}</span>
-<h2><a href="{h(problem.get('url'))}">{h(problem.get('label'))}</a></h2><p>{h(problem.get('summary'))}</p>
-<p><strong>Concepts:</strong> {h(', '.join(concepts[:12]) or 'Awaiting baseline.')}</p>
-<p><strong>Linked problems:</strong></p><ul>{''.join(links[:8]) or '<li>No shared concept edge yet.</li>'}</ul></article>""")
+        cards.append(
+            render_template(
+                BRAIN_CARD,
+                problem_id=problem.get("problem_id"),
+                baseline_status=problem.get("baseline_status"),
+                lane=problem.get("lane"),
+                url=problem.get("url"),
+                label=problem.get("label"),
+                summary=problem.get("summary"),
+                concepts=", ".join(concepts[:12]) or "Awaiting baseline.",
+                links=html_fragment("".join(links[:8]) or "<li>No shared concept edge yet.</li>"),
+            )
+        )
     counts = brain.summary(graph)
-    body = f"""
-<section class="method-head"><span class="overline">Generated research wiki</span><h1>Problems remember.<br><em>Ideas connect.</em></h1>
-<p>This graph is rebuilt from the canonical problem registry, per-problem research maps, append-only attempts, and strategy library. Links propose transfers; they never serve as mathematical evidence.</p>
-<div class="source-line"><a href="/api/brain.json">Download graph JSON ↗</a><span>{h(counts.get('nodes'))} nodes · {h(counts.get('edges'))} edges · {h(counts.get('concept', 0))} concepts</span></div></section>
-<section class="strategy-library">{''.join(cards)}</section>
-"""
+    body = render_template(
+        BRAIN_PAGE,
+        node_count=counts.get("nodes"),
+        edge_count=counts.get("edges"),
+        concept_count=counts.get("concept", 0),
+        cards=html_fragment("".join(cards)),
+    )
     return _layout("Research brain", body)
 
 

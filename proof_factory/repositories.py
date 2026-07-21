@@ -9,14 +9,26 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from . import store
+from . import config, store
 
 
 SCHEMA_VERSION = 1
-GITHUB_OWNER = os.environ.get("PROOF_REPO_GITHUB_OWNER", "ctkrug")
-GIT_AUTHOR_NAME = os.environ.get("PROOF_REPO_GIT_NAME", "ctkrug")
-GIT_AUTHOR_EMAIL = os.environ.get("PROOF_REPO_GIT_EMAIL", "ctkrug4501@gmail.com")
-MAX_TRACKED_FILE_BYTES = int(os.environ.get("PROOF_REPO_MAX_FILE_BYTES", str(50 * 1024 * 1024)))
+def _github_owner() -> str:
+    return config.get_text("PROOF_REPO_GITHUB_OWNER", "ctkrug")
+
+
+def _git_author_name() -> str:
+    return config.get_text("PROOF_REPO_GIT_NAME", "ctkrug")
+
+
+def _git_author_email() -> str:
+    return config.get_text("PROOF_REPO_GIT_EMAIL", "ctkrug4501@gmail.com")
+
+
+def _max_tracked_file_bytes() -> int:
+    return config.get_int(
+        "PROOF_REPO_MAX_FILE_BYTES", 50 * 1024 * 1024, minimum=1024, maximum=10 * 1024**3,
+    )
 LEGACY_GITIGNORE = """# Reproducible research belongs in Git; local environments and caches do not.
 .DS_Store
 .venv/
@@ -137,7 +149,7 @@ def _metadata(problem: dict[str, Any]) -> dict[str, Any]:
         "title": problem.get("title"),
         "source_url": problem.get("source_url"),
         "lane": problem.get("lane"),
-        "github_owner": GITHUB_OWNER,
+        "github_owner": _github_owner(),
         "github_repository": repo_name(problem["id"]),
         "visibility_policy": "public-research-history",
         "canonical_engine": "https://github.com/ctkrug/proofs",
@@ -154,7 +166,7 @@ def _large_artifacts(repo: Path) -> list[dict[str, Any]]:
         if any(part in excluded_parts for part in relative.parts):
             continue
         size = path.stat().st_size
-        if size <= MAX_TRACKED_FILE_BYTES:
+        if size <= _max_tracked_file_bytes():
             continue
         digest = hashlib.sha256()
         with path.open("rb") as handle:
@@ -169,7 +181,7 @@ def _exclude_large_artifacts(repo: Path) -> None:
     manifest = repo / ".proof-repository" / "LARGE_ARTIFACTS.json"
     store.write_json_atomic(manifest, {
         "schema_version": SCHEMA_VERSION,
-        "max_tracked_file_bytes": MAX_TRACKED_FILE_BYTES,
+        "max_tracked_file_bytes": _max_tracked_file_bytes(),
         "files": rows,
         "note": "Files remain on the research host; Git records their path, size, and SHA-256 instead of the bytes.",
     })
@@ -213,8 +225,8 @@ def _ensure_unlocked(problem: dict[str, Any]) -> tuple[Path, str]:
         )
         if proc.returncode != 0:
             raise RuntimeError(f"git init failed for {problem['id']}: {(proc.stdout + proc.stderr)[-2000:]}")
-    _git(repo, "config", "user.name", GIT_AUTHOR_NAME)
-    _git(repo, "config", "user.email", GIT_AUTHOR_EMAIL)
+    _git(repo, "config", "user.name", _git_author_name())
+    _git(repo, "config", "user.email", _git_author_email())
     _ensure_gitignore(repo / ".gitignore")
     _write_if_missing(repo / "README.md", _readme(problem))
     store.write_json_atomic(repo / ".proof-repository" / "metadata.json", _metadata(problem))
@@ -398,7 +410,7 @@ def _gh(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
 def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
     repo_info = ensure(problem)
     repo = Path(repo_info["path"])
-    full_name = f"{GITHUB_OWNER}/{repo_name(problem['id'])}"
+    full_name = f"{_github_owner()}/{repo_name(problem['id'])}"
     view = _gh("repo", "view", full_name, "--json", "url,visibility", check=False)
     created = False
     if view.returncode != 0:

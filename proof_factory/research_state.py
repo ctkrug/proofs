@@ -6,7 +6,7 @@ from copy import deepcopy
 from collections import Counter
 from typing import Any
 
-from . import store
+from . import schemas, store
 
 
 SCHEMA_VERSION = 5
@@ -189,27 +189,134 @@ def _initial(problem: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _ensure_list(value: dict[str, Any], key: str) -> None:
+    if key not in value or value[key] is None:
+        value[key] = []
+    elif not isinstance(value[key], list):
+        raise schemas.SchemaError(f"research state.{key} must be list")
+
+
+def _ensure_object(value: dict[str, Any], key: str, default: dict[str, Any]) -> None:
+    if key not in value or value[key] is None:
+        value[key] = deepcopy(default)
+    elif not isinstance(value[key], dict):
+        raise schemas.SchemaError(f"research state.{key} must be dict")
+
+
+def _migrate_v1_to_v2(value: dict[str, Any], problem: dict[str, Any]) -> dict[str, Any]:
+    """Add the baseline/continuation ledger introduced by research-state v2."""
+    migrated = deepcopy(value)
+    defaults = _initial(problem)
+    _ensure_object(migrated, "baseline_review", defaults["baseline_review"])
+    _ensure_object(migrated, "next_session", defaults["next_session"])
+    _ensure_list(migrated, "recent_attempt_ids")
+    migrated["schema_version"] = 2
+    return migrated
+
+
+def _migrate_v2_to_v3(value: dict[str, Any], problem: dict[str, Any]) -> dict[str, Any]:
+    """Add v3 tactical memory without manufacturing claims or decisions."""
+    migrated = deepcopy(value)
+    defaults = _initial(problem)["tactical_memory"]
+    _ensure_object(migrated, "tactical_memory", defaults)
+    memory = migrated["tactical_memory"]
+    memory.setdefault("current_bottleneck", "")
+    for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history"):
+        _ensure_list(memory, key)
+    migrated["schema_version"] = 3
+    return migrated
+
+
+def _migrate_v3_to_v4(value: dict[str, Any], problem: dict[str, Any]) -> dict[str, Any]:
+    """Add the v4 reduction and prior-art ledgers as empty structural containers."""
+    migrated = deepcopy(value)
+    _ensure_object(migrated, "tactical_memory", _initial(problem)["tactical_memory"])
+    for key in ("reduction_ledger", "prior_art_decisions"):
+        _ensure_list(migrated["tactical_memory"], key)
+    migrated["schema_version"] = 4
+    return migrated
+
+
+def _migrate_v4_to_v5(value: dict[str, Any], problem: dict[str, Any]) -> dict[str, Any]:
+    """Make v5 portfolio containers explicit; historical rows remain untouched."""
+    migrated = deepcopy(value)
+    for key in (
+        "completion_criteria", "non_results", "established_facts", "strategies", "open_leads",
+        "ruled_out", "unresolved_questions", "recent_attempt_ids",
+    ):
+        _ensure_list(migrated, key)
+    migrated["schema_version"] = 5
+    return migrated
+
+
+_MIGRATIONS = {
+    1: _migrate_v1_to_v2,
+    2: _migrate_v2_to_v3,
+    3: _migrate_v3_to_v4,
+    4: _migrate_v4_to_v5,
+}
+
+
+def _validate_current(value: dict[str, Any], problem: dict[str, Any]) -> None:
+    schemas.require_current_version(value, kind="research state", current=SCHEMA_VERSION)
+    required = frozenset(_initial(problem))
+    schemas.require_fields(value, required, kind="research state")
+    if value.get("problem_id") != problem["id"]:
+        raise schemas.SchemaError(
+            f"research state problem_id {value.get('problem_id')!r} does not match {problem['id']!r}"
+        )
+    epoch_count = value.get("epoch_count")
+    if isinstance(epoch_count, bool) or not isinstance(epoch_count, int) or epoch_count < 0:
+        raise schemas.SchemaError("research state.epoch_count must be a nonnegative integer")
+    for key in ("problem_id", "objective", "synthesis_summary"):
+        schemas.require_type(value, key, str, kind="research state")
+    schemas.require_type(value, "last_updated", (str, type(None)), kind="research state")
+    for key in (
+        "completion_criteria", "non_results", "established_facts", "strategies", "open_leads",
+        "ruled_out", "unresolved_questions", "recent_attempt_ids",
+    ):
+        schemas.require_type(value, key, list, kind="research state")
+    for key in ("baseline_review", "next_session", "tactical_memory"):
+        schemas.require_type(value, key, dict, kind="research state")
+    schemas.require_type(value["baseline_review"], "status", str, kind="research state.baseline_review")
+    schemas.require_type(
+        value["tactical_memory"], "current_bottleneck", str, kind="research state.tactical_memory",
+    )
+    for key in (
+        "failure_signatures", "reusable_assets", "constraints_learned", "decision_history",
+        "reduction_ledger", "prior_art_decisions",
+    ):
+        schemas.require_type(value["tactical_memory"], key, list, kind="research state.tactical_memory")
+
+
+def migrate_value(value: dict[str, Any], problem: dict[str, Any]) -> dict[str, Any]:
+    """Migrate a persisted v1..v5 state through every explicit intermediate schema."""
+    state = schemas.require_object(value, kind="research state")
+    if state.get("problem_id") != problem["id"]:
+        raise schemas.SchemaError(
+            f"research state problem_id {state.get('problem_id')!r} does not match {problem['id']!r}"
+        )
+    version = schemas.require_migratable_version(
+        state, kind="research state", oldest=1, current=SCHEMA_VERSION,
+    )
+    migrated = deepcopy(state)
+    while version < SCHEMA_VERSION:
+        migrated = _MIGRATIONS[version](migrated, problem)
+        version += 1
+    defaults = _initial(problem)
+    # Defaults here are schema structure and explanatory policy, never claims,
+    # evidence, route decisions, or experimental observations.
+    for key, default in defaults.items():
+        migrated.setdefault(key, deepcopy(default))
+    _validate_current(migrated, problem)
+    return migrated
+
+
 def load(problem: dict[str, Any]) -> dict[str, Any]:
-    value = store.read_json(state_path(problem["id"]), None)
-    if not isinstance(value, dict) or value.get("problem_id") != problem["id"]:
+    path = state_path(problem["id"])
+    if not path.exists():
         return _initial(problem)
-    seeded = _initial(problem)
-    seeded.update(value)
-    for key in ("completion_criteria", "non_results", "established_facts", "strategies", "open_leads", "ruled_out", "unresolved_questions", "recent_attempt_ids"):
-        if not isinstance(seeded.get(key), list):
-            seeded[key] = []
-    if not isinstance(seeded.get("baseline_review"), dict):
-        seeded["baseline_review"] = _initial(problem)["baseline_review"]
-    if not isinstance(seeded.get("tactical_memory"), dict):
-        seeded["tactical_memory"] = _initial(problem)["tactical_memory"]
-    else:
-        memory = _initial(problem)["tactical_memory"]
-        memory.update(seeded["tactical_memory"])
-        for key in ("failure_signatures", "reusable_assets", "constraints_learned", "decision_history", "reduction_ledger", "prior_art_decisions"):
-            if not isinstance(memory.get(key), list):
-                memory[key] = []
-        seeded["tactical_memory"] = memory
-    return seeded
+    return migrate_value(schemas.load_json_object(path, kind="research state"), problem)
 
 
 def needs_baseline(problem: dict[str, Any]) -> bool:

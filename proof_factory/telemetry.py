@@ -15,6 +15,8 @@ import os
 from contextlib import contextmanager
 from typing import Any, Iterator
 
+from . import config
+
 
 log = logging.getLogger("proof_factory.telemetry")
 _tracer = None
@@ -22,13 +24,13 @@ _state = "off"
 
 
 def _enabled() -> bool:
-    return os.environ.get("PHOENIX_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+    return config.get_bool("PHOENIX_ENABLED", False)
 
 
 def _text(value: str) -> str:
-    if os.environ.get("PHOENIX_CAPTURE_TEXT", "true").strip().lower() not in {"1", "true", "yes", "on"}:
+    if not config.get_bool("PHOENIX_CAPTURE_TEXT", True):
         return ""
-    limit = int(os.environ.get("PHOENIX_TEXT_LIMIT", "6000"))
+    limit = config.get_int("PHOENIX_TEXT_LIMIT", 6000, minimum=0, maximum=1_000_000)
     value = value or ""
     return value if len(value) <= limit else value[:limit] + f"\n…[truncated {len(value) - limit} chars]"
 
@@ -38,7 +40,7 @@ def init():
     global _tracer, _state
     if _tracer is not None or _state == "failed" or not _enabled():
         return _tracer
-    endpoint = os.environ.get("PHOENIX_ENDPOINT", "").rstrip("/")
+    endpoint = config.get_https_url("PHOENIX_ENDPOINT", "", allow_empty=True)
     if not endpoint:
         _state = "failed"
         log.warning("PHOENIX_ENABLED is set but PHOENIX_ENDPOINT is absent; continuing uninstrumented")
@@ -54,7 +56,7 @@ def init():
             headers["authorization"] = f"Bearer {api_key}"
         provider = TracerProvider(resource=Resource.create({
             "service.name": "proof-factory",
-            "openinference.project.name": os.environ.get("PHOENIX_PROJECT", "proof-factory"),
+            "openinference.project.name": config.get_text("PHOENIX_PROJECT", "proof-factory"),
         }))
         provider.add_span_processor(SimpleSpanProcessor(OTLPSpanExporter(
             endpoint=f"{endpoint}/v1/traces", headers=headers,

@@ -8,7 +8,7 @@ import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
-from . import agent, research_state, store
+from . import agent, config, research_state, store
 
 
 PROPOSAL_RE = re.compile(r"```strategy_proposal\s*(\{.*?\})\s*```", re.DOTALL)
@@ -107,7 +107,7 @@ def run() -> dict[str, Any]:
     workspace = store.RESEARCH / "strategy-lab" / "workspace"
     workspace.mkdir(parents=True, exist_ok=True)
     command = [
-        os.environ.get("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
+        config.get_text("CODEX_BIN", "codex"), "exec", "--ephemeral", "--json",
         "--sandbox", "workspace-write", "-c", 'approval_policy="never"',
         "-c", 'forced_login_method="chatgpt"', "-c", 'model_reasoning_effort="high"',
         "--ignore-user-config", "--ignore-rules", "--model", "gpt-5.6-terra", "-",
@@ -117,7 +117,8 @@ def run() -> dict[str, Any]:
     env.setdefault("HOME", "/root")
     proc = subprocess.run(
         command, input=_prompt(), text=True, capture_output=True, cwd=workspace, env=env,
-        timeout=int(os.environ.get("PROOF_STRATEGY_TIMEOUT_SEC", "3600")), start_new_session=True,
+        timeout=config.get_int("PROOF_STRATEGY_TIMEOUT_SEC", 3600, minimum=1, maximum=86_400),
+        start_new_session=True,
     )
     text, usage, failed = agent._codex_text(proc.stdout)
     store.write_json_atomic(store.STATE / "strategy-lab-last.json", {

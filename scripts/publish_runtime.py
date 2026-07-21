@@ -11,13 +11,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from proof_factory import live, store
+from proof_factory import config, live, store
 
 
 def main() -> int:
     token = os.environ.get("CLOUDFLARE_API_TOKEN") or os.environ.get("CF_API_TOKEN")
     account = os.environ.get("CLOUDFLARE_ACCOUNT_ID") or os.environ.get("CF_ACCOUNT_ID")
-    namespace = os.environ.get("PROOF_RUNTIME_KV_NAMESPACE_ID")
+    namespace = config.get_text("PROOF_RUNTIME_KV_NAMESPACE_ID", "", allow_empty=True)
     if not token or not account or not namespace:
         print("Cloudflare runtime publishing is not configured", file=sys.stderr)
         return 1

@@ -6,19 +6,12 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/root/proof-factory
+EnvironmentFile=/etc/proof-factory/proof-factory.env
 Environment=HOME=/root
 Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.cache/proof-factory/lean/elan/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-Environment=ELAN_HOME=/root/.cache/proof-factory/lean/elan
-Environment=PROOF_FACTORY_CACHE_DIR=/root/.cache/proof-factory
-Environment=PROOF_FACTORY_ROOT=/root/proof-factory
-Environment=CODEX_BIN=/root/.local/bin/codex
 Environment=PROOF_CODEX_SANDBOX=workspace-write
-Environment=PROOF_HARD_DELEGATE_TIMEOUT_SEC=1200
 EnvironmentFile=-/root/project-factory/.env
-Environment=PHOENIX_ENABLED=true
-Environment=PHOENIX_ENDPOINT=https://app.phoenix.arize.com/s/ctkrug4501
-Environment=PHOENIX_PROJECT=proof-factory
-Environment=PHOENIX_CAPTURE_TEXT=true
+ExecStartPre=/root/proof-factory/.venv/bin/python -m proof_factory.config validate --profile lane
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory tick --lane hard
 Nice=15
 CPUWeight=2

@@ -5,9 +5,9 @@ After=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/root/proof-factory
+EnvironmentFile=/etc/proof-factory/proof-factory.env
 Environment=HOME=/root
-Environment=PROOF_FACTORY_ROOT=/root/proof-factory
-Environment=PROOF_EASY_EXPECTED=1
+ExecStartPre=/root/proof-factory/.venv/bin/python -m proof_factory.config validate --profile watchdog
 ExecStart=/root/proof-factory/.venv/bin/python -m proof_factory watchdog
 Nice=19
 CPUWeight=1

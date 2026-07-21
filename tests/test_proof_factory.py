@@ -14,6 +14,13 @@ from proof_factory import agent, brain, briefing, capacity, cli, contribution_ga
 
 
 class ProofFactoryTests(unittest.TestCase):
+    def test_result_json_rejects_duplicate_keys(self) -> None:
+        text = '''```proof_result
+{"outcome":"progress","outcome":"failed","approach":"a","summary":"s","rationale":"r"}
+```'''
+        with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+            agent.extract_result(text)
+
     def test_agent_prompt_routes_lab_evidence_to_immutable_records(self) -> None:
         source = (store.ROOT / "proof_factory" / "agent.py").read_text()
         self.assertIn("`lab-archive/**`", source)
@@ -112,6 +119,48 @@ class ProofFactoryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             agent.extract_result(text)
 
+    def test_result_schema_drives_error_stub_projection_and_synthesis_persistence(self) -> None:
+        problem = {
+            "id": "schema-sync", "title": "Finite test", "statement": "Check one case.",
+            "source_url": "https://example.test/problem", "problem_state": "open",
+            "rationale": "Exact", "verifiability": "Exact checker", "techniques": [],
+        }
+        result = agent._error_result(problem, agent.SOL_MODEL, RuntimeError("fixture"))
+        candidates = [{
+            "family": f"composite-{index}",
+            "mechanism": "combine two exact filters",
+            "parent_strategy_ids": ["strategy-a", "strategy-b"],
+            "source_inputs": ["filter a", "filter b"],
+            "transfer_hypothesis": "the filters eliminate complementary cases",
+            "discriminating_test": "compare one bounded fixture",
+            "falsification_signal": "no matched reduction",
+            "rationale": "mechanism-level composition",
+        } for index in range(35)]
+        result.update({
+            "outcome": "no_progress",
+            "approach": "x" * 4100,
+            "summary": "bounded schema control",
+            "rationale": "exact serialization check",
+            "synthesis_candidates": candidates,
+        })
+        encoded = f"```proof_result\n{json.dumps(result)}\n```"
+        validated = agent.extract_result(encoded)
+        projection = agent._project_result(validated)
+        self.assertEqual(len(projection["approach"]), 4000)
+        self.assertEqual(len(projection["synthesis_candidates"]), 30)
+        self.assertEqual(projection["synthesis_candidates"][-1]["family"], "composite-29")
+        self.assertEqual(projection["lab_review"], {"decision": "none"})
+
+        def fake_run(prompt, *, model, effort, workspace, timeout, telemetry_meta=None):
+            if model == agent.TERRA_MODEL:
+                return "bounded source-discriminator memo", {}
+            return encoded, {}
+
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "RESEARCH", Path(raw)), \
+                patch.object(agent, "_run_codex", side_effect=fake_run):
+            attempt = agent.run(problem, "easy")
+        self.assertEqual(attempt["synthesis_candidates"], candidates[:30])
+
     def test_contribution_gate_rejects_arbitrary_range_extension(self) -> None:
         result = {
             "candidate_profile": {
@@ -134,6 +183,33 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertFalse(gate["passed"])
         self.assertEqual(gate["status"], "internal_result")
         self.assertTrue(any("cutoff" in reason for reason in gate["reasons"]))
+
+    def test_contribution_gate_rejects_hostless_urls_and_string_booleans(self) -> None:
+        result = {
+            "candidate_profile": {
+                "contribution_class": "terminal_result",
+                "scholarly_question": "Does the target hold?",
+                "meaningful_delta": "Claims to settle it.",
+                "acceptance_test": "Replay the proof.",
+                "closest_prior_work": [{"url": "https:", "difference": "claimed delta"}],
+                "novelty_searches": [
+                    {"source": "a", "query": "q", "url": "https:", "finding": "none"},
+                    {"source": "b", "query": "q", "url": "https:", "finding": "none"},
+                ],
+                "external_channel": {
+                    "recipient": "Maintainer", "url": "https:", "acceptance_path": "submit",
+                },
+                "independent_validations": [{
+                    "type": "formal_kernel", "validator": "checker", "result": "accepted",
+                    "artifact": "proof",
+                }],
+                "relevance": {"settles_exact_open_target": "false", "evidence_url": "https:"},
+                "arbitrary_cutoff_extension": "false",
+            }
+        }
+        gate = contribution_gate.assess(result)
+        self.assertFalse(gate["passed"])
+        self.assertTrue(any("booleans" in reason for reason in gate["reasons"]))
 
     def test_contribution_gate_accepts_exact_recognized_target(self) -> None:
         result = {
@@ -547,7 +623,33 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(queued_spec["review_every_segments"], 8)
                 second = lab.worker_once()
                 self.assertEqual(second["status"], "completed_awaiting_review")
-                self.assertEqual(lab.apply_review(submitted["id"], "validate", reason="complete and checked")["status"], "validated")
+                with self.assertRaisesRegex(ValueError, "validation receipt"):
+                    lab.apply_review(submitted["id"], "validate", reason="unbound model assertion")
+                workspace = research / "p" / "workspace"
+                checker = workspace / "independent-checker.py"
+                checker.write_text("# independent fixture checker\n")
+                artifact = workspace / "checkpoint.json"
+                final_state = lab._read_state(submitted["id"])
+                receipt_path = workspace / "validation-receipt.json"
+                receipt_path.write_text(json.dumps({
+                    "schema_version": lab.VALIDATION_RECEIPT_SCHEMA_VERSION,
+                    "job_id": submitted["id"],
+                    "segment": final_state["segment"],
+                    "progress_sha256": final_state["latest_progress"]["sha256"],
+                    "result": "passed",
+                    "validator": "independent fixture checker",
+                    "checker_path": "independent-checker.py",
+                    "checker_sha256": hashlib.sha256(checker.read_bytes()).hexdigest(),
+                    "checked_artifacts": {
+                        "checkpoint.json": hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                    },
+                    "independence_basis": "separate checker code reads only the final artifact",
+                    "created_at": store.now_iso(),
+                }))
+                self.assertEqual(lab.apply_review(
+                    submitted["id"], "validate", reason="complete and checked",
+                    validation_receipt="validation-receipt.json",
+                )["status"], "validated")
                 self.assertEqual(lab.status("p")["counts"]["validated"], 1)
 
     def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
@@ -611,6 +713,17 @@ class ProofFactoryTests(unittest.TestCase):
                 "citations": ["https://example.test"], "techniques": ["enumeration"],
                 "tool_disclosure": "AI and Python", "artifact_hashes": {"proof.txt": artifact_hash},
                 "independent_checker": "A separately written checker reproduced the result.",
+                "contribution_gate": {
+                    "schema_version": contribution_gate.SCHEMA_VERSION,
+                    "passed": True,
+                    "status": "candidate_eligible",
+                    "reasons": [],
+                    "contribution_class": "research_artifact",
+                    "meaningful_delta": "First checked artifact for the configured target.",
+                    "scholarly_question": "Can the configured target be checked independently?",
+                    "external_recipient": "Maintainer",
+                    "independent_validation_types": ["independent_third_party"],
+                },
             }
             (data / "problems.json").write_text(json.dumps([problem]))
             (data / "attempts.jsonl").write_text(json.dumps(attempt) + "\n")
@@ -1002,23 +1115,24 @@ class ProofFactoryTests(unittest.TestCase):
         attempt = {
             "id": "easy-attempt", "lane": "easy",
             "evidence_validation": {"status": "valid"},
-            "lab_review": {"job_id": "job-reviewed", "decision": "validate", "reason": "hashes pass"},
+            "lab_review": {"job_id": "job-reviewed", "decision": "continue", "reason": "hashes pass"},
         }
-        with patch.object(lab, "apply_review", return_value={"status": "validated"}) as apply_review:
+        with patch.object(lab, "apply_review", return_value={"status": "queued"}) as apply_review:
             reviewed_job = scheduler._apply_lab_review(attempt)
         self.assertEqual(reviewed_job, "job-reviewed")
-        self.assertEqual(attempt["lab_review_applied"]["status"], "validated")
+        self.assertEqual(attempt["lab_review_applied"]["status"], "queued")
         apply_review.assert_called_once_with(
-            "job-reviewed", "validate", reason="hashes pass", reviewer="proof-factory:easy-attempt",
+            "job-reviewed", "continue", reason="hashes pass", reviewer="proof-factory:easy-attempt",
         )
         research_events = [
-            {"id": "old-job", "kind": "lab_completed", "source": "state/jobs/job-old.json"},
-            {"id": "reviewed-job", "kind": "lab_completed", "source": "state/jobs/job-reviewed.json"},
+            {"id": "old-job", "kind": "lab_completed", "source": "state/labs/jobs/job-old.json"},
+            {"id": "reviewed-job", "kind": "lab_completed", "source": "state/labs/jobs/job-reviewed.json"},
             {"id": "source", "kind": "source_changed", "source": "source"},
         ]
         pending_events = [
             *research_events,
-            {"id": "segment", "kind": "lab_segment_completed", "evidence": "job-reviewed segment 1"},
+            {"id": "segment", "kind": "lab_segment_completed", "source": "state/labs/jobs/job-reviewed.json"},
+            {"id": "prefix", "kind": "lab_segment_completed", "source": "state/labs/jobs/job-reviewed-10.json"},
         ]
         selected = scheduler._consumable_event_ids(
             research_events, pending_events, reviewed_job=reviewed_job, evidence_valid=True,
@@ -1030,6 +1144,16 @@ class ProofFactoryTests(unittest.TestCase):
             ),
             set(),
         )
+
+    def test_automated_lab_review_cannot_validate_without_operator_receipt(self) -> None:
+        attempt = {
+            "id": "model-review", "evidence_validation": {"status": "valid"},
+            "lab_review": {"job_id": "job", "decision": "validate", "reason": "looks complete"},
+        }
+        with patch.object(lab, "apply_review") as apply_review:
+            self.assertEqual(scheduler._apply_lab_review(attempt), "")
+        apply_review.assert_not_called()
+        self.assertTrue(any("only an operator" in flag for flag in attempt["policy_flags"]))
 
     def test_render_contains_statuses_sources_and_attempts(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -1148,7 +1272,7 @@ class ProofFactoryTests(unittest.TestCase):
             with patch.multiple(
                 store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
                 PROBLEMS_FILE=problems_file, ATTEMPTS_FILE=attempts_file,
-            ), patch.object(repositories, "MAX_TRACKED_FILE_BYTES", 10_000):
+            ), patch.object(repositories, "_max_tracked_file_bytes", return_value=10_000):
                 info = repositories.ensure(problem)
                 repo = Path(info["path"])
                 (repo / "checker.py").write_text("print(1)\n")
