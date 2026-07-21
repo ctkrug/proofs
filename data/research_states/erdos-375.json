@@ -10,14 +10,150 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T14:47:14.087634+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T14:47:14.087634+00:00",
+    "source_attempt_id": "erdos-375-20260721-144714-02603d",
+    "source_status": "falsifiable",
+    "facts_recorded": 4,
+    "exclusions_recorded": 3,
+    "leads_recorded": 2,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The exact statement and current open status were audited. Historical methods, accepted and provisional computations, Lean semantics, software, verification contract, and external acceptance path were mapped. A mislabeled positive control inherited from the Terra delegate was corrected because its graph was actually deficient. The recorded experiment passed all seven controls, independently agreed through 1000, and found no failure among 779987 windows from 90407 composite starts with n+k<=100000. This is not a new bound or evidence for the universal conjecture.",
+  "established_facts": [
+    {
+      "claim": "The maintained database labels Erdős #375 open/falsifiable and warns that this is not a complete literature guarantee.",
+      "evidence": "https://www.erdosproblems.com/375, audited 2026-07-21",
+      "scope": "Maintained source status",
+      "status": "proved",
+      "source_attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "claim": "Laishram and Shorey's archival abstract states verification for all k when n<=1.9e10.",
+      "evidence": "https://repository.ias.ac.in/67716/",
+      "scope": "Reported 2006 numerical result",
+      "status": "proved",
+      "source_attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "claim": "No failure occurred in the local production scan of 779987 windows with n+k<=100000.",
+      "evidence": "artifacts/baseline-N100000.json and recorded experiment 20260721-143839-1180de",
+      "scope": "n>=1, k>=1, n+k<=100000 only",
+      "status": "computed",
+      "source_attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "claim": "The independent oracle agreed with production counts and decisions at limits through 1000.",
+      "evidence": "artifacts/baseline-N100000.json",
+      "scope": "Declared boundary limits 3,4,10,30,100,1000",
+      "status": "computed",
+      "source_attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-counterexample-certificate-search",
+      "family": "counterexample and witness search",
+      "fingerprint": "counterexample-certificate-search",
+      "title": "Baseline source and literature audit followed by validation of an exact Hall-certificate counterexample harness on a predeclared finite domain",
+      "mechanism": "Factor each composite interval, construct its position-to-prime-divisor bipartite graph, test for a perfect matching, and emit a Hall-deficient subset on failure; compare against trial division plus exhaustive Hall-subset enumeration on a smaller domain.",
+      "status": "active",
+      "hypothesis": "The SPF/matching discriminator agrees with an independent trial-division/exhaustive-Hall oracle through 1000 and finds no Hall-deficient all-composite window for n+k<=100000.",
+      "discriminating_test": "Require seven positive and adversarial controls, exact count agreement between materially different encodings at limits 3, 4, 10, 30, 100, and 1000, then stop the production scan at endpoint 100000 or immediately on a Hall certificate.",
+      "blocker": "Universal positive progress requires a theorem beyond the Ramachandra-Shorey-Tijdeman cubic sufficient range or a recognized weaker subproblem; computational-bound work is additionally blocked by unresolved provenance for larger provisional claims.",
+      "reopen_condition": "Resume larger counterexample scanning only with a validated novelty target, requested range, structural observable, or actual Hall candidate; resume Lean only after several GB of verified free space.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-375-20260721-144714-02603d",
+      "attempts": 1,
+      "parent_ids": [
+        "counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "family": "isolated adversarial reconstruction",
+      "mechanism": "Start from only a recovered provisional artifact and its stated range, reconstruct the smallest claimed exceptional interval using an independently written factor-divisor representation, and record the first discrepancy.",
+      "hypothesis": "At least one public Brox-Paseman artifact contains enough information to reproduce an S-algorithm failure and its repair.",
+      "discriminating_test": "Locate runnable code or exact interval data and require the smallest reported failure and repaired matching to reproduce independently; otherwise classify the claim as non-reproducible from public materials.",
+      "rationale": "Provenance resolution has higher information value than repeating a smaller or comparable scan.",
+      "id": "strategy-f2704f3fb744",
+      "fingerprint": "f2704f3fb744",
+      "status": "proposed",
+      "title": "Start from only a recovered provisional artifact and its stated range, reconstruct the smallest claimed exceptional interval using an independently written factor-divisor representation, and record the first discrepancy.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Recover and audit the Brox-Paseman provisional computation artifacts.",
+      "rationale": "This resolves the closest-prior-work ambiguity and may expose reusable exceptional-interval data or code before new compute is spent.",
+      "next_experiment": "Follow the EACA slides and MathOverflow links; inventory code, logs, exact failures, cover semantics, and replay the smallest failure if runnable artifacts exist.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-65a2a566c1",
+      "strategy_id": "strategy-counterexample-certificate-search",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "description": "Formalize the Hall-certificate contract or a finite interval checker in Lean.",
+      "rationale": "A small kernel-checked certificate layer would be reusable even without solving the conjecture.",
+      "next_experiment": "After disk repair, bootstrap Formal Conjectures and compile a minimal Hall-equivalence lemma with no sorry.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-8ddf232cee",
+      "strategy_id": "strategy-counterexample-certificate-search",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Treat a larger arbitrary local cutoff as a contribution.",
+      "scope": "Any extension that neither exceeds a validated frontier nor yields a structural result.",
+      "reason": "The accepted 2006 range and later provisional claims are vastly larger.",
+      "evidence": "notes/baseline-audit.md literature map",
+      "reopen_condition": "A counterexample, expert-requested range, validated best-bound improvement, or new structural theorem.",
+      "attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "claim_or_route": "Use only the number of distinct prime factors in the whole interval product.",
+      "scope": "All finite intervals.",
+      "reason": "This checks Hall's inequality only for the full left set; a proper subset can still be deficient.",
+      "evidence": "The controlled graph [[2],[2],[3,5]] has three global primes for three vertices but fails Hall on its first two vertices.",
+      "reopen_condition": "A proof that the special consecutive-integer divisor graphs make the whole-set condition sufficient for every subset.",
+      "attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    },
+    {
+      "claim_or_route": "Compile or extend the Lean formalization in the current host state.",
+      "scope": "Formal Conjectures bootstrap attempted 2026-07-21.",
+      "reason": "Cache unpacking failed with only 64 KB free disk; cleanup restored only 369 MB.",
+      "evidence": "notes/baseline-audit.md system audit",
+      "reopen_condition": "Verify several GB of free disk, rerun the prescribed bootstrap, and compile without sorry.",
+      "attempt_id": "erdos-375-20260721-144714-02603d",
+      "updated_at": "2026-07-21T14:47:14.087634+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-counterexample-certificate-search",
+    "objective": "Resolve the closest-prior computational artifact trail before allocating further computation.",
+    "first_action": "Inspect https://mathoverflow.net/questions/248146/on-comparing-two-almost-injective-divisor-maps and its EACA-slide link, including archived targets, and record every source-code, data, range, and exception artifact.",
+    "stop_condition": "Stop when a runnable artifact permits independent replay of the smallest claimed failure and repair, or when the public trail ends without code or certificates and park the bound-extension lane.",
+    "source_attempt_id": "erdos-375-20260721-144714-02603d"
+  },
+  "recent_attempt_ids": [
+    "erdos-375-20260721-144714-02603d"
+  ]
 }

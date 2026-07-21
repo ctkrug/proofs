@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 13,
-  "last_updated": "2026-07-21T12:33:03.280238+00:00",
+  "epoch_count": 14,
+  "last_updated": "2026-07-21T14:31:51.614975+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The hypothesis was falsified over the complete declared domain. There are 6,992,920, 953,580, and 106,076 handshake-parity profiles at orders 43, 44, and 45. The published extremal-excess interval removes none. Every profile satisfies the uncoloured pair LP by assigning distance 22 to even degree sums and distance 21 at n=43 or 23 at n=44,45 to odd degree sums. This changes no Ramsey bound.",
+  "synthesis_summary": "All eight formulas were SAT and produced valid order-42 Ramsey graphs at boundary distances 178–232. Every candidate was nevertheless one of eight distinct supplied classes. The novelty hypothesis therefore failed over exactly these eight first models. No Ramsey bound changed.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -344,27 +344,25 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-123303-2aa131",
       "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "claim": "Eight exact boundary models are valid supplied-corpus rediscoveries.",
+      "evidence": "Production report and byte-identical cold-audit replay.",
+      "scope": "Source records 21, 36, 41, 83, 126, 128, 192, and 216 with their fingerprint-selected boundaries.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-143151-8fb809",
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "claim": "Eight distinct supplied-class pairs share induced order-30 graphs.",
+      "evidence": "Frozen-boundary comparisons and independent target isomorphisms in the cold audit.",
+      "scope": "Exactly the eight retained transitions.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-143151-8fb809",
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
     }
   ],
   "strategies": [
-    {
-      "id": "strategy-r55-novel42",
-      "family": "novel order-42 basin discovery",
-      "fingerprint": "r55novel42basin2026",
-      "title": "Find a genuinely new 42-vertex component",
-      "mechanism": "Jointly destroy at least six vertices, exact-repair boundaries, canonicalize every valid result, and score explicit induced-subgraph novelty away from all 656; run an almost-regular constrained branch beside an unrestricted branch.",
-      "status": "proposed",
-      "hypothesis": "A 43 witness, if it exists, is reachable only through an unknown order-42 basin, and the almost-regular conjecture supplies one sharp search slice.",
-      "discriminating_test": "Produce a dual-verified order-42 graph outside all 656 or certify a precisely bounded branch empty; rediscovery of known classes fails the epoch.",
-      "blocker": "Requires authenticated corpus, canonicalization, novelty metrics, and independent checkers.",
-      "reopen_condition": "",
-      "last_attempt_id": "",
-      "attempts": 0,
-      "parent_ids": [
-        "strategy-r55-controls"
-      ],
-      "updated_at": "2026-07-20T12:53:00-06:00"
-    },
     {
       "id": "strategy-r55-breakout",
       "family": "violation-hypergraph tabu and local branching",
@@ -673,6 +671,41 @@
         "strategy-r55rowcodesdp2026"
       ],
       "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "id": "strategy-r55novel42basin2026",
+      "family": "novel order-42 basin discovery",
+      "fingerprint": "r55novel42basin2026",
+      "title": "Leakage-safe exact 12-vertex boundary repair on eight authenticated order-42 controls.",
+      "mechanism": "Freeze an induced order-30 graph, solve its 426 boundary edges exactly with minimum Hamming distance 60, then independently validate and canonicalize the first model.",
+      "status": "active",
+      "hypothesis": "At least one of eight predeclared boundaries yields a valid Ramsey(5,5,42) first SAT model outside all supplied 656 classes.",
+      "discriminating_test": "Require independent Python and C forbidden-five-set scans, boundary consistency, and canonical nonmembership in the supplied corpus.",
+      "blocker": "Unblocked exact solving preferentially returns supplied classes; no checked isomorphism-class blocking or exhaustive boundary certificate exists.",
+      "reopen_condition": "Install replayable complete-boundary model blocking with a predeclared model budget.",
+      "reopen_evidence": "Authenticated controls, exact CNFs, dual graph checkers, canonical membership testing, and a cold model checker are installed.",
+      "last_attempt_id": "ramsey-r55-20260721-143151-8fb809",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55controls2026"
+      ],
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "family": "canonical counterexample-guided exact repair",
+      "mechanism": "Iteratively solve one frozen boundary and block each complete labelled assignment that canonicalizes to a supplied class.",
+      "hypothesis": "After blocking finitely many supplied assignments, the boundary yields a valid graph outside all 656 controls.",
+      "discriminating_test": "A 64-model run yields a dual-checked novel graph or an exact rediscovery ledger.",
+      "rationale": "It changes the admissible model set in response to the observed failure rather than merely changing random seeds.",
+      "id": "strategy-4c792f58d4a3",
+      "fingerprint": "4c792f58d4a3",
+      "status": "proposed",
+      "title": "Iteratively solve one frozen boundary and block each complete labelled assignment that canonicalizes to a supplied class.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55novel42basin2026"
+      ],
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
     }
   ],
   "open_leads": [
@@ -887,6 +920,16 @@
       "id": "lead-53dd91d0b1",
       "strategy_id": "strategy-r55rowcodesdp2026",
       "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "description": "Canonical counterexample-guided exact repair within one retained boundary.",
+      "rationale": "It directly addresses the measured supplied-class rediscovery failure.",
+      "next_experiment": "Enumerate at most 64 trial-1 models, block each verified known boundary assignment, and require dual checking plus canonical novelty.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-a9436addec",
+      "strategy_id": "strategy-r55novel42basin2026",
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
     }
   ],
   "ruled_out": [
@@ -1127,6 +1170,24 @@
       "reopen_condition": "Demonstrate a source, degree-domain, support, profile-count, or Krawtchouk-certificate defect. A coloured adjacency-aware model is a different route.",
       "attempt_id": "ramsey-r55-20260721-123303-2aa131",
       "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "claim_or_route": "Use the first unblocked SAT model from these eight boundaries as a novelty mechanism.",
+      "scope": "The retained formulas, CaDiCaL seeds, and first models.",
+      "reason": "Every first model belongs to a supplied class.",
+      "evidence": "Production and cold-audit reports.",
+      "reopen_condition": "Add canonical model blocking or another mechanism that explicitly excludes observed assignments.",
+      "attempt_id": "ramsey-r55-20260721-143151-8fb809",
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
+    },
+    {
+      "claim_or_route": "Treat selected-layer r45extreme statistics as universal order-45 I3 bounds.",
+      "scope": "The public selected-layer archive.",
+      "reason": "Interior edge layers required for universal fixed-edge feature extrema are absent.",
+      "evidence": "Authoritative ANU data index and the primary I2/I3 paper.",
+      "reopen_condition": "Obtain complete catalogues or proved global feature bounds for every missing layer.",
+      "attempt_id": "ramsey-r55-20260721-143151-8fb809",
+      "updated_at": "2026-07-21T14:31:51.614975+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1137,11 +1198,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55rowcodesdp2026",
-    "objective": "Determine whether authenticated edge-extremal archives contain enough triangle and pointed features to reconstruct the published I2/I3 order-45 baseline.",
-    "first_action": "Fetch and hash https://users.cecs.anu.edu.au/~bdm/data/ramsey.html and r45extreme.tar.gz, inventory their files, and map available fields to equations I2 and I3 in sources/rowpair/subgraph-counting-r55.pdf.",
-    "stop_condition": "Stop if provenance fails, required I3 features are absent, or the archive only reproduces the already recorded edge extrema.",
-    "source_attempt_id": "ramsey-r55-20260721-123303-2aa131"
+    "recommended_strategy_id": "strategy-r55novel42basin2026",
+    "objective": "Test whether canonical counterexample-guided blocking escapes the supplied classes within retained trial 1.",
+    "first_action": "Append a 426-literal block for each verified known boundary model and retain every model and canonical label up to a budget of 64.",
+    "stop_condition": "Stop on a dual-checked novel class, 64 verified rediscoveries, any checker discrepancy, or an uncertified solver conclusion.",
+    "source_attempt_id": "ramsey-r55-20260721-143151-8fb809"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1156,6 +1217,7 @@
     "ramsey-r55-20260721-063540-e1ccef",
     "ramsey-r55-20260721-082900-aea66d",
     "ramsey-r55-20260721-103733-ba8afb",
-    "ramsey-r55-20260721-123303-2aa131"
+    "ramsey-r55-20260721-123303-2aa131",
+    "ramsey-r55-20260721-143151-8fb809"
   ]
 }
