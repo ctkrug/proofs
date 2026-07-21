@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 7,
-  "last_updated": "2026-07-20T19:10:03-06:00",
+  "epoch_count": 8,
+  "last_updated": "2026-07-21T02:34:27.831856+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The authenticated Springer K43 seed has exactly two all-zero K5s and no all-one K5. Its complete radius-1 and radius-2 neighborhoods are exhausted: all 903 one-edge and all 407253 distinct two-edge edits have burden at least 2. The only two radius-2 minimizers are the seed relabeled by rotations +27 and -27 modulo 43. Twenty cyclic-distance edge orbits are constant; only distance 6 varies. With the other orbits frozen, independent Z3 and custom C DPLL enumerations exhaust all 2^43 distance-6 words: minimum burden 2 with exactly 86 optima, the 43 rotations of step-27 intervals of length 24 and 25. This closes the one-orbit domain-wall ansatz but changes no Ramsey bound.",
+  "synthesis_summary": "The hypothesis was falsified at its exact scope. Every second distance in {1,...,21} minus {6} is UNSAT. Complete Python and C origin ledgers and CNFs agree byte-for-byte. All 20 DRAT proofs pass drat-trim, all LRAT conversions pass lrat-check, and full-graph semantic controls agree. This excludes only the specified fixed-background two-orbit union and changes no Ramsey bound.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -240,6 +240,14 @@
       "status": "audited-adjacent-precedent",
       "source_attempt_id": "manual-prior-art-audit-2026-07-20",
       "updated_at": "2026-07-20T18:30:56-06:00"
+    },
+    {
+      "claim": "All 20 fixed-background two-orbit slices are burden-zero UNSAT.",
+      "evidence": "artifacts/two_orbit_slice_exact_report.json and artifacts/two_orbit_slice_adversarial_audit.json",
+      "scope": "Distance 6 plus exactly one distance d in {1,...,21} minus {6}, with the other 19 distance orbits frozen to publisher source SHA-256 c2429869f6fa47ab7388134b580b014efae01e6f0e474f5bab2233afb1ef6990.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-023427-94891a",
+      "updated_at": "2026-07-21T02:34:27.831856+00:00"
     }
   ],
   "strategies": [
@@ -486,6 +494,26 @@
         "https://arxiv.org/abs/1704.03592"
       ],
       "updated_at": "2026-07-20T18:30:56-06:00"
+    },
+    {
+      "id": "strategy-r55twoorbitdomainwall2026",
+      "family": "certificate-carrying two-orbit SAT",
+      "fingerprint": "r55twoorbitdomainwall2026",
+      "title": "Proof-carrying burden-zero sweep of all 20 two-orbit cyclic domain-wall slices around the authenticated Springer K43 seed.",
+      "mechanism": "Free cyclic distance 6 and one other distance orbit, independently derive the exact K5 CNF in Python and C without symmetry reduction, solve it, and verify DRAT/LRAT proofs and variable-to-graph semantics.",
+      "status": "active",
+      "hypothesis": "At least one of the 20 slices contains a burden-zero R(5,5,43) coloring.",
+      "discriminating_test": "Solve every unsymmetrized 86-variable slice; accept SAT only after two full K5 scans, and accept UNSAT only after dual clause derivation and independent proof checking.",
+      "blocker": "The burden-zero witness question is closed for this family, but exact slice minima remain unknown because burden one has not yet been encoded with raw-origin multiplicity.",
+      "reopen_condition": "Reopen the burden-zero witness route only after a concrete defect in source provenance, encoding, mapping, proof verification, or slice coverage.",
+      "reopen_evidence": "The saved radius-two and distance-6 prerequisite gates replayed successfully before the new sweep.",
+      "last_attempt_id": "ramsey-r55-20260721-023427-94891a",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55twocore2026",
+        "strategy-r55-certified-pilot"
+      ],
+      "updated_at": "2026-07-21T02:34:27.831856+00:00"
     }
   ],
   "open_leads": [
@@ -610,6 +638,16 @@
       "id": "lead-r55-row-code-sdp",
       "strategy_id": "strategy-r55-row-code-sdp",
       "updated_at": "2026-07-20T18:30:56-06:00"
+    },
+    {
+      "description": "Decide whether any of the 20 two-orbit slices has burden one.",
+      "rationale": "The publisher assignment has burden two in every slice, so checked burden-at-most-one exclusions would establish exact minimum two and fully close this structured family.",
+      "next_experiment": "Add raw-origin relaxation variables and an independently derived at-most-one encoding, validate it on the one-orbit control, then run all 20 cases with proof logging.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-365cf4cbff",
+      "strategy_id": "strategy-r55twoorbitdomainwall2026",
+      "updated_at": "2026-07-21T02:34:27.831856+00:00"
     }
   ],
   "ruled_out": [
@@ -769,6 +807,15 @@
       "reopen_condition": "Only after a defect is found in the reduced-clause derivation or either complete model-set check; releasing another orbit is a different family.",
       "attempt_id": "manual-local-radius2-domain-wall-2026-07-20",
       "updated_at": "2026-07-20T19:10:03-06:00"
+    },
+    {
+      "claim_or_route": "Find a K43 Ramsey witness in the authenticated seed's two-released-orbit domain-wall family.",
+      "scope": "The union of all 20 archived unsymmetrized 86-variable slices.",
+      "reason": "Every exact burden-zero CNF has independently checked DRAT and LRAT evidence of UNSAT.",
+      "evidence": "artifacts/two_orbit_slices, artifacts/two_orbit_lrat, and the two retained reports",
+      "reopen_condition": "Demonstrate a source, clause-derivation, variable-mapping, proof-checker, or 20-distance coverage defect; freeing a third orbit is a different route.",
+      "attempt_id": "ramsey-r55-20260721-023427-94891a",
+      "updated_at": "2026-07-21T02:34:27.831856+00:00"
     }
   ],
   "unresolved_questions": [
@@ -779,11 +826,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-r55-two-orbit-domain-wall",
-    "objective": "Test whether the exact one-dimensional defect can escape burden 2 by coupling distance 6 to one additional cyclic-distance orbit.",
-    "first_action": "Replay the two retained epoch-7 gates, then generate the 20 deterministic 86-variable two-orbit CNFs with a sound common-rotation symmetry break and ask each first for burden 0.",
-    "stop_condition": "Stop immediately on any clause-derivation or dual-check mismatch. A SAT model must pass both full K5 checkers. An UNSAT result remains a discriminator unless its deterministic CNF and independently checked proof log are retained.",
-    "source_attempt_id": "manual-local-radius2-domain-wall-2026-07-20"
+    "recommended_strategy_id": "strategy-r55twoorbitdomainwall2026",
+    "objective": "Determine whether any two-orbit slice lowers the exact monochromatic-K5 burden from two to one.",
+    "first_action": "Extend both generators with one relaxation variable per raw origin and independently derived at-most-one constraints; validate first on the retained distance-6 slice.",
+    "stop_condition": "Stop on any source, multiplicity, specialization, dual-CNF, proof, or full-scan mismatch; otherwise stop after a checked burden-one model or 20 checked UNSAT results.",
+    "source_attempt_id": "ramsey-r55-20260721-023427-94891a"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -792,6 +839,7 @@
     "ramsey-r55-20260720-224631-ebf6f8",
     "ramsey-r55-20260720-235107-8e574c",
     "ramsey-r55-20260721-001847-bbfd27",
-    "manual-local-radius2-domain-wall-2026-07-20"
+    "manual-local-radius2-domain-wall-2026-07-20",
+    "ramsey-r55-20260721-023427-94891a"
   ]
 }

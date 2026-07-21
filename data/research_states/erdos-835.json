@@ -10,14 +10,183 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T02:53:53.627495+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T02:53:53.627495+00:00",
+    "source_attempt_id": "erdos-835-20260721-025353-29df74",
+    "source_status": "verifiable",
+    "facts_recorded": 6,
+    "exclusions_recorded": 4,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The maintained problem remains open. Ma-Tang exclude composite k+1; known design nonexistence excludes k=10 and k=12, making k=16 the first parameter not excluded by the audited results. A target coloring implies LS(k-1,k,2k), hence at k=16 it implies LS(4,5,21), stronger than one S(4,5,21). The exact-cover tooling passed bounded controls, but S(4,5,21) was not solved. The bare Johnson recurrence through k=500 excluded precisely composite offsets and did not reproduce the forum's reported four-survivor computation.",
+  "established_facts": [
+    {
+      "claim": "For every k>2 with composite k+1, chi(J(2k,k))>=k+2.",
+      "evidence": "Ma-Tang Theorem 2.2, repository commit 7f131832bab5abfc903014ddb61efff21d56ae01; audited PDF SHA-256 1597f3f9eb577869e9955aacd4234bc8ab02584c1f879b55688f810b882d9424.",
+      "scope": "All k>2 with composite k+1.",
+      "status": "proved",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim": "A target coloring implies LS(k-1,k,2k) and, for k>=5, LS(4,5,k+5).",
+      "evidence": "For each (k-1)-set, its k+1 one-point extensions form a K_(k+1) and receive every color once; derivation preserves the partition.",
+      "scope": "Necessary condition only; no converse is asserted.",
+      "status": "proved",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim": "The target is impossible for k=10 and k=12.",
+      "evidence": "Nonexistence of the necessary S(4,5,15) and S(4,5,17), respectively.",
+      "scope": "Exactly k=10 and k=12.",
+      "status": "proved",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim": "k=16 is the first parameter not excluded by the audited results.",
+      "evidence": "Maintained k<=8 exclusions, Ma-Tang composite-offset theorem, and the k=10 and k=12 design obstructions.",
+      "scope": "Relative to the explicitly audited published/maintained results.",
+      "status": "conditional",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim": "The S(4,5,21) pairwise CNF contains 20,349 variables and 819,945 semantically verified clauses.",
+      "evidence": ".proof-experiments/20260721-024238-f079dc and independent checker tools/check_steiner45.py.",
+      "scope": "Encoding correctness; satisfiability was not tested.",
+      "status": "computed",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim": "The unseeded Johnson recurrence excludes exactly composite offsets through k=500.",
+      "evidence": ".proof-experiments/20260721-024452-8ac515, two exact implementations.",
+      "scope": "3<=k<=500 and the bare recurrence only.",
+      "status": "computed",
+      "source_attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-counterexample-certificate-search",
+      "family": "counterexample and witness search",
+      "fingerprint": "counterexample-certificate-search",
+      "title": "Mandatory source/status baseline audit, design-theoretic reduction audit, and bounded validation of the promoted S(4,5,v) exact-cover tooling",
+      "mechanism": "Derive necessary Steiner large sets, validate their exact encodings on a known positive instance and adversarial corruptions, and distinguish independently reproducible bounds from unsupported reports.",
+      "status": "active",
+      "hypothesis": "The first parameter surviving the audited established exclusions is k=16; its necessary S(4,5,21) exact-cover encoding can be validated independently without attempting the open solve, while the bare recursive Johnson bound is insufficient to reproduce the forum's stronger k<=500 exclusion report.",
+      "discriminating_test": "Check primary/current sources for every exclusion, solve and independently validate the known S(4,5,11) control, reject three corrupted witnesses under two checkers, reconstruct every clause of the S(4,5,21) CNF independently, and compare two exact implementations of the unseeded Johnson recurrence through k=500.",
+      "blocker": "The first audited live case requires LS(4,5,21), while even existence of one S(4,5,21) remains open. No unrestricted proof certificate, lift theorem, or reproducible table-seeded exclusion ledger is currently available.",
+      "reopen_condition": "",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-835-20260721-025353-29df74",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "family": "formal proof with premise retrieval",
+      "mechanism": "Formalize the clique-to-Steiner-large-set reduction in the pinned Formal Conjectures environment and reuse nearby finite-set/coloring lemmas.",
+      "hypothesis": "The implication from the target Property to LS(k-1,k,2k), including the derived LS(4,5,k+5) corollary, admits a compact Lean proof without sorry.",
+      "discriminating_test": "Bootstrap the pinned repository and require the smallest clique-to-one-color-per-extension lemma to compile under the Lean kernel.",
+      "rationale": "This yields a small independently checkable structural artifact without requiring the open S(4,5,21) search.",
+      "id": "strategy-ddf1cb8711f1",
+      "fingerprint": "ddf1cb8711f1",
+      "status": "proposed",
+      "title": "Formalize the clique-to-Steiner-large-set reduction in the pinned Formal Conjectures environment and reuse nearby finite-set/coloring lemmas.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-counterexample-certificate-search"
+      ],
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Reconstruct the reported table-seeded constant-weight-code exclusions through k=500.",
+      "rationale": "This is the cheapest way to convert a currently uncheckable report into a precise exclusion map and identify the decisive bound seeds.",
+      "next_experiment": "Freeze codes.se/cw.html, build two exact fixed-point propagators with seed provenance, and compare the survivor sets.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-bea069b70a",
+      "strategy_id": "strategy-counterexample-certificate-search",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "description": "Formalize coloring implies LS(k-1,k,2k) and derived LS(4,5,k+5).",
+      "rationale": "The reduction is compact, central, and has a tractable kernel-checkable verification surface.",
+      "next_experiment": "Run /root/proof-factory/scripts/bootstrap-formal-conjectures.sh and compile the reduction against the pinned Property definition without sorry.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-928b5effb0",
+      "strategy_id": "strategy-counterexample-certificate-search",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "description": "Test tactical-decomposition constraints for LS(4,5,21).",
+      "rationale": "Partition-level obstructions are closer to the target than searching for one isolated S(4,5,21).",
+      "next_experiment": "Encode only design-level intersection equations and validate the encoding on smaller known large-set controls.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-2b9258461f",
+      "strategy_id": "strategy-counterexample-certificate-search",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Present one S(4,5,21) model as a solution to Erdős #835.",
+      "scope": "Any isolated derived design without a 17-design partition and full lift.",
+      "reason": "The coloring implies LS(15,16,32), and derivation gives LS(4,5,21), not merely one constituent design.",
+      "evidence": "Design derivation in notes/baseline-audit-2026-07-21.md.",
+      "reopen_condition": "Supply a proved lift or a complete independently checked coloring.",
+      "attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim_or_route": "Naive direct SAT encoding of J(32,16) on the audited host.",
+      "scope": "Straightforward vertex-color and edge-clause encoding.",
+      "reason": "It requires over 10.2 billion color variables and roughly 1.31 trillion edge-color clauses.",
+      "evidence": "Exact graph counts in the baseline audit.",
+      "reopen_condition": "A rigorous compression, orbit theorem, or structural reduction changing the scale by orders of magnitude.",
+      "attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim_or_route": "Treat the forum's k<=500 four-survivor statement as established.",
+      "scope": "The reported exclusions beyond the bare recurrence.",
+      "reason": "No frozen seeds, implementation, origin ledger, or certificate was supplied, and the independently run bare recurrence leaves every prime offset.",
+      "evidence": ".proof-experiments/20260721-024452-8ac515.",
+      "reopen_condition": "Two independently implemented exact table-seeded propagations with matching origin ledgers.",
+      "attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    },
+    {
+      "claim_or_route": "Infer nonexistence of S(4,5,21) from searches with prescribed automorphism groups.",
+      "scope": "The group-restricted searches in Kiermaier-Krčadinac-Wassermann (2026).",
+      "reason": "They do not cover asymmetric designs, and the authors explicitly describe the negative results as little evidence.",
+      "evidence": "https://doi.org/10.1007/s10623-026-01888-w",
+      "reopen_condition": "An unrestricted proof-checked enumeration or theorem exhausting all automorphism possibilities.",
+      "attempt_id": "erdos-835-20260721-025353-29df74",
+      "updated_at": "2026-07-21T02:53:53.627495+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-counterexample-certificate-search",
+    "objective": "Independently reconstruct the forum-reported table-seeded constant-weight exclusion map through k=500.",
+    "first_action": "Run `curl --fail --location --create-dirs --output sources/codes-se-cw-2026-07-21.html https://codes.se/bounds/cw.html`, then record its SHA-256 and retrieval timestamp before implementing tools/table_seeded_bound_audit.py.",
+    "stop_condition": "Stop when two independent exact update orders either reproduce exactly {16,112,256,268} with an origin ledger or expose the first irreducible missing or ambiguous seed. Do not extend beyond k=500 or begin a design/coloring search.",
+    "source_attempt_id": "erdos-835-20260721-025353-29df74"
+  },
+  "recent_attempt_ids": [
+    "erdos-835-20260721-025353-29df74"
+  ]
 }
