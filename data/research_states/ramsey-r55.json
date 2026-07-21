@@ -14,8 +14,8 @@
     "The 656 known order-42 graphs are not a proved complete census.",
     "A candidate is not a solution until independent and human review are recorded."
   ],
-  "epoch_count": 12,
-  "last_updated": "2026-07-21T10:37:33.656863+00:00",
+  "epoch_count": 13,
+  "last_updated": "2026-07-21T12:33:03.280238+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T12:53:00-06:00",
@@ -26,7 +26,7 @@
     "leads_recorded": 7,
     "requirement": "Repeat when the maintained survey or primary-source status changes materially."
   },
-  "synthesis_summary": "The complete cover and independent reconstruction audit passed. All 16 toy leaves were proof-checked UNSAT. All 16 production leaves returned UNKNOWN after 322.789 aggregate solver-seconds; fresh drat-trim rejected every partial stream. No witness, exclusion, or Ramsey-bound change was obtained.",
+  "synthesis_summary": "The hypothesis was falsified over the complete declared domain. There are 6,992,920, 953,580, and 106,076 handshake-parity profiles at orders 43, 44, and 45. The published extremal-excess interval removes none. Every profile satisfies the uncoloured pair LP by assigning distance 22 to even degree sums and distance 21 at n=43 or 23 at n=44,45 to odd degree sums. This changes no Ramsey bound.",
   "established_facts": [
     {
       "claim": "The maintained Dynamic Survey records 43 <= R(5,5) <= 46.",
@@ -328,6 +328,22 @@
       "status": "computed",
       "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb",
       "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "claim": "Every declared degree histogram at n=43,44,45 has the explicit central-distance feasible point in the uncoloured pair relaxation.",
+      "evidence": "Exact support and Krawtchouk tables in artifacts/rowpair_v1/rowpair_v1_report.json, independently reconstructed by the cold checker.",
+      "scope": "The uncoloured union-support pair LP only; no edge-colour marginals, adjacency symmetry, triple moments, or graph-existence conclusion.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-123303-2aa131",
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "claim": "The two independent control-ledger implementations agree exactly on all supplied graphs and complements.",
+      "evidence": "The retained TSV files are byte-identical with SHA-256 48df90ead7bfec093a33e14dad2906eb070413c1d4c2cd9d99e6e8ced3c1f9cc.",
+      "scope": "The authenticated supplied 656 controls, not an exhaustive census.",
+      "status": "computed",
+      "source_attempt_id": "ramsey-r55-20260721-123303-2aa131",
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
     }
   ],
   "strategies": [
@@ -546,36 +562,6 @@
       "updated_at": "2026-07-20T18:30:56-06:00"
     },
     {
-      "id": "strategy-r55-row-code-sdp",
-      "family": "coding-theory distance distributions and Terwilliger moment bounds",
-      "fingerprint": "r55rowcodesdp2026",
-      "title": "Use adjacency rows as a constrained binary code to search for exact profile exclusions",
-      "mechanism": "Represent the n adjacency rows as binary words with weights equal to degrees and pairwise distances d(u)+d(v)-2c(u,v). Add the proved edge/common-neighbor and nonedge/common-nonneighbor bounds from R(3,5)=14, then test a hierarchy: exact rational pair-distance LP first, Schrijver-style triple-intersection positive-semidefinite moments second, and colored edge/nonedge moments only if the relaxed stages cut a profile. Known order-42 graphs are mandatory positive controls; every numerical dual must be rationalized into an exact inequality or checked pseudo-Boolean certificate.",
-      "status": "proposed",
-      "hypothesis": "The adjacency-row pair and triple moment cone excludes at least one degree/common-neighbor profile still admitted by scalar degree and excess constraints, supplying a new structural reduction for an upper-bound slice.",
-      "discriminating_test": "Generate exact row weight/intersection distributions for all authenticated controls and enumerate the current hypothetical profiles. Park the route immediately if the rational pair-moment relaxation cuts no new profile; escalate to SDP only after a nonempty exact cut, and reject any cut that fails a known control or cannot be rationalized.",
-      "blocker": "The off-the-shelf code bound does not encode adjacency symmetry or the edge/nonedge relation; the first relaxed LP must show information gain before a custom colored moment system is justified.",
-      "prior_art_status": "Most precedent-adjacent; no located R55 adjacency-row Terwilliger formulation as of the 2026-07-20 public-source audit.",
-      "closest_prior_work": "The adjacency-row Hamming identity is Theorem 2.1 of Ali-Suwilo-Mardiningsih (2019). R55 upper bounds already use integer/linear programming and degree, neighborhood, triangle, and induced-subgraph counts. Flag-algebra SDP has proved other small Ramsey numbers; Schrijver supplies the coding SDP.",
-      "novelty_boundary": "Neither the row identity nor generic LP/SDP is new. Treat this as a cheap filter unless a colored row-moment inequality cuts a profile missed by the established R55 subgraph LP and is rationalized exactly.",
-      "reopen_condition": "",
-      "last_attempt_id": "",
-      "attempts": 0,
-      "parent_ids": [
-        "strategy-r55-inequality"
-      ],
-      "sources": [
-        "https://ir.cwi.nl/pub/14098",
-        "https://www.cs.rit.edu/~spr/ElJC/ejcram18.pdf",
-        "https://doi.org/10.1088/1742-6596/1255/1/012044",
-        "https://www.cs.rit.edu/~spr/PUBL/paper29.pdf",
-        "https://users.cecs.anu.edu.au/~bdm/papers/r55.pdf",
-        "https://arxiv.org/abs/2409.15709",
-        "https://arxiv.org/abs/1704.03592"
-      ],
-      "updated_at": "2026-07-20T18:30:56-06:00"
-    },
-    {
       "id": "strategy-r55twoorbitdomainwall2026",
       "family": "certificate-carrying two-orbit SAT",
       "fingerprint": "r55twoorbitdomainwall2026",
@@ -652,6 +638,41 @@
         "strategy-r55-certified-pilot"
       ],
       "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "id": "strategy-r55rowcodesdp2026",
+      "family": "coding-theory distance distributions and Terwilliger moment bounds",
+      "fingerprint": "r55rowcodesdp2026",
+      "title": "Exact all-profile test of the uncoloured union-support adjacency-row Delsarte pair relaxation at n=43,44,45.",
+      "mechanism": "Freeze each degree histogram, impose degree-pair totals and the union of edge/nonedge row-distance supports, then test ordinary binary Krawtchouk inequalities. An explicit central-distance primal template replaced millions of numerical LP solves.",
+      "status": "blocked",
+      "hypothesis": "The uncoloured union-support adjacency-row Delsarte pair LP excludes at least one degree histogram at n=43,44,45 surviving published degree and extremal-excess interval restrictions.",
+      "discriminating_test": "Construct or refute an exact feasible pair-distance distribution for every admissible histogram; accept a cut only with exact arithmetic and independent reconstruction.",
+      "blocker": "The first-stage pair relaxation has zero information gain, and no frozen stronger scalar-profile manifest has yet been reconstructed from published I2/I3 features.",
+      "reopen_condition": "Retry the same uncoloured stage only after a demonstrated artifact or mathematical defect. Treat coloured edge marginals or adjacency-aware identities as a separately justified mechanism.",
+      "reopen_evidence": "The saved first discriminator was fully executed by the corrected rowpair-v1 gate; its exact negative result activates the stop-before-SDP condition.",
+      "last_attempt_id": "ramsey-r55-20260721-123303-2aa131",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-r55-inequality"
+      ],
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
+    },
+    {
+      "family": "exact subgraph-count feature reconstruction",
+      "mechanism": "Use authenticated edge-extremal catalogues to derive exact triangle, pointed-neighbourhood, and induced-feature bounds, then reconstruct the published rational I2/I3 system before seeking one new inequality.",
+      "hypothesis": "The full published feature system defines a substantially smaller, precisely sourced order-45 profile family than the vacuous edge-extremal interval.",
+      "discriminating_test": "Inventory the archive and require at least one independently checkable I3 feature table not implied by edge extrema.",
+      "rationale": "It targets the exact missing baseline and avoids escalating a provably vacuous coding relaxation.",
+      "id": "strategy-1a9f19a608f2",
+      "fingerprint": "1a9f19a608f2",
+      "status": "proposed",
+      "title": "Use authenticated edge-extremal catalogues to derive exact triangle, pointed-neighbourhood, and induced-feature bounds, then reconstruct the published rational I2/I3 system before seeking one new inequality.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-r55rowcodesdp2026"
+      ],
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
     }
   ],
   "open_leads": [
@@ -856,6 +877,16 @@
       "id": "lead-b2dd264dcd",
       "strategy_id": "strategy-596a3981722b",
       "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "description": "Reconstruct a stronger order-45 I2/I3 scalar baseline from authenticated edge-extremal (4,5,n) data.",
+      "rationale": "The edge-extremal interval is vacuous, while the published subgraph-count LP identifies triangle and refined neighbourhood features as the established next strengthening.",
+      "next_experiment": "Fetch and hash the ANU archive index and r45extreme.tar.gz, inventory their schemas, and map every available feature to I2/I3 before generating profiles.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-53dd91d0b1",
+      "strategy_id": "strategy-r55rowcodesdp2026",
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
     }
   ],
   "ruled_out": [
@@ -1087,6 +1118,15 @@
       "reopen_condition": "Supply a completed proof bound to the exact leaf hash and passing DRAT-to-LRAT conversion and LRAT checking.",
       "attempt_id": "ramsey-r55-20260721-103733-ba8afb",
       "updated_at": "2026-07-21T10:37:33.656863+00:00"
+    },
+    {
+      "claim_or_route": "Exclude an order-43, 44, or 45 degree histogram using only the union of edge/nonedge row-distance supports and ordinary Delsarte inequalities.",
+      "scope": "All 8,052,576 degree histograms satisfying the exact degree bands, vertex count, and handshake parity.",
+      "reason": "Every profile has an explicit feasible central-distance distribution.",
+      "evidence": "Main report and independent cold audit.",
+      "reopen_condition": "Demonstrate a source, degree-domain, support, profile-count, or Krawtchouk-certificate defect. A coloured adjacency-aware model is a different route.",
+      "attempt_id": "ramsey-r55-20260721-123303-2aa131",
+      "updated_at": "2026-07-21T12:33:03.280238+00:00"
     }
   ],
   "unresolved_questions": [
@@ -1097,11 +1137,11 @@
     "Can proof logs for useful bounded R55 subcases fit the hard-lane retention and replay budget?"
   ],
   "next_session": {
-    "recommended_strategy_id": "strategy-596a3981722b",
-    "objective": "Run the cheapest exact adjacency-row pair-distance LP discriminator before any custom SDP or q=20 retry.",
-    "first_action": "Extract exact row-weight, pair-intersection, and edge/nonedge distance distributions from all 656 authenticated controls, then encode the rational pair-moment relaxation for admissible n=43–45 profiles.",
-    "stop_condition": "Park the route if it cuts no profile beyond published constraints, cuts a known control, or yields only a numerical dual that cannot be rationalized and checked exactly.",
-    "source_attempt_id": "ramsey-r55-20260721-103733-ba8afb"
+    "recommended_strategy_id": "strategy-r55rowcodesdp2026",
+    "objective": "Determine whether authenticated edge-extremal archives contain enough triangle and pointed features to reconstruct the published I2/I3 order-45 baseline.",
+    "first_action": "Fetch and hash https://users.cecs.anu.edu.au/~bdm/data/ramsey.html and r45extreme.tar.gz, inventory their files, and map available fields to equations I2 and I3 in sources/rowpair/subgraph-counting-r55.pdf.",
+    "stop_condition": "Stop if provenance fails, required I3 features are absent, or the archive only reproduces the already recorded edge extrema.",
+    "source_attempt_id": "ramsey-r55-20260721-123303-2aa131"
   },
   "recent_attempt_ids": [
     "ramsey-r55-20260720-194611-f14832",
@@ -1115,6 +1155,7 @@
     "ramsey-r55-20260721-043422-7a2274",
     "ramsey-r55-20260721-063540-e1ccef",
     "ramsey-r55-20260721-082900-aea66d",
-    "ramsey-r55-20260721-103733-ba8afb"
+    "ramsey-r55-20260721-103733-ba8afb",
+    "ramsey-r55-20260721-123303-2aa131"
   ]
 }

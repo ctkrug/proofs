@@ -10,14 +10,175 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 0,
-  "last_updated": null,
-  "synthesis_summary": "No completed research epoch yet.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "epoch_count": 1,
+  "last_updated": "2026-07-21T12:52:31.184692+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-21T12:52:31.184692+00:00",
+    "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+    "source_status": "falsifiable",
+    "facts_recorded": 5,
+    "exclusions_recorded": 4,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "The maintained positive-denominator statement remains open/falsifiable. The historical signed identity is outside its scope. The linked Lean file contains sorry in the main, gap-2, prime, and bridge theorems. The certificate-contract experiment checked 5,798 sequences with zero mismatches and passed seven controls in 0.288 seconds with 18,164 KB peak child memory. A pinned good-prime repository's arithmetic also reran successfully, but its lower bound remains conditional because the mathematical bridge was not independently proved. No frontier search was launched.",
+  "established_facts": [
+    {
+      "claim": "The current official target requires positive denominators beginning with 1 < n_1 and is labelled FALSIFIABLE.",
+      "evidence": "Official page, revision history, and teorth database commit a7b9502af8962b83161f403d55dddb1226e538d0",
+      "scope": "Maintained status as accessed 2026-07-21",
+      "status": "proved",
+      "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim": "The historical signed 20-term vector sums to 1 and has gaps at most 2, but fails the present positivity hypothesis.",
+      "evidence": "Independent integer-LCM control in experiment 20260721-124411-47ef7b",
+      "scope": "That displayed vector under the current statement",
+      "status": "computed",
+      "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim": "If exactly one denominator has strictly maximal p-adic valuation, the reciprocal sum cannot be an integer.",
+      "evidence": "After multiplication by the LCM, exactly one numerator summand is nonzero modulo p.",
+      "scope": "Any finite collection of positive integer denominators",
+      "status": "proved",
+      "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim": "The Fraction checker and LCM oracle agree on all subsequences of 2 through 14 with 2 through 7 terms.",
+      "evidence": "Experiment 20260721-124411-47ef7b, 5,798 comparisons and zero mismatches",
+      "scope": "Exactly that finite audit domain",
+      "status": "computed",
+      "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim": "The pinned good-prime code verifies its chain, Pocklington steps, and numerical floors.",
+      "evidence": "Commit 7c36f1ed0fb0c5b8da4ecfcfb0cad222dee4c34b, verifier exit 0",
+      "scope": "Repository arithmetic only; assumes the mathematical bridge",
+      "status": "conditional",
+      "source_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1",
+      "family": "counterexample-certificate search",
+      "fingerprint": "counterexample-certificate-search:erdos287-positive-small-gap-v1",
+      "title": "Mandatory source/status baseline audit followed by exact validation of the finite-counterexample certificate contract",
+      "mechanism": "Recognize finite disproof witnesses with exact Fraction arithmetic and audit that recognizer against a separate integer LCM-clearing implementation",
+      "status": "active",
+      "hypothesis": "The Fraction-based witness checker agrees with an independent LCM-clearing oracle on every subsequence of 2 through 14 having 2 through 7 terms and rejects controls for the corrected scope.",
+      "discriminating_test": "Compare both exact encodings on all 5,798 bounded sequences and stop at the first mismatch or failed gap, positivity, sum, or ordering control.",
+      "blocker": "The theorem-strength blocker is an independently verified good-prime bridge. Formal verification is additionally blocked because the prescribed Mathlib cache cannot unpack with only 2.8 GB free.",
+      "reopen_condition": "For Lean, provide at least 7 GB free or a larger PROOF_FACTORY_CACHE_DIR and complete the bootstrap. For chain extension, first supply an independent proof or formal verification of the bridge.",
+      "reopen_evidence": "",
+      "last_attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "family": "formal proof with premise retrieval",
+      "mechanism": "Retrieve existing Mathlib valuation and finite-sequence lemmas, prove the unique-maximal-valuation obstruction, and assemble the good-prime bridge before importing finite chain data.",
+      "hypothesis": "The forum bridge can be stated and proved for arbitrary admissible p,q,M without any hypothesis beyond positivity, small gaps, endpoint inequalities, and the stated primality conditions.",
+      "discriminating_test": "A standalone theorem compiles without sorry and its axiom report contains only accepted Mathlib foundations, with explicit tests of q=7, q=11, and interval endpoints.",
+      "rationale": "This attacks the logical bottleneck directly and has far higher information value than another prime-chain extension.",
+      "id": "strategy-5fccee11351c",
+      "fingerprint": "5fccee11351c",
+      "status": "proposed",
+      "title": "Retrieve existing Mathlib valuation and finite-sequence lemmas, prove the unique-maximal-valuation obstruction, and assemble the good-prime bridge before importing finite chain data.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1"
+      ],
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Formalize the finite good-prime bridge.",
+      "rationale": "It is the missing theorem behind the strongest existing finite certificate.",
+      "next_experiment": "Prove the unique-maximal-valuation lemma and p/q bridge in a standalone Lean module, requiring no sorry and an inspected axiom report.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-9d3f297250",
+      "strategy_id": "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "description": "Attack all bridge boundary cases with an independent LCM proof and PARI/GP.",
+      "rationale": "This can cheaply expose a small-q or endpoint omission before formalization.",
+      "next_experiment": "Enumerate admissible small p, q, and M configurations and all subsets of q, 2q, and 3q; stop at the first failure of the predicted valuation obstruction.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-89ffad90c6",
+      "strategy_id": "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "description": "Audit the reported k <= 18 Lean development if it becomes available.",
+      "rationale": "Its fixed-k decision theorem and gap-word bridge may be reusable, but the forum description is not evidence.",
+      "next_experiment": "Build the exact archive, search for sorry/admit and unexpected axioms, and compare its theorem statement with the official source.",
+      "priority": "low",
+      "status": "open",
+      "id": "lead-f70a178a20",
+      "strategy_id": "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use the signed-denominator identity to disprove the current problem.",
+      "scope": "Current official statement",
+      "reason": "It violates 1 < n_1.",
+      "evidence": "Official history and exact scope control",
+      "reopen_condition": "The official statement would have to revert to signed denominators.",
+      "attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim_or_route": "Interpret formalized: yes as a proof.",
+      "scope": "Formal Conjectures revision d3f74a9a760516fac291859dc741a148ca454e8e",
+      "reason": "The main and bridge declarations contain sorry.",
+      "evidence": "Pinned source inspection",
+      "reopen_condition": "A compiling, sorry-free theorem with an acceptable axiom report.",
+      "attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim_or_route": "Extend the good-prime chain during the next epoch.",
+      "scope": "Beyond endpoint 147573952589666836319",
+      "reason": "A longer chain only enlarges a conditional cutoff while the decisive bridge remains unverified.",
+      "evidence": "Pinned arithmetic replay and source audit",
+      "reopen_condition": "Independent written or formal proof of the bridge.",
+      "attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the forum's n_1 <= 12 or k <= 18 computations as a standalone contribution.",
+      "scope": "Those reported finite ranges",
+      "reason": "Their artifacts are unavailable and repeating arbitrary cutoffs has no credible standalone acceptance path.",
+      "evidence": "Forum and artifact audit",
+      "reopen_condition": "A supplied archive requiring independent review, or use as a regression control for a stronger structural result.",
+      "attempt_id": "erdos-287-20260721-125231-22a5f5",
+      "updated_at": "2026-07-21T12:52:31.184692+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
-  "recent_attempt_ids": []
+  "next_session": {
+    "recommended_strategy_id": "strategy-counterexample-certificate-search:erdos287-positive-small-gap-v1",
+    "objective": "Independently verify the arbitrary-parameter good-prime bridge before any chain extension.",
+    "first_action": "Run `df -BG /`; if at least 7G is free, run `/root/proof-factory/scripts/bootstrap-formal-conjectures.sh`; otherwise begin the standalone LCM proof and PARI/GP boundary-control script without another bootstrap attempt.",
+    "stop_condition": "Stop on any admissible p,q,M counterexample or missing hypothesis; otherwise stop when a sorry-free bridge compiles with an inspected axiom report, or when a complete paper proof and boundary controls isolate the exact remaining formal lemma.",
+    "source_attempt_id": "erdos-287-20260721-125231-22a5f5"
+  },
+  "recent_attempt_ids": [
+    "erdos-287-20260721-125231-22a5f5"
+  ]
 }
