@@ -2,11 +2,25 @@
 
 ## Current host
 
-The content droplet has 2 vCPU, 4 GiB RAM, 6 GiB swap, a 50 GB root disk, and a separate 25 GiB
+The content droplet has 2 vCPU, 4 GiB RAM, 6 GiB swap, a 50 GB root disk, and a separate 50 GiB
 volume shared by the immutable Alpha Factory tape and rebuildable Proof Factory formalization caches.
-The checkpointed lab is low-priority and limited to one full CPU core (`CPUQuota=100%`), 1.3 GiB hard
-memory, 128 tasks, offline execution, and at most 24 hours per segment. That leaves one CPU core and
-most memory available for dashboards and orchestration.
+The pinned 2.5 GiB Lean 4.27 toolchain lives on the root disk at
+`/root/.cache/proof-factory/lean`; the 6.9 GiB Formal Conjectures checkout and compiled Mathlib cache
+remain on the volume through `/root/.cache/proof-factory/formal-conjectures`. This split leaves about
+26 GiB of volume reserve without moving or deleting the 15 GiB Alpha evidence tape. The service
+environment pins `ELAN_HOME` to the project cache, so the global `stable` toolchain is not an input.
+The checkpointed lab is low-priority and limited to one full CPU core (`CPUQuota=100%`), a 3.4 GiB
+memory high watermark and 3.6 GiB hard memory cap, 128 tasks, offline execution, and at most 24 hours
+per segment. That leaves one CPU core and at least the admission reserve available for dashboards and
+orchestration.
+The experiment harness may grant Lean up to 16 GiB of virtual address space (`RLIMIT_AS`); this is not
+a 16 GiB RAM allocation. The service cgroup remains the physical-memory safety boundary. Lean's
+measured resident set reached about 2.2 GiB, almost entirely read-only mapped OLean files rather than
+anonymous heap, while smaller virtual limits failed before completing elaboration. The old 900 MiB
+high watermark forced roughly 240 MiB into swap during measured runs, so the bounded lab envelope was
+reallocated without changing CPU, admission, timeout, network, filesystem, or task-count containment.
+`OOMScoreAdjust=800` still makes the lab the preferred victim under real host pressure; the observed
+large cgroup charge is clean mapped-file cache while global `MemAvailable` remained about 3 GiB.
 Within an approved tranche the worker drains consecutive checkpointed segments without waiting for the
 five-minute queue poll; it stops as soon as the next review, validation, redirect, or safety gate is due.
 
@@ -42,10 +56,11 @@ checks, runtime sync, and public publication remain active for both programs.
 
 ## Upgrade triggers
 
-- Expand the shared volume before more Lean/Mathlib hydration. A 50 GiB volume provides roughly
-  25 GiB headroom without moving the verified Alpha tape.
+- Expand the shared volume again only if immutable evidence plus the pinned Lean/Mathlib cache cannot
+  retain the 1 GiB reserve after safe relocation or pruning. The current 50 GiB volume already provides
+  roughly 26 GiB headroom; any further provisioning remains a Charlie-only cost decision.
 - Use temporary 4–8 vCPU / 16–32 GiB compute when a measured pilot shows useful parallel scaling or
-  memory above the local 1.3 GiB lab ceiling.
+  resident memory above the local 3.6 GiB lab ceiling.
 - Use 16+ vCPU / 64+ GiB only for a verified proof/certificate search with a declared cost cap and
   independently checkable output.
 

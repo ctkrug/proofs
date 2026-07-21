@@ -603,7 +603,9 @@ Do not include a confidence score. Correct uncertainty is part of the result.
 EVIDENCE FILE RULE: `evidence_files` must contain immutable source, script, checker,
 experiment, certificate, and result-artifact paths only. Never include mutable projections
 or aggregate state such as `.git/**`, `.venv/**`, `.delegates/**`, `CHECKPOINT.md`, `README.md`,
-`docs/DOSSIER.md`, `records/problem.json`, or `records/research-state.json`. Those files may
+`docs/DOSSIER.md`, `lab-queue/**`, `lab-archive/**`, `records/problem.json`, or
+`records/research-state.json`. For lab evidence, claim the immutable `records/labs/**` record and
+its content-addressed `lab-runs/**` outputs instead. Those files may
 be updated for navigation, but claiming any of them as evidence deliberately invalidates the
 receipt and downgrades the epoch. Keep the list decisive and minimal.
 """

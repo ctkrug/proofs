@@ -14,6 +14,19 @@ from proof_factory import agent, brain, briefing, capacity, cli, contribution_ga
 
 
 class ProofFactoryTests(unittest.TestCase):
+    def test_agent_prompt_routes_lab_evidence_to_immutable_records(self) -> None:
+        source = (store.ROOT / "proof_factory" / "agent.py").read_text()
+        self.assertIn("`lab-archive/**`", source)
+        self.assertIn("immutable `records/labs/**` record", source)
+
+    def test_formal_conjectures_bootstrap_is_hash_locked(self) -> None:
+        script = (store.ROOT / "scripts" / "bootstrap-formal-conjectures.sh").read_text()
+        self.assertIn("b8b5208aa5d01f5f91c49ca516bf09cae8d93693", script)
+        self.assertIn("5b99b5f4f807cbba67bbcd22e5e486c17d6a8d970ea218de08d05830ab350c26", script)
+        self.assertNotIn('"$elan_home/bin/lake" update', script)
+        self.assertIn('if [[ "$lock_acquired" != true ]]', script)
+        self.assertIn("FormalConjecturesUtil.olean was not produced", script)
+
     def test_ramsey_brief_is_bounded_valid_json_and_selects_seeded_route(self) -> None:
         problem = next(row for row in store.load_problems() if row["id"] == "ramsey-r55")
         packet = briefing.compact_for_prompt(problem)
@@ -467,6 +480,31 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(result["status"], "completed_awaiting_review", result)
                 self.assertEqual(result["returncode"], 0)
                 self.assertTrue((state / "labs" / "jobs.jsonl").is_file())
+
+    def test_lab_allows_lean_virtual_address_space_but_keeps_a_hard_cap(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            research = root / "research"
+            state = root / "state"
+            data.mkdir()
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            with patch.multiple(
+                store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
+                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                accepted = lab._validate({
+                    "problem_id": "p", "name": "lean", "hypothesis": "module elaborates",
+                    "expected_signal": "zero exit", "command": ["lean", "Target.lean"],
+                    "segment_seconds": 60, "memory_mb": 16384,
+                })
+                self.assertEqual(accepted["memory_mb"], 16384)
+                with self.assertRaisesRegex(ValueError, "memory_mb"):
+                    lab._validate({
+                        "problem_id": "p", "name": "too-large", "hypothesis": "no",
+                        "expected_signal": "no", "command": ["lean", "Target.lean"],
+                        "segment_seconds": 60, "memory_mb": 16385,
+                    })
 
     def test_lab_checkpoint_review_continue_validate_lifecycle(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

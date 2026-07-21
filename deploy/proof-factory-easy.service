@@ -7,7 +7,9 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/root/proof-factory
 Environment=HOME=/root
-Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.cache/proof-factory/lean/elan/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=ELAN_HOME=/root/.cache/proof-factory/lean/elan
+Environment=PROOF_FACTORY_CACHE_DIR=/root/.cache/proof-factory
 Environment=PROOF_FACTORY_ROOT=/root/proof-factory
 Environment=CODEX_BIN=/root/.local/bin/codex
 Environment=PROOF_CODEX_SANDBOX=danger-full-access

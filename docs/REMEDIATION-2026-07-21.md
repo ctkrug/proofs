@@ -126,3 +126,57 @@ were 13,823 and 21,393 characters, the schema began at character 7,018, and task
 Phase acceptance: 64 local tests pass. Production must show easy, intake, scout, hard, lab, watchdog,
 runtime-sync, and publish timers enabled; strategy-lab remains disabled; the hard unit contains no
 priority override; hard next-run cadence is four hours; and the active easy campaign remains Erdős #530.
+
+## Phase 4 — Lean capacity and reproducible bootstrap
+
+- The 25 GiB research volume contained 15 GiB of immutable Alpha evidence and 9.4 GiB of rebuildable
+  Proof Factory state: one pinned 2.5 GiB Lean 4.27 toolchain and a single 6.9 GiB Formal Conjectures /
+  Mathlib checkout. There was no stale pinned-volume toolchain to delete. The toolchain was copied with
+  metadata, independently checksum-compared with `rsync -narc`, then relocated to the root disk. Only
+  after the comparison returned no differences was the exact old volume directory removed. The volume
+  rose from 0 bytes to 2.1 GiB free while root retained 16 GiB free. The Alpha tape was not touched.
+- A diagnostic invocation omitted `ELAN_HOME` and therefore hydrated an unrelated Lean 4.32 toolchain
+  under `/root/.elan`. Its new timestamp and exact 2.8 GiB path were verified, then that directory alone
+  was removed; it never became a research input. The existing global stable installation remains.
+- The bootstrap now pins the Formal Conjectures commit and manifest SHA-256, never performs an implicit
+  `lake update`, refuses tracked input drift, verifies the final `FormalConjecturesUtil.olean`, and checks
+  immutable inputs again after the build. Its atomic lock now tracks ownership explicitly and fails after
+  the bounded wait instead of mistaking another process's lock directory for acquisition. Easy and hard
+  services receive the project-scoped cache and `ELAN_HOME` explicitly.
+- The first canonical #530 lab retry exposed a resource-unit mismatch rather than a source error:
+  `memory_mb=1100` was enforced as virtual address space, and Lean failed while mapping its own
+  `PatternVar.olean` at only 321 MiB resident usage. A measured 4 GiB retry advanced to the candidate
+  but exhausted address space while mapping Mathlib at 890 MiB resident usage; an 8 GiB retry reached
+  about 1.1 GiB resident, hit the 900 MiB high watermark, and moved roughly 240 MiB to swap before the
+  same mapped-file failure. The lab now permits a 16 GiB virtual envelope while systemd retains a
+  bounded physical envelope, reallocated to a 3.4 GiB high watermark and 3.6 GiB hard cap after direct
+  `/proc` inspection showed a 2.2 GiB peak dominated by read-only mapped OLean pages, with only about
+  44 MiB anonymous resident memory. One CPU, admission reserves, timeouts, offline isolation, task
+  limits, and append-only failed records remain.
+- A second, partial 771 MiB Mathlib package tree inside the #530 workspace had the same manifest,
+  Mathlib commit, and Lean toolchain as the canonical cache. It is an unpinned rebuildable duplicate;
+  after the canonical support build completes it is replaced by a read-only link to the pinned packages,
+  leaving the workspace's own build outputs isolated and evidence-scannable.
+- Charlie expanded the mounted research volume from 25 to 50 GiB during the monitored target run.
+  Live `df` and `lsblk` confirmed the ext4 filesystem itself is 50 GiB and has 26 GiB free; this is
+  durable capacity, not merely a larger unexpanded block device. No volume-expansion task remains.
+- The first real post-repair discovery epoch honestly recorded `no_progress`: it preserved the
+  original warning-fatal build and identified eight missing AMS metadata attributes, applied only
+  those annotations, and reran the 512-case semantic regression successfully. It then queued the
+  repaired target as a bounded lab job instead of claiming an unobserved build. Its evidence receipt
+  still failed closed because the model cited `lab-archive/**`, a mutable projection. The principal
+  prompt now explicitly routes lab claims to immutable `records/labs/**` records and content-addressed
+  `lab-runs/**` outputs; the failed receipt remains unchanged in the ledger.
+- The repaired target lab then completed in 886.5 seconds with exit 0, empty stderr, all 8,038 Lake
+  jobs successful, byte-identical candidate copies at SHA-256 `208af82a...71c9`, and a nonempty
+  `530.olean` at SHA-256 `5401908c...3201`. The independent post-run inspection reproduced those
+  hashes and confirmed the immutable stdout/stderr digests. Peak child RSS was 2,711,332 KiB; the
+  lab cgroup peaked at 3,435,134,976 bytes with about 409 MiB swap and zero high/max/OOM events.
+  The durable lifecycle state is `completed_awaiting_review`, so this is a successful target build,
+  not yet a validated contribution or an upstream-ready claim.
+
+Phase acceptance: the full local suite passes 66 tests. Production must retain at least 1 GiB on both
+filesystems, produce the pinned support OLean from a clean/hash-matching checkout, pass a warning-fatal
+#530 target build with durable lab records, and complete one real discovery epoch whose evidence receipt
+is valid. The superseded hand-written #530 queue spec correctly failed closed as an unknown job after the
+new durable lab-state requirement; it is not reused or rewritten.

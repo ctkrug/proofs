@@ -23,7 +23,12 @@ ALLOWED_EXECUTABLES = {
 }
 MAX_SEGMENT_SECONDS = 24 * 3600
 MAX_DECLARED_SEGMENTS = 100_000
-MAX_MEMORY_MB = 1100
+# The experiment harness applies this as RLIMIT_AS (virtual address space), not
+# resident memory. Lean maps more than 1.1 GiB while staying below the lab
+# service cgroup, so keep physical containment in systemd and permit a 16 GiB
+# virtual-address envelope here. Measured 4 and 8 GiB envelopes still failed
+# while mapping Mathlib despite bounded resident use.
+MAX_MEMORY_MB = 16384
 LIFECYCLE_STATES = {
     "queued", "running", "checkpointed", "completed_awaiting_review",
     "validated", "stopped_with_reason",
