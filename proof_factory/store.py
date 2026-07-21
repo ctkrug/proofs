@@ -88,6 +88,13 @@ def save_problems(rows: list[dict[str, Any]]) -> None:
     write_json_atomic(PROBLEMS_FILE, rows)
 
 
+def discovery_campaign_run_count(problem: dict[str, Any]) -> int:
+    """Count non-error research runs since the current discovery campaign began."""
+    total = int(problem.get("research_attempt_count") or 0)
+    baseline = int(problem.get("campaign_start_research_attempt_count") or 0)
+    return max(0, total - baseline)
+
+
 def start_discovery_campaign(problem_id: str) -> dict[str, Any]:
     """Persist one discovery incumbent so scheduled passes cannot rotate away from it."""
     with lock("state") as acquired:
@@ -186,7 +193,7 @@ def record_attempt(attempt: dict[str, Any]) -> None:
                 problem["campaign_state"] = "review"
                 problem["campaign_decision"] = "candidate awaiting review"
         elif campaign and outcome != "error":
-            completed = int(problem.get("research_attempt_count") or 0)
+            completed = discovery_campaign_run_count(problem)
             minimum = max(DISCOVERY_CAMPAIGN_MIN_RUNS, int(problem.get("campaign_min_runs") or 0))
             problem["campaign_min_runs"] = minimum
             if completed < minimum:

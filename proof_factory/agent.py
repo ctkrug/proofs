@@ -385,7 +385,7 @@ def build_prompt(
         "TECHNICAL PHASE. The source/status baseline is complete. Start from its live leads and exclusions; execute one "
         "bounded discriminator and update the durable map with exact evidence."
     )
-    completed_campaign_runs = int(problem.get("research_attempt_count") or 0)
+    completed_campaign_runs = store.discovery_campaign_run_count(problem)
     campaign_minimum = max(
         store.DISCOVERY_CAMPAIGN_MIN_RUNS,
         int(problem.get("campaign_min_runs") or 0),

@@ -723,6 +723,43 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertEqual(problem["status"], "active")
                 self.assertEqual(problem["campaign_state"], "active")
 
+    def test_discovery_campaign_minimum_counts_only_runs_since_start(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            problems_file = data / "problems.json"
+            attempts_file = data / "attempts.jsonl"
+            problems_file.parent.mkdir(parents=True)
+            problems_file.write_text(json.dumps([{
+                "id": "p", "lane": "easy", "status": "active", "attempt_count": 123,
+                "research_attempt_count": 123, "campaign_state": "active", "campaign_min_runs": 25,
+                "campaign_start_research_attempt_count": 100,
+            }]))
+            attempts_file.write_text("")
+
+            def attempt(attempt_id: str) -> dict[str, object]:
+                return {
+                    "id": attempt_id, "problem_id": "p", "started_at": "2026-01-01T00:00:00+00:00",
+                    "finished_at": "2026-01-01T00:01:00+00:00", "lane": "easy",
+                    "outcome": "no_progress", "summary": "bounded route failed",
+                    "campaign_assessment": {"decision": "hold", "close_signal": "", "reason": "route exhausted"},
+                }
+
+            with patch.multiple(
+                store, ROOT=root, DATA=data, STATE=root / "state", RESEARCH=root / "research",
+                PROBLEMS_FILE=problems_file, ATTEMPTS_FILE=attempts_file,
+            ):
+                store.record_attempt(attempt("campaign-24"))
+                problem = store.load_problems()[0]
+                self.assertEqual(problem["research_attempt_count"], 124)
+                self.assertEqual(store.discovery_campaign_run_count(problem), 24)
+                self.assertEqual(problem["campaign_state"], "active")
+
+                store.record_attempt(attempt("campaign-25"))
+                problem = store.load_problems()[0]
+                self.assertEqual(store.discovery_campaign_run_count(problem), 25)
+                self.assertEqual(problem["campaign_state"], "hold")
+
     def test_low_hanging_score_learns_from_accepted_techniques(self) -> None:
         win = {"id": "win", "accepted_result": True, "difficulty": 4, "techniques": ["SAT"], "contribution_type": "finite witness"}
         similar = {"id": "similar", "difficulty": 4, "techniques": ["SAT"], "contribution_type": "finite witness"}
