@@ -1,0 +1,280 @@
+{
+  "schema_version": 5,
+  "problem_id": "deepmind-superhuman-13-answerbench-column",
+  "objective": "Repair `imobench/answerbench_v2.csv` so `imo-bench-algebra-036` has the reported short answer `$Y(x)=A+B/x-x$` in its own Short Answer column and again has exactly the six columns declared by the dataset header.",
+  "completion_criteria": [
+    "Parse the CSV with a standards-compliant reader, assert that every row has six columns, assert the exact short-answer field for `imo-bench-algebra-036`, and pass any repository checks. The current main branch was independently reproduced as a five-column row."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-22T15:34:46.250803+00:00",
+  "baseline_review": {
+    "status": "complete",
+    "reviewed_at": "2026-07-22T15:34:46.250803+00:00",
+    "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+    "source_status": "open",
+    "facts_recorded": 3,
+    "exclusions_recorded": 3,
+    "leads_recorded": 3,
+    "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
+  },
+  "synthesis_summary": "At the 2026-07-22 audit, upstream issue #13 remained open and current main was 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace. The pinned 169,537-byte CSV has 400 data records: 399 width six and only algebra-036 width five under ordinary parsing; strict parsing rejects it. A temporary one-byte quote insertion at offset 13,618 yields a 169,538-byte file with SHA-256 0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16, 400 strict-parsed six-column records, and exact Short Answer $Y(x)=A+\\frac{B}{x}-x$. This mandatory baseline epoch did not edit the released dataset or submit externally.",
+  "established_facts": [
+    {
+      "claim": "The pinned upstream CSV has exactly 400 data records under ordinary parsing, with width counts {5: 1, 6: 399}; the width-five record is algebra-036.",
+      "evidence": "artifacts/baseline-audit-96fa6c4-275877a9.json and experiment 20260722-153113-23f885",
+      "scope": "Upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace only",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "claim": "A quote inserted at byte offset 13,618 restores six fields on every record and exact target Short Answer $Y(x)=A+\\frac{B}{x}-x$.",
+      "evidence": "Strict full-file parse, target assertion, and exact-diff checker in experiment 20260722-153113-23f885",
+      "scope": "The temporary one-byte candidate derived from the pinned baseline",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "claim": "The semantic-only checker is insufficient to exclude unrelated changes, while --reference excludes the tested unrelated mutation.",
+      "evidence": "unrelated_edit control in artifacts/baseline-audit-96fa6c4-275877a9.json",
+      "scope": "The checker and pinned baseline used in this epoch",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+      "family": "CSV structural validation and minimal-patch certification",
+      "fingerprint": "csv-width+strict-parse+target-literal+one-byte-diff-v1",
+      "title": "Authoritative GitHub status audit plus a hash-pinned CSV parse, temporary one-byte repair, and adversarial exact-diff checker controls",
+      "mechanism": "A standards-library CSV parser exposes the unique malformed row; the issue-supplied answer token identifies the separator; a second checker certifies all row widths, exact target fields, and equality to the baseline plus one quote byte.",
+      "status": "promising",
+      "hypothesis": "At upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, algebra-036 is the unique five-field data record, strict CSV parsing rejects the malformed syntax, and inserting one quote before the answer separator restores all 400 records and the exact short-answer field without another change.",
+      "discriminating_test": "Run python3 tools/baseline_answerbench_036.py on the pinned CSV and checker; require the baseline/repair signals and rejection of wrong-answer and unrelated-edit controls.",
+      "blocker": "The mandatory baseline phase forbade applying the correction in this epoch; afterward, human authorization, CLA readiness, and upstream maintainer review remain necessary for external acceptance.",
+      "reopen_condition": "Not applicable to the active route; refresh or redirect if upstream main, issue status, PR status, or target bytes change.",
+      "reopen_evidence": "",
+      "last_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-22T15:34:46.250803+00:00",
+      "route_evaluation": {
+        "gate_proximity": 0.65,
+        "contribution_value": 0.8,
+        "decisiveness": 0.98,
+        "novelty_confidence": 0.8,
+        "novelty_risk": 0.2,
+        "scope": 1.0,
+        "reuse_value": 0.75,
+        "model_cost": 0.1,
+        "cpu_cost": 0.01
+      }
+    },
+    {
+      "family": "Repository-wide CSV schema regression guard",
+      "mechanism": "Add a generic standards-library test that parses every maintained benchmark CSV and checks each data-row width against its header, with a target-literal regression assertion for issue #13.",
+      "hypothesis": "A generic schema guard will fail on current main, pass on the one-byte repair, and catch future malformed rows without relying on problem-specific raw-byte patterns.",
+      "discriminating_test": "Run the generic guard on the pinned baseline and temporary repair; require one uniquely identified failure before and zero failures after.",
+      "rationale": "This is a preventive repository mechanism rather than a renamed one-byte patch, but it should remain secondary to the minimal correction unless maintainers request tests.",
+      "id": "strategy-a769495e14cc",
+      "fingerprint": "a769495e14cc",
+      "status": "proposed",
+      "title": "Add a generic standards-library test that parses every maintained benchmark CSV and checks each data-row width against its header, with a target-literal regression assertion for issue #13.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1"
+      ],
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Apply and verify the isolated one-byte patch against a freshly resolved upstream head.",
+      "rationale": "It is the cheapest path from verified baseline to the requested dataset correction.",
+      "next_experiment": "Run git ls-remote for upstream main, refresh if needed, then invoke the checker with --reference on the materialized candidate.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-b9687a7885",
+      "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "description": "Package the full-file checker as a regression test or PR verification command.",
+      "rationale": "The pinned repository tree has no existing CI/test harness for CSV widths, and semantic-only checks miss collateral edits.",
+      "next_experiment": "Run the checker on the fresh baseline and candidate from a clean checkout and record the exact output.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-bf74c0238d",
+      "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "description": "Seek upstream acceptance after owner approval.",
+      "rationale": "Maintainer review is the only external acceptance path identified by CONTRIBUTING.md.",
+      "next_experiment": "Prepare a one-byte PR diff and validation transcript linked to issue #13; do not publish without human authorization.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-5691c02f79",
+      "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use semantic-only CSV validation as the complete contribution certificate",
+      "scope": "Proposed algebra-036 repair candidates against the pinned baseline",
+      "reason": "It accepts a candidate containing an unrelated problem-ID mutation.",
+      "evidence": "The unrelated_edit control has semantic_only_returncode 0 and with_reference_returncode 1.",
+      "reopen_condition": "A new checker proves full-file equality outside the target edit by another exact mechanism.",
+      "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "claim_or_route": "Solve or re-derive the functional equation before repairing the CSV",
+      "scope": "This source-defined dataset correction",
+      "reason": "Issue #13 and the existing raw token supply the exact stored answer literal; the failure is CSV quoting, not mathematical uncertainty.",
+      "evidence": "Issue #13 body, pinned raw bytes, and successful structural repair",
+      "reopen_condition": "The authoritative source retracts or disputes the stored answer literal.",
+      "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    },
+    {
+      "claim_or_route": "Treat issue #13 as already repaired upstream",
+      "scope": "Repository state observed on 2026-07-22",
+      "reason": "The issue was open, main retained the malformed bytes, and both repository PR searches returned zero.",
+      "evidence": "Pinned API snapshots and baseline experiment",
+      "reopen_condition": "A newer upstream commit, issue transition, or matching pull request appears.",
+      "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+      "updated_at": "2026-07-22T15:34:46.250803+00:00"
+    }
+  ],
+  "unresolved_questions": [],
+  "next_session": {
+    "recommended_strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+    "objective": "Materialize and certify the exact one-byte dataset correction if the authoritative baseline is unchanged.",
+    "first_action": "git ls-remote https://github.com/google-deepmind/superhuman.git refs/heads/main",
+    "stop_condition": "Stop or redirect if issue #13 is closed, a competing PR exists, upstream bytes changed, the checker fails, or the candidate diff is not exactly one inserted quote.",
+    "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9"
+  },
+  "recent_attempt_ids": [
+    "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "The technical edit is isolated; the remaining bottlenecks are refreshing the upstream base, applying the patch in a technical epoch, human approval, CLA readiness, and maintainer review.",
+    "failure_signatures": [
+      {
+        "id": "072cda943cc8",
+        "signature": "An unclosed quoted Problem field can be tolerated as a five-field record by ordinary parsing but rejected as malformed by strict parsing; semantic-only repair checks can miss unrelated edits.",
+        "count": 1,
+        "last_strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+        "last_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "Pinned upstream AnswerBench v2 snapshot",
+        "use": "Reference baseline and exact-diff anchor",
+        "evidence": "sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv; SHA-256 275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      },
+      {
+        "name": "check_answerbench_036.py",
+        "use": "Verify six-column schema, target fields, and one-byte-only diff",
+        "evidence": "tools/check_answerbench_036.py; SHA-256 2f4ec24de997ce40514f139d55329b319a57910fbb9942097048104c86b723bb",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      },
+      {
+        "name": "baseline_answerbench_036.py and result",
+        "use": "Reproduce the defect and adversarially exercise the checker",
+        "evidence": "tools/baseline_answerbench_036.py and artifacts/baseline-audit-96fa6c4-275877a9.json; result SHA-256 5a70762c42caf6024b0f1169dfa628b683e88807f3a07b27edc1c3a64774dd37",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "Always use the checker with --reference for the contribution gate.",
+        "scope": "Any proposed repair derived from the pinned baseline",
+        "evidence": "The unrelated-edit control passes semantic-only checks and fails the exact-diff guard.",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      },
+      {
+        "constraint": "Preserve the repository's exact LaTeX literal $Y(x)=A+\\frac{B}{x}-x$ rather than normalizing it.",
+        "scope": "The algebra-036 Short Answer field",
+        "evidence": "Issue #13 body, pinned source bytes, and the wrong-answer control",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      },
+      {
+        "constraint": "Refresh the upstream baseline before editing if main no longer equals 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace.",
+        "scope": "Future patch epochs",
+        "evidence": "The exact-diff certificate is hash-bound to the pinned source.",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+        "decision": "continue",
+        "prediction": "Ordinary parsing would show 399 six-field and one five-field row; a one-byte candidate would yield 400 six-field rows and pass all controls.",
+        "observation": "The width prediction and all candidate controls passed; strict parsing of the malformed baseline raised a CSV syntax error while strict parsing of the repair passed.",
+        "surprise": "The initial strict-parser run failed earlier than the predicted width count, providing a stronger syntax-level diagnostic; the harness was revised to preserve both tolerant-width and strict-syntax signals.",
+        "next_discriminator": "Resolve upstream main; if unchanged, materialize the one-byte candidate and run the narrow checker with the pinned source as --reference.",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "All single-byte insertions into the pinned 169,537-byte CSV: 169,538 positions times 256 byte values",
+        "represented_space_before": "43,401,728 candidate edit scripts",
+        "eliminated_or_quotiented": "43,401,727 candidates eliminated by the unique answer token, preceding comma, required CSV closing quote, and issue-specified target",
+        "represented_space_after": "1 candidate edit script: insert byte 0x22 at zero-based offset 13,618",
+        "reduction_factor": "43,401,728 exactly within the stated model",
+        "measurement_status": "exact",
+        "unit": "families",
+        "coverage_scope": "Single-byte insertion repairs of the pinned upstream CSV only",
+        "soundness_basis": "Unique answer-token count, local separator inspection, strict parse of all repaired records, exact target-field assertion, and exact candidate/reference byte equality",
+        "remaining_unknown": "Arbitrary multi-byte rewrites were not classified, upstream may move, and maintainer acceptance is external.",
+        "next_bulk_elimination": "None; no further search is justified. Refresh upstream and apply the already isolated edit.",
+        "source_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-153446-675bb9",
+        "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+        "nearest_method_ids": [
+          "none-found"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "Issue #13 reports the merged fields. This epoch adds a hash-bound full-file reproduction, identifies the exact one-byte edit, supplies an exact-diff checker, and tests strict-parser, wrong-answer, and unrelated-edit controls.",
+        "duplicate_risk": "A fix could appear after the timestamp, exist in an unindexed fork, or be submitted under wording absent from the two repository PR searches.",
+        "comparison_test": "Before any patch or PR, resolve current main and rerun repository issue/PR searches for answerbench_v2 and imo-bench-algebra-036.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/google-deepmind/superhuman/issues/13",
+          "https://github.com/google-deepmind/superhuman/commit/ea72dda6e4aa615d940cf84713b142bcb0aa75b5",
+          "https://github.com/google-deepmind/superhuman/commit/955558ad67ef24dccd27545c326988bdad1b4471",
+          "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/README.md"
+        ],
+        "updated_at": "2026-07-22T15:34:46.250803+00:00"
+      }
+    ]
+  }
+}
