@@ -141,7 +141,7 @@
     "phase0_status": "link_route_promoted_checkpointed_campaign_active",
     "phase0_evidence": "Published controls pass. Direct depth-7 cubing closed only 10/128 sampled leaves (7.8125%) and was stopped. The link-first campaign has four audited C(11,5,3) orbit classes, all four excluded by reconstructed residual CNFs and replayed external proofs; exact primary/secondary/tertiary partitions contain 189 validated proof receipts and 47 open canonical frontier nodes. A biased quaternary child-zero smoke test returned 10 UNKNOWN results; a schema-2, independently audited Glucose4 incremental diagnostic also closed 0/10 under explicitly best-effort caps. Neither is route-gate eligible and both policies are stopped unchanged.",
     "campaign_summary_sha256": "1a9ff4abe35470308876496219ec6cf93d64e6b10ceafb942a3dd43b5dd3139f",
-    "campaign_repository_commit": "7ef9e99c21241e891f1e74a41e56da583313e5fc",
+    "campaign_repository_commit": "5aa660c48e79962a7e8a62ef2706289d39e71193",
     "automation_eligible": true,
     "manual_scope_approved_by": "Charlie Krug",
     "manual_scope_approved_at": "2026-07-22T01:42:24Z",
