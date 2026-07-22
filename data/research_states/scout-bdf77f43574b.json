@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 8,
-  "last_updated": "2026-07-22T10:36:23.102218+00:00",
+  "epoch_count": 9,
+  "last_updated": "2026-07-22T12:36:44.160438+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "Run 7 confirmed that PR 4044 remains open, unmerged, non-draft, at the same head and labelled awaiting-author. A separate deterministic checker validated the delegate-generated snapshot against run 6. No Lean source was changed, and no contribution or novelty claim is made.",
+  "synthesis_summary": "Run 8 found no public state change. PR 4044 remains an open, owned, reviewed same-target formalization, so no Lean source was changed and no contribution or novelty claim is made. The new live receipt, independent checker, and durable checkpoint all validate successfully within their stated scope.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -167,6 +167,30 @@
       "status": "computed",
       "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
       "updated_at": "2026-07-22T10:36:23.102218+00:00"
+    },
+    {
+      "claim": "PR 4044 is an open, unmerged, same-target Formal Conjectures formalization at head e9caf02a19d55dff055d89d441b45272e1fa134b.",
+      "evidence": ".proof-experiments/20260722-123152-75db6a/stdout.txt and independent experiment 20260722-123227-778f5c",
+      "scope": "The public official page and GitHub REST state captured on 2026-07-22.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim": "The run-8 normalized ownership snapshot is byte-identical to run 7.",
+      "evidence": "checks/check_erdos530_run8_receipt.sh returned 0; snapshot SHA-256 22e9ad93abcc1954b15b35d4024853e1c71b9d46073653a135e24188b7003a8c.",
+      "scope": "The exact normalized fields emitted by checks/audit_erdos530_live_status.sh.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim": "Local source hash 3ff7038c3c08f48408f48d53c4503182944cfd8c51b549cbab570a3b062e8466 is warning-clean for the exact target under Lean 4.27.0.",
+      "evidence": "Lab 135f90912547 returned 0 with empty stderr and nonempty OLean SHA-256 0ba42a02ee4fd1fed5b19d584dbae21cb4f8dde7cffc8b2c432f4cb0befdcb37.",
+      "scope": "Pinned Formal Conjectures checkout 8f6e745798379104379da0b5c28c25315489890f; exact numeric module only.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
     }
   ],
   "strategies": [
@@ -275,6 +299,36 @@
         "novelty_risk": 0.9,
         "scope": 0.35,
         "reuse_value": 0.7,
+        "model_cost": 1.0,
+        "cpu_cost": 1.0
+      }
+    },
+    {
+      "id": "strategy-strategy-78a3290db733",
+      "family": "receipt-level adversarial validation",
+      "fingerprint": "strategy-78a3290db733",
+      "title": "Executed the prescribed run-8 public-status audit and a separately written fail-closed receipt checker, then stopped without Lean edits because the active same-target pull request and ownership state were unchanged.",
+      "mechanism": "Normalize five authoritative page/REST responses, compare the snapshot byte-for-byte with run 7, and independently assert the decisive ownership predicates.",
+      "status": "blocked",
+      "hypothesis": "PR 4044 remains open at its recorded head with no public coordination event authorizing a competing or replacement formalization.",
+      "discriminating_test": "Run checks/audit_erdos530_live_status.sh once through the deterministic experiment wrapper, then require checks/check_erdos530_run8_receipt.sh to confirm the exact snapshot hash, byte equality with run 7, open/unmerged state, unchanged head, identified author, awaiting-author label, timestamp, and review counts.",
+      "blocker": "No documented permission exists to modify, supersede, or independently resubmit the active same-target pull request.",
+      "reopen_condition": "Documented consent from PR 4044's author or maintainers, or PR closure followed by explicit maintainer approval for a replacement.",
+      "reopen_evidence": "",
+      "last_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "attempts": 1,
+      "parent_ids": [
+        "strategy-ddb7727d56f5"
+      ],
+      "updated_at": "2026-07-22T12:36:44.160438+00:00",
+      "route_evaluation": {
+        "gate_proximity": 0.2,
+        "contribution_value": 0.1,
+        "decisiveness": 0.95,
+        "novelty_confidence": 0.05,
+        "novelty_risk": 0.95,
+        "scope": 0.35,
+        "reuse_value": 0.75,
         "model_cost": 1.0,
         "cpu_cost": 1.0
       }
@@ -438,16 +492,28 @@
       "closed_at": "2026-07-22T10:36:23.102218+00:00"
     },
     {
+      "description": "Detect a public merge, closure, ownership change, or explicit coordination statement on PR 4044.",
+      "rationale": "Such an event is the cheapest evidence capable of reopening legitimate implementation work.",
+      "next_experiment": "When a fresh check is warranted, rerun checks/audit_erdos530_live_status.sh once and compare with research/run8_live_status_result_20260722.json.",
+      "priority": "normal",
+      "status": "closed",
+      "id": "lead-4ffa22dac6",
+      "strategy_id": "strategy-strategy-78a3290db733",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
       "description": "Coordinate the kernel-validated IsSidon-reusing cleanup with the existing author or maintainers.",
-      "rationale": "It addresses the maintainer's API comment without duplicating the scholarly target.",
+      "rationale": "It could address the existing API review without duplicating the scholarly target.",
       "next_experiment": "After documented authorization, port only the requested delta and run a fresh warning-fatal exact-target build.",
       "priority": "high",
       "status": "closed",
-      "id": "lead-4d1563bc2c",
-      "strategy_id": "strategy-78a3290db733",
-      "updated_at": "2026-07-22T10:36:23.102218+00:00",
+      "id": "lead-8a65f77293",
+      "strategy_id": "strategy-strategy-78a3290db733",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00",
       "closure_reason": "terminal_strategy",
-      "closed_at": "2026-07-22T10:36:23.102218+00:00"
+      "closed_at": "2026-07-22T12:36:44.160438+00:00"
     }
   ],
   "ruled_out": [
@@ -578,15 +644,6 @@
       "updated_at": "2026-07-22T08:36:36.152588+00:00"
     },
     {
-      "claim_or_route": "Open an independent competing PR while PR 4044 remains active.",
-      "scope": "Current Formal Conjectures contribution route.",
-      "reason": "PR 4044 already contains the same target, has an identified author, and has maintainer review.",
-      "evidence": ".proof-experiments/20260722-103042-a9ed1e/stdout.txt",
-      "reopen_condition": "Documented consent from the author or maintainers, or closure/abandonment followed by explicit maintainer approval for a replacement.",
-      "attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
-      "updated_at": "2026-07-22T10:36:23.102218+00:00"
-    },
-    {
       "claim_or_route": "Treat awaiting-author status or inactivity as abandonment.",
       "scope": "Interpretation of PR 4044's public state.",
       "reason": "The pull request remains open, unmerged, and owned by an identified author.",
@@ -594,15 +651,42 @@
       "reopen_condition": "A public author or maintainer statement explicitly declaring abandonment or inviting replacement.",
       "attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
       "updated_at": "2026-07-22T10:36:23.102218+00:00"
+    },
+    {
+      "claim_or_route": "Open an independent competing PR while PR 4044 remains active.",
+      "scope": "Current Formal Conjectures contribution route.",
+      "reason": "PR 4044 already contains the same target, has an identified author, and has maintainer review.",
+      "evidence": ".proof-experiments/20260722-123152-75db6a/stdout.txt",
+      "reopen_condition": "Documented consent from the author or maintainers, or closure followed by explicit maintainer approval for a replacement.",
+      "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim_or_route": "Treat awaiting-author status or inactivity as abandonment.",
+      "scope": "Interpretation of PR 4044's current public state.",
+      "reason": "The pull request remains open, unmerged, and owned by an identified author.",
+      "evidence": ".proof-experiments/20260722-123227-778f5c/stdout.txt",
+      "reopen_condition": "A public author or maintainer statement explicitly declaring abandonment or inviting replacement.",
+      "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the expensive Lean target build as the current discriminator.",
+      "scope": "Run-8 decision between source validation and ownership validation.",
+      "reason": "The Lean artifact already has a hash-bound kernel receipt; another build cannot resolve the sole remaining authorization uncertainty.",
+      "evidence": "The status audit and checker completed in 2.378 seconds combined and found the ownership blocker unchanged.",
+      "reopen_condition": "Documented authorization for a source delta that requires a new source hash and kernel receipt.",
+      "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "updated_at": "2026-07-22T12:36:44.160438+00:00"
     }
   ],
   "unresolved_questions": [],
   "next_session": {
-    "recommended_strategy_id": "strategy-78a3290db733",
+    "recommended_strategy_id": "strategy-strategy-78a3290db733",
     "objective": "Detect a legitimate coordinated acceptance path without duplicating the active pull request.",
-    "first_action": "Run checks/audit_erdos530_live_status.sh once through scripts/run_experiment.py and compare its normalized output with research/run7_live_status_result_20260722.json.",
-    "stop_condition": "Stop without source edits if PR 4044 remains open and no explicit coordination is documented; redirect only on an authorized coordination or replacement event.",
-    "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b"
+    "first_action": "Read research/run8_live_status_result_20260722.json and inspect whether any newly supplied source event satisfies the recorded reopen condition; if a current snapshot is required, run the fixed audit once.",
+    "stop_condition": "Stop without source edits if PR 4044 remains active and no explicit coordination is documented; redirect only on an authorized coordination or replacement event.",
+    "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03"
   },
   "recent_attempt_ids": [
     "scout-bdf77f43574b-20260720-195251-a9f2d4",
@@ -612,10 +696,11 @@
     "scout-bdf77f43574b-20260722-044204-213e81",
     "scout-bdf77f43574b-20260722-063944-5d5057",
     "scout-bdf77f43574b-20260722-083636-48022a",
-    "scout-bdf77f43574b-20260722-103623-04157b"
+    "scout-bdf77f43574b-20260722-103623-04157b",
+    "scout-bdf77f43574b-20260722-123644-28aa03"
   ],
   "tactical_memory": {
-    "current_bottleneck": "Human coordination and upstream ownership remain the sole limiting uncertainty.",
+    "current_bottleneck": "Human coordination and upstream ownership remain the sole limiting uncertainties.",
     "failure_signatures": [
       {
         "id": "c817046b8ac8",
@@ -656,6 +741,14 @@
         "last_strategy_id": "strategy-78a3290db733",
         "last_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "id": "b7427b75da76",
+        "signature": "A locally kernel-valid artifact cannot advance while an identified author owns an open, reviewed same-target pull request and no coordination authorization exists.",
+        "count": 1,
+        "last_strategy_id": "strategy-strategy-78a3290db733",
+        "last_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ],
     "reusable_assets": [
@@ -728,6 +821,27 @@
         "evidence": "research/run7_live_status_result_20260722.json; SHA-256 fb21b4947cd594161b77c3c9580bda5a64127cc11131525a36ac3c948dacbd49",
         "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "name": "Run-8 live-status audit",
+        "use": "Produce a normalized public ownership snapshot.",
+        "evidence": "checks/audit_erdos530_live_status.sh SHA-256 045275026c11e0538acf115ae6ddfecdb576c494539300cade2e9988cae91c56",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "name": "Run-8 independent receipt checker",
+        "use": "Fail closed on snapshot or ownership-field changes.",
+        "evidence": "checks/check_erdos530_run8_receipt.sh SHA-256 30a2f59b32bf339def12f3d31772557d3b6fa73db9ae1dec26864a20741017f0",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "name": "Run-8 durable result",
+        "use": "Exact checkpoint and comparison baseline.",
+        "evidence": "research/run8_live_status_result_20260722.json SHA-256 12efc69003661ff48d4864995ae97250471f2ad685bc35d88978eee8420efcf9",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ],
     "constraints_learned": [
@@ -795,18 +909,25 @@
         "updated_at": "2026-07-22T08:36:36.152588+00:00"
       },
       {
-        "constraint": "An awaiting-author label and inactivity do not constitute abandonment or replacement permission.",
-        "scope": "Current Formal Conjectures acceptance route.",
-        "evidence": "PR 4044 remains open, unmerged, and owned by putonthetableacat55.",
-        "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
-        "updated_at": "2026-07-22T10:36:23.102218+00:00"
-      },
-      {
         "constraint": "REST review enumeration cannot establish GraphQL review-thread resolution or private coordination.",
         "scope": "The run-7 five-endpoint audit.",
         "evidence": "The audit queried only the official page and public GitHub REST endpoints.",
         "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "constraint": "An awaiting-author label and inactivity do not constitute abandonment or replacement permission.",
+        "scope": "Current Formal Conjectures acceptance route.",
+        "evidence": "PR 4044 remains open, unmerged, and owned by putonthetableacat55.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "constraint": "REST review enumeration cannot establish GraphQL thread resolution or private coordination.",
+        "scope": "The fixed five-endpoint audit.",
+        "evidence": "The audit queries only the official page and public GitHub REST endpoints.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ],
     "decision_history": [
@@ -859,6 +980,16 @@
         "surprise": "None.",
         "next_discriminator": "Repeat the fixed live audit once in run 8 and compare it against research/run7_live_status_result_20260722.json.",
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "strategy_id": "strategy-strategy-78a3290db733",
+        "decision": "hold",
+        "prediction": "The run-8 snapshot would be byte-identical to run 7 and preserve the coordination hold.",
+        "observation": "The live snapshot SHA-256 remained 22e9ad93abcc1954b15b35d4024853e1c71b9d46073653a135e24188b7003a8c. PR 4044 remained open, non-draft, unmerged, at head e9caf02a19d55dff055d89d441b45272e1fa134b, with eight inline comments and one review. The independent checker returned 0.",
+        "surprise": "None.",
+        "next_discriminator": "A documented public authorization, merge, closure, head change, ownership change, or replacement invitation; if a fresh snapshot is required, rerun the fixed audit once.",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ],
     "reduction_ledger": [
@@ -941,6 +1072,22 @@
         "source_attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
         "strategy_id": "strategy-78a3290db733",
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "ambient_space": "Currently legitimate Formal Conjectures acceptance-route families for the local Erdős Problem 530 artifact.",
+        "represented_space_before": "One coordination-dependent route family; the independent competing-submission route was already closed.",
+        "eliminated_or_quotiented": "No additional family was eliminated; run 8 confirmed that the competing-submission family remains closed.",
+        "represented_space_after": "One coordination-dependent route family.",
+        "reduction_factor": "1",
+        "measurement_status": "exact",
+        "unit": "families",
+        "coverage_scope": "Publicly visible Formal Conjectures acceptance routes represented by the official page, issue 773, PR 4044, its inline comments, and reviews on 2026-07-22.",
+        "soundness_basis": "PR 4044 remained open, non-draft, unmerged, at the recorded head, owned by an identified author, and labelled awaiting-author.",
+        "remaining_unknown": "Whether the author will resume and whether the author or maintainers will authorize assistance or replacement.",
+        "next_bulk_elimination": "No unconditional repetition is justified; rerun the fixed audit only when a fresh epoch requires a current public-state discriminator or a source-change event is reported.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "strategy_id": "strategy-strategy-78a3290db733",
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -1033,6 +1180,24 @@
           "https://github.com/google-deepmind/formal-conjectures/pull/4044#discussion_r3312344627"
         ],
         "updated_at": "2026-07-22T10:36:23.102218+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+        "strategy_id": "strategy-strategy-78a3290db733",
+        "nearest_method_ids": [
+          "formal-conjectures-pr-4044"
+        ],
+        "classification": "replication_control",
+        "exact_delta": "Run 8 adds a hash-bound status receipt and independent comparison baseline; it adds no new formal target relative to PR 4044.",
+        "duplicate_risk": "An independent submission would duplicate an open, reviewed pull request containing the same extremal function and asymptotic declaration.",
+        "comparison_test": "Compare PR 4044 state, merge status, head SHA, author, labels, update time, comments, and reviews with the run-7 normalized snapshot.",
+        "decision": "control_only",
+        "source_urls": [
+          "https://www.erdosproblems.com/530",
+          "https://github.com/google-deepmind/formal-conjectures/issues/773",
+          "https://github.com/google-deepmind/formal-conjectures/pull/4044"
+        ],
+        "updated_at": "2026-07-22T12:36:44.160438+00:00"
       }
     ]
   }
