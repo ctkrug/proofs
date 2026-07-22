@@ -10,31 +10,217 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 1,
-  "last_updated": "2026-07-22T21:30:11.870180+00:00",
+  "epoch_count": 2,
+  "last_updated": "2026-07-22T21:42:40.054051+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A review-ready patch against upstream addb4a1 changes `in` to `not in` and adds focused CPU rejection plus CUDA/TPU acceptance regressions. The exact-method suite passes 3/3, pristine behavior shows the inverse outcomes, the independent checker passes, and the patch applies cleanly to the pristine index. The full ML dependency suite and hardware training were not run.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "synthesis_summary": "The existing review patch against upstream addb4a1 changes `in` to `not in` and adds focused CPU rejection plus CUDA/TPU acceptance regressions. Run 2 replayed the exact-method suite (3/3), pristine inverse behavior, an independent checker, and clean apply check from an external environment, repairing the prior evidence-packaging failure. Full ML dependencies and accelerator hardware were not used.",
+  "established_facts": [
+    {
+      "claim": "Issue #26 remained open and main remained addb4a1 at 2026-07-22T21:35:55Z.",
+      "evidence": "artifacts/source-status-20260722T213555Z.json; SHA-256 d4df2283ed58138d372bae380f3a1cd3c1ac829c1bf58ba4c289f9da26c26005",
+      "scope": "GitHub issue, matching PR search, and remote main ref at the recorded timestamp",
+      "status": "computed",
+      "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    },
+    {
+      "claim": "Pristine addb4a1 has the inverted CPU/CUDA/TPU initial-guard behavior.",
+      "evidence": ".proof-experiments/20260722-213513-f77a39",
+      "scope": "Initial guard in BayesianDetector.train_best_detector",
+      "status": "computed",
+      "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    },
+    {
+      "claim": "The proposed patch satisfies the three-case mocked verification contract and applies to the pinned index.",
+      "evidence": ".proof-experiments/20260722-213513-66c43f, 20260722-213514-36393f, and 20260722-213514-fa7958",
+      "scope": "cpu, cuda, and tpu device types at the initial guard on addb4a1 plus patch df1d9a58...c1caefd",
+      "status": "computed",
+      "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-device-allowlist-branch-regression-v1",
+      "family": "boundary-guard correction with mutation-control regression",
+      "fingerprint": "device-allowlist-branch-regression-v1",
+      "title": "Replay the one-token allowlist inversion, mocked CPU/CUDA/TPU regressions, pristine mutation control, independent AST truth-table check, and clean apply check from an external pinned environment.",
+      "mechanism": "Execute the exact train_best_detector method body with downstream training mocked, compare with the pinned pristine method, and independently parse and evaluate the initial guard.",
+      "status": "promising",
+      "hypothesis": "Changing the guard to `torch_device.type not in (\"cuda\", \"tpu\")` makes CPU raise before downstream work while CUDA and TPU reach mocked training.",
+      "discriminating_test": "Exhaust the three verification-contract device types on the exact method and compare with pristine addb4a1; separately evaluate the parsed guard truth table.",
+      "blocker": "No local technical blocker; external submission, CI, and maintainer review require human authorization and coordination.",
+      "reopen_condition": "Reopen implementation only if upstream main changes the method/tests, CI exposes an integration failure, or maintainers alter the supported device tokens.",
+      "reopen_evidence": "The prior evidence-packaging condition was satisfied by moving the environment outside the workspace and replaying all checks in new receipts.",
+      "last_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-22T21:42:40.054051+00:00",
+      "route_evaluation": {
+        "gate_proximity": 1.0,
+        "contribution_value": 0.8,
+        "decisiveness": 1.0,
+        "novelty_confidence": 0.9,
+        "novelty_risk": 0.1,
+        "scope": 1.0,
+        "reuse_value": 0.6,
+        "model_cost": 0.05,
+        "cpu_cost": 0.01
+      }
+    },
+    {
+      "family": "full-package integration validation",
+      "mechanism": "Execute the new test through the repository's native runner with its complete declared dependency graph.",
+      "hypothesis": "The focused test imports and passes unchanged in the full package environment.",
+      "discriminating_test": "Run only src/synthid_text/detector_bayesian_test.py under upstream CI or a pinned external environment.",
+      "rationale": "It targets the only remaining local technical uncertainty without adding irrelevant hardware work.",
+      "id": "strategy-b71fdd1fd64b",
+      "fingerprint": "b71fdd1fd64b",
+      "status": "proposed",
+      "title": "Execute the new test through the repository's native runner with its complete declared dependency graph.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-device-allowlist-branch-regression-v1"
+      ],
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Human-authorized upstream submission and repository CI",
+      "rationale": "This is the remaining acceptance path after local deterministic completion.",
+      "next_experiment": "Apply patches/synthid-text-issue-26.patch to a fork of the current main and run the repository CI workflow.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-8c64b755c1",
+      "strategy_id": "strategy-device-allowlist-branch-regression-v1",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Physical accelerator hardware is necessary to validate this initial guard correction.",
+      "scope": "Control flow before process_raw_model_outputs",
+      "reason": "The guard observes only torch_device.type; exact-method execution with downstream methods mocked and independent expression evaluation exhaust the branch contract.",
+      "evidence": "3/3 focused tests plus independent AST truth table",
+      "reopen_condition": "A maintainer requests backend integration coverage or changes the supported-device contract.",
+      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the prior workspace-local virtual environment in an evidence receipt.",
+      "scope": "Evidence packaging for this contribution",
+      "reason": "Its symlink paths invalidated the prior receipt despite passing computations; run 2 used the repaired external environment.",
+      "evidence": "evidence/deepmind-synthid-text-26-device-guard-20260722-213011-ecd7fd/evidence-receipt.json and run-2 experiment commands",
+      "reopen_condition": "The receipt validator explicitly permits and correctly hashes workspace-local environment symlinks.",
+      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "updated_at": "2026-07-22T21:42:40.054051+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
+  "next_session": {
+    "recommended_strategy_id": "strategy-device-allowlist-branch-regression-v1",
+    "objective": "Obtain isolated human review, then upstream CI and maintainer disposition.",
+    "first_action": "Recheck issue #26 and refs/heads/main, then review patch df1d9a580a0286cbb8e85e06fbb534721cc7c8beaedd1bfb047e1ded6c1caefd before applying it to a fork.",
+    "stop_condition": "Stop local implementation work when upstream CI passes and a maintainer merges, rejects, or supersedes the exact patch.",
+    "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df"
+  },
   "recent_attempt_ids": [
-    "deepmind-synthid-text-26-device-guard-20260722-213011-ecd7fd"
+    "deepmind-synthid-text-26-device-guard-20260722-213011-ecd7fd",
+    "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df"
   ],
   "tactical_memory": {
-    "current_bottleneck": "",
-    "failure_signatures": [],
-    "reusable_assets": [],
-    "constraints_learned": [],
-    "decision_history": [],
-    "reduction_ledger": [],
-    "prior_art_decisions": []
+    "current_bottleneck": "Local guard correctness and review-patch reproducibility are complete; remaining uncertainty is full upstream CI and maintainer disposition.",
+    "failure_signatures": [
+      {
+        "id": "6c3e76c3f1a7",
+        "signature": "A two-token allowlist coupled to a CPU-only error message used membership rather than non-membership; evidence receipts also fail when mutable workspace virtual-environment symlinks are included.",
+        "count": 1,
+        "last_strategy_id": "strategy-device-allowlist-branch-regression-v1",
+        "last_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "focused exact-method test runner",
+        "use": "Run upstream-style branch tests without the ML stack or accelerator hardware.",
+        "evidence": "tools/run_focused_device_guard_tests.py; SHA-256 ba8977c1fca92d455112fbdfbff211309a453563c1a2411fc7a25a1cfcb17ddb",
+        "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      },
+      {
+        "name": "independent guard checker",
+        "use": "Fail closed on the exact torch_device.type allowlist, truth table, and regression parameters.",
+        "evidence": "tools/check_issue_26_patch.py; SHA-256 f47b0af639b992828f0fbe3e2b3c1becd1fe247114316ad74fb11a4d76f4b21f",
+        "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "The corrected initial guard admits exactly the source-declared cuda and tpu tokens and rejects every other type before processing.",
+        "scope": "BayesianDetector.train_best_detector at addb4a1 plus patch df1d9a58...c1caefd",
+        "evidence": "independent AST checker and exact-method branch suite",
+        "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "strategy_id": "strategy-device-allowlist-branch-regression-v1",
+        "decision": "continue",
+        "prediction": "Pristine source will accept CPU and reject CUDA/TPU; the patch will invert all three outcomes and reject CPU before downstream work.",
+        "observation": "Pristine behavior matched the bug; all three patched cases passed; the independent checker and pinned-index apply check passed.",
+        "surprise": "The only prior gate failure was evidence packaging by workspace-local virtual-environment symlinks, not implementation or test behavior.",
+        "next_discriminator": "Human-authorized application to an upstream fork followed by repository CI.",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "All possible values of torch_device.type",
+        "represented_space_before": "The source-declared supported tokens {cuda,tpu} and every value outside that set",
+        "eliminated_or_quotiented": "Every unsupported token is equivalent under the initial membership guard; cpu represents that complement, while cuda and tpu are checked individually.",
+        "represented_space_after": "Three guard-equivalence cases: cpu, cuda, tpu",
+        "reduction_factor": "infinite unsupported token domain quotiented to one equivalence class; two supported singleton classes retained",
+        "measurement_status": "exact",
+        "unit": "profiles",
+        "coverage_scope": "Initial device guard in BayesianDetector.train_best_detector only",
+        "soundness_basis": "The initial branch observes only torch_device.type membership in the exact two-element tuple; independent AST inspection verifies no earlier executable statement or additional predicate.",
+        "remaining_unknown": "Actual accelerator execution, training numerics, full repository CI, and maintainer acceptance are outside this quotient and remain unchecked.",
+        "next_bulk_elimination": "not applicable; the stated branch contract is exhausted",
+        "source_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "strategy_id": "strategy-device-allowlist-branch-regression-v1",
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+        "strategy_id": "strategy-device-allowlist-branch-regression-v1",
+        "nearest_method_ids": [
+          "github-issue-26"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "Issue #26 proposes the operator change; this contribution adds a review-ready patch, focused CPU/CUDA/TPU regressions, pristine mutation control, independent checker, and reproducible receipts.",
+        "duplicate_risk": "An unindexed fork could contain the same fix; current main remains unfixed and the exact repository PR search for train_best_detector has zero results.",
+        "comparison_test": "Compare the live main guard and repository PR search with the patch and focused tests.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/google-deepmind/synthid-text/issues/26",
+          "https://github.com/google-deepmind/synthid-text/blob/addb4a158143c7c6851a1308f78b89fceed59683/src/synthid_text/detector_bayesian.py#L1031-L1036",
+          "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fsynthid-text+is%3Apr+%22train_best_detector%22"
+        ],
+        "updated_at": "2026-07-22T21:42:40.054051+00:00"
+      }
+    ]
   }
 }

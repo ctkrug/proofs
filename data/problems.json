@@ -1471,11 +1471,11 @@
       "mocking"
     ],
     "lane": "easy",
-    "status": "attempted",
+    "status": "active",
     "automation_eligible": true,
     "priority": 92,
-    "attempt_count": 1,
-    "research_attempt_count": 1,
+    "attempt_count": 2,
+    "research_attempt_count": 2,
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
@@ -1485,12 +1485,12 @@
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
     "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-22T21:30:11.870180+00:00",
+    "last_attempt_at": "2026-07-22T21:42:40.054051+00:00",
     "campaign_last_assessment": {
-      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-213011-ecd7fd",
+      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
       "decision": "continue",
-      "close_signal": "Hash-bound patch applies to addb4a1, focused tests pass 3/3, pristine mutation control and independent checker both pass.",
-      "reason": "The bounded contribution is candidate-complete; only human review and upstream validation remain."
+      "close_signal": "Hash-bound patch applies to live main addb4a1, focused tests pass 3/3, pristine mutation control and independent checker pass, and the prior receipt blocker was removed.",
+      "reason": "The bounded contribution is candidate-complete; continued work means isolated human review and upstream validation rather than another local implementation epoch."
     }
   },
   {
