@@ -14,7 +14,7 @@
       "repository": "ctkrug/proofs-covering-c1264",
       "url": "https://github.com/ctkrug/proofs-covering-c1264",
       "visibility": "PUBLIC",
-      "commit": "8ad072a72e81fe3a1e761d76d98f0de89a6cb7f8"
+      "commit": "6ce4d0379227d0012c3b169c41cedcb4ec97b9b8"
     },
     {
       "problem_id": "erdos-307",
@@ -121,6 +121,46 @@
     {
       "problem_id": "scout-bdf77f43574b",
       "error": "RuntimeError: working tree is dirty for scout-bdf77f43574b; refusing repository sync"
+    },
+    {
+      "problem_id": "leanarchitect-5-cycle-detection",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/leanarchitect-5-cycle-detection/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "langlands-47-inversion-finsets",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/langlands-47-inversion-finsets/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "langlands-46-standard-parabolic",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/langlands-46-standard-parabolic/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "langlands-49-sl2-triple",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/langlands-49-sl2-triple/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "mathlib-37366-gcd-sum-difference",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/mathlib-37366-gcd-sum-difference/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "formal-mathfin-67-fra",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/formal-mathfin-67-fra/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-superhuman-13-answerbench-column",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-superhuman-16-faithfulness",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-superhuman-16-faithfulness/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "iris-lean-127-simp-to-model",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/iris-lean-127-simp-to-model/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "leanbridge-56-totally-positive",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/leanbridge-56-totally-positive/workspace: merge: origin/main - not something we can merge"
     }
   ],
   "projection_retry": {

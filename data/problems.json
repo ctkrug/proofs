@@ -105,7 +105,7 @@
     "title": "Exact covering number C(12,6,4)",
     "lane": "hard",
     "difficulty": 7,
-    "status": "active",
+    "status": "attempted",
     "problem_state": "open finite exact value",
     "statement": "Determine the minimum number of 6-subsets of a 12-point set needed to cover every 4-subset. The maintained range is 40 <= C(12,6,4) <= 41; either a verified 40-block cover or a complete independently checked exclusion of 40 settles the exact value.",
     "source_url": "https://ljcr.dmgordon.org/cover/show_cover.php?v=12&k=6&t=4",
@@ -132,11 +132,11 @@
     "contribution_score": 4,
     "review_cost": 3,
     "novelty_risk": 2,
-    "attempt_count": 2,
-    "research_attempt_count": 2,
+    "attempt_count": 3,
+    "research_attempt_count": 3,
     "created_at": "2026-07-22T01:42:24Z",
     "accepted_result": false,
-    "last_attempt_at": "2026-07-22T13:15:09.478653+00:00",
+    "last_attempt_at": "2026-07-22T15:12:54.586824+00:00",
     "priority": 110,
     "phase0_status": "link_route_promoted_checkpointed_campaign_active",
     "phase0_evidence": "Published controls pass. Direct depth-7 cubing closed only 10/128 sampled leaves (7.8125%) and was stopped. The link-first campaign has four audited C(11,5,3) orbit classes, all four excluded by reconstructed residual CNFs and replayed external proofs; exact primary/secondary/tertiary partitions contain 189 validated proof receipts and 47 open canonical frontier nodes. A biased quaternary child-zero smoke test returned 10 UNKNOWN results; a schema-2, independently audited Glucose4 incremental diagnostic also closed 0/10 under explicitly best-effort caps. Neither is route-gate eligible and both policies are stopped unchanged.",
@@ -651,7 +651,11 @@
     "contribution_score": 5,
     "review_cost": 2,
     "novelty_risk": 1,
-    "techniques": ["Lean 4 metaprogramming", "directed-cycle detection", "diagnostic testing"],
+    "techniques": [
+      "Lean 4 metaprogramming",
+      "directed-cycle detection",
+      "diagnostic testing"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -693,7 +697,12 @@
     "contribution_score": 6,
     "review_cost": 2,
     "novelty_risk": 1,
-    "techniques": ["Lean 4", "Coxeter systems", "List.toFinset", "reduced-word inversions"],
+    "techniques": [
+      "Lean 4",
+      "Coxeter systems",
+      "List.toFinset",
+      "reduced-word inversions"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -735,7 +744,12 @@
     "contribution_score": 6,
     "review_cost": 2,
     "novelty_risk": 1,
-    "techniques": ["Lean 4", "Coxeter systems", "subgroup closure", "standard parabolics"],
+    "techniques": [
+      "Lean 4",
+      "Coxeter systems",
+      "subgroup closure",
+      "standard parabolics"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -777,7 +791,12 @@
     "contribution_score": 7,
     "review_cost": 2,
     "novelty_risk": 1,
-    "techniques": ["Lean 4", "matrix Lie algebras", "finite extensionality", "nilpotence"],
+    "techniques": [
+      "Lean 4",
+      "matrix Lie algebras",
+      "finite extensionality",
+      "nilpotence"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -819,7 +838,12 @@
     "contribution_score": 5,
     "review_cost": 3,
     "novelty_risk": 3,
-    "techniques": ["Lean 4", "integer gcd", "coprimality", "parity"],
+    "techniques": [
+      "Lean 4",
+      "integer gcd",
+      "coprimality",
+      "parity"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -861,7 +885,13 @@
     "contribution_score": 6,
     "review_cost": 3,
     "novelty_risk": 2,
-    "techniques": ["Lean 4", "zero-coupon bonds", "field_simp", "ring normalization", "axiom audit"],
+    "techniques": [
+      "Lean 4",
+      "zero-coupon bonds",
+      "field_simp",
+      "ring normalization",
+      "axiom audit"
+    ],
     "lane": "easy",
     "status": "parked",
     "automation_eligible": false,
@@ -909,7 +939,11 @@
     "contribution_score": 5,
     "review_cost": 1,
     "novelty_risk": 1,
-    "techniques": ["CSV validation", "benchmark curation", "regression testing"],
+    "techniques": [
+      "CSV validation",
+      "benchmark curation",
+      "regression testing"
+    ],
     "lane": "easy",
     "status": "queued",
     "automation_eligible": true,
@@ -955,7 +989,12 @@
     "contribution_score": 7,
     "review_cost": 3,
     "novelty_risk": 2,
-    "techniques": ["Lean 4 formalization", "Euclidean geometry", "counterexample validation", "benchmark curation"],
+    "techniques": [
+      "Lean 4 formalization",
+      "Euclidean geometry",
+      "counterexample validation",
+      "benchmark curation"
+    ],
     "lane": "easy",
     "status": "queued",
     "automation_eligible": true,
@@ -1001,7 +1040,12 @@
     "contribution_score": 6,
     "review_cost": 2,
     "novelty_risk": 1,
-    "techniques": ["Lean 4", "simp_to_model", "TreeMap", "proof refactoring"],
+    "techniques": [
+      "Lean 4",
+      "simp_to_model",
+      "TreeMap",
+      "proof refactoring"
+    ],
     "lane": "easy",
     "status": "queued",
     "automation_eligible": true,
@@ -1047,7 +1091,13 @@
     "contribution_score": 8,
     "review_cost": 3,
     "novelty_risk": 2,
-    "techniques": ["Lean 4", "number fields", "real embeddings", "ordered fields", "LMFDB"],
+    "techniques": [
+      "Lean 4",
+      "number fields",
+      "real embeddings",
+      "ordered fields",
+      "LMFDB"
+    ],
     "lane": "easy",
     "status": "queued",
     "automation_eligible": true,
