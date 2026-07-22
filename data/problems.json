@@ -534,8 +534,8 @@
     "lane": "easy",
     "status": "parked",
     "priority": 40,
-    "attempt_count": 9,
-    "research_attempt_count": 9,
+    "attempt_count": 10,
+    "research_attempt_count": 10,
     "accepted_result": false,
     "added_at": "2026-07-20T17:25:05.376727+00:00",
     "source_checked_at": "2026-07-20T17:25:05.376753+00:00",
@@ -547,7 +547,7 @@
       "output_tokens": 2010,
       "reasoning_output_tokens": 1031
     },
-    "last_attempt_at": "2026-07-22T12:36:44.160438+00:00",
+    "last_attempt_at": "2026-07-22T14:41:34.392949+00:00",
     "campaign_state": "invalidated",
     "campaign_started_at": "2026-07-21T15:14:41.303998+00:00",
     "campaign_start_research_attempt_count": 1,
@@ -564,10 +564,10 @@
       "evidence": "Issue comment links a 700-line partial formalization; PR #4044 is open for the same formalization."
     },
     "campaign_last_assessment": {
-      "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
+      "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
       "decision": "continue",
       "close_signal": "",
-      "reason": "Run 8 is before the mandatory run-25 review point. Continue with bounded, event-sensitive discrimination while preserving the verified artifact and avoiding duplicate submissions."
+      "reason": "This is run 9, before the required run-25 review point. Continuation should be event-triggered and must not repeat polling, rebuilding, or duplicate implementation."
     }
   },
   {
