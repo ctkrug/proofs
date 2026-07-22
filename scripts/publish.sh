@@ -17,6 +17,17 @@ if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]]; then
   exit 1
 fi
 
+# Laptop evolution lab (proof-lab-local) publishes into data/local_lab/ via git.
+# Default-off: this box only pulls those results when the flag file exists.
+if [[ -f "$PROOF_ROOT/state/local-lab-pull.enabled" ]]; then
+  if git pull --rebase --autostash origin main; then
+    .venv/bin/python -m proof_factory render || echo "Warning: post-pull render failed" >&2
+  else
+    echo "Warning: local-lab pull failed; publishing existing state" >&2
+    git rebase --abort 2>/dev/null || true
+  fi
+fi
+
 # Research services create local commits without credentials. Only this publisher
 # may provision and push the public per-problem GitHub repositories.
 if ! .venv/bin/python -m proof_factory repo-sync; then

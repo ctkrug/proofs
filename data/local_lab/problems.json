@@ -1,0 +1,46 @@
+[
+ {
+  "id": "local-covering-c13-6-4",
+  "title": "Covering design C(13,6,4) record hunt",
+  "lane": "local-lab",
+  "status": "active",
+  "problem_state": "open",
+  "statement": "Find a covering design C(13,6,4) with fewer than 66 blocks: a set of 6-element subsets of a 13-element set such that every 4-element subset is contained in at least one block. Published bounds: 63 <= C(13,6,4) <= 66. Lab best so far: verified cover with 79 blocks.",
+  "source_url": "https://ljcr.dmgordon.org/show_cover.php?v=13&k=6&t=4",
+  "source_name": "La Jolla Covering Repository",
+  "verifiability": "exact",
+  "rationale": "Laptop-local FunSearch-style evolution: claude -p writes construction programs, a deterministic dual-implementation checker verifies every witness exactly. Published bounds 63 <= C <= 66 (checked 2026-07-22).",
+  "techniques": [
+   "program evolution",
+   "randomized search",
+   "exact verification"
+  ],
+  "attempt_count": 1,
+  "created_at": "2026-07-22T00:00:00+00:00",
+  "accepted_result": false,
+  "priority": "normal",
+  "contribution_type": "Local evolution lab"
+ },
+ {
+  "id": "local-covering-c14-6-4",
+  "title": "Covering design C(14,6,4) record hunt",
+  "lane": "local-lab",
+  "status": "active",
+  "problem_state": "open",
+  "statement": "Find a covering design C(14,6,4) with fewer than 80 blocks: a set of 6-element subsets of a 14-element set such that every 4-element subset is contained in at least one block. Published bounds: 75 <= C(14,6,4) <= 80.",
+  "source_url": "https://ljcr.dmgordon.org/show_cover.php?v=14&k=6&t=4",
+  "source_name": "La Jolla Covering Repository",
+  "verifiability": "exact",
+  "rationale": "Laptop-local FunSearch-style evolution: claude -p writes construction programs, a deterministic dual-implementation checker verifies every witness exactly. Published bounds 75 <= C <= 80 (checked 2026-07-22).",
+  "techniques": [
+   "program evolution",
+   "randomized search",
+   "exact verification"
+  ],
+  "attempt_count": 0,
+  "created_at": "2026-07-22T00:00:00+00:00",
+  "accepted_result": false,
+  "priority": "normal",
+  "contribution_type": "Local evolution lab"
+ }
+]

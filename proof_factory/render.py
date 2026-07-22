@@ -988,6 +988,21 @@ export default {
 def _build_unlocked() -> Path:
     problems = store.load_problems()
     attempts = store.load_attempts()
+    try:
+        import json as _json
+        local_problems = store.read_json(store.DATA / "local_lab" / "problems.json", [])
+        if isinstance(local_problems, list):
+            known = {p["id"] for p in problems}
+            problems += [p for p in local_problems if isinstance(p, dict) and p.get("id") and p["id"] not in known]
+        local_attempts_file = store.DATA / "local_lab" / "attempts.jsonl"
+        if local_attempts_file.exists():
+            for line in local_attempts_file.read_text().splitlines():
+                if line.strip():
+                    row = _json.loads(line)
+                    if isinstance(row, dict):
+                        attempts.append(row)
+    except Exception:
+        pass  # the laptop lab feed must never break the box render
     runtime = store.runtime()
     reviews = store.read_json(store.DATA / "reviews.json", [])
     if not isinstance(reviews, list):
