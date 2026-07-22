@@ -10,13 +10,6 @@
       "commit": "3e7bd8dd272a6d034be86b51e997ad54cb6f35bd"
     },
     {
-      "problem_id": "covering-c1264",
-      "repository": "ctkrug/proofs-covering-c1264",
-      "url": "https://github.com/ctkrug/proofs-covering-c1264",
-      "visibility": "PUBLIC",
-      "commit": "ed7b1ecea6866761a7491d5c0a2a8f49e440c481"
-    },
-    {
       "problem_id": "erdos-307",
       "repository": "ctkrug/proofs-erdos-307",
       "url": "https://github.com/ctkrug/proofs-erdos-307",
@@ -109,6 +102,10 @@
     {
       "problem_id": "erdos-242",
       "error": "RuntimeError: working tree is dirty for erdos-242; refusing repository sync"
+    },
+    {
+      "problem_id": "covering-c1264",
+      "error": "RuntimeError: working tree is dirty for covering-c1264; refusing repository sync"
     },
     {
       "problem_id": "erdos-647",
