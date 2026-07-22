@@ -366,21 +366,26 @@ class WatchdogBoundaryTests(unittest.TestCase):
         self.assertIn("capacity reserve", report["health_issues"])
 
     def test_pending_hard_event_becomes_stale_only_after_six_hours(self) -> None:
-        base = {"id": "hard", "lane": "hard", "problem_id": "ramsey", "outcome": "progress"}
-        exact = self.watchdog(attempts=[{
-            **base, "finished_at": (self.fixed_now - timedelta(hours=6)).isoformat(),
-        }], reviewable=[{"id": "event"}])
-        stale = self.watchdog(attempts=[{
-            **base, "finished_at": (self.fixed_now - timedelta(hours=6, seconds=1)).isoformat(),
-        }], reviewable=[{"id": "event"}])
+        problems = [{"id": "ramsey", "lane": "hard", "status": "active"}]
+        exact = self.watchdog(
+            problems=problems,
+            reviewable=[{"id": "event", "created_at": (self.fixed_now - timedelta(hours=6)).isoformat()}],
+        )
+        stale = self.watchdog(
+            problems=problems,
+            reviewable=[{
+                "id": "event", "created_at": (self.fixed_now - timedelta(hours=6, seconds=1)).isoformat(),
+            }],
+        )
         self.assertEqual(exact["health"], "healthy")
         self.assertIn("unconsumed evidence event", stale["health_issues"][0])
 
-    def test_first_hard_review_ready_degrades_without_prior_hard_attempt(self) -> None:
+    def test_fresh_first_hard_review_event_does_not_false_alarm(self) -> None:
         report = self.watchdog(
-            problems=[{"id": "ramsey", "lane": "hard"}], reviewable=[{"id": "event"}],
+            problems=[{"id": "ramsey", "lane": "hard", "status": "active"}],
+            reviewable=[{"id": "event", "created_at": self.fixed_now.isoformat()}],
         )
-        self.assertTrue(any("has not completed its first review" in issue for issue in report["health_issues"]))
+        self.assertEqual(report["health"], "healthy")
 
     def test_easy_attempt_becomes_stale_only_after_three_hours(self) -> None:
         base = {"id": "easy", "lane": "easy", "problem_id": "p", "outcome": "progress"}

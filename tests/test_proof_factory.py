@@ -124,6 +124,25 @@ class ProofFactoryTests(unittest.TestCase):
         ]
         self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "safe")
 
+    def test_explicit_automation_hold_is_not_dispatched(self) -> None:
+        problems = [
+            {"id": "held", "lane": "hard", "status": "active", "priority": 100,
+             "automation_eligible": False},
+            {"id": "ready", "lane": "hard", "status": "active", "priority": 10,
+             "automation_eligible": True},
+        ]
+        self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "ready")
+
+    def test_automated_hard_selection_is_limited_to_event_bearing_problem(self) -> None:
+        problems = [
+            {"id": "higher-idle", "lane": "hard", "status": "active", "priority": 100},
+            {"id": "lower-ready", "lane": "hard", "status": "active", "priority": 10},
+        ]
+        self.assertEqual(
+            scheduler.choose_problem("hard", problems, candidate_ids={"lower-ready"})["id"],
+            "lower-ready",
+        )
+
     def test_parse_official_statement(self) -> None:
         page = '<div id="content">Is there an $n&gt;2$?<br>Exactly.</div>'
         self.assertEqual(intake.parse_statement(page), "Is there an $n>2$? Exactly.")
@@ -1191,7 +1210,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_usage_tie_break_prefers_discovery_without_preemption(self) -> None:
         decisions = {"hard": {"allowed": True}, "easy": {"allowed": True}}
-        self.assertEqual(usage.preferred_lane(decisions), "easy")
+        self.assertEqual(usage.preferred_lane(decisions), "hard")
         self.assertEqual(usage.preferred_lane({"hard": {"allowed": True}}), "hard")
         self.assertIsNone(usage.preferred_lane({"hard": {"allowed": False}, "easy": {"allowed": False}}))
 
@@ -1208,6 +1227,14 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertFalse(hard["allowed"])
         self.assertEqual(hard["mode"], "portfolio")
         self.assertTrue(easy["allowed"])
+
+        with tempfile.TemporaryDirectory() as raw:
+            cache = Path(raw) / "usage.json"; cache.write_text(json.dumps(payload))
+            with patch.dict("os.environ", {"PROOF_USAGE_CACHE_PATH": str(cache)}), \
+                    patch.object(store, "runtime", return_value={"hard_running": "covering-c1264"}):
+                waiting_easy = usage.admission("easy", monotonic_now=302400.0)
+        self.assertFalse(waiting_easy["allowed"])
+        self.assertEqual(waiting_easy["mode"], "portfolio")
 
     def test_scout_is_limited_to_one_completed_call_per_day(self) -> None:
         now = datetime(2026, 7, 21, 12, 0, tzinfo=timezone.utc)
@@ -1288,7 +1315,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn("Next run", index)
                 self.assertIn("Completed research passes", index)
                 self.assertIn("What this run accomplished", index)
-                self.assertIn("Ramsey campaign", index)
+                self.assertIn("Hard research queue", index)
                 self.assertIn("Open-problem program", index)
                 self.assertNotIn(">hard</span>", index)
                 self.assertNotIn(">easy</span>", index)
@@ -1296,7 +1323,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertNotIn("easy lane ·", index)
                 self.assertIn("/assets/site-v4.css", index)
                 self.assertIn("/assets/site-v4.js", index)
-                self.assertIn("Ramsey number R(5,5)", index)
+                self.assertIn("Exact-problem queue", index)
                 self.assertIn("Official source", index)
                 self.assertNotIn("Every attempt", index)
                 self.assertNotIn("External wins", index)

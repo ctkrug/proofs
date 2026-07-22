@@ -76,3 +76,14 @@ def consume(problem_id: str, attempt_id: str, *, event_ids: set[str] | None = No
         source.unlink()
         archived.append(value)
     return archived
+
+
+def consume_job(problem_id: str, job_id: str, review_id: str) -> list[dict[str, Any]]:
+    """Archive only lifecycle events bound exactly to one reviewed lab job."""
+    source = f"state/labs/jobs/{job_id}.json"
+    selected = {
+        str(row["id"])
+        for row in pending(problem_id)
+        if row.get("job_id") == job_id or row.get("source") == source
+    }
+    return consume(problem_id, review_id, event_ids=selected)

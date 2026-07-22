@@ -161,14 +161,24 @@ def research_authorization_satisfied(problem: dict[str, Any], problems: list[dic
     return True
 
 
-def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
+def choose_problem(
+    lane: str,
+    problems: list[dict[str, Any]],
+    *,
+    candidate_ids: set[str] | None = None,
+) -> dict[str, Any]:
     statuses = ACTIVE_STATUSES if lane == "hard" else {"queued", "active", "attempted"}
     candidates = [row for row in problems if row.get("lane") == lane and row.get("status") in statuses]
+    # Missing preserves compatibility with older registrations; an explicit false is a
+    # fail-closed operator hold and must never be silently ignored by dispatch.
+    candidates = [row for row in candidates if row.get("automation_eligible", True) is True]
     # A duplicate upstream formalization is not a contribution. Scout rows carry
     # a current PR check; keep any later-discovered competing work out of dispatch.
     candidates = [row for row in candidates if not isinstance(row.get("upstream_work_check"), dict)
                   or int(row["upstream_work_check"].get("active_prs") or 0) == 0]
     candidates = [row for row in candidates if research_authorization_satisfied(row, problems)]
+    if candidate_ids is not None:
+        candidates = [row for row in candidates if str(row.get("id") or "") in candidate_ids]
     if not candidates:
         raise RuntimeError(f"no active {lane} problems")
     if lane == "hard":
@@ -225,8 +235,8 @@ def rendered_attempt_freshness(attempts: list[dict[str, Any]], *, now: datetime)
 def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
     if lane not in {"easy", "hard"}:
         raise ValueError("lane must be easy or hard")
-    # The hard lane is the workspace-only R(5,5) campaign; unlike formalization
-    # discovery it does not use the separate Lean build cache.
+    # Hard finite-search campaigns are workspace-only; unlike formalization
+    # discovery they do not use the separate Lean build cache.
     capacity_policy = capacity.admission(lane, require_cache=lane != "hard")
     store.update_runtime(capacity_policy=capacity_policy)
     if not capacity_policy["allowed"]:
@@ -255,15 +265,25 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         if not acquired:
             raise RuntimeError(f"{lane} lane already running")
         problems = store.load_problems()
-        problem = choose_problem(lane, problems)
-        research_events = _reviewable_events(problem["id"])
-        if lane == "hard" and admission.get("mode") != "operator" and not research_events:
-            reason = "no unconsumed research event; clock time alone cannot start a model-backed R(5,5) pass"
+        reviewable_by_problem = {
+            str(row.get("id") or ""): _reviewable_events(str(row.get("id") or ""))
+            for row in problems if row.get("lane") == "hard"
+        } if lane == "hard" else {}
+        automated_event_ids = {
+            problem_id for problem_id, pending in reviewable_by_problem.items() if pending
+        }
+        if lane == "hard" and admission.get("mode") != "operator" and not automated_event_ids:
+            reason = "no unconsumed research event; clock time alone cannot start a model-backed hard-research pass"
             store.update_runtime(hard_running=None, hard_event_policy={
                 "allowed": False, "reason": reason, "checked_at": store.now_iso(),
             })
             render.build()
             return {"status": "deferred", "lane": lane, "reason": reason}
+        problem = choose_problem(
+            lane, problems,
+            candidate_ids=(automated_event_ids if lane == "hard" and admission.get("mode") != "operator" else None),
+        )
+        research_events = _reviewable_events(problem["id"])
         if lane == "easy":
             problem = store.start_discovery_campaign(problem["id"])
         phase = "baseline" if research_state.needs_baseline(problem) else "technical"
@@ -351,13 +371,22 @@ def watchdog(*, publish: bool = False) -> dict[str, Any]:
             f"newest durable attempt {site_freshness['latest_attempt_id']} has no rendered page "
             f"after {site_freshness['lag_seconds'] / 3600:.1f} hours"
         )
-    if hard:
-        last_hard = store.parse_iso(hard[-1].get("finished_at"))
-        pending_hard_events = _reviewable_events(str(hard[-1].get("problem_id")))
-        if pending_hard_events and not hard_in_flight and last_hard and (now - last_hard).total_seconds() > 6 * 3600:
-            issues.append("Ramsey campaign has an unconsumed evidence event for more than 6 hours")
-    elif not hard_in_flight and any(_reviewable_events(row["id"]) for row in store.load_problems() if row.get("lane") == "hard"):
-        issues.append("Ramsey campaign has evidence ready but has not completed its first review")
+    pending_hard_events = [
+        event
+        for problem in store.load_problems()
+        if problem.get("lane") == "hard" and problem.get("status") in ACTIVE_STATUSES
+        for event in _reviewable_events(str(problem.get("id") or ""))
+    ]
+    hard_event_times = [
+        parsed for event in pending_hard_events
+        if (parsed := store.parse_iso(event.get("created_at"))) is not None
+    ]
+    oldest_event = min(hard_event_times, default=None)
+    if (
+        pending_hard_events and not hard_in_flight and oldest_event
+        and (now - oldest_event).total_seconds() > 6 * 3600
+    ):
+        issues.append("hard-research queue has an unconsumed evidence event for more than 6 hours")
     easy_expected = config.get_bool("PROOF_EASY_EXPECTED", True)
     if easy_expected:
         if easy:

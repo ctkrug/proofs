@@ -96,7 +96,9 @@
     "created_at": "2026-07-20T20:24:00+00:00",
     "last_attempt_at": "2026-07-22T04:20:15.836306+00:00",
     "accepted_result": false,
-    "priority": 100
+    "priority": 100,
+    "phase5_status": "validated",
+    "phase5_validation_receipt_sha256": "4eb03f4a2cfac40bcd352101d36bcfa80125badce1ddaedcd424f5753449d04d"
   },
   {
     "id": "covering-c1264",
@@ -139,11 +141,33 @@
     "phase0_status": "link_route_promoted_checkpointed_campaign_active",
     "phase0_evidence": "Published controls pass. Direct depth-7 cubing closed only 10/128 sampled leaves (7.8125%) and was stopped. The link-first campaign has four audited C(11,5,3) orbit classes, all four excluded by reconstructed residual CNFs and replayed external proofs; exact primary/secondary/tertiary partitions contain 189 validated proof receipts and 47 open canonical frontier nodes. A biased quaternary child-zero smoke test returned 10 UNKNOWN results; a schema-2, independently audited Glucose4 incremental diagnostic also closed 0/10 under explicitly best-effort caps. Neither is route-gate eligible and both policies are stopped unchanged.",
     "campaign_summary_sha256": "1a9ff4abe35470308876496219ec6cf93d64e6b10ceafb942a3dd43b5dd3139f",
-    "campaign_repository_commit": "af62e5946d767f984e854143402bb708b081a1e9",
-    "automation_eligible": false,
+    "campaign_repository_commit": "7ef9e99c21241e891f1e74a41e56da583313e5fc",
+    "automation_eligible": true,
     "manual_scope_approved_by": "Charlie Krug",
     "manual_scope_approved_at": "2026-07-22T01:42:24Z",
-    "manual_scope": "Continue the checkpointed C(12,6,4) campaign through bounded canonical-frontier and incremental-solver discriminators. Preserve independent reconstruction and proof replay, pause at declared information-value gates, and make no exact-value claim before complete coverage and a second cardinality validation route."
+    "manual_scope": "Continuously operate the checkpointed C(12,6,4) campaign through bounded canonical-frontier and materially different propagation/cardinality discriminators. Preserve independent reconstruction and proof replay, serialize heavy work on the current host, pause at declared information-value gates, provision no paid burst capacity, and make no exact-value claim before complete coverage and a second cardinality validation route.",
+    "research_authorization": {
+      "approved": true,
+      "approved_by": "Charlie Krug",
+      "approved_at": "2026-07-22T12:45:18Z",
+      "scope": "Run the evidence-gated, checkpointed C(12,6,4) campaign continuously under existing CPU, memory, disk, correctness, and information-value limits. Completed artifacts remain durable until reviewed; no paid scaling or public mathematical claim is authorized.",
+      "prerequisites": [
+        {
+          "kind": "problem_field",
+          "problem_id": "ramsey-r55",
+          "field": "phase5_status",
+          "allowed_values": [
+            "validated",
+            "maintenance"
+          ]
+        },
+        {
+          "kind": "artifact_sha256",
+          "path": "research/ramsey-r55/workspace/artifacts/known-class-embedding-census-v3/validation-receipt.json",
+          "sha256": "4eb03f4a2cfac40bcd352101d36bcfa80125badce1ddaedcd424f5753449d04d"
+        }
+      ]
+    }
   },
   {
     "id": "erdos-647",

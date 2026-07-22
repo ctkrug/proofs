@@ -523,7 +523,6 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
     destination = queue / f"{normalized['id']}.json"
     if destination.exists() or _state_path(normalized["id"]).exists():
         raise ValueError(f"duplicate lab job: {normalized['id']}")
-    store.write_json_atomic(destination, normalized)
     state = {
         **normalized,
         "status": "queued",
@@ -532,6 +531,15 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
         "created_at": store.now_iso(),
     }
     _write_state(state)
+    try:
+        # Executable work becomes visible only after its authoritative state is
+        # durable. A crash cannot leave the worker an orphan queue item.
+        store.write_json_atomic(destination, normalized)
+    except Exception as exc:
+        state["status"] = "stopped_with_reason"
+        state["stop_reason"] = f"submission state persisted but queue publication failed: {type(exc).__name__}: {exc}"
+        _write_state(state)
+        raise
     repositories.record_lab(normalized["problem_id"], "submitted", normalized)
     return {"status": "queued", "spec": str(destination), **normalized}
 
@@ -615,7 +623,17 @@ def _recover_running_specs() -> list[str]:
 
 
 def queued_specs() -> list[Path]:
-    return sorted(store.RESEARCH.glob("*/workspace/lab-queue/*.json"), key=lambda path: path.stat().st_mtime)
+    priorities = {
+        str(problem.get("id") or ""): int(problem.get("priority") or 0)
+        for problem in store.load_problems()
+    }
+
+    def order(path: Path) -> tuple[int, float, str]:
+        # The problem id is the directory immediately below research/.
+        problem_id = path.parents[2].name
+        return (-priorities.get(problem_id, 0), path.stat().st_mtime, path.as_posix())
+
+    return sorted(store.RESEARCH.glob("*/workspace/lab-queue/*.json"), key=order)
 
 
 def _requires_build_cache(raw: dict[str, Any]) -> bool:
@@ -1262,8 +1280,13 @@ def apply_review(
             "recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
             "status": "repository_projection_pending", "error": projection_warning,
         })
+    consumed_events = events.consume_job(
+        str(state["problem_id"]), job_id,
+        f"lab-review:{job_id}:{review['reviewed_at']}",
+    )
     return {
         "status": state["status"], "job_id": job_id, "review": review,
+        "consumed_event_ids": [row["id"] for row in consumed_events],
         **({"repository_projection_warning": projection_warning} if projection_warning else {}),
     }
 

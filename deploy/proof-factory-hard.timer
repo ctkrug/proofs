@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - event-gated R(5,5) research review
+Description=Proof Factory - event-gated hard-research review
 
 [Timer]
 OnCalendar=*-*-* 00,04,08,12,16,20:00:00 UTC

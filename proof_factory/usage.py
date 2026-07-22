@@ -12,11 +12,11 @@ from . import config, store
 
 DEFAULT_CACHE = Path("/root/project-factory/state/usage_cache.json")
 MAX_AGE_SECONDS = 30 * 60
-LANE_TIE_PRIORITY = ("easy", "hard")
+LANE_TIE_PRIORITY = ("hard", "easy")
 
 
 def preferred_lane(admissions: dict[str, dict[str, Any]]) -> str | None:
-    """Choose discovery first when multiple model lanes are simultaneously admissible."""
+    """Choose the operator-designated flagship lane when both are admissible."""
     return next((lane for lane in LANE_TIE_PRIORITY if admissions.get(lane, {}).get("allowed")), None)
 
 
@@ -54,7 +54,7 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
         "baseline_slot": baseline,
         "operator_authorized": operator_authorized,
         "lane_tie_priority": list(LANE_TIE_PRIORITY),
-        "tie_break_rule": "discovery/easy wins simultaneous admissibility; no running lane is preempted",
+        "tie_break_rule": "hard research wins simultaneous admissibility; no running lane is preempted",
         "reason": "usage snapshot unavailable; retaining baseline only",
     }
     if not isinstance(payload, dict) or not payload.get("ok"):
@@ -69,7 +69,13 @@ def admission(lane: str, *, now: datetime | None = None, monotonic_now: float | 
     if lane == "hard" and store.runtime().get("easy_running"):
         result.update({
             "mode": "portfolio", "allowed": False,
-            "reason": "discovery lane is already running; it wins simultaneous admissibility without preemption",
+            "reason": "discovery lane is already running; it is allowed to finish without preemption",
+        })
+        return result
+    if lane == "easy" and store.runtime().get("hard_running"):
+        result.update({
+            "mode": "portfolio", "allowed": False,
+            "reason": "highest-priority hard research is already running; discovery waits without overlap",
         })
         return result
     if operator_authorized:

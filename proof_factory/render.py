@@ -50,7 +50,7 @@ def _badge(status: str) -> str:
 
 
 def _program_label(lane: str | None) -> str:
-    return "Ramsey campaign" if lane == "hard" else "Open-problem program"
+    return "Hard research queue" if lane == "hard" else "Open-problem program"
 
 
 def _problem_tag(problem: dict[str, Any]) -> str:
@@ -93,7 +93,7 @@ def _attempt_row(attempt: dict[str, Any], problem: dict[str, Any], reviews: list
 
 def _lane_card(lane: str, payload: dict[str, Any]) -> str:
     running = payload.get("status") == "running"
-    title = payload.get("running_problem_title") or ("Ramsey number R(5,5)" if lane == "hard" else "Discovery queue")
+    title = payload.get("running_problem_title") or ("Exact-problem queue" if lane == "hard" else "Discovery queue")
     status = "Running now" if running else "Between runs"
     detail = "Research pass in progress" if running else "Next dispatch scheduled"
     return f"""
@@ -669,7 +669,7 @@ SITE_JS = r"""
     progress: "Progress", no_progress: "No progress", failed: "Failed route", error: "Error",
     candidate: "Candidate — review needed", internal_result: "Internal result", verified: "Verified", published: "Public research note"
   };
-  const programLabels = {hard: "Ramsey campaign", easy: "Open-problem program"};
+  const programLabels = {hard: "Hard research queue", easy: "Open-problem program"};
   const renderBlockers = blockers => {
     const existing = document.querySelector("[data-operational-blockers]");
     if (!blockers?.length) { existing?.remove(); return; }
@@ -714,7 +714,7 @@ SITE_JS = r"""
     const status = card.querySelector('[data-role="status"]');
     status.textContent = running ? "Running now" : "Between runs";
     status.classList.toggle("is-live", running);
-    card.querySelector('[data-role="title"]').textContent = payload.running_problem_title || (lane === "hard" ? "Ramsey number R(5,5)" : "Discovery queue");
+    card.querySelector('[data-role="title"]').textContent = payload.running_problem_title || (lane === "hard" ? "Exact-problem queue" : "Discovery queue");
     card.querySelector('[data-role="detail"]').textContent = running ? "Research pass in progress" : "Next dispatch scheduled";
     card.querySelector('[data-role="current-clock"]').dataset.startedAt = payload.started_at || "";
     card.querySelector('[data-role="next-clock"]').dataset.nextAt = payload.next_at || "";

@@ -1,5 +1,5 @@
 [Unit]
-Description=Proof Factory - event-gated R(5,5) evidence review
+Description=Proof Factory - event-gated hard-research evidence review
 After=network-online.target
 Wants=network-online.target
 

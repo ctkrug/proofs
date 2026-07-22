@@ -59,6 +59,24 @@ class ResearchEventTests(unittest.TestCase):
                 self.assertEqual([row["id"] for row in consumed], [first["id"]])
                 self.assertEqual([row["id"] for row in events.pending("p")], [second["id"]])
 
+    def test_consume_job_uses_exact_job_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); data = root / "data"; data.mkdir()
+            problems = data / "problems.json"
+            problems.write_text(json.dumps([{"id": "p"}]))
+            with patch.multiple(store, ROOT=root, DATA=data, STATE=root / "state", PROBLEMS_FILE=problems):
+                exact = events.enqueue(
+                    "p", "lab_segment_completed", evidence="exact",
+                    source="state/labs/jobs/job-reviewed.json",
+                )
+                prefix = events.enqueue(
+                    "p", "lab_completed", evidence="prefix",
+                    source="state/labs/jobs/job-reviewed-10.json",
+                )
+                consumed = events.consume_job("p", "job-reviewed", "review-1")
+                self.assertEqual([row["id"] for row in consumed], [exact["id"]])
+                self.assertEqual([row["id"] for row in events.pending("p")], [prefix["id"]])
+
 
 if __name__ == "__main__":
     unittest.main()
