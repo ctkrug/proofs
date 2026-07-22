@@ -1226,6 +1226,68 @@ class ProofFactoryTests(unittest.TestCase):
             self.assertEqual(result["status"], "deferred")
             self.assertTrue(queued_file.exists())
 
+    def test_synced_c1264_sequential_job_registers_before_segment_execution(self) -> None:
+        """A repository-synced queue spec must not require submitter-local state."""
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); data = root / "data"; research = root / "research"; state = root / "state"
+            data.mkdir(); (data / "problems.json").write_text(json.dumps([{"id": "covering-c1264"}]))
+            workspace = research / "covering-c1264" / "workspace"
+            script = workspace / "scripts" / "run_sequential_frontier_sweep.py"
+            manifest = workspace / "artifacts" / "experiments" / "sequential-open-frontier-32-v5-20260722" / "manifest.json"
+            script.parent.mkdir(parents=True); manifest.parent.mkdir(parents=True)
+            script.write_text("# exact C(12,6,4) sequential sweep job type\n")
+            manifest.write_text(json.dumps({"expected_leaf_count": 32, "seconds_per_run": 60}))
+            checkpoint = workspace / "artifacts" / "sequential-frontier-sweep" / "sequential-open-frontier-32-v5-20260722" / "checkpoint.json"
+            progress = checkpoint.with_name("progress.json")
+            efficiency = {
+                "naive_cost": "all 47 leaves", "opportunities_considered": ["exclude closures", "ordered leaves", "bounded checkpoints"],
+                "chosen_reductions": "exact 32-node manifest in eight-leaf segments", "expected_throughput_gain": "avoid 15 reruns",
+                "soundness_basis": "hash-bound manifest and replayed proofs", "remains_uncompressed": "32 independent leaves",
+            }
+            command = [
+                "python3", "scripts/run_sequential_frontier_sweep.py", "--manifest",
+                "artifacts/experiments/sequential-open-frontier-32-v5-20260722/manifest.json",
+                "--run-id", "sequential-open-frontier-32-v5-20260722", "--checkpoint",
+                "artifacts/sequential-frontier-sweep/sequential-open-frontier-32-v5-20260722/checkpoint.json",
+                "--progress", "artifacts/sequential-frontier-sweep/sequential-open-frontier-32-v5-20260722/progress.json",
+                "--units-per-invocation", "8",
+            ]
+
+            def execute_after_registration(*args, **kwargs):
+                registered = lab._read_state("lab-covering-c1264-registration-regression")
+                self.assertEqual(registered["registration_recovery"]["status"], "reconstructed_from_canonical_queue_spec")
+                checkpoint.parent.mkdir(parents=True, exist_ok=True)
+                checkpoint.write_text(json.dumps({"completed": ["t-1--sequential"]}))
+                progress.write_text(json.dumps({
+                    "completed_units": 1, "total_units": 32, "complete": False,
+                    "correctness_checks_passed": True, "decision_value_active": True,
+                    "artifact_bytes": checkpoint.stat().st_size,
+                }))
+                return subprocess.CompletedProcess([], 0, "segment started", ""), ""
+
+            with patch.multiple(
+                store, ROOT=root, DATA=data, RESEARCH=research, STATE=state,
+                PROBLEMS_FILE=data / "problems.json", ATTEMPTS_FILE=data / "attempts.jsonl",
+            ), patch.object(capacity, "admission", return_value={"allowed": True}), \
+                    patch.object(lab.repositories, "record_lab", return_value={}), \
+                    patch.object(lab, "_run_monitored_segment", side_effect=execute_after_registration):
+                submitted = lab.submit({
+                    "id": "lab-covering-c1264-registration-regression", "problem_id": "covering-c1264",
+                    "name": "Audited five-orbit sequential harvest over 32 open nodes",
+                    "hypothesis": "the exact 32-node sweep starts", "expected_signal": "checkpoint records progress",
+                    "decision_value": "distinguishes orchestration from solver hardness", "efficiency_design": efficiency,
+                    "command": command, "segment_seconds": 1200, "memory_mb": 4096, "max_segments": 4,
+                    "pilot_segments": 1, "review_every_segments": 1,
+                    "checkpoint_path": checkpoint.relative_to(workspace).as_posix(),
+                    "progress_path": progress.relative_to(workspace).as_posix(),
+                    "continuation_thresholds": {"min_throughput_per_second": 0.002, "max_artifact_growth_bytes": 10_000_000_000, "require_correctness_checks": True},
+                })
+                lab._state_path(submitted["id"]).unlink()  # Simulate repository sync to a fresh worker host.
+                result = lab.worker_once()
+            self.assertEqual(result["status"], "completed_awaiting_review")
+            self.assertTrue(result["checkpoint_exists"])
+            self.assertEqual(result["progress"]["completed_units"], 1.0)
+
     def test_usage_policy_enforces_elapsed_week_and_baseline(self) -> None:
         now = datetime(2026, 7, 20, 2, 0, tzinfo=timezone.utc)
         clock = now.timestamp()

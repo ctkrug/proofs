@@ -129,6 +129,40 @@ def _write_state(state: dict[str, Any]) -> None:
     store.write_json_atomic(_state_path(str(state["id"])), state)
 
 
+def _read_or_register_queued_state(spec: dict[str, Any], *, source: Path) -> dict[str, Any]:
+    """Resolve state, recovering the cross-host queue projection when necessary.
+
+    Queue specs live in problem repositories and may arrive on a worker through
+    repository sync, while the operational state registry is intentionally
+    host-local.  The persisted spec has already passed current-schema,
+    canonical-form, and spec-hash validation before this function is called.
+    """
+    job_id = str(spec["id"])
+    try:
+        return _read_state(job_id)
+    except ValueError as exc:
+        if str(exc) != f"unknown lab job: {job_id}":
+            raise
+    recovered_at = store.now_iso()
+    state = {
+        **spec,
+        "status": "queued",
+        "segments": [],
+        "last_reviewed_segment": 0,
+        "created_at": recovered_at,
+        "registration_recovery": {
+            "status": "reconstructed_from_canonical_queue_spec",
+            "recorded_at": recovered_at,
+            "queue_spec_path": str(source),
+            "queue_spec_sha256": _sha256(source),
+            "spec_sha256": spec["spec_sha256"],
+            "reason": "queue spec arrived through repository sync without host-local operational state",
+        },
+    }
+    _write_state(state)
+    return _read_state(job_id)
+
+
 def _git_commit(workspace: Path) -> str:
     proc = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=workspace, text=True, capture_output=True, timeout=20,
@@ -845,7 +879,7 @@ def worker_once() -> dict[str, Any]:
         try:
             spec = _load_persisted_spec(running, source_path=source)
             workspace = _workspace(spec["problem_id"])
-            state = _read_state(spec["id"])
+            state = _read_or_register_queued_state(spec, source=running)
             _verify_immutable_inputs(spec, workspace, state)
             if state.get("status") not in {"queued", "checkpointed"}:
                 raise schemas.SchemaError(
