@@ -161,6 +161,18 @@
     {
       "problem_id": "leanbridge-56-totally-positive",
       "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/leanbridge-56-totally-positive/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-superhuman-14-geometry-answer",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "rocq-16807-identref-time-printer",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/rocq-16807-identref-time-printer/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "rocq-18136-rewrite-strategy-warning",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/rocq-18136-rewrite-strategy-warning/workspace: merge: origin/main - not something we can merge"
     }
   ],
   "projection_retry": {
