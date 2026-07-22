@@ -184,7 +184,7 @@
     },
     {
       "problem_id": "deepmind-synthid-text-26-device-guard",
-      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace: merge: origin/main - not something we can merge"
+      "error": "RuntimeError: working tree is dirty for deepmind-synthid-text-26-device-guard; refusing repository sync"
     },
     {
       "problem_id": "deepmind-alphageometry-32-cc-tangent0",

@@ -1,0 +1,40 @@
+{
+  "schema_version": 5,
+  "problem_id": "deepmind-synthid-text-26-device-guard",
+  "objective": "In `BayesianDetector.train_best_detector`, reject unsupported CPU training by changing the device condition from `torch_device.type in (\"cuda\", \"tpu\")` to `not in`, and add focused CPU-reject and accelerator-accept regression tests without requiring physical accelerator hardware.",
+  "completion_criteria": [
+    "Mock the downstream training work and assert that a CPU device raises the documented error while CUDA and TPU device types pass the guard. Run the detector's focused tests and verify the condition agrees with its error message."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-22T21:30:11.870180+00:00",
+  "baseline_review": {
+    "status": "required",
+    "reviewed_at": null,
+    "source_attempt_id": null,
+    "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
+  },
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A review-ready patch against upstream addb4a1 changes `in` to `not in` and adds focused CPU rejection plus CUDA/TPU acceptance regressions. The exact-method suite passes 3/3, pristine behavior shows the inverse outcomes, the independent checker passes, and the patch applies cleanly to the pristine index. The full ML dependency suite and hardware training were not run.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": [
+    "deepmind-synthid-text-26-device-guard-20260722-213011-ecd7fd"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "",
+    "failure_signatures": [],
+    "reusable_assets": [],
+    "constraints_learned": [],
+    "decision_history": [],
+    "reduction_ledger": [],
+    "prior_art_decisions": []
+  }
+}
