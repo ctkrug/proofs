@@ -900,7 +900,8 @@ SITE_JS = r"""
     const attemptId = panel.dataset.attemptId;
     const setStatus = (message, error = false) => { status.textContent = message; status.classList.toggle("is-error", error); };
     const poll = async () => {
-      for (let count = 0; count < 30; count += 1) {
+      // Cloudflare KV may serve a regional value for up to a minute after the server updates it.
+      for (let count = 0; count < 45; count += 1) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         const response = await fetch(`/api/reviews/status?attempt_id=${encodeURIComponent(attemptId)}`, {cache:"no-store"});
         if (!response.ok) continue;
