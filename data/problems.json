@@ -1178,7 +1178,12 @@
     "accepted_result": false,
     "added_at": "2026-07-22T15:39:30Z",
     "source_checked_at": "2026-07-22T15:39:30Z",
-    "intake_source": "independent recognized-repository audit"
+    "intake_source": "independent recognized-repository audit",
+    "campaign_state": "superseded",
+    "campaign_started_at": "2026-07-22T18:12:04.309162+00:00",
+    "campaign_start_research_attempt_count": 0,
+    "campaign_min_runs": 25,
+    "campaign_decision": "superseded by a newer persisted campaign"
   },
   {
     "id": "rocq-16807-identref-time-printer",
@@ -1323,15 +1328,27 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "active",
     "automation_eligible": true,
     "priority": 96,
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
-    "intake_source": "independent Google DeepMind repository audit"
+    "intake_source": "independent Google DeepMind repository audit",
+    "campaign_state": "active",
+    "campaign_started_at": "2026-07-22T18:13:16.340464+00:00",
+    "campaign_start_research_attempt_count": 0,
+    "campaign_min_runs": 25,
+    "campaign_decision": "continue through run 25",
+    "last_attempt_at": "2026-07-22T18:29:13.598811+00:00",
+    "campaign_last_assessment": {
+      "attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-182913-37098e",
+      "decision": "continue",
+      "close_signal": "A hash-bound patch applicable to e37bc994 passes a focused repository regression and a separate deterministic checker, while baseline and partial controls fail.",
+      "reason": "Run 1 completed the bounded technical contribution; the next bounded pass has a concrete path through human review and upstream submission."
+    }
   },
   {
     "id": "deepmind-distrax-337-hmm-padding",
