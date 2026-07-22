@@ -24,6 +24,13 @@
       "commit": "0f75ab9da456a2fe10d7906a3b374ca7de7ff59a"
     },
     {
+      "problem_id": "covering-c1264",
+      "repository": "ctkrug/proofs-covering-c1264",
+      "url": "https://github.com/ctkrug/proofs-covering-c1264",
+      "visibility": "PUBLIC",
+      "commit": "5a8dd0ec77d208c183cb0ea7f021c4c2cc252c89"
+    },
+    {
       "problem_id": "erdos-647",
       "repository": "ctkrug/proofs-erdos-647",
       "url": "https://github.com/ctkrug/proofs-erdos-647",
