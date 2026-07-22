@@ -484,6 +484,11 @@ def _gh(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     return proc
 
 
+def _same_github_remote(left: str, right: str) -> bool:
+    """Treat GitHub's web URL and Git's conventional .git form as the same remote."""
+    return left.strip().removesuffix(".git") == right.strip().removesuffix(".git")
+
+
 def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
     repo_info = ensure(problem)
     repo = Path(repo_info["path"])
@@ -506,7 +511,7 @@ def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError(f"repository did not become public: {full_name}")
     url = str(remote["url"])
     existing = _git(repo, "remote", "get-url", "origin", check=False)
-    if existing.returncode == 0 and existing.stdout.strip() != url:
+    if existing.returncode == 0 and not _same_github_remote(existing.stdout, url):
         raise RuntimeError(f"origin already points elsewhere for {problem['id']}: {existing.stdout.strip()}")
     if existing.returncode != 0:
         _git(repo, "remote", "add", "origin", url)

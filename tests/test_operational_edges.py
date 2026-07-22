@@ -51,6 +51,27 @@ class RepositorySyncTests(unittest.TestCase):
         self.assertIn(call(repo, "push", "--set-upstream", "origin", "main"), git.call_args_list)
         self.assertNotIn(call(repo, "remote", "add", "origin", self.remote_url), git.call_args_list)
 
+    def test_dot_git_suffix_is_a_matching_origin(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+
+            def fake_git(_repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+                if args == ("remote", "get-url", "origin"):
+                    return _completed(args, stdout=f"{self.remote_url}.git\n")
+                if args == ("rev-parse", "HEAD"):
+                    return _completed(args, stdout="b" * 40 + "\n")
+                return _completed(args)
+
+            with patch.object(repositories, "ensure", return_value={"path": str(repo)}), \
+                    patch.object(repositories, "_gh", return_value=_completed(
+                        ["gh"], stdout=json.dumps({"url": self.remote_url, "visibility": "PUBLIC"}),
+                    )), patch.object(repositories, "_git", side_effect=fake_git) as git:
+                result = repositories._sync_problem(self.problem)
+
+        self.assertEqual(result["commit"], "b" * 40)
+        self.assertIn(call(repo, "push", "--set-upstream", "origin", "main"), git.call_args_list)
+        self.assertNotIn(call(repo, "remote", "add", "origin", self.remote_url), git.call_args_list)
+
     def test_absent_repository_is_created_then_remote_added_and_pushed(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             repo = Path(raw)

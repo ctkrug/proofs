@@ -7,6 +7,14 @@ sent, and no technical research epoch, result outreach, or public claim has begu
 
 **Recommendation:** Make the exact covering number \(C(12,6,4)\) the first successor baseline. Its maintained live bracket is \(40\le C(12,6,4)\le41\), so either a 40-block witness or a certified exclusion of 40 is decisive.
 
+**Post-pilot update (2026-07-22):** Charlie approved and started this successor after the R(5,5)
+completion gate. Direct shallow cubing missed its continuation threshold, while the link-first route
+has four audited link orbits, four residual exclusions, 189 replay-validated proof receipts, and 47
+open canonical frontier nodes. The current strategic range is **70–85% for a field-usable contribution**
+and **45–65% for exact resolution** within 90 days. These are judgment ranges, not calibrated
+probabilities. No exact-value claim is made. The pre-pilot estimates below are retained as the dated
+decision baseline rather than silently rewritten.
+
 ## Executive judgment
 
 The easier-hard review changes the recommendation. The best balanced 90-day target is now the exact covering-design problem

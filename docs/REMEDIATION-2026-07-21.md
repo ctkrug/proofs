@@ -244,6 +244,14 @@ new durable lab-state requirement; it is not reused or rewritten.
   authorization excludes the target from scheduling. `human_approved` remains reserved for result/
   publication approval and is not reused.
 
+The successor gate has now run. Direct depth-7 cubing closed only 10/128 sampled leaves (7.8125%) and
+was stopped; the link-first route found four exact link orbits and excluded all four residual extensions.
+Primary, secondary, and one tertiary canonical partition now carry 189 replay-validated external proofs
+with 47 canonical frontier nodes still open. This raises the judgment range for a field-usable 90-day
+contribution to 70–85% and exact resolution to 45–65%; neither is a calibrated probability. The campaign
+is active, but no exact value is claimed, and a global negative result still needs complete frontier
+coverage plus a second independently validated cardinality translation.
+
 The reusable design guidelines now encode this ease-first policy and permit parallel source review,
 adversarial audit, independent checker construction, documentation, and packet tooling while serializing
 shared ledgers, deployments, final assembly, and CPU/cache-conflicting computation.

@@ -118,6 +118,17 @@ Every completed segment emits a durable event. The lifecycle is `running`, `chec
 distinction. A later reviewer reads the recorded state and artifacts and chooses `continue`, `validate`,
 `promote`, or `redirect`. Completion never depends on a model being scheduled at that instant.
 
+Separate portable evidence from the hot artifact cache. Version compact source constraints, exact commands,
+partitions, semantic audits, proof-validation receipts, and a hash manifest. Keep large reproducible CNFs,
+proof streams, and raw solver logs in a capacity-managed local or object-store cache. A receipt must bind the
+omitted bytes by size and cryptographic hash and state how to regenerate or retrieve them. Never duplicate a
+multi-gigabyte cache onto the orchestration host merely to make a dashboard complete.
+
+When a canonical frontier develops a hard tail, compare bounded alternatives on the same matched cases before
+raising timeouts globally. At minimum consider another stabilizer/canonical layer and an incremental
+assumptions-based run that reuses the parent formula and learned clauses. Promote only the route whose measured
+closure, proof growth, and independently checkable coverage clear the predeclared gate.
+
 ## 5. Validate evidence before updating research memory
 
 An attempt is not durable progress until an evidence validator accepts it. Each attempt receives an

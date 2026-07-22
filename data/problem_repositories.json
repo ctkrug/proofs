@@ -24,6 +24,13 @@
       "commit": "db8a19c48ec1c305ba649e0de0daa87581f14427"
     },
     {
+      "problem_id": "covering-c1264",
+      "repository": "ctkrug/proofs-covering-c1264",
+      "url": "https://github.com/ctkrug/proofs-covering-c1264",
+      "visibility": "PUBLIC",
+      "commit": "e20d09cc6bda3dbba844bbe21b52d8eab5ef46b1"
+    },
+    {
       "problem_id": "erdos-647",
       "repository": "ctkrug/proofs-erdos-647",
       "url": "https://github.com/ctkrug/proofs-erdos-647",
@@ -129,12 +136,7 @@
       "commit": "c7c42f1ef0e6b9dafb22bccd64789ba28c53311e"
     }
   ],
-  "errors": [
-    {
-      "problem_id": "covering-c1264",
-      "error": "RuntimeError: origin already points elsewhere for covering-c1264: https://github.com/ctkrug/proofs-covering-c1264.git"
-    }
-  ],
+  "errors": [],
   "projection_retry": {
     "retried": 0,
     "remaining": 0,

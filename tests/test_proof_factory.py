@@ -39,7 +39,7 @@ class ProofFactoryTests(unittest.TestCase):
         packet = briefing.compact_for_prompt(problem)
         decoded = json.loads(packet)
         self.assertLessEqual(len(packet), 24000)
-        self.assertEqual(decoded["tactics"]["incumbent"]["fingerprint"], "r55knownclassembeddingblock2026")
+        self.assertEqual(decoded["tactics"]["incumbent"]["fingerprint"], "r55tworbitproofcompress2026")
         prompt = agent.build_prompt(problem, "hard", store.RESEARCH / problem["id"] / "workspace", phase="research")
         self.assertLessEqual(len(prompt), 50000)
         self.assertIn("deliberately invalidates the", prompt)
@@ -60,7 +60,7 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_initial_lane_selection(self) -> None:
         problems = store.load_problems()
-        self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "ramsey-r55")
+        self.assertEqual(scheduler.choose_problem("hard", problems)["id"], "covering-c1264")
         frontier = [
             {"id": "easy-first", "lane": "easy", "status": "queued", "difficulty": 4, "research_attempt_count": 0},
             {"id": "easy-next", "lane": "easy", "status": "queued", "difficulty": 6, "research_attempt_count": 0},
