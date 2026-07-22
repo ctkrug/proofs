@@ -3,39 +3,11 @@
   "visibility_policy": "public-research-history",
   "repositories": [
     {
-      "problem_id": "jacobian-2026-reproduction",
-      "repository": "ctkrug/proofs-jacobian-2026-reproduction",
-      "url": "https://github.com/ctkrug/proofs-jacobian-2026-reproduction",
-      "visibility": "PUBLIC",
-      "commit": "e1cc95785d741e6aa8bc3fabade333362ffbd864"
-    },
-    {
-      "problem_id": "erdos-242",
-      "repository": "ctkrug/proofs-erdos-242",
-      "url": "https://github.com/ctkrug/proofs-erdos-242",
-      "visibility": "PUBLIC",
-      "commit": "f0510569340787bb331db1f18c699c6e1c7498ed"
-    },
-    {
       "problem_id": "ramsey-r55",
       "repository": "ctkrug/proofs-ramsey-r55",
       "url": "https://github.com/ctkrug/proofs-ramsey-r55",
       "visibility": "PUBLIC",
       "commit": "db8a19c48ec1c305ba649e0de0daa87581f14427"
-    },
-    {
-      "problem_id": "covering-c1264",
-      "repository": "ctkrug/proofs-covering-c1264",
-      "url": "https://github.com/ctkrug/proofs-covering-c1264",
-      "visibility": "PUBLIC",
-      "commit": "af62e5946d767f984e854143402bb708b081a1e9"
-    },
-    {
-      "problem_id": "erdos-647",
-      "repository": "ctkrug/proofs-erdos-647",
-      "url": "https://github.com/ctkrug/proofs-erdos-647",
-      "visibility": "PUBLIC",
-      "commit": "d4ae4180a8f813472be3bd95e120120b8582b427"
     },
     {
       "problem_id": "erdos-307",
@@ -108,25 +80,11 @@
       "commit": "5b1f50244d794772c0a469a8966e13543be63bb5"
     },
     {
-      "problem_id": "erdos-398",
-      "repository": "ctkrug/proofs-erdos-398",
-      "url": "https://github.com/ctkrug/proofs-erdos-398",
-      "visibility": "PUBLIC",
-      "commit": "e02f75297b431349a362be7ad0ab3ed1f8e0af90"
-    },
-    {
       "problem_id": "formal-conjectures-3688",
       "repository": "ctkrug/proofs-formal-conjectures-3688",
       "url": "https://github.com/ctkrug/proofs-formal-conjectures-3688",
       "visibility": "PUBLIC",
       "commit": "7262f54d43d6a75edc38bbd64043dee3b6f3968d"
-    },
-    {
-      "problem_id": "scout-bdf77f43574b",
-      "repository": "ctkrug/proofs-scout-bdf77f43574b",
-      "url": "https://github.com/ctkrug/proofs-scout-bdf77f43574b",
-      "visibility": "PUBLIC",
-      "commit": "a3ecf7b83a2315e50683f953dc29604d00e34cca"
     },
     {
       "problem_id": "scout-1b950f384759",
@@ -136,7 +94,32 @@
       "commit": "c7c42f1ef0e6b9dafb22bccd64789ba28c53311e"
     }
   ],
-  "errors": [],
+  "errors": [
+    {
+      "problem_id": "jacobian-2026-reproduction",
+      "error": "RuntimeError: working tree is dirty for jacobian-2026-reproduction; refusing repository sync"
+    },
+    {
+      "problem_id": "erdos-242",
+      "error": "RuntimeError: working tree is dirty for erdos-242; refusing repository sync"
+    },
+    {
+      "problem_id": "covering-c1264",
+      "error": "RuntimeError: working tree is dirty for covering-c1264; refusing repository sync"
+    },
+    {
+      "problem_id": "erdos-647",
+      "error": "RuntimeError: working tree is dirty for erdos-647; refusing repository sync"
+    },
+    {
+      "problem_id": "erdos-398",
+      "error": "RuntimeError: working tree is dirty for erdos-398; refusing repository sync"
+    },
+    {
+      "problem_id": "scout-bdf77f43574b",
+      "error": "RuntimeError: working tree is dirty for scout-bdf77f43574b; refusing repository sync"
+    }
+  ],
   "projection_retry": {
     "retried": 0,
     "remaining": 0,
