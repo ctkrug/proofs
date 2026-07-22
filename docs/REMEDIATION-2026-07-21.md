@@ -186,21 +186,50 @@ filesystems, produce the pinned support OLean from a clean/hash-matching checkou
 is valid. The superseded hand-written #530 queue spec correctly failed closed as an unknown job after the
 new durable lab-state requirement; it is not reused or rewritten.
 
+## Phase 5 — R(5,5) decisive supplied-corpus boundary (active monitored continuation)
+
+- Full v2 preserved 254 canonical hosts with exact bitset/NetworkX stream agreement, then correctly
+  stopped at segment 255 when `source_record_255` exceeded the predeclared 30-second aggregate host
+  gate. The segment used about 54 MiB child memory; the service's earlier peak was about 105 MiB with
+  no service swap. Root retained 16 GiB and the research volume 26 GiB, so this was an algorithmic
+  timing gate, not a CPU, memory, disk, swap, systemd, or restart failure.
+- All 254 manifest rows, gzip packets, artifact hashes, checkpoint rows, and sequential indices were
+  independently rechecked. The stopped v2 checkpoint, progress, and manifest hashes remain
+  `12dd99da...d2332`, `ec8f949e...71629`, and `50946975...fff95`; the timer polled the stopped job and
+  did not silently resume it.
+- A new hash-locked cap-60 wrapper, exact prefix-copy auditor, mixed 30/60 final validator, and
+  residual-SAT producer/cold auditor were implemented with 25 focused positive/adversarial tests. The
+  original job was never continued or rewritten.
+- The isolated one-host calibration `lab-ramsey-r55-99d6e467cd79` copied the frozen prefix to a new
+  path. Host 254 finished in 21.617 seconds (3.516 bitset + 18.101 NetworkX), below the predeclared
+  45-second continuation threshold, with exact stream agreement and no change to the stopped v2 hashes.
+- The calibration exposed a lifecycle accounting defect: a newly submitted resumed job measured its
+  first delta from zero instead of from the imported progress record. New jobs now bind an engine-
+  generated progress baseline into the immutable spec and measure first-segment throughput/artifact
+  growth from it. Mutable checkpoint/progress paths are opt-in exact argv paths with starting hashes,
+  per-segment before/after chains, reboot recovery receipts, and explicit immutable coverage for all
+  other file arguments. The engine passes 166 local tests plus 17 subtests; production passes 141
+  engine tests, all 25 R55 tests, configuration validation, and `doctor`.
+- New job `lab-ramsey-r55-868014a68d6e` imported the verified 255-host prefix. Its lifecycle pilot
+  advanced exactly one host at 0.0454 hosts/second with exact agreement and 4.5 KiB measured growth.
+  The durable operator review continued the remaining 400 one-host segments under 120-second/1,000 MiB
+  per-segment limits, a 60-second host cap, a 0.015-host/second threshold, and a 64 MiB growth gate. It
+  is monitored and checkpointed; no same-family or residual-SAT work can consume a partial manifest.
+
 ## Phase 6 — easier-hard successor selection (prepared in parallel; execution gated)
 
 - The successor criterion now prefers the smallest meaningful finite uncertainty with two decisive,
-  independently checkable outcomes over the most prestigious frontier. Eleven current exact, record,
-  and certification targets were compared on novelty, 90-day contribution odds, certificate cost,
-  acceptance path, and measured-compute fit. The probabilities are explicit strategic judgments, not
-  measured frequencies.
+  independently checkable outcomes over the most prestigious frontier. Six exact covering targets were
+  verified against their maintained parameter pages and current-improvements feed; `R(3,10)` and the
+  five-dimensional kissing number were retained only as harder negative calibration points.
 - Exact covering number `C(12,6,4)` replaces cage `n(4,9)` as the recommendation. The maintained live
   bracket is `40 <= C(12,6,4) <= 41`; there are 924 candidate blocks and 495 coverage constraints. At a
   hypothetical size 40, every point has degree exactly 20 and the 66 pairs share only six excess
   incidences above multiplicity nine. A 40-block witness or a complete independently checked exclusion
   of 40 therefore resolves the same exact target.
-- The 90-day field-usable-contribution estimate is 62% for `C(12,6,4)`, compared with 14% for a new
-  `n(4,9)` cage contribution. The compact covering-record portfolio and a reusable Lean covering-design
-  verifier are ranked second and third but are less decisive or are not new mathematics.
+- The lead's honest pre-pilot estimate is a 45–70% judgment range with roughly 60% as the planning
+  midpoint. Its factor table separates status/duplication, technical tractability, independent
+  verification, and external usefulness; the number must be replaced after alignment and pilot evidence.
 - The only authorized first computation is a 1–4 core-hour, dual-encoding pilot after Phase 5 closes:
   direct set-cover SAT/PB with exact degree and pair constraints, plus a materially separate link-first
   canonical augmentation. Positive output needs a tiny non-importing checker; negative output needs an
@@ -209,7 +238,46 @@ new durable lab-state requirement; it is not reused or rewritten.
   envelope, acceptance channels, and redirect conditions. No successor search has started. The Charlie
   decision task remains deliberately unqueued until the current R(5,5) census and residual-SAT gate are
   complete, as required by the directive.
+- Automated dispatch now fails closed on a distinct `research_authorization` object. It requires
+  Charlie's identity, timestamp, exact scope, a predecessor machine-state predicate, and the SHA-256 of
+  the independently validated completion receipt. Missing, malformed, incomplete, or hash-mismatched
+  authorization excludes the target from scheduling. `human_approved` remains reserved for result/
+  publication approval and is not reused.
 
 The reusable design guidelines now encode this ease-first policy and permit parallel source review,
 adversarial audit, independent checker construction, documentation, and packet tooling while serializing
 shared ledgers, deployments, final assembly, and CPU/cache-conflicting computation.
+
+## Phase 7 — outreach preparation (drafted; all sending remains Charlie-gated)
+
+- `docs/R55-OUTREACH-DRAFTS-2026-07-21.md` contains short, non-claiming drafts for Thibault Gauthier,
+  John Mackey/CMU, and BigCompute. The first two addresses were source-checked; BigCompute retains only
+  its confirmed public maintainer channel because no reliable email was found.
+- The R55 repo now has an allowlist-only deterministic packet builder and three-packet specification.
+  It rejects symlinks, untracked inputs, path traversal, dirty/spec drift, and missing replay hooks;
+  emits a SHA-256 manifest and explicit nonclaims; and rechecks a detached clean clone. Eight packet
+  tests pass. The final packet remains intentionally absent until the census and residual discriminator
+  reach their independently validated terminal scope.
+- No email, repository submission, social post, or public result claim was sent. The urgent Charlie
+  send task will be registered only when the referenced final packet exists and hash-verifies.
+
+## Phase 8 — lifecycle and evidence engineering debt
+
+- Principal result parsing, error stubs, attempt projection, and truncation now share one schema-driven
+  field table. Strict JSON rejects duplicate keys and non-finite numbers; URL and Boolean gates no longer
+  coerce malformed values.
+- Attempt append, problem projection, and discovery-campaign transitions are separated and covered by
+  focused minimum-run, close-signal, and hold-review tests. Repository projection failures journal atomic
+  retry receipts; legacy JSONL entries migrate without silently discarding malformed or pending work.
+- Rendered pages use default-escaped templates with smoke coverage. Configuration is typed and service-
+  scoped through one checked-in environment file; systemd units validate only the profile they consume.
+- Research-state, lab, evidence, and contribution-gate loaders explicitly migrate supported versions or
+  fail loudly. Lab validate/promote requires a distinct completed validation job, exact checker/input
+  hashes, execution record, stdout/result hashes, and a fresh final-artifact rehash. Automated models may
+  recommend but cannot apply validate/promote.
+- Lab state parsing, threshold arithmetic, mutable checkpoint chains, live root/artifact-growth monitors,
+  event/job matching, and stopped-job continuation all fail closed. A completed segment publishes its next
+  executable spec only after state, append-only ledger, repository receipt, and completion event are durable.
+- The hardened engine was deployed from Git revision `17337be`; production engine tests, R55 tests, all
+  configuration profiles, systemd timer state, and `doctor` pass. The live-only automated projection commit
+  was preserved, rebased, pushed, and then refreshed to the current R55 repository revision.

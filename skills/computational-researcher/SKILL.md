@@ -21,6 +21,14 @@ Prefer, in order:
 
 Reject targets whose status is ambiguous, whose only verifier is another LLM, whose compute would merely repeat a stronger known bound, or whose publication venue would view the work as automated spam.
 
+When choosing a flagship successor, prefer an easier hard problem: a meaningful finite uncertainty with a
+narrow live gap, decisive outcomes, feasible segmented certificates, and a credible specialist acceptance
+path. Compare at least six source-verified current candidates, keep technical completion, surviving novelty
+review, independent validation, and external usefulness as separate planning probabilities, and replace
+judgment ranges after a measured pilot. Fame never compensates for a wide gap or an uncheckable negative
+result. Do not register or dispatch the successor until its predecessor gate has an independently validated,
+hash-bound completion receipt and the human owner has approved the exact research scope.
+
 ## Run the research loop
 
 1. **Source.** Confirm the exact statement and current status from a primary or maintained authoritative source. Define what would be new.
