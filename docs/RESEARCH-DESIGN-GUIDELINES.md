@@ -118,11 +118,23 @@ Every completed segment emits a durable event. The lifecycle is `running`, `chec
 distinction. A later reviewer reads the recorded state and artifacts and chooses `continue`, `validate`,
 `promote`, or `redirect`. Completion never depends on a model being scheduled at that instant.
 
+Continuous operation means the controller, durable queue, recovery path, and monitors are always available;
+it does not mean keeping a CPU busy when no qualified experiment exists. The worker should drain qualified
+segments continuously, while model-backed reviews remain event-driven and within provider limits. When an
+operator designates a flagship, give its review lane and queued lab jobs priority without preempting an
+already-running bounded segment. Lower-priority work must yield rather than overlap a memory-, CPU-, or
+cache-intensive flagship job.
+
 Separate portable evidence from the hot artifact cache. Version compact source constraints, exact commands,
 partitions, semantic audits, proof-validation receipts, and a hash manifest. Keep large reproducible CNFs,
 proof streams, and raw solver logs in a capacity-managed local or object-store cache. A receipt must bind the
 omitted bytes by size and cryptographic hash and state how to regenerate or retrieve them. Never duplicate a
 multi-gigabyte cache onto the orchestration host merely to make a dashboard complete.
+
+Host-local proof bytes are not disaster recovery. A production campaign must declare whether its decisive
+artifacts are reproducible, mirrored, snapshotted, or stored in a hash-verified off-host object store. Until
+one of those protections is active, dashboards must label the campaign host-loss-vulnerable even when Git
+contains compact manifests and receipts.
 
 When a canonical frontier develops a hard tail, compare bounded alternatives on the same matched cases before
 raising timeouts globally. At minimum consider another stabilizer/canonical layer and an incremental
