@@ -73,6 +73,17 @@ def extract_candidate(text: str) -> dict[str, Any]:
         raise ValueError("upstream_work_check requires a checked_url")
     if not isinstance(work.get("checked_at"), str) or not work["checked_at"].strip():
         raise ValueError("upstream_work_check requires checked_at")
+    recognition = value.get("repository_recognition")
+    if not isinstance(recognition, dict):
+        raise ValueError("candidate requires repository_recognition")
+    stars = int(recognition.get("stars") or 0)
+    recognized = recognition.get("recognized_academic_or_industry") is True
+    if stars < 100 and not recognized:
+        raise ValueError("repository must have at least 100 stars or recognized academic/industry provenance")
+    if not isinstance(recognition.get("evidence_url"), str) or not recognition["evidence_url"].startswith(("http://", "https://")):
+        raise ValueError("repository_recognition requires an evidence_url")
+    if not isinstance(recognition.get("evidence"), str) or not recognition["evidence"].strip():
+        raise ValueError("repository_recognition requires evidence")
     return value
 
 
@@ -84,7 +95,8 @@ OPERATING SKILL
 
 NORTH STAR
 Maximize externally verified, net-new scholarly credit per compute and human-review hour. A target
-that is obscure, narrow, or useful to only one specialist is welcome. Fame has almost no value.
+must come from a repository with at least 100 GitHub stars or from a clearly recognized academic or
+industry research project. Within that trusted pool, prefer the smallest independently checkable win.
 
 SOURCE ROUTES
 {json.dumps(sources, indent=2, ensure_ascii=False)}
@@ -102,7 +114,9 @@ RULES
    decisive check is another LLM.
 5. The statement must be exact enough for a new researcher to begin without guessing.
 6. Estimate conservatively. The target will receive an independent status audit during its first run.
-7. End with exactly one JSON object:
+7. Record current repository recognition. Academic/industry provenance below 100 stars needs direct,
+   specific evidence; a self-description, AI-generated issue set, or individual hobby repo is insufficient.
+8. End with exactly one JSON object:
 
 ```contribution_candidate
 {{
@@ -117,6 +131,7 @@ RULES
   "rationale": "why this is unusually tractable and potentially new",
   "external_channel": "specific repository, maintainer, workshop, or journal",
   "external_url": "channel URL",
+  "repository_recognition": {"stars":100,"recognized_academic_or_industry":false,"evidence_url":"repository or institution URL","evidence":"current star count or specific institutional provenance"},
   "upstream_work_check": {{"active_prs":0,"active_claims":0,"issue_comments_checked":true,"same_author_prs_checked":true,"checked_url":"direct issue/PR search URL","checked_at":"ISO date","evidence":"what comments, linked PRs, repository search, and same-author PR search showed"}},
   "estimated_success_probability": 0.01,
   "difficulty": 1,
