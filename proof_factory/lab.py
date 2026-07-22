@@ -1174,7 +1174,13 @@ def apply_review(
     if not str(reason).strip():
         raise ValueError("review reason is required")
     state = _read_state(job_id)
-    if state.get("status") not in {"completed_awaiting_review", "stopped_with_reason"}:
+    current_status = state.get("status")
+    promoting_validated = current_status == "validated" and decision == "promote"
+    if current_status == "validated" and decision != "promote":
+        raise ValueError(f"validated job {job_id} may only be promoted")
+    if promoting_validated and state.get("promotion_requested"):
+        raise ValueError(f"job {job_id} has already been promoted")
+    if current_status not in {"completed_awaiting_review", "stopped_with_reason"} and not promoting_validated:
         raise ValueError(f"job {job_id} is not awaiting review or stopped")
     review = {"decision": decision, "reason": str(reason)[:4000], "reviewer": str(reviewer)[:200],
               "reviewed_at": store.now_iso(), "segment": int(state.get("segment") or 1)}
@@ -1212,7 +1218,11 @@ def apply_review(
         if not state.get("latest_progress", {}).get("complete"):
             raise ValueError("only a complete experiment can be validated or promoted")
         state["status"] = "validated"
-        state["promotion_requested"] = decision == "promote"
+        if decision == "promote":
+            state["promotion_requested"] = True
+            state["promotion_requested_at"] = review["reviewed_at"]
+        else:
+            state["promotion_requested"] = False
     else:
         state["status"] = "stopped_with_reason"
         state["stop_reason"] = str(reason)[:4000]

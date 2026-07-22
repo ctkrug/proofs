@@ -110,8 +110,12 @@ The lower-bound case is unusually rigid and gives strong, independently derivabl
 
 - Each point must occur in at least \(C(11,5,3)=20\) blocks: after fixing a point, its incident blocks must cover every triple on the other 11 points. Forty 6-blocks have 240 point incidences, so every point must occur **exactly 20 times**. The maintained subproblem is recorded at the [LJCR \((11,5,3)\) entry](https://ljcr.dmgordon.org/cover/show_cover.php?v=11&k=5&t=3).
 - Each pair must occur in at least \(C(10,4,2)=9\) blocks: after fixing a pair, the remaining four points of an incident block must cover every pair on the other ten points. The 40 blocks have \(40\binom62=600\) pair incidences, while 66 pairs at multiplicity 9 consume 594. Thus there are only **six excess pair incidences** above the mandatory baseline. See the maintained [LJCR \((10,4,2)\) entry](https://ljcr.dmgordon.org/cover/show_cover.php?v=10&k=4&t=2).
+- For any point \(x\), summing the multiplicities of its 11 incident pairs gives \(5r_x=100\). The mandatory baseline contributes 99, so exactly one pair through \(x\) has multiplicity 10 and all other pairs through \(x\) have multiplicity 9. Consequently the six excess pairs form a perfect matching. Fixing that matching is a sound quotient by all \(12!/(2^6 6!)=10{,}395\) possible perfect matchings; its stabilizer has order \(2^6 6!=46{,}080\).
+- Relative to the fixed matching, let \(r(B)\) count the complete matched pairs in block \(B\). The 40 blocks have \(\sum_B r(B)=60\), so a complete root split needs only two disjoint cases: a canonical \(r=0\) block exists, or no \(r=0\) block exists and a canonical \(r=1\) block exists. The second case is exhaustive because the average is 1.5.
 
 These facts are not optional heuristic assumptions. They must be independently proved in the research record, encoded as redundant sound constraints, and checked against any result.
+
+Block complementation is **not** an automorphism of the covering constraints: a block containing a 4-set is sent to a complementary block disjoint from it. It must not be used for symmetry reduction without a separate proved bridge.
 
 ## First decision gate: two independent bounded pilots
 
@@ -123,25 +127,27 @@ Before a long job, implement and compare two materially different formulations o
 - one coverage constraint for each of the 495 4-subsets;
 - cardinality exactly 40;
 - redundant exact point-degree-20 constraints;
-- pair-multiplicity-at-least-9 constraints plus the six-excess accounting identity;
-- one fixed block and only written, checked orbit/symmetry restrictions;
+- exact pair multiplicity 10 on a fixed perfect matching and 9 on every other pair (these equations already imply both 40 blocks and point degree 20, so benchmark redundant constraints rather than assuming they help);
+- the two exhaustive canonical root cases above, with only written and independently checked orbit restrictions;
 - proof logging for every decisive UNSAT solve.
 
 ### Encoding B: link-first canonical augmentation
 
-Build the block family through point links/pair multiplicities and canonical augmentation, independently checking isomorph rejection and complete orbit coverage. This must not merely translate Encoding A's clauses through the same generator. It should provide a second semantic path to a witness or to a partition of the remaining search.
+Fix a point and its matched partner. The point's 20 incident blocks induce an optimal \((11,5,3)\)-cover whose point degrees are 10 at the matched partner and 9 at each other point. Enumerate these links up to the fixed-matching stabilizer, then solve the exact residual problem of choosing 20 blocks that exclude the fixed point. Independently check isomorph rejection and complete orbit coverage. This must not merely translate Encoding A's clauses through the same generator. Without a checked complete link-orbit manifest, use this route only as a discriminator and retain Encoding A's proof-producing cube tree as the completeness path.
 
 ### Pilot envelope and continuation rule
 
 Run each formulation, or a representative disjoint tranche of each, for a combined **1–4 core-hours** with checkpointing and durable receipts. Continue beyond the pilot only when all of the following hold:
 
-1. both formulations agree on shared bounded cases and direct semantic checks;
-2. measured throughput gives a credible full-run estimate inside the likely 20–250 core-hour range, or a documented hard-tail plan no larger than 1,000 core-hours;
-3. the negative-certificate projection fits the declared 2–30 GB proof-artifact envelope and can be streamed, hashed, resumed, and independently checked;
-4. canonical/orbit reductions have a written soundness basis and independently checked coverage;
-5. no current repository maintainer or author reports the exact case already settled or substantially complete.
+1. known 41-block and smaller-parameter controls pass, including a checked exclusion of eight blocks for \(C(10,4,2)\);
+2. both formulations agree on at least 32 determinate shared-prefix cases, and timeouts are recorded as inconclusive rather than disagreements;
+3. shallow orbit counts match an independent checker and checkpoint replay is byte-identical;
+4. at least 80% of a deterministic stratified sample of at least 128 direct-encoding cubes close within their cap;
+5. measured throughput gives a conservative full-run estimate no larger than 250 core-hours, with a separately reviewed hard-tail ceiling of 1,000 core-hours;
+6. the negative-certificate projection is at most 30 GB and can be streamed, hashed, resumed, and independently checked;
+7. no current repository maintainer or author reports the exact case already settled or substantially complete.
 
-Pause or redirect if correctness checks diverge, proof growth exceeds the envelope, throughput makes the hard tail noncredible, or the output can no longer be made independently checkable. A completed result must persist as completed-awaiting-review even when no reviewer is scheduled.
+If only 20--80% of sampled cubes close, permit one bounded deeper-cubing or encoding-redesign tranche. Pause or redirect on any semantic disagreement, symmetry-coverage or proof-replay failure, proof growth above 30 GB, a post-redesign estimate above 1,000 core-hours, or loss of independent checkability. Any 40-block witness immediately stops exhaustive work and enters dual validation. A completed result must persist as completed-awaiting-review even when no reviewer is scheduled.
 
 ## Resource profile
 

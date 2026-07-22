@@ -746,6 +746,31 @@ class ProofFactoryTests(unittest.TestCase):
                     validation_receipt="validation-receipt.json",
                 )["status"], "validated")
                 self.assertEqual(lab.status("p")["counts"]["validated"], 1)
+                with self.assertRaisesRegex(ValueError, "may only be promoted"):
+                    lab.apply_review(submitted["id"], "redirect", reason="validated result is terminal")
+                with self.assertRaisesRegex(ValueError, "validation receipt"):
+                    lab.apply_review(submitted["id"], "promote", reason="receipt remains mandatory")
+                promoted = lab.apply_review(
+                    submitted["id"], "promote", reason="validated result is ready for operator promotion",
+                    validation_receipt="validation-receipt.json",
+                )
+                self.assertEqual(promoted["status"], "validated")
+                promoted_state = lab._read_state(submitted["id"])
+                self.assertTrue(promoted_state["promotion_requested"])
+                self.assertTrue(store.parse_iso(promoted_state["promotion_requested_at"]))
+                self.assertEqual(
+                    [review["decision"] for review in promoted_state["reviews"][-2:]],
+                    ["validate", "promote"],
+                )
+                self.assertEqual(
+                    promoted_state["reviews"][-1]["validation_receipt_sha256"],
+                    promoted_state["reviews"][-2]["validation_receipt_sha256"],
+                )
+                with self.assertRaisesRegex(ValueError, "already been promoted"):
+                    lab.apply_review(
+                        submitted["id"], "promote", reason="duplicate promotion",
+                        validation_receipt="validation-receipt.json",
+                    )
 
     def test_strategy_lab_requires_executable_sourced_proposal(self) -> None:
         text = '''```strategy_proposal
