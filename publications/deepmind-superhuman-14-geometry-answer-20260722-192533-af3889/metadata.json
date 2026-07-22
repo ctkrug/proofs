@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "title": "Correct the corrupted short answer for IMO AnswerBench geometry problem 004",
+  "problem_id": "deepmind-superhuman-14-geometry-answer",
+  "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+  "contribution_type": "dataset correction",
+  "status": "public-research-note",
+  "peer_reviewed": false,
+  "expert_confirmed": false,
+  "created_at": "2026-07-22T20:31:45.793933+00:00",
+  "creator": "Charlie Krug",
+  "ai_assistance_disclosed": true,
+  "source_url": "https://github.com/google-deepmind/superhuman/issues/14",
+  "claims": [
+    "Against upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, the candidate changes exactly imo-bench-geometry-004 column 3 from 45752 to 4, 5.",
+    "The corrected geometry-004 record parses into exactly six fields.",
+    "imo-bench-number_theory-048 and all other records are unchanged.",
+    "The candidate SHA-256 is a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc.",
+    "The review patch applies cleanly to the pinned upstream commit and produces the same candidate hash."
+  ],
+  "evidence": [
+    "python3 checkers/verify_answerbench_geometry_004.py V1.csv BASELINE_V2.csv imobench/answerbench_v2.csv: PASS",
+    "python3 checkers/check_exact_geometry_004_patch_bytes.py BASELINE_V2.csv imobench/answerbench_v2.csv: PASS",
+    "python3 checkers/test_geometry_004_checkers.py V1.csv BASELINE_V2.csv imobench/answerbench_v2.csv: candidate accepted and four adversarial controls rejected",
+    "git apply --check artifacts/answerbench-v2-geometry-004.patch in a clean upstream checkout: PASS",
+    "Clean-checkout application produced a one-file, one-insertion/one-deletion diff and candidate SHA-256 a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc."
+  ],
+  "independent_checker": "checkers/check_exact_geometry_004_patch_bytes.py is a separately written, parser-independent encoding. It requires exact full-file byte equality after one unique context-bound replacement and passed against the pinned baseline.",
+  "citations": [
+    "https://github.com/google-deepmind/superhuman/issues/14",
+    "https://geometry.ru/olimp/2009/finseng.pdf",
+    "https://github.com/google-deepmind/superhuman/commit/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace",
+    "https://raw.githubusercontent.com/google-deepmind/superhuman/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/answerbench.csv",
+    "https://raw.githubusercontent.com/google-deepmind/superhuman/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/answerbench_v2.csv"
+  ],
+  "artifact_hashes": {
+    "artifacts/.delegates/20260722-191238-4287c7/source-discriminator/memo.md": "62ef0ff2ad8355fa8c2c98b62eb34a468142b69efeca7ec6b54889fd237dda01",
+    "artifacts/.git/objects/82/d906aeea5cd6bb46b392abf37c5a788cee2eab": "08307e6e68e5e8dd32caa4c05290b4086f1d8f1886a2a545e79055a165bd7545",
+    "artifacts/.git/objects/pack/pack-d3f145e5195751339648177d77d60f498d254e91.idx": "104d2a7d2aac9a6c816bd5b07a4b202710c0a806ae9c697c37fe9893c77be9b5",
+    "artifacts/.git/objects/pack/pack-d3f145e5195751339648177d77d60f498d254e91.pack": "fc3af778275701bdc23b0e622f3212c4053ecabde8525078f69323215c2b21a9",
+    "artifacts/.git/objects/pack/pack-d3f145e5195751339648177d77d60f498d254e91.rev": "5a56d0f85f708ca886b555b219b5520773eefd296f20d6dbb02553d561948ee1",
+    "artifacts/.proof-experiments/20260722-191953-1b9235/experiment.json": "3155443ef5fd0f8dc6c505fa0cecd881349c24adf5e1d3026fae6457e44033a1",
+    "artifacts/.proof-experiments/20260722-191953-1b9235/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-191953-1b9235/stdout.txt": "66b5588ac6f94e8f6bc4c19f6f55bb6b72cc490120807ec652fd03b690ad9a3d",
+    "artifacts/.proof-experiments/20260722-192003-1006c6/experiment.json": "77cf674c32575929301981166ae3fc86c1b56277a2f86562cfe097cf5f571039",
+    "artifacts/.proof-experiments/20260722-192003-1006c6/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-192003-1006c6/stdout.txt": "049d62b09012988e34b2b495b915ff8ae0aa589a9cc9f20cfe4eee6662d665cb",
+    "artifacts/.proof-experiments/20260722-192003-88bf3d/experiment.json": "a4e1c9ef2dbae5cede0f64515201390b91f342ebb1648e952c54d1ccc3fac8bb",
+    "artifacts/.proof-experiments/20260722-192003-88bf3d/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-192003-88bf3d/stdout.txt": "48cc03cf2b343a158984b3137d2df4393c8b61981d00e523460e68aaedc5714d",
+    "artifacts/artifacts/answerbench-v2-geometry-004.patch": "1830069867cdd91033c9fcdff34b042fd4ba649fd41d33286d69a69239ea35ad",
+    "artifacts/checkers/check_exact_geometry_004_patch_bytes.py": "05ec3c3b4e2f6dec0645ae5374e8baa186cf9a4c8c6c563780149892b3e24903",
+    "artifacts/checkers/test_geometry_004_checkers.py": "6ea19e8e7032b44f49f1bf1e4bee030f5d216b52fa4b9310e77c84c94eb3afbb",
+    "artifacts/checkers/verify_answerbench_geometry_004.py": "d8a18250cf68a519d48c5285bb2fd64e28ac8bef5152caf4c90e96541651ee88",
+    "artifacts/imobench/answerbench_v2.csv": "a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc",
+    "artifacts/notes/source-discriminator-2026-07-22.md": "028093135815865a353e1355331a1f7f4ab182956cd2287305d0cd11701aa2a1",
+    "artifacts/records/attempts/2026-07-22-run-001.md": "208cb709dd36ee02c71dccc587232555a1521ee22dc65762a75cc620fe4ec5d3"
+  },
+  "review": {
+    "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+    "problem_id": "deepmind-superhuman-14-geometry-answer",
+    "decision": "accept",
+    "note": "I reviewed the evidence packet and approve this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T20:31:45.793933+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
+  }
+}

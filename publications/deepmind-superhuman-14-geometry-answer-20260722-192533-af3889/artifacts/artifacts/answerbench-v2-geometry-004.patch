@@ -1,0 +1,9 @@
+diff --git a/imobench/answerbench_v2.csv b/imobench/answerbench_v2.csv
+index 7c46992..82d906a 100644
+--- a/imobench/answerbench_v2.csv
++++ b/imobench/answerbench_v2.csv
+@@ -815,3 +815,3 @@
+ imo-bench-geometry-004,"Let $n$ cities lie on the circumference of a circular lake. Exactly half of the triangles formed by connecting any three of these cities are acute-angled triangles. Find the value of $n$ for which this is possible.
+-",45752,Geometry,combinatorial_geometry,Sharygin 2009
++","4, 5",Geometry,combinatorial_geometry,Sharygin 2009
+ imo-bench-geometry-005,"Given cyclic quadrilateral $PQRS$. Four circles each touching its diagonals and the circumcircle internally are equal. Compute the ratio $\frac{PR}{PQ}+\frac{PS}{PQ}$.

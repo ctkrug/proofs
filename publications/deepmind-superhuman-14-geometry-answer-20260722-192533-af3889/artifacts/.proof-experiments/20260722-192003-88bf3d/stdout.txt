@@ -1,0 +1,1 @@
+PASS: v1 corroborates '4, 5'; exactly one semantic v2 CSV cell changed; released schema profile and number_theory-048 are preserved

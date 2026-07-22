@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite it using this metadata."
+title: "Correct the corrupted short answer for IMO AnswerBench geometry problem 004"
+type: software
+authors:
+  - family-names: "Krug"
+    given-names: "Charlie"
+date-released: "2026-07-22"
+repository-code: "https://github.com/ctkrug/proofs"
+url: "https://proofs.charliekrug.com/publications/deepmind-superhuman-14-geometry-answer-20260722-192533-af3889/"

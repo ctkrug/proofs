@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "20260722-191953-1b9235",
+  "name": "geometry-004-full-validation",
+  "hypothesis": "The candidate differs from pinned AnswerBench v2 only by correcting geometry-004 from 45752 to 4, 5, agrees with v1, preserves the released schema profile, and leaves number_theory-048 unchanged.",
+  "expected_signal": "Both independent encodings accept the candidate and all four adversarial controls are rejected.",
+  "command": [
+    "python3",
+    "checkers/test_geometry_004_checkers.py",
+    "/tmp/geometry004.ZRVhkd/answerbench_v1.csv",
+    "/tmp/geometry004.ZRVhkd/answerbench_v2_baseline.csv",
+    "imobench/answerbench_v2.csv"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace",
+  "seed": 0,
+  "timeout_seconds": 30,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T19:19:53.178502+00:00",
+  "finished_at": "2026-07-22T19:19:53.254849+00:00",
+  "duration_seconds": 0.076,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "6ba1003f395554b938ed58cf4cd525e68508c3ee",
+  "source_urls": [
+    "https://github.com/google-deepmind/superhuman/issues/14"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace/checkers/test_geometry_004_checkers.py": "6ea19e8e7032b44f49f1bf1e4bee030f5d216b52fa4b9310e77c84c94eb3afbb",
+    "/tmp/geometry004.ZRVhkd/answerbench_v1.csv": "37aeca686ce677f93580821cfe16a0c0e45872479a502df43272e099da37d8fa",
+    "/tmp/geometry004.ZRVhkd/answerbench_v2_baseline.csv": "275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+    "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace/imobench/answerbench_v2.csv": "a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc"
+  },
+  "peak_child_memory_rusage": 18048,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "66b5588ac6f94e8f6bc4c19f6f55bb6b72cc490120807ec652fd03b690ad9a3d",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

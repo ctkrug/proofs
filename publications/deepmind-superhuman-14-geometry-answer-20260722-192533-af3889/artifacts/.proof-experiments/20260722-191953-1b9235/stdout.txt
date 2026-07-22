@@ -1,0 +1,1 @@
+PASS: positive candidate accepted and four adversarial controls rejected

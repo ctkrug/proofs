@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "20260722-192003-88bf3d",
+  "name": "geometry-004-semantic-check",
+  "hypothesis": "The corrected candidate has the v1-supported answer and exactly one semantic-cell delta from pinned v2 while preserving its schema profile.",
+  "expected_signal": "The standards-compliant CSV checker exits 0 and reports the unique geometry-004 change with number_theory-048 preserved.",
+  "command": [
+    "python3",
+    "checkers/verify_answerbench_geometry_004.py",
+    "/tmp/geometry004.ZRVhkd/answerbench_v1.csv",
+    "/tmp/geometry004.ZRVhkd/answerbench_v2_baseline.csv",
+    "imobench/answerbench_v2.csv"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace",
+  "seed": 0,
+  "timeout_seconds": 30,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T19:20:03.717789+00:00",
+  "finished_at": "2026-07-22T19:20:03.800410+00:00",
+  "duration_seconds": 0.083,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "6ba1003f395554b938ed58cf4cd525e68508c3ee",
+  "source_urls": [
+    "https://geometry.ru/olimp/2009/finseng.pdf"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace/checkers/verify_answerbench_geometry_004.py": "d8a18250cf68a519d48c5285bb2fd64e28ac8bef5152caf4c90e96541651ee88",
+    "/tmp/geometry004.ZRVhkd/answerbench_v1.csv": "37aeca686ce677f93580821cfe16a0c0e45872479a502df43272e099da37d8fa",
+    "/tmp/geometry004.ZRVhkd/answerbench_v2_baseline.csv": "275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+    "/root/proof-factory/research/deepmind-superhuman-14-geometry-answer/workspace/imobench/answerbench_v2.csv": "a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc"
+  },
+  "peak_child_memory_rusage": 18048,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "48cc03cf2b343a158984b3137d2df4393c8b61981d00e523460e68aaedc5714d",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1170,7 +1170,7 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "candidate",
+    "status": "verified",
     "automation_eligible": true,
     "priority": 95,
     "attempt_count": 1,
@@ -1191,7 +1191,9 @@
       "close_signal": "The exact candidate, independent checker, adversarial controls, and clean-upstream application receipt all pass; only external human review remains.",
       "reason": "Another computational epoch would repeat completed validation rather than reduce uncertainty."
     },
-    "candidate_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889"
+    "candidate_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+    "human_approved": true,
+    "approved_packet": "publications/deepmind-superhuman-14-geometry-answer-20260722-192533-af3889"
   },
   {
     "id": "rocq-16807-identref-time-printer",
@@ -1411,7 +1413,12 @@
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
-    "intake_source": "independent Google DeepMind repository audit"
+    "intake_source": "independent Google DeepMind repository audit",
+    "campaign_state": "active",
+    "campaign_started_at": "2026-07-22T20:30:01.116582+00:00",
+    "campaign_start_research_attempt_count": 0,
+    "campaign_min_runs": 25,
+    "campaign_decision": "continue through the minimum campaign"
   },
   {
     "id": "deepmind-synthid-text-26-device-guard",
