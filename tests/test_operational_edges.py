@@ -125,6 +125,30 @@ class RepositorySyncTests(unittest.TestCase):
             self.assertTrue(malformed.is_file())
             self.assertTrue(any("malformed projection retained" in error for error in result["errors"]))
 
+    def test_legacy_projection_jsonl_is_atomically_imported_before_retry(self) -> None:
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "STATE", Path(raw)):
+            legacy = Path(raw) / "repository_projection_queue.jsonl"
+            legacy.write_text(json.dumps({
+                "schema_version": 1, "id": "a" * 64, "problem_id": "p",
+                "event": "validated", "payload": {"id": "job"},
+            }) + "\n")
+            with patch.object(repositories, "record_lab", return_value={"commit": "b" * 40}) as record:
+                result = repositories.retry_lab_projections()
+            self.assertEqual(result["retried"], 1)
+            self.assertEqual(result["remaining"], 0)
+            self.assertFalse(legacy.exists())
+            record.assert_called_once_with("p", "validated", {"id": "job"})
+
+    def test_malformed_legacy_projection_jsonl_remains_byte_intact(self) -> None:
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "STATE", Path(raw)):
+            legacy = Path(raw) / "repository_projection_queue.jsonl"
+            original = '{"schema_version":1\n'
+            legacy.write_text(original)
+            result = repositories.retry_lab_projections()
+            self.assertEqual(result["remaining"], 1)
+            self.assertEqual(legacy.read_text(), original)
+            self.assertTrue(any("malformed legacy projection retained" in error for error in result["errors"]))
+
     def test_mismatched_existing_origin_fails_without_push(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             repo = Path(raw)

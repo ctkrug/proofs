@@ -426,13 +426,35 @@ def queue_lab_projection(problem_id: str, event: str, payload: dict[str, Any], *
 
 def retry_lab_projections() -> dict[str, Any]:
     queue = store.STATE / "repository_projection_queue"
-    if not queue.is_dir():
+    legacy = store.STATE / "repository_projection_queue.jsonl"
+    if not queue.is_dir() and not legacy.is_file():
         return {"retried": 0, "remaining": 0, "errors": []}
+    queue.mkdir(parents=True, exist_ok=True)
     with store.lock("repository-projection-queue") as acquired:
         if not acquired:
             return {"retried": 0, "remaining": 0, "errors": ["projection queue lock unavailable"]}
         pending: list[tuple[Path, dict[str, Any]]] = []
         errors: list[str] = []
+        if legacy.is_file():
+            legacy_valid = True
+            for line_number, line in enumerate(legacy.read_text().splitlines(), 1):
+                try:
+                    value = json.loads(line)
+                    if not isinstance(value, dict) or not str(value.get("id") or ""):
+                        raise ValueError("entry is not an identified object")
+                    destination = queue / f"{value['id']}.json"
+                    if not destination.exists():
+                        store.write_json_atomic(destination, value)
+                except (OSError, ValueError, json.JSONDecodeError) as exc:
+                    legacy_valid = False
+                    errors.append(
+                        f"malformed legacy projection retained: line {line_number}: {type(exc).__name__}: {exc}"
+                    )
+            # Remove the superseded aggregate only after every entry is safely
+            # represented as its own atomic receipt. Any malformed line keeps
+            # the original byte stream intact for operator recovery.
+            if legacy_valid:
+                legacy.unlink()
         for path in sorted(queue.glob("*.json")):
             try:
                 value = json.loads(path.read_text())
@@ -451,7 +473,7 @@ def retry_lab_projections() -> dict[str, Any]:
                 path.unlink()
             except Exception as exc:
                 errors.append(f"{path.name}: {type(exc).__name__}: {exc}"[:4000])
-        remaining = len(list(queue.glob("*.json")))
+        remaining = len(list(queue.glob("*.json"))) + int(legacy.is_file())
     return {"retried": retried, "remaining": remaining, "errors": errors}
 
 
