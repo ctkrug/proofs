@@ -110,8 +110,20 @@ class RepositorySyncTests(unittest.TestCase):
             self.assertEqual(result["retried"], 1)
             self.assertEqual(result["remaining"], 0)
             record.assert_called_once_with("p", "validated", {"id": "job"})
-            self.assertEqual((Path(raw) / "repository_projection_queue.jsonl").read_text(), "")
+            self.assertEqual(list((Path(raw) / "repository_projection_queue").glob("*.json")), [])
             self.assertEqual(len(queued["id"]), 64)
+
+    def test_malformed_projection_receipt_is_retained_for_operator_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "STATE", Path(raw)):
+            queue = Path(raw) / "repository_projection_queue"
+            queue.mkdir()
+            malformed = queue / "truncated.json"
+            malformed.write_text('{"schema_version":1')
+            result = repositories.retry_lab_projections()
+            self.assertEqual(result["retried"], 0)
+            self.assertEqual(result["remaining"], 1)
+            self.assertTrue(malformed.is_file())
+            self.assertTrue(any("malformed projection retained" in error for error in result["errors"]))
 
     def test_mismatched_existing_origin_fails_without_push(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

@@ -620,7 +620,7 @@ class ProofFactoryTests(unittest.TestCase):
                     continued = lab.apply_review(submitted["id"], "continue", reason="pilot passed")
                 self.assertEqual(continued["status"], "queued")
                 self.assertIn("projection offline", continued["repository_projection_warning"])
-                self.assertTrue((state / "repository_projection_queue.jsonl").is_file())
+                self.assertEqual(len(list((state / "repository_projection_queue").glob("*.json"))), 1)
                 queued_spec = json.loads(
                     (research / "p" / "workspace" / "lab-queue" / f"{submitted['id']}.json").read_text()
                 )
@@ -631,27 +631,29 @@ class ProofFactoryTests(unittest.TestCase):
                     lab.apply_review(submitted["id"], "validate", reason="unbound model assertion")
                 workspace = research / "p" / "workspace"
                 checker = workspace / "independent-checker.py"
-                checker.write_text("# independent fixture checker\n")
+                checker.write_text(
+                    "import json,pathlib,sys; "
+                    "assert json.loads(pathlib.Path(sys.argv[1]).read_text())['n']==2; "
+                    "pathlib.Path(sys.argv[2]).write_text(json.dumps({'valid':True})); "
+                    "print('validation passed')\n"
+                )
                 artifact = workspace / "checkpoint.json"
                 checker_result = workspace / "validation-result.json"
-                checker_result.write_text('{"valid":true}\n')
                 checker_command = [
                     "python3", "independent-checker.py", "checkpoint.json", "validation-result.json",
                 ]
-                execution_dir = workspace / "validation-run"
-                execution_dir.mkdir()
-                validation_stdout = execution_dir / "stdout.txt"
-                validation_stdout.write_text("validation passed\n")
-                execution_record = execution_dir / "experiment.json"
-                execution_record.write_text(json.dumps({
-                    "schema_version": 1,
-                    "command": checker_command,
-                    "returncode": 0,
-                    "timed_out": False,
-                    "artifacts": {
-                        "stdout.txt": hashlib.sha256(validation_stdout.read_bytes()).hexdigest(),
-                    },
-                }))
+                validation_job = lab.submit({
+                    "problem_id": "p", "name": "independent validation",
+                    "hypothesis": "the source job checkpoint reaches two",
+                    "expected_signal": "independent checker exits zero",
+                    "command": checker_command, "segment_seconds": 60, "memory_mb": 128,
+                })
+                validation_run = lab.worker_once()
+                self.assertEqual(validation_run["status"], "completed_awaiting_review")
+                execution_records = list((workspace / validation_run["output_root"]).glob("*/experiment.json"))
+                self.assertEqual(len(execution_records), 1)
+                execution_record = execution_records[0]
+                validation_stdout = execution_record.parent / "stdout.txt"
                 final_state = lab._read_state(submitted["id"])
                 receipt_path = workspace / "validation-receipt.json"
                 receipt_path.write_text(json.dumps({
@@ -665,10 +667,11 @@ class ProofFactoryTests(unittest.TestCase):
                     "checker_sha256": hashlib.sha256(checker.read_bytes()).hexdigest(),
                     "checker_command": checker_command,
                     "checker_exit_code": 0,
+                    "validation_job_id": validation_job["id"],
                     "checker_stdout_sha256": hashlib.sha256(validation_stdout.read_bytes()).hexdigest(),
                     "checker_result_path": "validation-result.json",
                     "checker_result_sha256": hashlib.sha256(checker_result.read_bytes()).hexdigest(),
-                    "execution_record_path": "validation-run/experiment.json",
+                    "execution_record_path": execution_record.relative_to(workspace).as_posix(),
                     "execution_record_sha256": hashlib.sha256(execution_record.read_bytes()).hexdigest(),
                     "checked_artifacts": {
                         "checkpoint.json": hashlib.sha256(artifact.read_bytes()).hexdigest(),

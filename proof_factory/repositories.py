@@ -413,62 +413,46 @@ def queue_lab_projection(problem_id: str, event: str, payload: dict[str, Any], *
         "error": str(error)[:4000],
         "queued_at": store.now_iso(),
     }
-    queue = store.STATE / "repository_projection_queue.jsonl"
-    queue.parent.mkdir(parents=True, exist_ok=True)
+    queue = store.STATE / "repository_projection_queue"
+    queue.mkdir(parents=True, exist_ok=True)
     with store.lock("repository-projection-queue") as acquired:
         if not acquired:
             raise RuntimeError("repository projection queue lock unavailable")
-        existing_ids: set[str] = set()
-        if queue.is_file():
-            for line in queue.read_text().splitlines():
-                try:
-                    value = json.loads(line)
-                    if isinstance(value, dict):
-                        existing_ids.add(str(value.get("id") or ""))
-                except json.JSONDecodeError:
-                    continue
-        if record["id"] not in existing_ids:
-            with queue.open("a") as handle:
-                handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
-                handle.flush()
-                os.fsync(handle.fileno())
+        destination = queue / f"{record['id']}.json"
+        if not destination.exists():
+            store.write_json_atomic(destination, record)
     return record
 
 
 def retry_lab_projections() -> dict[str, Any]:
-    queue = store.STATE / "repository_projection_queue.jsonl"
-    if not queue.is_file():
+    queue = store.STATE / "repository_projection_queue"
+    if not queue.is_dir():
         return {"retried": 0, "remaining": 0, "errors": []}
     with store.lock("repository-projection-queue") as acquired:
         if not acquired:
             return {"retried": 0, "remaining": 0, "errors": ["projection queue lock unavailable"]}
-        pending: list[dict[str, Any]] = []
-        for line in queue.read_text().splitlines():
-            try:
-                value = json.loads(line)
-                if isinstance(value, dict):
-                    pending.append(value)
-            except json.JSONDecodeError:
-                continue
-        remaining: list[dict[str, Any]] = []
+        pending: list[tuple[Path, dict[str, Any]]] = []
         errors: list[str] = []
+        for path in sorted(queue.glob("*.json")):
+            try:
+                value = json.loads(path.read_text())
+                if isinstance(value, dict):
+                    pending.append((path, value))
+                else:
+                    errors.append(f"malformed projection retained: {path.name}: not an object")
+            except (OSError, json.JSONDecodeError) as exc:
+                errors.append(f"malformed projection retained: {path.name}: {type(exc).__name__}: {exc}")
+                continue
         retried = 0
-        for row in pending:
+        for path, row in pending:
             try:
                 record_lab(str(row["problem_id"]), str(row["event"]), dict(row["payload"]))
                 retried += 1
+                path.unlink()
             except Exception as exc:
-                row["error"] = f"{type(exc).__name__}: {exc}"[:4000]
-                remaining.append(row)
-                errors.append(row["error"])
-        temporary = queue.with_name(queue.name + ".tmp")
-        with temporary.open("w") as handle:
-            for row in remaining:
-                handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, queue)
-    return {"retried": retried, "remaining": len(remaining), "errors": errors}
+                errors.append(f"{path.name}: {type(exc).__name__}: {exc}"[:4000])
+        remaining = len(list(queue.glob("*.json")))
+    return {"retried": retried, "remaining": remaining, "errors": errors}
 
 
 def _gh(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:

@@ -775,6 +775,7 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
         "checker_path", "checker_sha256", "checked_artifacts", "independence_basis", "created_at",
         "checker_command", "checker_exit_code", "checker_stdout_sha256", "checker_result_path",
         "checker_result_sha256", "execution_record_path", "execution_record_sha256",
+        "validation_job_id",
     }), kind="lab validation receipt")
     if isinstance(receipt["segment"], bool) or not isinstance(receipt["segment"], int):
         raise schemas.SchemaError("lab validation receipt.segment must be int")
@@ -828,6 +829,25 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
     if isinstance(receipt["checker_exit_code"], bool) or receipt["checker_exit_code"] != 0:
         raise schemas.SchemaError("lab validation checker exit code must be integer zero")
 
+    validation_job_id = receipt["validation_job_id"]
+    if not isinstance(validation_job_id, str) or validation_job_id == state["id"]:
+        raise schemas.SchemaError("lab validation receipt requires a distinct validation job id")
+    validation_state = _read_state(validation_job_id)
+    validation_segments = validation_state.get("segments", [])
+    validation_last = validation_segments[-1] if validation_segments else {}
+    if (
+        validation_state.get("problem_id") != state["problem_id"]
+        or validation_state.get("status") not in {"completed_awaiting_review", "validated"}
+        or validation_state.get("command") != checker_command
+        or validation_last.get("returncode") != 0
+        or validation_last.get("threshold_failures")
+        or not validation_state.get("latest_progress", {}).get("complete")
+        or not validation_state.get("latest_progress", {}).get("correctness_checks_passed")
+    ):
+        raise schemas.SchemaError("declared validation job did not complete the checker successfully")
+    if validation_state.get("input_sha256", {}).get(checker_relative) != receipt["checker_sha256"]:
+        raise schemas.SchemaError("validation job input identity does not bind the checker bytes")
+
     execution_relative = receipt["execution_record_path"]
     if not isinstance(execution_relative, str):
         raise schemas.SchemaError("lab validation receipt.execution_record_path must be a relative path")
@@ -840,10 +860,21 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
         raise schemas.SchemaError("lab validation execution record is absent or hash-mismatched")
     execution = schemas.load_json_object(execution_path, kind="lab validation execution record")
     schemas.require_current_version(execution, kind="lab validation execution record", current=1)
+    schemas.require_fields(execution, frozenset({
+        "schema_version", "id", "name", "hypothesis", "expected_signal", "command", "cwd", "seed",
+        "timeout_seconds", "memory_limit_mb", "memory_limit_enforced", "started_at", "finished_at",
+        "duration_seconds", "returncode", "timed_out", "python", "platform", "git_commit",
+        "source_urls", "input_artifacts", "peak_child_memory_rusage", "peak_child_memory_unit", "artifacts",
+    }), kind="lab validation execution record")
+    expected_output_root = str(validation_last.get("output_root") or "").rstrip("/") + "/"
+    execution_inputs = execution.get("input_artifacts") if isinstance(execution.get("input_artifacts"), dict) else {}
     if (
-        execution.get("command") != checker_command
+        not execution_relative.startswith(expected_output_root)
+        or execution.get("command") != checker_command
+        or execution.get("cwd") != str(workspace)
         or isinstance(execution.get("returncode"), bool) or execution.get("returncode") != 0
         or execution.get("timed_out") is not False
+        or execution_inputs.get(str(checker)) != receipt["checker_sha256"]
     ):
         raise schemas.SchemaError("lab validation execution record did not run the declared checker successfully")
     stdout = execution_path.parent / "stdout.txt"
