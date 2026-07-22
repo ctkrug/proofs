@@ -1345,7 +1345,7 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertNotIn(">easy</span>", index)
                 self.assertNotIn("hard lane ·", index)
                 self.assertNotIn("easy lane ·", index)
-                self.assertIn("/assets/site-v4.css", index)
+                self.assertIn("/assets/site-v5.css", index)
                 self.assertIn("/assets/site-v4.js", index)
                 self.assertIn("Exact-problem queue", index)
                 self.assertIn("Official source", index)

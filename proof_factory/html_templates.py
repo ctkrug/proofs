@@ -41,7 +41,7 @@ LAYOUT = Template(r"""<!doctype html>
   <meta name="theme-color" content="#f4f1e8">
   <title>$title · Proof Factory</title>
   <meta name="description" content="$description">
-  <link rel="stylesheet" href="/assets/site-v4.css">
+  <link rel="stylesheet" href="/assets/site-v5.css">
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"153bb72472fb49d8863fb2f8f08f6b2b"}'></script>
   <script>MathJax={tex:{inlineMath:[['$$','$$'],['\\(','\\)']]}};</script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -75,4 +75,3 @@ BRAIN_CARD = Template("""
 
 
 BRAIN_LINK = Template("""<li><a href="/problems/$problem_id/">$label</a><br>$concepts</li>""")
-

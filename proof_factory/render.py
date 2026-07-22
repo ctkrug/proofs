@@ -909,7 +909,7 @@ def _build_unlocked() -> Path:
             else:
                 child.unlink()
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
-    _write(store.SITE / "assets" / "site-v4.css", CSS + ACADEMIC_CSS + ABOUT_CSS)
+    _write(store.SITE / "assets" / "site-v5.css", CSS + ACADEMIC_CSS + ABOUT_CSS)
     _write(store.SITE / "assets" / "site-v4.js", SITE_JS)
     _write(store.SITE / "_worker.js", WORKER_JS)
     _write(store.SITE / "index.html", _index(problems, attempts, runtime, reviews))
