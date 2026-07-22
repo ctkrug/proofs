@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 9,
-  "last_updated": "2026-07-22T12:36:44.160438+00:00",
+  "epoch_count": 10,
+  "last_updated": "2026-07-22T14:41:34.392949+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "Run 8 found no public state change. PR 4044 remains an open, owned, reviewed same-target formalization, so no Lean source was changed and no contribution or novelty claim is made. The new live receipt, independent checker, and durable checkpoint all validate successfully within their stated scope.",
+  "synthesis_summary": "Run 9 added conversation/timeline coverage missing from the earlier state audit. It found no public authorization but discovered direct prior art: PatoLocos/Erdos530 already contains the requested scoped Lean statement at a hash-bound July 2026 head. No Lean source was changed, no proof is claimed, and the standalone contribution route was redirected.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -191,6 +191,30 @@
       "status": "computed",
       "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
       "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim": "A public standalone Lean statement layer for Erdős Problem 530 exists in PatoLocos/Erdos530 at commit 3016bc04ece2858089b9fb135492312208cbe864.",
+      "evidence": "Embedded source and repository metadata in experiment 20260722-143505-e2b517; independent checker returned 0.",
+      "scope": "Exact repository head and 530.lean contents captured on 2026-07-22.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
+    },
+    {
+      "claim": "No explicit replacement or assistance authorization occurs in the audited public REST corpus.",
+      "evidence": "Hash-bound issue/PR bodies and timeline events in experiment 20260722-143505-e2b517.",
+      "scope": "Issue comments/timeline and PR ordinary comments/timeline; excludes private coordination and GraphQL-only thread state.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
+    },
+    {
+      "claim": "The local source hash 3ff7038c3c08f48408f48d53c4503182944cfd8c51b549cbab570a3b062e8466 elaborates warning-clean under Lean 4.27.0.",
+      "evidence": "Lab 135f90912547 returned 0 with empty stderr and a nonempty hash-bound OLean.",
+      "scope": "Pinned checkout 8f6e745798379104379da0b5c28c25315489890f and exact numeric target only.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
     }
   ],
   "strategies": [
@@ -332,6 +356,50 @@
         "model_cost": 1.0,
         "cpu_cost": 1.0
       }
+    },
+    {
+      "id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+      "family": "public coordination and prior-art event audit",
+      "fingerprint": "strategy-coordination-prior-art-event-audit-v1",
+      "title": "Audited previously unchecked public issue/PR conversation streams and their linked external prior-art repository, then validated the normalized receipt with a separately implemented checker.",
+      "mechanism": "Paginated GitHub REST event enumeration plus content-addressed inspection of the linked Lean statement source.",
+      "status": "exhausted",
+      "hypothesis": "The public issue and PR event streams contain no post-review authorization to supersede PR 4044, while issue 773 links a public Lean artifact already containing the requested Sidon, extremal-function, and exact-asymptotic declarations.",
+      "discriminating_test": "Enumerate issue comments/timeline, PR ordinary comments/timeline, and the linked repository history with 100-item pages; require empty second pages, hash the exact bodies and source, and inspect the resulting finite corpus.",
+      "blocker": "The requested statement layer is already public in two forms, and no author or maintainer has authorized a materially distinct contribution.",
+      "reopen_condition": "A public author or maintainer message must explicitly authorize assistance, a specified patch, or a replacement, and the proposed delta must be materially distinct from both existing artifacts.",
+      "reopen_evidence": "",
+      "last_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-22T14:41:34.392949+00:00",
+      "route_evaluation": {
+        "gate_proximity": 0.15,
+        "contribution_value": 0.35,
+        "decisiveness": 0.95,
+        "novelty_confidence": 0.0,
+        "novelty_risk": 1.0,
+        "scope": 0.85,
+        "reuse_value": 0.9,
+        "model_cost": 0.25,
+        "cpu_cost": 0.01
+      }
+    },
+    {
+      "family": "authorized upstream reconciliation",
+      "mechanism": "With maintainer consent, prove equivalence between the external Finset Sidon/extremal interface and the project IsSidon/findGreatest interface, then port only the accepted canonical form.",
+      "hypothesis": "A small equivalence artifact could make the existing upstream PR easier to review without duplicating its ownership.",
+      "discriminating_test": "Obtain an explicit maintainer or PR-author request naming that reconciliation before writing Lean.",
+      "rationale": "This produces information and integration value distinct from another standalone statement, but is blocked until authorized.",
+      "id": "strategy-06778f7782c0",
+      "fingerprint": "06778f7782c0",
+      "status": "proposed",
+      "title": "With maintainer consent, prove equivalence between the external Finset Sidon/extremal interface and the project IsSidon/findGreatest interface, then port only the accepted canonical form.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-strategy-coordination-prior-art-event-audit-v1"
+      ],
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
     }
   ],
   "open_leads": [
@@ -514,6 +582,30 @@
       "updated_at": "2026-07-22T12:36:44.160438+00:00",
       "closure_reason": "terminal_strategy",
       "closed_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "description": "Explicit coordination on PR 4044 or issue 773.",
+      "rationale": "It is the only current path to a legitimate upstream contribution involving this local work.",
+      "next_experiment": "On a newly reported event, inspect its exact author, timestamp, scope, and requested patch before editing.",
+      "priority": "high",
+      "status": "closed",
+      "id": "lead-689863408c",
+      "strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T14:41:34.392949+00:00"
+    },
+    {
+      "description": "Authorized reconciliation of the two existing statement APIs.",
+      "rationale": "The PatoLocos and Formal Conjectures artifacts use different Sidon predicates and extremal interfaces; maintainers might value a reviewed canonicalization, but only if requested.",
+      "next_experiment": "After explicit authorization, write a small Lean equivalence file comparing the exact definitions and kernel-check it.",
+      "priority": "normal",
+      "status": "closed",
+      "id": "lead-51a1f24148",
+      "strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T14:41:34.392949+00:00"
     }
   ],
   "ruled_out": [
@@ -678,15 +770,42 @@
       "reopen_condition": "Documented authorization for a source delta that requires a new source hash and kernel receipt.",
       "attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
       "updated_at": "2026-07-22T12:36:44.160438+00:00"
+    },
+    {
+      "claim_or_route": "Present the local scoped declaration as the first or only standalone formalization.",
+      "scope": "Historical novelty for the current contribution type.",
+      "reason": "PatoLocos/Erdos530 already contains the same statement components, and PR 4044 is an active upstream same-target submission.",
+      "evidence": "Run-9 audit receipt and linked hash-bound 530.lean.",
+      "reopen_condition": "Historical priority cannot be restored; only a materially different, externally useful delta could support another contribution.",
+      "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
+    },
+    {
+      "claim_or_route": "Open a competing PR while PR 4044 remains active.",
+      "scope": "Formal Conjectures submission route.",
+      "reason": "No public authorization exists and duplicate/spam risk is decisive.",
+      "evidence": "Exact public event corpus captured in experiment 20260722-143505-e2b517.",
+      "reopen_condition": "Explicit public consent or a maintainer-approved replacement after closure.",
+      "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
+    },
+    {
+      "claim_or_route": "Repeat the expensive Lean build as the next discriminator.",
+      "scope": "Current coordination/prior-art bottleneck.",
+      "reason": "The existing source already has a kernel receipt; another build cannot create novelty or authorization.",
+      "evidence": "Audit-plus-check took 4.745 seconds and resolved the current decision, versus the prior 643.927-second build.",
+      "reopen_condition": "An authorized source delta with a new source hash.",
+      "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+      "updated_at": "2026-07-22T14:41:34.392949+00:00"
     }
   ],
   "unresolved_questions": [],
   "next_session": {
-    "recommended_strategy_id": "strategy-strategy-78a3290db733",
-    "objective": "Detect a legitimate coordinated acceptance path without duplicating the active pull request.",
-    "first_action": "Read research/run8_live_status_result_20260722.json and inspect whether any newly supplied source event satisfies the recorded reopen condition; if a current snapshot is required, run the fixed audit once.",
-    "stop_condition": "Stop without source edits if PR 4044 remains active and no explicit coordination is documented; redirect only on an authorized coordination or replacement event.",
-    "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03"
+    "recommended_strategy_id": "strategy-06778f7782c0",
+    "objective": "Detect a legitimate, materially distinct coordinated acceptance path without duplicating either existing formalization.",
+    "first_action": "Inspect the exact URL of any newly reported PR/issue event and compare its timestamp and scope against the run-9 hash-bound receipt.",
+    "stop_condition": "Stop without source edits if no explicit authorization or materially distinct requested delta is present.",
+    "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd"
   },
   "recent_attempt_ids": [
     "scout-bdf77f43574b-20260720-195251-a9f2d4",
@@ -697,10 +816,11 @@
     "scout-bdf77f43574b-20260722-063944-5d5057",
     "scout-bdf77f43574b-20260722-083636-48022a",
     "scout-bdf77f43574b-20260722-103623-04157b",
-    "scout-bdf77f43574b-20260722-123644-28aa03"
+    "scout-bdf77f43574b-20260722-123644-28aa03",
+    "scout-bdf77f43574b-20260722-144134-7b4bbd"
   ],
   "tactical_memory": {
-    "current_bottleneck": "Human coordination and upstream ownership remain the sole limiting uncertainties.",
+    "current_bottleneck": "The limiting conditions are now both public authorization and identification of a materially novel delta; Lean elaboration is not the bottleneck.",
     "failure_signatures": [
       {
         "id": "c817046b8ac8",
@@ -749,6 +869,14 @@
         "last_strategy_id": "strategy-strategy-78a3290db733",
         "last_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "id": "2f9ddbd7237f",
+        "signature": "Website status fields and issue assignment metadata can falsely suggest novelty when issue comments link external work.",
+        "count": 1,
+        "last_strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+        "last_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ],
     "reusable_assets": [
@@ -842,6 +970,20 @@
         "evidence": "research/run8_live_status_result_20260722.json SHA-256 12efc69003661ff48d4864995ae97250471f2ad685bc35d88978eee8420efcf9",
         "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "name": "coordination/prior-art audit",
+        "use": "Recheck exact public event streams and external statement contents after a reported change.",
+        "evidence": "checks/audit_erdos530_coordination_prior_art.sh, SHA-256 c000dd0c5ea6634ddec490178921fb874686a3fdce631f4e75d59cb1c7eba058",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
+      },
+      {
+        "name": "run-9 receipt checker",
+        "use": "Fail-closed validation of pagination coverage, event hashes, repository head, and embedded Lean source.",
+        "evidence": "checks/check_erdos530_run9_coordination_prior_art.py, SHA-256 8154e0e90431bbe42ac6576477db3c41bbd8a47b092da2ba8f5ef423ab86728d",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ],
     "constraints_learned": [
@@ -928,6 +1070,20 @@
         "evidence": "The audit queries only the official page and public GitHub REST endpoints.",
         "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "constraint": "A standalone Sidon/extremal/asymptotic statement declaration is not novel relative to PatoLocos/Erdos530 at commit 3016bc04ece2858089b9fb135492312208cbe864.",
+        "scope": "The contribution type specified in the current task.",
+        "evidence": "Hash-bound external 530.lean embedded in experiment 20260722-143505-e2b517.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
+      },
+      {
+        "constraint": "No audited public message authorizes a competing submission or replacement of PR 4044.",
+        "scope": "Exact issue/PR REST bodies and timeline events captured on 2026-07-22.",
+        "evidence": "Experiment 20260722-143505-e2b517 and independent checker 20260722-143621-a1d2ff.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ],
     "decision_history": [
@@ -990,6 +1146,16 @@
         "surprise": "None.",
         "next_discriminator": "A documented public authorization, merge, closure, head change, ownership change, or replacement invitation; if a fresh snapshot is required, rerun the fixed audit once.",
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+        "decision": "redirect",
+        "prediction": "No post-review authorization would appear, but issue comments might expose prior work omitted from the state-only audit.",
+        "observation": "No authorization appeared. Issue comment 3850383367 links PatoLocos/Erdos530, whose hash-bound current 530.lean already defines IsSidon, GuaranteesSidonSubset, ell, and exactAsymptoticConjecture.",
+        "surprise": "The linked repository contains the exact requested statement layer and was updated through 14 July 2026, despite the official page still displaying “Formalised statement? No.”",
+        "next_discriminator": "A newly reported explicit author/maintainer authorization, merge, closure, ownership change, or replacement invitation.",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ],
     "reduction_ledger": [
@@ -1088,6 +1254,22 @@
         "source_attempt_id": "scout-bdf77f43574b-20260722-123644-28aa03",
         "strategy_id": "strategy-strategy-78a3290db733",
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "ambient_space": "Publicly legitimate acceptance-route families for an Erdős Problem 530 statement formalization.",
+        "represented_space_before": "One coordination-dependent route family with an unresolved residual novelty premise.",
+        "eliminated_or_quotiented": "The residual premise that a standalone scoped statement could still be net-new was falsified; no acceptance-route family was removed.",
+        "represented_space_after": "One coordination-dependent route family.",
+        "reduction_factor": "1",
+        "measurement_status": "exact",
+        "unit": "families",
+        "coverage_scope": "Public Formal Conjectures issue/PR REST events and linked PatoLocos/Erdos530 history visible on 2026-07-22.",
+        "soundness_basis": "Complete first pages with empty second pages, hash-bound bodies, embedded source, and an independent receipt checker.",
+        "remaining_unknown": "Private coordination, GraphQL review-thread resolution, whether either existing artifact will merge, and whether maintainers would authorize a materially distinct patch.",
+        "next_bulk_elimination": "Perform one event-triggered comparison only after a new authorization, merge, closure, ownership, or replacement event is reported.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -1198,6 +1380,24 @@
           "https://github.com/google-deepmind/formal-conjectures/pull/4044"
         ],
         "updated_at": "2026-07-22T12:36:44.160438+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-144134-7b4bbd",
+        "strategy_id": "strategy-strategy-coordination-prior-art-event-audit-v1",
+        "nearest_method_ids": [
+          "github-pr-4044",
+          "github-patolocos-erdos530-3016bc0"
+        ],
+        "classification": "replication_control",
+        "exact_delta": "The local artifact reuses the Formal Conjectures IsSidon API and adds bounded-maximum helper lemmas; PatoLocos uses a local Finset predicate and ratio Tendsto declaration, while PR 4044 uses repository-style theorem wrappers. These are implementation differences, not a materially new scoped formalization.",
+        "duplicate_risk": "Submitting the local declaration would duplicate both a public standalone statement layer and an active same-target Formal Conjectures pull request.",
+        "comparison_test": "Compare the declaration inventories and exact asymptotic targets in the three hash-bound Lean files.",
+        "decision": "stop",
+        "source_urls": [
+          "https://github.com/PatoLocos/Erdos530/blob/3016bc04ece2858089b9fb135492312208cbe864/530.lean",
+          "https://github.com/google-deepmind/formal-conjectures/pull/4044"
+        ],
+        "updated_at": "2026-07-22T14:41:34.392949+00:00"
       }
     ]
   }
