@@ -58,7 +58,8 @@ closed unless its reopen evidence exists. Empty or stale routes are ineligible f
 ### Successor selection: prefer an easier hard problem
 
 The default successor is not the most famous available frontier. Prefer the smallest meaningful finite
-uncertainty for which both positive and negative outcomes have compact, independently checkable evidence.
+uncertainty for which both positive and negative outcomes have feasible, segmented, independently
+checkable evidence.
 Gap-one exact optima, tightly constrained designs, and small classification boundaries should outrank wide
 Ramsey or cage intervals when they offer a credible path to closure and a live expert/repository channel.
 
@@ -71,10 +72,16 @@ Before Charlie approves a successor pilot, compare at least six current candidat
 - an objective acceptance owner or venue and a non-duplicative contribution class;
 - a bounded first gate whose result can raise or lower the estimate materially.
 
-Prefer a target above 50% estimated 90-day contribution probability when one remains mathematically
-meaningful. Demote a prestige frontier below that threshold unless it uniquely exercises a reusable method
-or outside evidence materially changes its cost profile. Reproduction alone is not success; it qualifies
-only when it creates a genuinely new accepted certification or verification artifact.
+Use 50% estimated 90-day contribution probability as a preference, not an admission threshold, when a
+mathematically meaningful target clears it. Demote a prestige frontier below that heuristic unless it
+uniquely exercises a reusable method or outside evidence materially changes its cost profile. Reproduction
+alone is not success; it qualifies only when it creates a genuinely new accepted certification or
+verification artifact.
+
+A successor registered for automated dispatch must carry a fail-closed `research_authorization` with
+Charlie's approver identity, timestamp, exact approved scope, and prerequisites. Each predecessor milestone
+must be represented both by a machine state and by the hash of its independently validated completion
+receipt. The scheduler must refuse malformed, unapproved, incomplete, missing, or hash-mismatched gates.
 
 ## 4. Use event-driven model review and persistent computation
 

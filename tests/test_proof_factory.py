@@ -72,6 +72,43 @@ class ProofFactoryTests(unittest.TestCase):
         frontier[1]["campaign_started_at"] = "2026-07-21T00:00:00+00:00"
         self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-next")
 
+    def test_successor_research_authorization_requires_human_and_hashed_phase_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "ROOT", Path(raw)):
+            receipt = Path(raw) / "phase5.json"
+            receipt.write_text("complete\n")
+            receipt_sha = hashlib.sha256(receipt.read_bytes()).hexdigest()
+            predecessor = {"id": "ramsey-r55", "lane": "hard", "status": "active", "phase5_status": "running"}
+            fallback = {"id": "easy-fallback", "lane": "easy", "status": "queued", "difficulty": 8}
+            successor = {
+                "id": "covering-c-12-6-4", "lane": "easy", "status": "queued", "difficulty": 2,
+                "research_authorization": {
+                    "approved": False, "approved_by": "", "approved_at": "", "scope": "pilot",
+                    "prerequisites": [
+                        {"kind": "problem_field", "problem_id": "ramsey-r55", "field": "phase5_status",
+                         "allowed_values": ["complete", "maintenance"]},
+                        {"kind": "artifact_sha256", "path": "phase5.json", "sha256": receipt_sha},
+                    ],
+                },
+            }
+            problems = [predecessor, fallback, successor]
+            self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "easy-fallback")
+            successor["research_authorization"].update({
+                "approved": True, "approved_by": "Charlie Krug", "approved_at": "2026-07-21T12:00:00Z",
+            })
+            self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "easy-fallback")
+            predecessor["phase5_status"] = "complete"
+            self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "covering-c-12-6-4")
+            receipt.write_text("tampered\n")
+            self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "easy-fallback")
+
+    def test_malformed_research_authorization_fails_closed(self) -> None:
+        problems = [
+            {"id": "bad", "lane": "easy", "status": "queued", "difficulty": 1,
+             "research_authorization": []},
+            {"id": "safe", "lane": "easy", "status": "queued", "difficulty": 9},
+        ]
+        self.assertEqual(scheduler.choose_problem("easy", problems)["id"], "safe")
+
     def test_parse_official_statement(self) -> None:
         page = '<div id="content">Is there an $n&gt;2$?<br>Exactly.</div>'
         self.assertEqual(intake.parse_statement(page), "Is there an $n>2$? Exactly.")

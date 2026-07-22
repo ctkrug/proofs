@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import shlex
@@ -113,6 +114,53 @@ def low_hanging_score(problem: dict[str, Any], problems: list[dict[str, Any]]) -
     )
 
 
+def research_authorization_satisfied(problem: dict[str, Any], problems: list[dict[str, Any]]) -> bool:
+    """Fail closed on an explicitly configured authorization for a new campaign."""
+    gate = problem.get("research_authorization")
+    if gate is None:
+        return True
+    if not isinstance(gate, dict):
+        return False
+    if (
+        gate.get("approved") is not True
+        or not str(gate.get("approved_by") or "").strip()
+        or not str(gate.get("approved_at") or "").strip()
+        or not str(gate.get("scope") or "").strip()
+    ):
+        return False
+    prerequisites = gate.get("prerequisites", [])
+    if not isinstance(prerequisites, list) or not prerequisites:
+        return False
+    by_id = {str(row.get("id") or ""): row for row in problems}
+    for prerequisite in prerequisites:
+        if not isinstance(prerequisite, dict):
+            return False
+        kind = prerequisite.get("kind")
+        if kind == "problem_field":
+            predecessor = by_id.get(str(prerequisite.get("problem_id") or ""))
+            field = str(prerequisite.get("field") or "")
+            allowed = prerequisite.get("allowed_values")
+            if predecessor is None or not field or not isinstance(allowed, list) or not allowed:
+                return False
+            if predecessor.get(field) not in allowed:
+                return False
+        elif kind == "artifact_sha256":
+            relative = str(prerequisite.get("path") or "")
+            expected = str(prerequisite.get("sha256") or "")
+            candidate = (store.ROOT / relative).resolve()
+            try:
+                candidate.relative_to(store.ROOT.resolve())
+                with candidate.open("rb") as handle:
+                    actual = hashlib.file_digest(handle, "sha256").hexdigest()
+            except (OSError, ValueError):
+                return False
+            if len(expected) != 64 or actual != expected:
+                return False
+        else:
+            return False
+    return True
+
+
 def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
     statuses = ACTIVE_STATUSES if lane == "hard" else {"queued", "active", "attempted"}
     candidates = [row for row in problems if row.get("lane") == lane and row.get("status") in statuses]
@@ -120,6 +168,7 @@ def choose_problem(lane: str, problems: list[dict[str, Any]]) -> dict[str, Any]:
     # a current PR check; keep any later-discovered competing work out of dispatch.
     candidates = [row for row in candidates if not isinstance(row.get("upstream_work_check"), dict)
                   or int(row["upstream_work_check"].get("active_prs") or 0) == 0]
+    candidates = [row for row in candidates if research_authorization_satisfied(row, problems)]
     if not candidates:
         raise RuntimeError(f"no active {lane} problems")
     if lane == "hard":

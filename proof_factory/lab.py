@@ -50,6 +50,7 @@ SPEC_FIELDS = (
     "segment", "pilot_segments", "review_every_segments", "checkpoint_path", "progress_path",
     "continuation_thresholds", "submitted_at", "workspace_git_commit", "input_sha256",
 )
+OPTIONAL_SPEC_FIELDS = ("mutable_argv_paths", "mutable_argv_initial_sha256")
 
 
 def _workspace(problem_id: str) -> Path:
@@ -103,6 +104,19 @@ def _read_state(job_id: str) -> dict[str, Any]:
         raise schemas.SchemaError(f"lab persisted state has invalid lifecycle status: {value.get('status')!r}")
     schemas.require_type(value, "segments", list, kind="lab persisted state")
     _validate_input_hashes(value.get("input_sha256"), kind="lab persisted state")
+    if "mutable_argv_paths" in value or "mutable_argv_initial_sha256" in value:
+        if "mutable_argv_paths" not in value or "mutable_argv_initial_sha256" not in value:
+            raise schemas.SchemaError("lab persisted state must carry both mutable argv fields")
+        mutable_paths = _normalize_mutable_argv_paths(
+            value["mutable_argv_paths"],
+            workspace=_workspace(str(value.get("problem_id") or "")),
+            command=value.get("command", []),
+        )
+        if mutable_paths != value["mutable_argv_paths"]:
+            raise schemas.SchemaError("lab persisted state.mutable_argv_paths is not canonical")
+        _validate_mutable_initial_hashes(
+            value["mutable_argv_initial_sha256"], mutable_paths, kind="lab persisted state",
+        )
     expected = str(value.get("spec_sha256") or "")
     if len(expected) != 64 or expected != _spec_sha256(value):
         raise schemas.SchemaError("lab persisted state spec_sha256 mismatch")
@@ -130,7 +144,12 @@ def _git_contains(workspace: Path, revision: str) -> bool:
     return proc.returncode == 0
 
 
-def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
+def _input_identity(
+    workspace: Path,
+    command: list[str],
+    *,
+    excluded: frozenset[str] = frozenset(),
+) -> dict[str, str]:
     identities: dict[str, str] = {}
     for raw in command:
         if len(raw) > 512 or any(char in raw for char in "\n\r\0"):
@@ -143,7 +162,9 @@ def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
             continue
         try:
             if _inside(resolved, workspace) and resolved.is_file() and not resolved.is_symlink():
-                identities[resolved.relative_to(workspace).as_posix()] = _sha256(resolved)
+                relative = resolved.relative_to(workspace).as_posix()
+                if relative not in excluded:
+                    identities[relative] = _sha256(resolved)
         except OSError:
             continue
     return dict(sorted(identities.items()))
@@ -151,6 +172,12 @@ def _input_identity(workspace: Path, command: list[str]) -> dict[str, str]:
 
 def _spec_sha256(value: dict[str, Any]) -> str:
     identity = {key: value.get(key) for key in SPEC_FIELDS}
+    # Lab schema v2 predates resumable-job mutable argv declarations. Preserve
+    # the digest of existing v2 records while binding both opt-in fields for
+    # every new job that uses the feature.
+    for key in OPTIONAL_SPEC_FIELDS:
+        if key in value:
+            identity[key] = value[key]
     identity.pop("segment", None)
     return hashlib.sha256(
         json.dumps(identity, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
@@ -172,6 +199,84 @@ def _validate_input_hashes(value: Any, *, kind: str) -> None:
             or any(char not in "0123456789abcdef" for char in digest)
         ):
             raise schemas.SchemaError(f"{kind}.input_sha256[{relative!r}] must be lowercase SHA-256")
+
+
+def _normalize_mutable_argv_paths(
+    value: Any,
+    *,
+    workspace: Path,
+    command: list[str],
+) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, list):
+        raise ValueError("mutable_argv_paths must be a list")
+    command_paths: set[str] = set()
+    for raw in command[1:]:
+        if len(raw) > 512 or any(char in raw for char in "\n\r\0"):
+            continue
+        candidate = Path(raw)
+        path = candidate if candidate.is_absolute() else workspace / candidate
+        try:
+            resolved = path.resolve()
+        except OSError:
+            continue
+        if _inside(resolved, workspace):
+            command_paths.add(resolved.relative_to(workspace).as_posix())
+
+    normalized: list[str] = []
+    for raw in value:
+        if not isinstance(raw, str) or not raw or len(raw) > 512 or any(char in raw for char in "\n\r\0"):
+            raise ValueError("mutable_argv_paths entries must be nonempty path strings")
+        candidate = Path(raw)
+        if candidate.is_absolute() or ".." in candidate.parts or candidate.as_posix() != raw:
+            raise ValueError(f"mutable argv path must be canonical and workspace-relative: {raw!r}")
+        path = workspace / candidate
+        resolved = path.resolve()
+        if not _inside(resolved, workspace):
+            raise ValueError(f"mutable argv path must remain inside the workspace: {raw!r}")
+        relative = resolved.relative_to(workspace).as_posix()
+        if relative != raw:
+            raise ValueError(f"mutable argv path must resolve without aliases: {raw!r}")
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError(f"mutable argv path must be absent or a regular non-symlink file: {raw!r}")
+        if relative not in command_paths:
+            raise ValueError(f"mutable argv path is not an exact command argument: {raw!r}")
+        if relative in normalized:
+            raise ValueError(f"duplicate mutable argv path: {raw!r}")
+        normalized.append(relative)
+    return sorted(normalized)
+
+
+def _mutable_identity(workspace: Path, paths: list[str]) -> dict[str, str]:
+    identities: dict[str, str] = {}
+    workspace_resolved = workspace.resolve()
+    for relative in paths:
+        path = workspace_resolved / relative
+        resolved = path.resolve()
+        if (
+            not _inside(resolved, workspace_resolved)
+            or resolved.relative_to(workspace_resolved).as_posix() != relative
+            or path.is_symlink()
+            or (path.exists() and not path.is_file())
+        ):
+            raise ValueError(f"mutable argv path is no longer a regular file: {relative}")
+        identities[relative] = _sha256(path) if path.is_file() else "absent"
+    return identities
+
+
+def _validate_mutable_initial_hashes(value: Any, paths: list[str], *, kind: str) -> dict[str, str]:
+    if not isinstance(value, dict) or set(value) != set(paths):
+        raise schemas.SchemaError(f"{kind}.mutable_argv_initial_sha256 must cover exactly mutable_argv_paths")
+    for relative, digest in value.items():
+        if digest != "absent" and (
+            not isinstance(digest, str) or len(digest) != 64
+            or any(char not in "0123456789abcdef" for char in digest)
+        ):
+            raise schemas.SchemaError(
+                f"{kind}.mutable_argv_initial_sha256[{relative!r}] must be lowercase SHA-256 or 'absent'"
+            )
+    return dict(sorted(value.items()))
 
 
 def _validate_efficiency(value: Any, *, substantial: bool) -> dict[str, Any]:
@@ -223,6 +328,53 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
             raise ValueError("command arguments may not traverse outside the workspace")
         if candidate.is_absolute() and not _inside(candidate, workspace):
             raise ValueError("absolute command paths must remain inside the problem workspace")
+
+    mutable_paths = _normalize_mutable_argv_paths(
+        spec.get("mutable_argv_paths"), workspace=workspace, command=command,
+    )
+    mutable_set = frozenset(mutable_paths)
+    explicit_input_hashes = spec.get("input_sha256")
+    automatic_input_hashes = _input_identity(workspace, command, excluded=mutable_set)
+    mutable_initial: dict[str, str] = {}
+    if mutable_paths:
+        if not isinstance(explicit_input_hashes, dict):
+            raise ValueError(
+                "mutable argv declarations require explicit input_sha256 hashes for protected code and corpus inputs"
+            )
+        _validate_input_hashes(explicit_input_hashes, kind="lab spec")
+        overlap = sorted(mutable_set.intersection(explicit_input_hashes))
+        if overlap:
+            raise ValueError(f"paths cannot be both mutable and immutable inputs: {', '.join(overlap)}")
+        missing_or_wrong = sorted(
+            relative for relative, digest in automatic_input_hashes.items()
+            if explicit_input_hashes.get(relative) != digest
+        )
+        if missing_or_wrong:
+            raise ValueError(
+                "explicit input_sha256 must bind every existing non-mutable argv file: "
+                + ", ".join(missing_or_wrong)
+            )
+        # Extra hashes are encouraged for inputs reached through a config or
+        # manifest rather than passed directly on argv. Verify them now as well
+        # as before every segment so a submission cannot contain invented pins.
+        for relative, digest in explicit_input_hashes.items():
+            unresolved = workspace / relative
+            path = unresolved.resolve()
+            if (
+                not _inside(path, workspace) or not path.is_file() or unresolved.is_symlink()
+                or _sha256(path) != digest
+            ):
+                raise ValueError(f"explicit immutable input hash does not match a regular workspace file: {relative}")
+        if source_path is None:
+            if "mutable_argv_initial_sha256" in spec:
+                raise ValueError("mutable_argv_initial_sha256 is engine-generated and may not be supplied")
+            mutable_initial = _mutable_identity(workspace, mutable_paths)
+        else:
+            mutable_initial = _validate_mutable_initial_hashes(
+                spec.get("mutable_argv_initial_sha256"), mutable_paths, kind="lab persisted spec",
+            )
+    elif "mutable_argv_initial_sha256" in spec:
+        raise ValueError("mutable_argv_initial_sha256 requires mutable_argv_paths")
 
     segment_seconds = int(spec.get("segment_seconds") or 3600)
     memory_mb = int(spec.get("memory_mb") or 512)
@@ -288,8 +440,11 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
         "continuation_thresholds": normalized_thresholds,
         "submitted_at": str(spec.get("submitted_at") or store.now_iso()),
         "workspace_git_commit": str(spec.get("workspace_git_commit") or _git_commit(workspace)),
-        "input_sha256": spec.get("input_sha256") or _input_identity(workspace, command),
+        "input_sha256": explicit_input_hashes if explicit_input_hashes is not None else automatic_input_hashes,
     }
+    if mutable_paths:
+        normalized["mutable_argv_paths"] = mutable_paths
+        normalized["mutable_argv_initial_sha256"] = mutable_initial
     if not normalized["name"] or not normalized["hypothesis"] or not normalized["expected_signal"]:
         raise ValueError("name, hypothesis, and expected_signal are required")
     if not _SAFE_JOB_ID.fullmatch(normalized["id"]):
@@ -309,6 +464,9 @@ def _load_persisted_spec(path: Path, *, source_path: Path | None = None) -> dict
     schemas.require_current_version(raw, kind="lab persisted spec", current=SCHEMA_VERSION)
     schemas.require_fields(raw, frozenset((*SPEC_FIELDS, "spec_sha256")), kind="lab persisted spec")
     _validate_input_hashes(raw.get("input_sha256"), kind="lab persisted spec")
+    if "mutable_argv_paths" in raw or "mutable_argv_initial_sha256" in raw:
+        if "mutable_argv_paths" not in raw or "mutable_argv_initial_sha256" not in raw:
+            raise schemas.SchemaError("lab persisted spec must carry both mutable argv fields")
     expected = str(raw.get("spec_sha256") or "")
     if len(expected) != 64 or expected != _spec_sha256(raw):
         raise schemas.SchemaError("lab persisted spec spec_sha256 mismatch")
@@ -338,7 +496,7 @@ def submit(spec: dict[str, Any]) -> dict[str, Any]:
     return {"status": "queued", "spec": str(destination), **normalized}
 
 
-def _verify_immutable_inputs(spec: dict[str, Any], workspace: Path) -> None:
+def _verify_immutable_inputs(spec: dict[str, Any], workspace: Path, state: dict[str, Any] | None = None) -> None:
     current_commit = _git_commit(workspace)
     if (
         spec["workspace_git_commit"] != "unversioned"
@@ -352,6 +510,24 @@ def _verify_immutable_inputs(spec: dict[str, Any], workspace: Path) -> None:
         path = (workspace / relative).resolve()
         if not _inside(path, workspace) or not path.is_file() or _sha256(path) != expected:
             raise ValueError(f"immutable input changed or disappeared: {relative}")
+    mutable_paths = spec.get("mutable_argv_paths", [])
+    if mutable_paths:
+        previous_segments = (state or {}).get("segments", [])
+        recovery = (state or {}).get("mutable_argv_recovery")
+        if (
+            isinstance(recovery, dict)
+            and recovery.get("segment") == spec.get("segment")
+            and isinstance(recovery.get("recovered_sha256"), dict)
+        ):
+            expected_mutable = recovery["recovered_sha256"]
+        else:
+            expected_mutable = (
+                previous_segments[-1].get("mutable_argv_after_sha256")
+                if previous_segments else spec["mutable_argv_initial_sha256"]
+            )
+        current_mutable = _mutable_identity(workspace, mutable_paths)
+        if current_mutable != expected_mutable:
+            raise ValueError("mutable argv input changed outside the recorded segment chain")
 
 
 def _append_record(record: dict[str, Any]) -> None:
@@ -373,6 +549,24 @@ def _recover_running_specs() -> list[str]:
             state = _read_state(str(raw["id"]))
             state["status"] = "checkpointed"
             state["recovery_note"] = "in-flight segment recovered after worker interruption; exact segment will replay"
+            mutable_paths = state.get("mutable_argv_paths", [])
+            if mutable_paths:
+                previous_segments = state.get("segments", [])
+                prior_expected = (
+                    previous_segments[-1].get("mutable_argv_after_sha256")
+                    if previous_segments else state["mutable_argv_initial_sha256"]
+                )
+                recovery = {
+                    "recorded_at": store.now_iso(),
+                    "segment": int(state.get("segment") or 1),
+                    "prior_expected_sha256": prior_expected,
+                    "recovered_sha256": _mutable_identity(
+                        _workspace(str(state["problem_id"])), mutable_paths,
+                    ),
+                    "reason": "worker interruption left no completed segment record; replay must recheck progress",
+                }
+                state["mutable_argv_recovery"] = recovery
+                state.setdefault("mutable_argv_recovery_receipts", []).append(recovery)
             _write_state(state)
             recovered.append(str(raw["id"]))
         except Exception:
@@ -593,8 +787,8 @@ def worker_once() -> dict[str, Any]:
         try:
             spec = _load_persisted_spec(running, source_path=source)
             workspace = _workspace(spec["problem_id"])
-            _verify_immutable_inputs(spec, workspace)
             state = _read_state(spec["id"])
+            _verify_immutable_inputs(spec, workspace, state)
             if state.get("status") not in {"queued", "checkpointed"}:
                 raise schemas.SchemaError(
                     f"lab job {spec['id']} is not executable from state {state.get('status')!r}"
@@ -602,6 +796,7 @@ def worker_once() -> dict[str, Any]:
             state["status"] = "running"
             state["running_segment"] = spec["segment"]
             _write_state(state)
+            mutable_before = _mutable_identity(workspace, spec.get("mutable_argv_paths", []))
             output_root = workspace / "lab-runs" / spec["id"] / f"segment-{spec['segment']:06d}"
             output_root.mkdir(parents=True, exist_ok=True)
             total_label = "open" if spec["max_segments"] == 0 else str(spec["max_segments"])
@@ -653,6 +848,11 @@ def worker_once() -> dict[str, Any]:
                 "runner_result": proc.stdout[-12000:], "runner_error": proc.stderr[-4000:],
                 "output_root": str(output_root.relative_to(workspace)),
             }
+            if spec.get("mutable_argv_paths"):
+                record["mutable_argv_before_sha256"] = mutable_before
+                record["mutable_argv_after_sha256"] = _mutable_identity(
+                    workspace, spec["mutable_argv_paths"],
+                )
             if proc.returncode not in {0, 124}:
                 threshold_failures.append(f"segment process returned {proc.returncode}")
             if proc.returncode == 124 and not checkpoint_exists:
@@ -964,7 +1164,7 @@ def apply_review(
         # atomically published after the authoritative review ledger is durable.
         state["status"] = "checkpointed"
         state["spec_sha256"] = _spec_sha256(state)
-        queued_spec = {key: state[key] for key in (*SPEC_FIELDS, "spec_sha256")}
+        queued_spec = {key: state[key] for key in (*SPEC_FIELDS, *OPTIONAL_SPEC_FIELDS, "spec_sha256") if key in state}
     elif decision in {"validate", "promote"}:
         if not state.get("latest_progress", {}).get("complete"):
             raise ValueError("only a complete experiment can be validated or promoted")

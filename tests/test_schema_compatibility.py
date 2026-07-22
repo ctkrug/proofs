@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -172,6 +173,184 @@ class SchemaCompatibilityTests(unittest.TestCase):
                 self.assertEqual(next_spec["segment"], 2)
                 self.assertEqual(state["segment"], 2)
                 self.assertEqual(state["spec_sha256"], next_spec["spec_sha256"])
+
+    def test_lab_explicit_mutable_argv_paths_resume_with_hash_chain(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            state_root = root / "state"
+            research = root / "research"
+            workspace = research / "p" / "workspace"
+            data.mkdir()
+            workspace.mkdir(parents=True)
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            worker = workspace / "worker.py"
+            worker.write_text(
+                "import json,pathlib,sys\n"
+                "checkpoint,progress=map(pathlib.Path,sys.argv[1:])\n"
+                "done=json.loads(checkpoint.read_text())['done']+1\n"
+                "checkpoint.write_text(json.dumps({'done':done}))\n"
+                "progress.write_text(json.dumps({'completed_units':done,'total_units':2,"
+                "'complete':done>=2,'correctness_checks_passed':True,"
+                "'decision_value_active':True,'artifact_bytes':checkpoint.stat().st_size}))\n"
+            )
+            checkpoint = workspace / "checkpoint.json"
+            checkpoint.write_text('{"done":0}')
+            worker_hash = hashlib.sha256(worker.read_bytes()).hexdigest()
+            efficiency = {
+                "naive_cost": "two units",
+                "opportunities_considered": ["symmetry", "memoization", "decomposition"],
+                "chosen_reductions": "checkpoint one unit per segment",
+                "expected_throughput_gain": "resumability",
+                "soundness_basis": "immutable worker plus chained checkpoints",
+                "remains_uncompressed": "two units",
+            }
+            with patch.multiple(
+                store,
+                ROOT=root,
+                DATA=data,
+                STATE=state_root,
+                RESEARCH=research,
+                PROBLEMS_FILE=data / "problems.json",
+                ATTEMPTS_FILE=data / "attempts.jsonl",
+            ), patch.object(capacity, "admission", return_value={"allowed": True}):
+                submitted = lab.submit({
+                    "problem_id": "p",
+                    "name": "resumed mutable checkpoint",
+                    "hypothesis": "the checkpoint reaches two",
+                    "expected_signal": "two exact segments complete",
+                    "decision_value": "tests safe resumed execution",
+                    "efficiency_design": efficiency,
+                    "command": ["python3", "worker.py", "checkpoint.json", "progress.json"],
+                    "input_sha256": {"worker.py": worker_hash},
+                    "mutable_argv_paths": ["checkpoint.json", "progress.json"],
+                    "checkpoint_path": "checkpoint.json",
+                    "progress_path": "progress.json",
+                    "segment_seconds": 60,
+                    "memory_mb": 128,
+                    "max_segments": 2,
+                    "pilot_segments": 2,
+                    "continuation_thresholds": {"require_correctness_checks": True},
+                })
+                self.assertEqual(submitted["input_sha256"], {"worker.py": worker_hash})
+                self.assertEqual(
+                    submitted["mutable_argv_initial_sha256"],
+                    {
+                        "checkpoint.json": hashlib.sha256(b'{"done":0}').hexdigest(),
+                        "progress.json": "absent",
+                    },
+                )
+                first = lab.worker_once()
+                self.assertEqual(first["status"], "checkpointed")
+                self.assertEqual(first["mutable_argv_before_sha256"], submitted["mutable_argv_initial_sha256"])
+                second = lab.worker_once()
+                self.assertEqual(second["status"], "completed_awaiting_review")
+                self.assertEqual(json.loads(checkpoint.read_text()), {"done": 2})
+                persisted = lab._read_state(submitted["id"])
+                self.assertEqual(
+                    persisted["segments"][0]["mutable_argv_after_sha256"],
+                    persisted["segments"][1]["mutable_argv_before_sha256"],
+                )
+                checkpoint.write_text('{"done":999}')
+                with self.assertRaisesRegex(ValueError, "outside the recorded segment chain"):
+                    lab._verify_immutable_inputs(submitted, workspace, persisted)
+
+    def test_lab_mutable_argv_declaration_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            research = root / "research"
+            workspace = research / "p" / "workspace"
+            data.mkdir()
+            workspace.mkdir(parents=True)
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            (workspace / "worker.py").write_text("print('ok')\n")
+            (workspace / "checkpoint.json").write_text("{}")
+            base = {
+                "problem_id": "p", "name": "closed", "hypothesis": "closed",
+                "expected_signal": "rejection", "command": ["python3", "worker.py", "checkpoint.json"],
+                "segment_seconds": 60, "memory_mb": 128,
+            }
+            with patch.multiple(
+                store,
+                ROOT=root,
+                DATA=data,
+                RESEARCH=research,
+                PROBLEMS_FILE=data / "problems.json",
+                ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                with self.assertRaisesRegex(ValueError, "require explicit input_sha256"):
+                    lab._validate({**base, "mutable_argv_paths": ["checkpoint.json"]})
+                with self.assertRaisesRegex(ValueError, "bind every existing non-mutable argv file"):
+                    lab._validate({
+                        **base, "mutable_argv_paths": ["checkpoint.json"], "input_sha256": {},
+                    })
+                worker_hash = hashlib.sha256((workspace / "worker.py").read_bytes()).hexdigest()
+                with self.assertRaisesRegex(ValueError, "not an exact command argument"):
+                    lab._validate({
+                        **base, "mutable_argv_paths": ["other-output.json"],
+                        "input_sha256": {"worker.py": worker_hash, "checkpoint.json": hashlib.sha256(b"{}").hexdigest()},
+                    })
+                with self.assertRaisesRegex(ValueError, "both mutable and immutable"):
+                    lab._validate({
+                        **base, "mutable_argv_paths": ["checkpoint.json"],
+                        "input_sha256": {
+                            "worker.py": worker_hash,
+                            "checkpoint.json": hashlib.sha256(b"{}").hexdigest(),
+                        },
+                    })
+
+    def test_lab_interrupted_mutable_segment_gets_a_recovery_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            data = root / "data"
+            state_root = root / "state"
+            research = root / "research"
+            workspace = research / "p" / "workspace"
+            data.mkdir()
+            workspace.mkdir(parents=True)
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            worker = workspace / "worker.py"
+            worker.write_text("print('resume')\n")
+            checkpoint = workspace / "checkpoint.json"
+            checkpoint.write_text('{"done":0}')
+            worker_hash = hashlib.sha256(worker.read_bytes()).hexdigest()
+            with patch.multiple(
+                store,
+                ROOT=root,
+                DATA=data,
+                STATE=state_root,
+                RESEARCH=research,
+                PROBLEMS_FILE=data / "problems.json",
+                ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                submitted = lab.submit({
+                    "problem_id": "p", "name": "recover", "hypothesis": "partial work survives",
+                    "expected_signal": "a replay baseline receipt", "command": [
+                        "python3", "worker.py", "checkpoint.json",
+                    ],
+                    "input_sha256": {"worker.py": worker_hash},
+                    "mutable_argv_paths": ["checkpoint.json"],
+                    "segment_seconds": 60, "memory_mb": 128,
+                })
+                queue = workspace / "lab-queue" / f"{submitted['id']}.json"
+                running = queue.with_suffix(".running.json")
+                queue.rename(running)
+                state = lab._read_state(submitted["id"])
+                state["status"] = "running"
+                lab._write_state(state)
+                checkpoint.write_text('{"done":1}')
+
+                self.assertEqual(lab._recover_running_specs(), [submitted["id"]])
+                recovered = lab._read_state(submitted["id"])
+                receipt = recovered["mutable_argv_recovery"]
+                self.assertEqual(receipt["segment"], 1)
+                self.assertNotEqual(receipt["prior_expected_sha256"], receipt["recovered_sha256"])
+                lab._verify_immutable_inputs(submitted, workspace, recovered)
+
+                checkpoint.write_text('{"done":2}')
+                with self.assertRaisesRegex(ValueError, "outside the recorded segment chain"):
+                    lab._verify_immutable_inputs(submitted, workspace, recovered)
 
     def test_lab_segment_event_names_completed_segment_after_rollover(self) -> None:
         spec = {"id": "job", "problem_id": "p", "segment": 2}

@@ -30,6 +30,14 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--checkpoint-path", default="")
     parser.add_argument("--progress-path", default="")
+    parser.add_argument(
+        "--mutable-argv-path", action="append", default=[],
+        help="Exact workspace-relative argv path mutated by the job; repeat as needed",
+    )
+    parser.add_argument(
+        "--input-sha256", default="",
+        help="JSON object of immutable workspace-relative input hashes (required with mutable argv paths)",
+    )
     parser.add_argument("--pilot-segments", type=int, default=1)
     parser.add_argument("--review-every-segments", type=int, default=1)
     parser.add_argument("--min-throughput", type=float, default=0.0)
@@ -41,7 +49,7 @@ def main() -> int:
     if command[:1] == ["--"]:
         command = command[1:]
     efficiency = json.loads(Path(args.efficiency_design).read_text())
-    result = lab.submit({
+    request = {
         "problem_id": args.problem, "name": args.name, "hypothesis": args.hypothesis,
         "expected_signal": args.expected_signal, "decision_value": args.decision_value,
         "efficiency_design": efficiency, "source_urls": args.source_url,
@@ -54,7 +62,12 @@ def main() -> int:
             "max_artifact_growth_bytes": args.max_artifact_growth_bytes,
             "require_correctness_checks": not args.no_correctness_gate,
         }, "command": command,
-    })
+    }
+    if args.mutable_argv_path:
+        request["mutable_argv_paths"] = args.mutable_argv_path
+    if args.input_sha256:
+        request["input_sha256"] = json.loads(Path(args.input_sha256).read_text())
+    result = lab.submit(request)
     print(json.dumps(result, indent=2))
     return 0
 
