@@ -46,6 +46,13 @@ def snapshot(
     for review in reviews or []:
         reviews_by_attempt.setdefault(str(review.get("attempt_id")), []).append(review)
 
+    experiment_summary = lab.public_summary()
+    generated_candidates = [str(runtime.get("updated_at") or "")]
+    generated_candidates.extend(
+        str(row.get("updated_at") or "") for row in experiment_summary.get("jobs", [])
+    )
+    generated_at = max((value for value in generated_candidates if value), default=now.isoformat())
+
     lanes: dict[str, dict[str, Any]] = {}
     for lane in ("hard", "easy"):
         running_id = runtime.get(f"{lane}_running")
@@ -91,12 +98,12 @@ def snapshot(
     return {
         "schema_version": 1,
         "available": True,
-        "generated_at": runtime.get("updated_at") or now.isoformat(),
+        "generated_at": generated_at,
         "health": runtime.get("health", "starting"),
         "health_issues": runtime.get("health_issues") or [],
         "operational_blockers": runtime.get("operational_blockers") or [],
         "usage_policy": runtime.get("usage_policy") or {},
         "lanes": lanes,
-        "experiments": lab.public_summary(),
+        "experiments": experiment_summary,
         "recent_runs": recent_runs,
     }

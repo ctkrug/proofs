@@ -1316,6 +1316,17 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(value["recent_runs"][0]["accomplishment"], "Eliminated two cases.")
         self.assertEqual(value["recent_runs"][0]["next_action"], "Check the remaining case.")
 
+    def test_live_snapshot_timestamp_tracks_newest_lab_state(self) -> None:
+        now = datetime(2026, 7, 22, 1, 30, tzinfo=timezone.utc)
+        experiments = {
+            "counts": {"running": 1},
+            "jobs": [{"id": "new-job", "status": "running", "updated_at": "2026-07-22T01:29:00+00:00"}],
+        }
+        with patch.object(lab, "public_summary", return_value=experiments):
+            value = live.snapshot([], [], {"updated_at": "2026-07-22T00:30:00+00:00"}, now=now)
+        self.assertEqual(value["generated_at"], "2026-07-22T01:29:00+00:00")
+        self.assertIs(value["experiments"], experiments)
+
     def test_render_uses_shared_process_lock(self) -> None:
         events: list[str] = []
 
