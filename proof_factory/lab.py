@@ -1330,7 +1330,12 @@ def status(problem_id: str | None = None) -> dict[str, Any]:
 def public_summary() -> dict[str, Any]:
     report = status()
     visible = []
-    for row in report["jobs"][-10:]:
+    newest = sorted(
+        report["jobs"],
+        key=lambda row: (str(row.get("updated_at") or ""), str(row.get("id") or "")),
+        reverse=True,
+    )[:10]
+    for row in newest:
         visible.append({
             "id": row.get("id"), "problem_id": row.get("problem_id"), "name": row.get("name"),
             "status": row.get("status"), "segment": row.get("segment"),

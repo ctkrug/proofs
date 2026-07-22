@@ -72,6 +72,21 @@ class ProofFactoryTests(unittest.TestCase):
         frontier[1]["campaign_started_at"] = "2026-07-21T00:00:00+00:00"
         self.assertEqual(scheduler.choose_problem("easy", frontier)["id"], "easy-next")
 
+    def test_public_lab_summary_uses_newest_updates_not_lexical_job_ids(self) -> None:
+        jobs = [
+            {"id": f"job-{index:02d}", "updated_at": f"2026-07-21T00:{index:02d}:00+00:00",
+             "status": "checkpointed", "latest_progress": {"completed_units": index, "total_units": 20}}
+            for index in range(12)
+        ]
+        jobs.append({
+            "id": "job-00-current", "updated_at": "2026-07-22T01:00:00+00:00", "status": "running",
+            "latest_progress": {"completed_units": 300, "total_units": 656},
+        })
+        with patch.object(lab, "status", return_value={"jobs": jobs, "counts": {"running": 1}}):
+            summary = lab.public_summary()
+        self.assertEqual(summary["jobs"][0]["id"], "job-00-current")
+        self.assertEqual(len(summary["jobs"]), 10)
+
     def test_successor_research_authorization_requires_human_and_hashed_phase_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as raw, patch.object(store, "ROOT", Path(raw)):
             receipt = Path(raw) / "phase5.json"
