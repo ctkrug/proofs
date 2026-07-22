@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-07-22T21:48:46Z",
+  "repository": "google-deepmind/synthid-text",
+  "issue": {
+    "number": 26,
+    "state": "open",
+    "updated_at": "2025-04-06T23:51:34Z",
+    "url": "https://github.com/google-deepmind/synthid-text/issues/26",
+    "api_url": "https://api.github.com/repos/google-deepmind/synthid-text/issues/26"
+  },
+  "main": {
+    "ref": "refs/heads/main",
+    "commit": "addb4a158143c7c6851a1308f78b89fceed59683",
+    "source_path": "src/synthid_text/detector_bayesian.py",
+    "source_blob": "955424b9fc7ff7749200a58848e2e038fd959c1d",
+    "pristine_source_sha256": "8f917d162e14eb38884b95494bb1f8bfa28a5a074d6bf4f5e69658d2da5dd361"
+  },
+  "pull_request_searches": [
+    {
+      "query": "repo:google-deepmind/synthid-text is:pr \"train_best_detector\"",
+      "total_count": 0,
+      "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fsynthid-text%20is%3Apr%20%22train_best_detector%22"
+    },
+    {
+      "query": "repo:google-deepmind/synthid-text is:pr \"detector_bayesian\"",
+      "total_count": 0,
+      "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fsynthid-text%20is%3Apr%20%22detector_bayesian%22"
+    },
+    {
+      "query": "repo:google-deepmind/synthid-text is:pr \"torch_device.type\"",
+      "total_count": 0,
+      "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind/synthid-text%20is%3Apr%20%22torch_device.type%22"
+    }
+  ],
+  "candidate": {
+    "patch": "patches/synthid-text-issue-26.patch",
+    "patch_sha256": "df1d9a580a0286cbb8e85e06fbb534721cc7c8beaedd1bfb047e1ded6c1caefd",
+    "patched_source_sha256": "91752c7e5bb031a85330e23cb285bee0dcb3c715a4d3fc0be91a7ef48b19a4c5",
+    "focused_test_sha256": "c40427e34058d8ffa7b8cc079269aff8c6831f78116a0bdc78d3dda9d1069c1b",
+    "independent_checker_sha256": "f47b0af639b992828f0fbe3e2b3c1becd1fe247114316ad74fb11a4d76f4b21f"
+  },
+  "method": "GitHub REST API queries plus git ls-remote and pinned local Git-object hashing"
+}

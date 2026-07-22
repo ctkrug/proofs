@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "title": "Fix SynthID Text's inverted GPU training guard",
+  "problem_id": "deepmind-synthid-text-26-device-guard",
+  "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86",
+  "contribution_type": "research software correctness",
+  "status": "public-research-note",
+  "peer_reviewed": false,
+  "expert_confirmed": false,
+  "created_at": "2026-07-22T22:06:56.494657+00:00",
+  "creator": "Charlie Krug",
+  "ai_assistance_disclosed": true,
+  "source_url": "https://github.com/google-deepmind/synthid-text/issues/26",
+  "claims": [
+    "Pristine addb4a158143c7c6851a1308f78b89fceed59683 accepts cpu and rejects cuda and tpu at the initial train_best_detector guard.",
+    "Patch SHA-256 df1d9a580a0286cbb8e85e06fbb534721cc7c8beaedd1bfb047e1ded6c1caefd makes cpu raise before processing while cuda and tpu reach mocked downstream training.",
+    "The patch applies cleanly to the pristine addb4a1 index and its focused exact-method suite passes 3/3 without accelerator hardware.",
+    "At 2026-07-22T21:48:46Z issue #26 was open, main was addb4a1, and three repository PR searches returned zero results."
+  ],
+  "evidence": [
+    "Experiment 20260722-214820-16d426: pristine inverse behavior PASS.",
+    "Experiment 20260722-214820-984369: cuda, tpu, and cpu focused tests all PASS.",
+    "Experiment 20260722-214820-54a4cb: independent exact guard and regression checker PASS.",
+    "Experiment 20260722-214820-01af65: patch hash and pinned-index application PASS.",
+    "artifacts/source-status-20260722T214846Z.json: live status and three novelty searches."
+  ],
+  "independent_checker": "tools/check_issue_26_patch.py is a separately written dependency-free AST/evaluation encoding; experiment 20260722-214820-54a4cb returned PASS.",
+  "citations": [
+    "https://github.com/google-deepmind/synthid-text/issues/26",
+    "https://github.com/google-deepmind/synthid-text/commit/addb4a158143c7c6851a1308f78b89fceed59683",
+    "https://github.com/google-deepmind/synthid-text/blob/addb4a158143c7c6851a1308f78b89fceed59683/src/synthid_text/detector_bayesian.py#L1031-L1036",
+    "https://github.com/google-deepmind/synthid-text/blob/addb4a158143c7c6851a1308f78b89fceed59683/.github/workflows/ci.yaml"
+  ],
+  "artifact_hashes": {
+    "artifacts/.delegates/20260722-214411-005f44/source-discriminator/memo.md": "a8ef79126860d62a9e4155b0c631193587730c31f2e21a10430415475c4904a0",
+    "artifacts/.proof-experiments/20260722-214800-c82815/experiment.json": "a98aa3819298b26a759b4cc5add332620168dd6306946eb6913e6150a06e7643",
+    "artifacts/.proof-experiments/20260722-214800-c82815/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-214800-c82815/stdout.txt": "a5810acac7148ec7b96799ab2cc8b7723e0da2f0a7f4e4763d1eaeda846d32db",
+    "artifacts/.proof-experiments/20260722-214820-01af65/experiment.json": "b2339d2049fcc89f04e6c98adff8db2c1e54f11131b5646683ee884d014bbb27",
+    "artifacts/.proof-experiments/20260722-214820-01af65/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-214820-01af65/stdout.txt": "2c22ba663f82544a40193dd33d994fa13ead7e68c4cd2a29183766b38d8b4abb",
+    "artifacts/.proof-experiments/20260722-214820-16d426/experiment.json": "3b0d353d80a167f8e36afcbbbd4350e30864fa2f6cdbd6560986aaec32452e9f",
+    "artifacts/.proof-experiments/20260722-214820-16d426/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-214820-16d426/stdout.txt": "792bc55487efb2843e958866380e64295f45efc108200c3cf2e541fb1571117a",
+    "artifacts/.proof-experiments/20260722-214820-54a4cb/experiment.json": "f3834cc3b8bcdb3140ad1b96b8e0e14d04b4d1b4557717dc48623eda282b642d",
+    "artifacts/.proof-experiments/20260722-214820-54a4cb/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-214820-54a4cb/stdout.txt": "8a440197a3f99f65ba266a369d7e30735a5c2b9ceb944a89b66248c962322565",
+    "artifacts/.proof-experiments/20260722-214820-984369/experiment.json": "b6da6797b8899644fa2f0c78c03db5dfe780596eeb7184e30504cf37024bd638",
+    "artifacts/.proof-experiments/20260722-214820-984369/stderr.txt": "2646de3295865e7e0b48dc74adea605114a3eaeb2acb87c2dab587010fa9445a",
+    "artifacts/.proof-experiments/20260722-214820-984369/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/artifacts/source-status-20260722T214846Z.json": "512e3cfea0f9a200bb487d44cb88c75a63ac2c49934946e1dc88a367411755bf",
+    "artifacts/patches/synthid-text-issue-26.patch": "df1d9a580a0286cbb8e85e06fbb534721cc7c8beaedd1bfb047e1ded6c1caefd",
+    "artifacts/records/attempts/20260722-run-003.json": "f487f6df3b7eb649175219c925f151a996bd5c6780adfcbf76518f240471fb19",
+    "artifacts/requirements-focused.txt": "90b68080f37796746a2e5dcfe6e40b67573dd0fed14254387245f74cab2c53d0",
+    "artifacts/tools/check_issue_26_patch.py": "f47b0af639b992828f0fbe3e2b3c1becd1fe247114316ad74fb11a4d76f4b21f",
+    "artifacts/tools/check_patch_applies.py": "c9bd48cdc526c283be8378d1ee6f2504b4e8cfb493db537765ce1e62206b3f66",
+    "artifacts/tools/check_prepatch_behavior.py": "ad065e0d5d47b733facc447093d76b262c9c762755cbad716cd6280907a1ff7f",
+    "artifacts/tools/run_focused_device_guard_tests.py": "ba8977c1fca92d455112fbdfbff211309a453563c1a2411fc7a25a1cfcb17ddb"
+  },
+  "review": {
+    "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86",
+    "problem_id": "deepmind-synthid-text-26-device-guard",
+    "decision": "accept",
+    "note": "I reviewed the evidence packet and approve this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T22:06:56.494657+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
+  }
+}

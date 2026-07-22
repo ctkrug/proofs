@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "20260722-214820-984369",
+  "name": "run3-focused-device-guard-tests",
+  "hypothesis": "The patch rejects CPU before processing and allows CUDA and TPU to reach mocked training",
+  "expected_signal": "All three parameterized focused tests pass without accelerator hardware",
+  "command": [
+    "/usr/bin/env",
+    "PYTHONPATH=.run3-deps",
+    "python3",
+    "tools/run_focused_device_guard_tests.py",
+    "upstream/synthid-text/src/synthid_text/detector_bayesian.py",
+    "upstream/synthid-text/src/synthid_text/detector_bayesian_test.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace",
+  "seed": 0,
+  "timeout_seconds": 60,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T21:48:20.359169+00:00",
+  "finished_at": "2026-07-22T21:48:20.699049+00:00",
+  "duration_seconds": 0.34,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "370e9d9ab5b0289c033ee2add3969dfa454fa618",
+  "source_urls": [
+    "https://github.com/google-deepmind/synthid-text/issues/26"
+  ],
+  "input_artifacts": {
+    "/usr/bin/env": "1490a663e7312c4347987b2e12d7d73950ed1e9a322449daf8e4836660396e31",
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/tools/run_focused_device_guard_tests.py": "ba8977c1fca92d455112fbdfbff211309a453563c1a2411fc7a25a1cfcb17ddb",
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/upstream/synthid-text/src/synthid_text/detector_bayesian.py": "91752c7e5bb031a85330e23cb285bee0dcb3c715a4d3fc0be91a7ef48b19a4c5",
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/upstream/synthid-text/src/synthid_text/detector_bayesian_test.py": "c40427e34058d8ffa7b8cc079269aff8c6831f78116a0bdc78d3dda9d1069c1b"
+  },
+  "peak_child_memory_rusage": 28436,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.txt": "2646de3295865e7e0b48dc74adea605114a3eaeb2acb87c2dab587010fa9445a"
+  }
+}

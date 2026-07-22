@@ -1,0 +1,1 @@
+PASS: exact CPU-reject/CUDA+TPU-accept guard and regression cases verified

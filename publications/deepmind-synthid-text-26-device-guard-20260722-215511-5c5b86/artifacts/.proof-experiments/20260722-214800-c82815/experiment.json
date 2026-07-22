@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "20260722-214800-c82815",
+  "name": "run3-focused-dependency-setup",
+  "hypothesis": "Pinned focused test dependencies can be provisioned without the full ML stack",
+  "expected_signal": "pip installs absl-py 2.3.1 and mock 5.2.0 into the run-3 target directory",
+  "command": [
+    "python3",
+    "-m",
+    "pip",
+    "install",
+    "--disable-pip-version-check",
+    "--no-input",
+    "--target",
+    ".run3-deps",
+    "--requirement",
+    "requirements-focused.txt"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace",
+  "seed": 0,
+  "timeout_seconds": 120,
+  "memory_limit_mb": 512,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T21:48:00.559278+00:00",
+  "finished_at": "2026-07-22T21:48:02.047729+00:00",
+  "duration_seconds": 1.488,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "370e9d9ab5b0289c033ee2add3969dfa454fa618",
+  "source_urls": [
+    "https://github.com/google-deepmind/synthid-text/blob/addb4a158143c7c6851a1308f78b89fceed59683/pyproject.toml"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/requirements-focused.txt": "90b68080f37796746a2e5dcfe6e40b67573dd0fed14254387245f74cab2c53d0"
+  },
+  "peak_child_memory_rusage": 57216,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "a5810acac7148ec7b96799ab2cc8b7723e0da2f0a7f4e4763d1eaeda846d32db",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

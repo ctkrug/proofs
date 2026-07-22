@@ -1,0 +1,13 @@
+test_accelerator_type_reaches_training_pipeline0 ('cuda') (issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest)
+issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest.test_accelerator_type_reaches_training_pipeline0 ('cuda')
+test_accelerator_type_reaches_training_pipeline('cuda') ... ok
+test_accelerator_type_reaches_training_pipeline1 ('tpu') (issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest)
+issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest.test_accelerator_type_reaches_training_pipeline1 ('tpu')
+test_accelerator_type_reaches_training_pipeline('tpu') ... ok
+test_cpu_rejected_before_processing (issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest)
+issue_26_detector_bayesian_test.BayesianDetectorDeviceGuardTest.test_cpu_rejected_before_processing ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+OK

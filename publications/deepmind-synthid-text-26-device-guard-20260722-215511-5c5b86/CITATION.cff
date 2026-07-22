@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite it using this metadata."
+title: "Fix SynthID Text's inverted GPU training guard"
+type: software
+authors:
+  - family-names: "Krug"
+    given-names: "Charlie"
+date-released: "2026-07-22"
+repository-code: "https://github.com/ctkrug/proofs"
+url: "https://proofs.charliekrug.com/publications/deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86/"

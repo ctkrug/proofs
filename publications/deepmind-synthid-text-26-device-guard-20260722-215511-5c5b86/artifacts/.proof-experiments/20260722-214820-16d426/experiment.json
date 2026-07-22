@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "20260722-214820-16d426",
+  "name": "run3-pristine-inverse-control",
+  "hypothesis": "Pinned pristine addb4a1 exhibits the reported inverse guard",
+  "expected_signal": "CPU reaches mocked training while CUDA and TPU raise the CPU-instability error",
+  "command": [
+    "/usr/bin/env",
+    "PYTHONPATH=.run3-deps",
+    "python3",
+    "tools/check_prepatch_behavior.py",
+    "upstream/synthid-text",
+    "--ref",
+    "addb4a158143c7c6851a1308f78b89fceed59683"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace",
+  "seed": 0,
+  "timeout_seconds": 60,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T21:48:20.252150+00:00",
+  "finished_at": "2026-07-22T21:48:20.426340+00:00",
+  "duration_seconds": 0.174,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "370e9d9ab5b0289c033ee2add3969dfa454fa618",
+  "source_urls": [
+    "https://github.com/google-deepmind/synthid-text/issues/26"
+  ],
+  "input_artifacts": {
+    "/usr/bin/env": "1490a663e7312c4347987b2e12d7d73950ed1e9a322449daf8e4836660396e31",
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/tools/check_prepatch_behavior.py": "ad065e0d5d47b733facc447093d76b262c9c762755cbad716cd6280907a1ff7f"
+  },
+  "peak_child_memory_rusage": 18432,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "792bc55487efb2843e958866380e64295f45efc108200c3cf2e541fb1571117a",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

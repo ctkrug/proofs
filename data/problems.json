@@ -1471,7 +1471,7 @@
       "mocking"
     ],
     "lane": "easy",
-    "status": "candidate",
+    "status": "verified",
     "automation_eligible": true,
     "priority": 92,
     "attempt_count": 3,
@@ -1492,7 +1492,9 @@
       "close_signal": "The hash-bound patch applies to unchanged live main, focused tests pass 3/3, and both pristine mutation control and independent checker pass.",
       "reason": "The bounded contribution is candidate-complete; continuation means isolated human review and upstream validation, not another local branch replay."
     },
-    "candidate_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86"
+    "candidate_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86",
+    "human_approved": true,
+    "approved_packet": "publications/deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86"
   },
   {
     "id": "deepmind-alphageometry-32-cc-tangent0",

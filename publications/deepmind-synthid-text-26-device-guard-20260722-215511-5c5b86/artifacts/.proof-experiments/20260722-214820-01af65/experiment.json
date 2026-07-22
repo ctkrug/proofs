@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "id": "20260722-214820-01af65",
+  "name": "run3-pinned-patch-apply",
+  "hypothesis": "The hash-bound review patch applies to the pristine addb4a1 index",
+  "expected_signal": "git apply --check --cached succeeds and prints patch/base hashes",
+  "command": [
+    "python3",
+    "tools/check_patch_applies.py",
+    "upstream/synthid-text",
+    "patches/synthid-text-issue-26.patch",
+    "--base",
+    "addb4a158143c7c6851a1308f78b89fceed59683"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace",
+  "seed": 0,
+  "timeout_seconds": 60,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T21:48:20.385305+00:00",
+  "finished_at": "2026-07-22T21:48:20.565532+00:00",
+  "duration_seconds": 0.18,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "370e9d9ab5b0289c033ee2add3969dfa454fa618",
+  "source_urls": [
+    "https://github.com/google-deepmind/synthid-text/commit/addb4a158143c7c6851a1308f78b89fceed59683"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/tools/check_patch_applies.py": "c9bd48cdc526c283be8378d1ee6f2504b4e8cfb493db537765ce1e62206b3f66",
+    "/root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace/patches/synthid-text-issue-26.patch": "df1d9a580a0286cbb8e85e06fbb534721cc7c8beaedd1bfb047e1ded6c1caefd"
+  },
+  "peak_child_memory_rusage": 17920,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "2c22ba663f82544a40193dd33d994fa13ead7e68c4cd2a29183766b38d8b4abb",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
