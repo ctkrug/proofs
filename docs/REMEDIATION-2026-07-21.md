@@ -252,6 +252,15 @@ contribution to 70–85% and exact resolution to 45–65%; neither is a calibrat
 is active, but no exact value is claimed, and a global negative result still needs complete frontier
 coverage plus a second independently validated cardinality translation.
 
+A subsequent coordinated hard-tail pass added exact fourth-level stabilizer partitions and a schema-2
+incremental-assumptions harness. Independent review accepted their semantics after provenance, aggregate,
+root-context, mutation, and receipt hardening. The fourth-layer run sampled only biased child zero and is
+strictly a smoke test; all ten results were UNKNOWN. Glucose4 incremental reuse also closed 0/10 exact
+parent leaves and its interruption caps were best-effort, so its receipts are explicitly ineligible for
+the 40% route gate. Neither method scales unchanged. The reusable-contribution range remains 70–85%, while
+the exact-resolution judgment narrows to 40–60% pending a materially different propagation or encoding
+discriminator.
+
 The reusable design guidelines now encode this ease-first policy and permit parallel source review,
 adversarial audit, independent checker construction, documentation, and packet tooling while serializing
 shared ledgers, deployments, final assembly, and CPU/cache-conflicting computation.
