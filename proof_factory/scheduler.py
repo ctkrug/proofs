@@ -15,6 +15,17 @@ ACTIVE_STATUSES = {"queued", "active", "attempted", "candidate"}
 MAX_RENDER_LAG_SECONDS = 4 * 3600
 
 
+def is_one_shot_easy_target(problem: dict[str, Any]) -> bool:
+    """Return whether a bounded contribution should skip a research-only baseline turn."""
+    return bool(
+        problem.get("lane") == "easy"
+        and problem.get("automation_eligible") is True
+        and int(problem.get("difficulty") or 10) <= 3
+        and int(problem.get("verification_score") or 0) >= 8
+        and "github.com/" in str(problem.get("source_url") or "")
+    )
+
+
 def _reviewable_events(problem_id: str) -> list[dict[str, Any]]:
     """Return evidence that warrants a model turn, excluding tranche-internal receipts."""
     return [row for row in events.pending(problem_id) if row.get("kind") != "lab_segment_completed"]
@@ -286,7 +297,11 @@ def tick(lane: str, *, publish: bool = False) -> dict[str, Any]:
         research_events = _reviewable_events(problem["id"])
         if lane == "easy":
             problem = store.start_discovery_campaign(problem["id"])
-        phase = "baseline" if research_state.needs_baseline(problem) else "technical"
+        phase = (
+            "technical"
+            if is_one_shot_easy_target(problem)
+            else ("baseline" if research_state.needs_baseline(problem) else "technical")
+        )
         repositories.ensure(problem)
         workspace = store.RESEARCH / problem["id"] / "workspace"
         try:

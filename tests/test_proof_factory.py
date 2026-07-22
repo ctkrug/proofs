@@ -310,6 +310,40 @@ class ProofFactoryTests(unittest.TestCase):
         }
         self.assertTrue(contribution_gate.assess(result)["passed"])
 
+    def test_contribution_gate_accepts_deterministic_checker_for_review_candidate(self) -> None:
+        result = {
+            "candidate_profile": {
+                "contribution_class": "research_artifact",
+                "scholarly_question": "Does the reported repository defect have a complete repair?",
+                "meaningful_delta": "Repairs the requested defect and adds a regression test.",
+                "acceptance_test": "The focused test and an independent checker both pass.",
+                "closest_prior_work": [{"url": "https://example.test/issues/1", "difference": "Open and unpatched."}],
+                "novelty_searches": [
+                    {"source": "issue", "query": "#1", "url": "https://example.test/issues/1", "finding": "No linked patch."},
+                    {"source": "pull requests", "query": "defect", "url": "https://example.test/pulls", "finding": "No matching PR."},
+                ],
+                "external_channel": {"recipient": "Repository maintainers", "url": "https://example.test/pulls", "acceptance_path": "Submit a tested pull request."},
+                "independent_validations": [{"type": "deterministic_checker", "validator": "separate regression checker", "result": "passed", "artifact": "tools/check_fix.py"}],
+                "relevance": {"settles_exact_open_target": False, "improves_best_known_result": False, "source_explicitly_requests_result": True, "expert_interest_confirmed": False, "new_structural_result": False, "evidence_url": "https://example.test/issues/1"},
+                "arbitrary_cutoff_extension": False,
+            }
+        }
+        gate = contribution_gate.assess(result)
+        self.assertTrue(gate["passed"])
+        self.assertEqual(gate["independent_validation_types"], ["deterministic_checker"])
+
+    def test_one_shot_easy_prompt_does_not_defer_completed_candidate(self) -> None:
+        problem = {
+            "id": "easy-fix", "title": "Fix", "statement": "Repair bug", "source_url": "https://github.com/org/repo/issues/1",
+            "problem_state": "open", "rationale": "bounded", "verifiability": "focused test", "techniques": ["Python"],
+            "lane": "easy", "automation_eligible": True, "difficulty": 1, "verification_score": 10,
+            "campaign_min_runs": 25, "campaign_start_research_attempt_count": 0, "research_attempt_count": 0,
+        }
+        prompt = agent.build_prompt(problem, "easy", Path("/tmp/easy-fix"), phase="technical")
+        self.assertIn("ONE-SHOT CONTRIBUTION MODE", prompt)
+        self.assertIn("campaign minimum never delays a completed candidate", prompt)
+        self.assertIn("deterministic_checker", prompt)
+
     def test_rejected_candidate_displays_as_internal_result(self) -> None:
         attempt = {"id": "a", "outcome": "candidate"}
         reviews = [{"decision": "reject", "display_status": "internal_result"}]

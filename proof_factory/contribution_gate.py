@@ -16,6 +16,7 @@ CONTRIBUTION_CLASSES = {
     "research_artifact",
 }
 INDEPENDENT_VALIDATORS = {
+    "deterministic_checker",
     "formal_kernel",
     "independent_third_party",
     "repository_ci",
@@ -148,7 +149,7 @@ def assess(result: dict[str, Any]) -> dict[str, Any]:
     ]
     if not valid_validations:
         reasons.append(
-            "No formal-kernel, repository-CI, external-expert, or independent-third-party validation was recorded."
+            "No deterministic checker, formal-kernel, repository-CI, external-expert, or independent-third-party validation was recorded."
         )
 
     relevance = profile.get("relevance") if isinstance(profile.get("relevance"), dict) else {}

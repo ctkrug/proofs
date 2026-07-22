@@ -617,13 +617,31 @@ def build_prompt(
         int(problem.get("campaign_min_runs") or 0),
     )
     next_campaign_run = completed_campaign_runs + 1
+    one_shot = bool(
+        not hard
+        and problem.get("automation_eligible") is True
+        and int(problem.get("difficulty") or 10) <= 3
+        and int(problem.get("verification_score") or 0) >= 8
+        and "github.com/" in str(problem.get("source_url") or "")
+    )
+    one_shot_contract = "" if not one_shot else """
+ONE-SHOT CONTRIBUTION MODE
+This is a bounded, high-verifiability repository contribution. Aim to finish the implementation, focused regression
+tests, independent deterministic checker, and review-ready patch in this epoch. Do not spend a separate turn merely
+repeating source triage that is already recorded. A completed contribution must request `candidate` immediately; the
+campaign minimum never delays a completed candidate. Record the materially separate checker as an independent validation
+of type `deterministic_checker` with its immutable artifact path. This makes the result eligible for isolated human review,
+not verified, accepted, or published. If the task cannot be completed, preserve the exact blocker and smallest next action.
+"""
     campaign_contract = "" if hard else f"""
 DISCOVERY CAMPAIGN
 This is non-error research run {next_campaign_run} on this problem; the minimum review point is run {campaign_minimum}.
-Do not recommend switching problems before that minimum. At the end of every run, return `campaign_assessment`.
-Before run {campaign_minimum}, its decision must be `continue`. At or after run {campaign_minimum}, use `continue` only
+The minimum applies only while the recognized target remains unresolved; it never blocks a completed `candidate`.
+Do not recommend switching an unresolved problem before that minimum. At the end of every run, return `campaign_assessment`.
+Before run {campaign_minimum}, its decision must be `continue` for unresolved work. At or after run {campaign_minimum}, use `continue` only
 when `close_signal` names concrete evidence that the next bounded pass has a credible path to a verifiable contribution;
 otherwise use `hold`. A merely open problem, generic optimism, or a renamed dead route is not a close signal.
+{one_shot_contract}
 """
     prompt = f"""You are the next principal-investigator epoch in an indefinitely continuing, headless research campaign.
 The campaign has no preset final number of epochs. This process has a {epoch_minutes}-minute safety ceiling, so leave a
@@ -669,7 +687,7 @@ WHAT DOES NOT COUNT
 - Reopening a blocked or ruled-out route without satisfying its recorded reopen condition or providing materially new evidence.
 
 LANE AND THIS EPOCH'S JOB
-{('Hard/famous lane. Seek one genuinely new lemma, reduction, parametric family, computational bound, or falsifiable route. Do not spend the run narrating the whole famous problem.' if hard else 'Discovery lane. Prefer a concrete witness, executable search, exact identity, formal lemma, or rigorous elimination of a bounded route.')}
+{('Hard/famous lane. Seek one genuinely new lemma, reduction, parametric family, computational bound, or falsifiable route. Do not spend the run narrating the whole famous problem.' if hard else ('Bounded contribution lane. One-shot the complete patch, focused tests, independent deterministic checker, and review packet whenever the verification contract can be satisfied.' if one_shot else 'Discovery lane. Prefer a concrete witness, executable search, exact identity, formal lemma, or rigorous elimination of a bounded route.'))}
 
 SOL-TERRA ORCHESTRATION
 You are the GPT-5.6 Sol principal. Terra delegates performed bounded reconnaissance before this pass. Their memos are
@@ -826,7 +844,7 @@ WORK RULES
     "closest_prior_work":[{{"url":"direct primary-source URL","difference":"exact difference"}}],
     "novelty_searches":[{{"source":"database or citation graph","query":"reproducible query","url":"direct results/source URL","finding":"what was found"}}],
     "external_channel":{{"recipient":"named maintainer/expert/venue","url":"channel URL","acceptance_path":"how it can be accepted"}},
-    "independent_validations":[{{"type":"formal_kernel|independent_third_party|repository_ci|external_expert","validator":"who or what","result":"exact result","artifact":"local certificate path or blank","evidence_url":"public evidence or blank"}}],
+    "independent_validations":[{{"type":"deterministic_checker|formal_kernel|independent_third_party|repository_ci|external_expert","validator":"who or what","result":"exact result","artifact":"local certificate path or blank","evidence_url":"public evidence or blank"}}],
     "relevance":{{"settles_exact_open_target":false,"improves_best_known_result":false,"source_explicitly_requests_result":false,"expert_interest_confirmed":false,"new_structural_result":false,"evidence_url":"supporting URL"}},
     "arbitrary_cutoff_extension":false
   }},
