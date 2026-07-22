@@ -14,7 +14,7 @@
       "repository": "ctkrug/proofs-covering-c1264",
       "url": "https://github.com/ctkrug/proofs-covering-c1264",
       "visibility": "PUBLIC",
-      "commit": "31c50ea41fb79e6aacd27b0ef22c50ca8ca58b11"
+      "commit": "d88e362ef0813959dca0300bb5263226014c30bf"
     },
     {
       "problem_id": "erdos-307",
@@ -173,6 +173,22 @@
     {
       "problem_id": "rocq-18136-rewrite-strategy-warning",
       "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/rocq-18136-rewrite-strategy-warning/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-ai-foundations-37-layernorm-count",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-distrax-337-hmm-padding",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-synthid-text-26-device-guard",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-synthid-text-26-device-guard/workspace: merge: origin/main - not something we can merge"
+    },
+    {
+      "problem_id": "deepmind-alphageometry-32-cc-tangent0",
+      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-alphageometry-32-cc-tangent0/workspace: merge: origin/main - not something we can merge"
     }
   ],
   "projection_retry": {
