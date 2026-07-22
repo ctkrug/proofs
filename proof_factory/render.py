@@ -129,6 +129,13 @@ def _problem_card(problem: dict[str, Any], attempts: list[dict[str, Any]], state
 </article>"""
 
 
+def _candidate_review_href(candidates: list[dict[str, Any]]) -> str:
+    """Link one candidate to its dossier; send a queue to the live work section."""
+    if len(candidates) == 1:
+        return f"/problems/{h(candidates[0].get('id'))}/"
+    return "#ongoing"
+
+
 def _index(
     problems: list[dict[str, Any]], attempts: list[dict[str, Any]], runtime: dict[str, Any], reviews: list[dict[str, Any]]
 ) -> str:
@@ -157,7 +164,7 @@ def _index(
     planned = ordered([row for row in problems if row.get("status") == "queued"])
     candidate_banner = ""
     if candidates:
-        candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="#problems">Review records →</a></section>"""
+        candidate_banner = f"""<section class="candidate-alert"><div><span class="pulse"></span><strong>{len(candidates)} candidate finding{'s' if len(candidates) != 1 else ''} need review.</strong><p>Candidate means unverified. It is not a solved claim.</p></div><a href="{_candidate_review_href(candidates)}">Review records →</a></section>"""
     blocker_banner = ""
     if operational_blockers:
         blocker = operational_blockers[0] if isinstance(operational_blockers[0], dict) else {"detail": str(operational_blockers[0])}

@@ -93,6 +93,16 @@ class HTMLTemplateTests(unittest.TestCase):
         self.assertIn('id="memory"', output)
         self.assertIn("How it works · Proof Factory", output)
 
+    def test_single_candidate_review_link_opens_its_record(self) -> None:
+        href = render._candidate_review_href([{"id": "candidate-one"}])
+
+        self.assertEqual(href, "/problems/candidate-one/")
+
+    def test_multiple_candidate_review_link_targets_existing_section(self) -> None:
+        href = render._candidate_review_href([{"id": "candidate-one"}, {"id": "candidate-two"}])
+
+        self.assertEqual(href, "#ongoing")
+
 
 if __name__ == "__main__":
     unittest.main()
