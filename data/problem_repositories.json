@@ -21,14 +21,7 @@
       "repository": "ctkrug/proofs-ramsey-r55",
       "url": "https://github.com/ctkrug/proofs-ramsey-r55",
       "visibility": "PUBLIC",
-      "commit": "0f75ab9da456a2fe10d7906a3b374ca7de7ff59a"
-    },
-    {
-      "problem_id": "covering-c1264",
-      "repository": "ctkrug/proofs-covering-c1264",
-      "url": "https://github.com/ctkrug/proofs-covering-c1264",
-      "visibility": "PUBLIC",
-      "commit": "5a8dd0ec77d208c183cb0ea7f021c4c2cc252c89"
+      "commit": "6b50af7ff0edfa7c3523da4ba025d3a449c98280"
     },
     {
       "problem_id": "erdos-647",
@@ -136,7 +129,12 @@
       "commit": "c7c42f1ef0e6b9dafb22bccd64789ba28c53311e"
     }
   ],
-  "errors": [],
+  "errors": [
+    {
+      "problem_id": "covering-c1264",
+      "error": "RuntimeError: origin already points elsewhere for covering-c1264: https://github.com/ctkrug/proofs-covering-c1264.git"
+    }
+  ],
   "projection_retry": {
     "retried": 0,
     "remaining": 0,
