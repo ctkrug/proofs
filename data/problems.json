@@ -1471,27 +1471,28 @@
       "mocking"
     ],
     "lane": "easy",
-    "status": "active",
+    "status": "candidate",
     "automation_eligible": true,
     "priority": 92,
-    "attempt_count": 2,
-    "research_attempt_count": 2,
+    "attempt_count": 3,
+    "research_attempt_count": 3,
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
     "intake_source": "independent Google DeepMind repository audit",
-    "campaign_state": "active",
+    "campaign_state": "review",
     "campaign_started_at": "2026-07-22T21:12:33.104030+00:00",
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
-    "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-22T21:42:40.054051+00:00",
+    "campaign_decision": "candidate awaiting review",
+    "last_attempt_at": "2026-07-22T21:55:11.341383+00:00",
     "campaign_last_assessment": {
-      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-214240-e5c8df",
+      "attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86",
       "decision": "continue",
-      "close_signal": "Hash-bound patch applies to live main addb4a1, focused tests pass 3/3, pristine mutation control and independent checker pass, and the prior receipt blocker was removed.",
-      "reason": "The bounded contribution is candidate-complete; continued work means isolated human review and upstream validation rather than another local implementation epoch."
-    }
+      "close_signal": "The hash-bound patch applies to unchanged live main, focused tests pass 3/3, and both pristine mutation control and independent checker pass.",
+      "reason": "The bounded contribution is candidate-complete; continuation means isolated human review and upstream validation, not another local branch replay."
+    },
+    "candidate_attempt_id": "deepmind-synthid-text-26-device-guard-20260722-215511-5c5b86"
   },
   {
     "id": "deepmind-alphageometry-32-cc-tangent0",
