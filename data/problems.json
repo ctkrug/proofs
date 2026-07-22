@@ -1405,7 +1405,7 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "candidate",
+    "status": "verified",
     "automation_eligible": true,
     "priority": 94,
     "attempt_count": 2,
@@ -1426,7 +1426,9 @@
       "close_signal": "The one-line patch, repository regression, pristine failure, patched replays, focused suite, independent six-profile checker, and hash-bound completion receipt are all present.",
       "reason": "The local technical contribution is candidate-complete; one bounded continuation for human review and upstream CI has high value, while further unsourced parameter sweeps do not."
     },
-    "candidate_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4"
+    "candidate_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+    "human_approved": true,
+    "approved_packet": "publications/deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4"
   },
   {
     "id": "deepmind-synthid-text-26-device-guard",

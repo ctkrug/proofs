@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "20260722-204153-3f9ac4",
+  "name": "patched-focused-hmm-tests",
+  "hypothesis": "Preserving beta_prev across padded reverse-scan steps makes padded forward_backward match the sliced prefix for valid alpha, beta, posterior, and log-likelihood without regressing existing HMM forward-backward tests.",
+  "expected_signal": "All test_forward_backward cases pass across the available Chex eager, JIT, device, and pmap variants; unavailable multi-device variants may be skipped.",
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "upstream/distrax/distrax/_src/utils/hmm_test.py",
+    "-k",
+    "forward_backward"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace",
+  "seed": 0,
+  "timeout_seconds": 300,
+  "memory_limit_mb": 4096,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T20:41:53.770676+00:00",
+  "finished_at": "2026-07-22T20:46:15.696636+00:00",
+  "duration_seconds": 261.927,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "8e67bdb5c691d8a6213718f260e917b67df0b201",
+  "source_urls": [
+    "https://github.com/google-deepmind/distrax/issues/337"
+  ],
+  "input_artifacts": {
+    "/usr/bin/python3.12": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+    "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/upstream/distrax/distrax/_src/utils/hmm_test.py": "be5c0de0153160eb23741f572c89ac7e602cd1fe46e5dbddce8db206449b081f"
+  },
+  "peak_child_memory_rusage": 569312,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "773689c2af5917b926aad2a31a2a3e219f37028999274a591c68ca2640f7a803",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

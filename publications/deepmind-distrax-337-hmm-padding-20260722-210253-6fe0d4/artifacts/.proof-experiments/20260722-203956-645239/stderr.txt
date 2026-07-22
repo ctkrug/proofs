@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/artifacts/hmm_padding_discriminator.py", line 37, in <module>
+    main()
+  File "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/artifacts/hmm_padding_discriminator.py", line 29, in main
+    np.testing.assert_allclose(beta_padded[:valid_length], beta_prefix,
+  File "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/.venv/lib/python3.12/site-packages/numpy/testing/_private/utils.py", line 1780, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+  File "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/.venv/lib/python3.12/site-packages/numpy/testing/_private/utils.py", line 988, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-06, atol=1e-06
+
+Mismatched elements: 6 / 6 (100%)
+First 5 mismatches are at indices:
+ [0, 0]: 0.0 (ACTUAL), 0.22222228348255157 (DESIRED)
+ [0, 1]: 0.0 (ACTUAL), 0.7777776718139648 (DESIRED)
+ [1, 0]: 0.0 (ACTUAL), 0.7272726893424988 (DESIRED)
+ [1, 1]: 0.0 (ACTUAL), 0.2727273106575012 (DESIRED)
+ [2, 0]: 0.0 (ACTUAL), 1.0 (DESIRED)
+Max absolute difference among violations: 1.
+Max relative difference among violations: 1.
+ ACTUAL: array([[0., 0.],
+       [0., 0.],
+       [0., 0.]], dtype=float32)
+ DESIRED: array([[0.222222, 0.777778],
+       [0.727273, 0.272727],
+       [1.      , 1.      ]], dtype=float32)

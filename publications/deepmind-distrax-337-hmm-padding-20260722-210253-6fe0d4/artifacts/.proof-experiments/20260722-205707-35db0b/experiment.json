@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "id": "20260722-205707-35db0b",
+  "name": "replay-patched-issue-337",
+  "hypothesis": "At pinned upstream 6701435c with the one-line carry patch, the issue reproduction matches beta, posterior, and log-likelihood on the valid prefix.",
+  "expected_signal": "Standalone discriminator exits 0.",
+  "command": [
+    "/tmp/distrax-337-evidence-venv-20260722T2054Z/bin/python",
+    "artifacts/hmm_padding_discriminator.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace",
+  "seed": 0,
+  "timeout_seconds": 180,
+  "memory_limit_mb": 4096,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T20:57:07.667005+00:00",
+  "finished_at": "2026-07-22T20:57:29.271510+00:00",
+  "duration_seconds": 21.605,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "a5a1ad914549812187028db69859a0ec24caa154",
+  "source_urls": [
+    "https://github.com/google-deepmind/distrax/issues/337"
+  ],
+  "input_artifacts": {
+    "/usr/bin/python3.12": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+    "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/artifacts/hmm_padding_discriminator.py": "dd5fa1ef0530448a3b811d5ef31630994b15f51960cd880d5e09348708c46683"
+  },
+  "peak_child_memory_rusage": 411220,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

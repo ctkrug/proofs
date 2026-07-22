@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "title": "Preserve valid HMM marginals for padded sequences in Distrax",
+  "problem_id": "deepmind-distrax-337-hmm-padding",
+  "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+  "contribution_type": "research software correctness",
+  "status": "public-research-note",
+  "peer_reviewed": false,
+  "expert_confirmed": false,
+  "created_at": "2026-07-22T21:09:32.223084+00:00",
+  "creator": "Charlie Krug",
+  "ai_assistance_disclosed": true,
+  "source_url": "https://github.com/google-deepmind/distrax/issues/337",
+  "claims": [
+    "At upstream commit 6701435c2b0796ec2d6dddf11bae0df615a62017, the issue witness returns zero beta values for all six valid state-time entries.",
+    "With the one-line carry patch, padded and sliced forward_backward results agree within declared tolerances for valid alpha, beta, posterior, and log-likelihood at L=1, 3, and 5 in two fixed HMM parameterizations.",
+    "The complete focused forward-backward selection passed 45 tests and 180 subtests, with 15 multi-device pmap variants skipped on the one-device host.",
+    "The patch is byte-identical to the pinned checkout diff, passes git diff --check, and is reverse-applicable.",
+    "This is a local candidate for human review, not an accepted upstream fix."
+  ],
+  "evidence": [
+    "Baseline experiment 20260722-203956-645239 returned 1 at the beta equality assertion with all six padded valid-prefix beta entries zero.",
+    "Focused suite 20260722-204153-3f9ac4 returned 0: 45 passed, 15 skipped, 180 subtests passed.",
+    "Patched issue replay 20260722-205707-35db0b returned 0.",
+    "Independent replay 20260722-205707-d2f290 returned 0 with six machine-readable profile results.",
+    "Regression-only replay 20260722-205741-bec817 returned 0: 9 passed and 3 unavailable pmap variants skipped.",
+    "sha256sum -c artifacts/run2-evidence.sha256 validated every listed artifact."
+  ],
+  "independent_checker": "artifacts/check_hmm_padding_numpy.py separately implements normalized forward and backward recurrences in NumPy, then compares them with JIT-compiled padded and sliced Distrax inference for two HMMs and lengths 1, 3, and 5.",
+  "citations": [
+    "https://github.com/google-deepmind/distrax/issues/337",
+    "https://github.com/google-deepmind/distrax/blob/6701435c2b0796ec2d6dddf11bae0df615a62017/distrax/_src/utils/hmm.py#L226-L237",
+    "https://github.com/google-deepmind/distrax/blob/6701435c2b0796ec2d6dddf11bae0df615a62017/distrax/_src/utils/hmm_test.py",
+    "https://github.com/google-deepmind/distrax/pulls?q=is%3Apr+337"
+  ],
+  "artifact_hashes": {
+    "artifacts/.delegates/20260722-205434-a08aaf/source-discriminator/memo.md": "bf5fb0944515ac47549812917dd78f1fc0ab8b8e2718bcbbce4aef5a5d8e819e",
+    "artifacts/.proof-experiments/20260722-203956-645239/experiment.json": "641e1d8bce9b32f3fef74a2e696709775bb4ab646339cc8c2070acafef352bfa",
+    "artifacts/.proof-experiments/20260722-203956-645239/stderr.txt": "3e04d110032a3190ca5579ec265d0acd5a21918984f72d0ddf2c090163682277",
+    "artifacts/.proof-experiments/20260722-204153-3f9ac4/experiment.json": "f25b6e6b927cd690dd85def0328e60ab45745e518931d8ed86534a55ab4b4d43",
+    "artifacts/.proof-experiments/20260722-204153-3f9ac4/stdout.txt": "773689c2af5917b926aad2a31a2a3e219f37028999274a591c68ca2640f7a803",
+    "artifacts/.proof-experiments/20260722-205707-35db0b/experiment.json": "8e9d44f7ba0335a3447197c07b19519c2ab8152a72cad3fd09b5e71558d0ea54",
+    "artifacts/.proof-experiments/20260722-205707-35db0b/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-205707-35db0b/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-205707-d2f290/experiment.json": "2c4e18f28b82c90fa75a3b1f9e31eb38e9f8f7e80a83f86af231a9ac23859fcf",
+    "artifacts/.proof-experiments/20260722-205707-d2f290/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-205707-d2f290/stdout.txt": "082a69209a5a41ba3c37c90e757f7ad9ef4fa07911bb31bde49292779ace3dc3",
+    "artifacts/.proof-experiments/20260722-205741-bec817/experiment.json": "f713d5cfdb33e4cbb09aeeb525a65ea45f4968ecec6bb3e7155ba7a3e2a98cca",
+    "artifacts/.proof-experiments/20260722-205741-bec817/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-205741-bec817/stdout.txt": "2bb8af8386efb9aab251e52b43140f6a1b7a3a348446ecee8ba9deb4e85b7d70",
+    "artifacts/artifacts/check_hmm_padding_numpy.py": "9f9db42e7ac9f44af60b714c56cdc8db2fc858ae0b85e523658c1d587bd0cf9a",
+    "artifacts/artifacts/hmm_padding_discriminator.py": "dd5fa1ef0530448a3b811d5ef31630994b15f51960cd880d5e09348708c46683",
+    "artifacts/artifacts/requirements-lock.txt": "f2f3fa0f66a54b495512b73e910aa7b794cb40979ffdec01b1ee375e8c6a4bc4",
+    "artifacts/artifacts/review-packet.md": "5c81739ec20ab403d77f11ef8a294682b0f2b1fda328e16cc14defe8890da6a2",
+    "artifacts/artifacts/run2-evidence.sha256": "97bfbb0682ae60491b695e1c36609133edde069f9d16b7b8fcc6fdee3f88ca4d",
+    "artifacts/artifacts/run2-validation.md": "cb311058933d0b45eb9ece4a0b12436f698692558c63b37b986a8d3827e5712d",
+    "artifacts/patches/0001-preserve-hmm-backward-carry.patch": "f115729ba1da41a10b3266f7621dc5d048797d6d39696820eaa83e48c7b12733"
+  },
+  "review": {
+    "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+    "problem_id": "deepmind-distrax-337-hmm-padding",
+    "decision": "accept",
+    "note": "I reviewed the evidence packet and approve this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T21:09:32.223084+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
+  }
+}

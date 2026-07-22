@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "id": "20260722-203956-645239",
+  "name": "baseline-hmm-padding-discriminator",
+  "hypothesis": "At upstream 6701435c, padded forward_backward differs from sliced-prefix beta and posterior on the valid prefix.",
+  "expected_signal": "The discriminator exits nonzero at the beta equality assertion, while its output shows zero padded beta values.",
+  "command": [
+    ".venv/bin/python",
+    "artifacts/hmm_padding_discriminator.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace",
+  "seed": 0,
+  "timeout_seconds": 120,
+  "memory_limit_mb": 4096,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T20:39:56.181362+00:00",
+  "finished_at": "2026-07-22T20:40:05.735391+00:00",
+  "duration_seconds": 9.554,
+  "returncode": 1,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "8e67bdb5c691d8a6213718f260e917b67df0b201",
+  "source_urls": [
+    "https://github.com/google-deepmind/distrax/issues/337"
+  ],
+  "input_artifacts": {
+    "/usr/bin/python3.12": "1643dacd9feaedc58f3cc581e4d22577dfe25c09b10282936186ccf0f2e61118",
+    "/root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace/artifacts/hmm_padding_discriminator.py": "dd5fa1ef0530448a3b811d5ef31630994b15f51960cd880d5e09348708c46683"
+  },
+  "peak_child_memory_rusage": 409436,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.txt": "3e04d110032a3190ca5579ec265d0acd5a21918984f72d0ddf2c090163682277"
+  }
+}

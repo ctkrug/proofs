@@ -34,5 +34,14 @@
     "reviewed_at": "2026-07-22T20:31:45.793933+00:00",
     "reviewer": "Charlie Krug",
     "display_status": "candidate"
+  },
+  {
+    "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+    "problem_id": "deepmind-distrax-337-hmm-padding",
+    "decision": "accept",
+    "note": "I reviewed the evidence packet and approve this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T21:09:32.223084+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
   }
 ]
