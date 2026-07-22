@@ -56,3 +56,9 @@ Approval authorizes release of this research note; it does not substitute for in
 Inspect the source, run the recorded experiment commands, compare hashes, and try to falsify the
 claim with an independent implementation. Corrections are welcome through the repository issue
 tracker. External acceptance or expert review is recorded separately from this release.
+
+## External record — submitted
+
+- Recorded: 2026-07-22T17:51:15.303442+00:00
+- Source: [https://github.com/google-deepmind/superhuman/pull/18](https://github.com/google-deepmind/superhuman/pull/18)
+- Note: Draft pull request #18 opened against google-deepmind/superhuman main with the approved one-byte CSV correction.

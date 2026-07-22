@@ -60,5 +60,16 @@
     "reviewed_at": "2026-07-22T17:42:37.502176+00:00",
     "reviewer": "Charlie Krug",
     "display_status": "candidate"
-  }
+  },
+  "external_validation_history": [
+    {
+      "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+      "problem_id": "deepmind-superhuman-13-answerbench-column",
+      "state": "submitted",
+      "source_url": "https://github.com/google-deepmind/superhuman/pull/18",
+      "note": "Draft pull request #18 opened against google-deepmind/superhuman main with the approved one-byte CSV correction.",
+      "recorded_at": "2026-07-22T17:51:15.303442+00:00",
+      "recorded_by": "Charlie Krug"
+    }
+  ]
 }

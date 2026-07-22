@@ -971,7 +971,9 @@
     "approved_packet": "publications/deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
     "publication_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
     "publication_packet": "publications/deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
-    "publication_state": "public research note"
+    "publication_state": "public research note",
+    "external_validation_state": "submitted",
+    "external_validation_url": "https://github.com/google-deepmind/superhuman/pull/18"
   },
   {
     "id": "deepmind-superhuman-16-faithfulness",

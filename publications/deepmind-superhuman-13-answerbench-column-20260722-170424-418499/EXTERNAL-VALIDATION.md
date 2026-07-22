@@ -10,3 +10,9 @@ The website and GitHub release are provenance artifacts, not external scholarly 
 4. Record replies, corrections, DOI, repository acceptance, and peer-review state without collapsing
    them into one generic “published” label.
 5. Never bulk-submit or auto-email experts.
+
+## External record — submitted
+
+- Recorded: 2026-07-22T17:51:15.303442+00:00
+- Source: [https://github.com/google-deepmind/superhuman/pull/18](https://github.com/google-deepmind/superhuman/pull/18)
+- Note: Draft pull request #18 opened against google-deepmind/superhuman main with the approved one-byte CSV correction.
