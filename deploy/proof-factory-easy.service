@@ -8,7 +8,7 @@ Type=oneshot
 WorkingDirectory=/root/proof-factory
 EnvironmentFile=/etc/proof-factory/proof-factory.env
 Environment=HOME=/root
-Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.cache/proof-factory/lean/elan/bin:/root/.elan/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+Environment=PATH=/root/proof-factory/.lab-venv/bin:/root/.cache/proof-factory/lean/elan/bin:/root/.elan/bin:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 Environment=PROOF_CODEX_SANDBOX=danger-full-access
 EnvironmentFile=-/root/project-factory/.env
 ExecStartPre=/root/proof-factory/.venv/bin/python -m proof_factory.config validate --profile lane

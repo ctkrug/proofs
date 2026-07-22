@@ -113,6 +113,8 @@ class SystemdConfigurationTests(unittest.TestCase):
         lab = (DEPLOY / "proof-factory-lab.service").read_text()
         self.assertIn("Environment=PROOF_CODEX_SANDBOX=danger-full-access", easy)
         self.assertIn("Environment=PROOF_CODEX_SANDBOX=workspace-write", hard)
+        self.assertIn("/root/.local/bin", easy)
+        self.assertIn("/root/.local/bin", hard)
         for directive in (
             "CPUQuota=100%", "MemoryHigh=3400M", "MemoryMax=3600M", "TimeoutStartSec=25h",
             "IPAddressDeny=any", "NoNewPrivileges=true",
