@@ -149,10 +149,14 @@ class ProofFactoryTests(unittest.TestCase):
 
     def test_scout_requires_sourced_scored_candidate(self) -> None:
         text = '''```contribution_candidate
-{"outcome":"candidate","title":"One missing case","statement":"Determine exact X(7).","source_url":"https://example.test/paper","source_name":"Paper","problem_state":"open","contribution_type":"exact optimum","verifiability":"Witness and UNSAT certificate","rationale":"Adjacent cases are known","external_channel":"Maintained table","external_url":"https://example.test/table","upstream_work_check":{"active_prs":0,"checked_url":"https://example.test/issues/7","checked_at":"2026-07-21","evidence":"no linked PR"},"estimated_success_probability":0.2,"difficulty":4,"verification_score":5,"contribution_score":3,"review_cost":2,"novelty_risk":3,"techniques":["SAT"]}
+{"outcome":"candidate","title":"One missing case","statement":"Determine exact X(7).","source_url":"https://example.test/paper","source_name":"Paper","problem_state":"open","contribution_type":"exact optimum","verifiability":"Witness and UNSAT certificate","rationale":"Adjacent cases are known","external_channel":"Maintained table","external_url":"https://example.test/table","upstream_work_check":{"active_prs":0,"active_claims":0,"issue_comments_checked":true,"same_author_prs_checked":true,"checked_url":"https://example.test/issues/7","checked_at":"2026-07-21","evidence":"comments and linked/same-author PRs checked; no active work"},"estimated_success_probability":0.2,"difficulty":4,"verification_score":5,"contribution_score":3,"review_cost":2,"novelty_risk":3,"techniques":["SAT"]}
 ```'''
         value = scout.extract_candidate(text)
         self.assertEqual(value["contribution_type"], "exact optimum")
+        stale = dict(value)
+        stale["upstream_work_check"] = {**value["upstream_work_check"], "active_claims": 1}
+        with self.assertRaisesRegex(ValueError, "active_claims=0"):
+            scout.extract_candidate(json.dumps(stale))
         self.assertEqual(scout.extract_candidate('{"outcome":"no_candidate","reason":"No current source survived."}')["outcome"], "no_candidate")
 
     def test_extract_structured_result(self) -> None:
