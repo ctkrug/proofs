@@ -39,6 +39,8 @@ install -m 0644 deploy/proof-factory-strategy-lab.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-strategy-lab.timer /etc/systemd/system/
 install -m 0644 deploy/proof-factory-runtime-sync.service /etc/systemd/system/
 install -m 0644 deploy/proof-factory-runtime-sync.timer /etc/systemd/system/
+install -m 0644 deploy/proof-factory-review-inbox.service /etc/systemd/system/
+install -m 0644 deploy/proof-factory-review-inbox.timer /etc/systemd/system/
 systemctl daemon-reload
 
 # The deployed portfolio has passed its canaries; enable the bounded production cadences.
@@ -52,3 +54,4 @@ systemctl enable --now proof-factory-publish.timer
 systemctl enable --now proof-factory-publish.path
 systemctl enable --now proof-factory-lab.timer
 systemctl enable --now proof-factory-runtime-sync.timer
+systemctl enable --now proof-factory-review-inbox.timer

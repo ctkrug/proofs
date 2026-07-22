@@ -232,7 +232,16 @@ def _problem_page(
     ) or '<div class="empty">No attempt has completed yet. The problem is queued transparently.</div>'
     candidate = ""
     if problem.get("status") == "candidate":
-        candidate = '<div class="candidate-alert"><div><strong>Unverified candidate finding</strong><p>Read the attempt and evidence below. This is not an accepted solution.</p></div></div>'
+        candidate_attempt_id = h(problem.get("candidate_attempt_id") or "")
+        candidate = f'''<section class="candidate-review" data-candidate-review data-attempt-id="{candidate_attempt_id}">
+  <div class="candidate-review-copy"><span class="overline">Human review gate</span><h2>Unverified candidate finding</h2><p>Read the attempt and evidence below. Approval records your human review; it does not claim external acceptance or submit the result.</p><code>{candidate_attempt_id}</code></div>
+  <form class="candidate-review-form" data-candidate-review-form>
+    <label>Review note<textarea name="note" required>I reviewed the evidence packet and approve this candidate for the next external contribution step.</textarea></label>
+    <label>Approval password<input name="password" type="password" required autocomplete="current-password"></label>
+    <button type="submit">Approve candidate</button>
+    <p class="candidate-review-status" data-candidate-review-status role="status" aria-live="polite"></p>
+  </form>
+</section>'''
     counts = research_state.summary_counts(state)
     strategies = list(reversed(state.get("strategies", [])[-12:]))
     ruled = list(reversed(state.get("ruled_out", [])[-10:]))
@@ -702,6 +711,7 @@ main{max-width:1480px;border-color:var(--line);background:var(--paper)}
 .hero h1 em,.method-head h1 em{color:var(--red);font-style:normal}
 .hero-copy{max-width:800px;color:#48514f;font-family:var(--serif);font-size:clamp(18px,1.8vw,24px);line-height:1.55}
 .candidate-alert,.internal-alert{border-color:#c9aa74;background:#f6ecd7;color:var(--ink)}.candidate-alert p{color:#66573f}.pulse{background:var(--amber);box-shadow:none}
+.candidate-review{margin:28px clamp(20px,7vw,110px);padding:clamp(24px,4vw,42px);border:1px solid #c9aa74;background:#f6ecd7;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.8fr);gap:clamp(28px,5vw,72px)}.candidate-review h2{margin:8px 0 12px;font:400 clamp(30px,4vw,48px)/1.05 var(--serif)}.candidate-review-copy p{max-width:680px;color:#66573f}.candidate-review-copy code{display:block;margin-top:18px}.candidate-review-form{display:grid;gap:15px}.candidate-review-form label{display:grid;gap:6px;color:var(--ink);font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase}.candidate-review-form textarea,.candidate-review-form input{width:100%;border:1px solid #bca77f;background:#fffdf7;color:var(--ink);padding:12px;font:400 14px/1.45 var(--sans);text-transform:none;letter-spacing:0}.candidate-review-form textarea{min-height:96px;resize:vertical}.candidate-review-form button{justify-self:start;border:0;background:var(--ink);color:#fff;padding:12px 18px;font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.candidate-review-form button:disabled{opacity:.55;cursor:wait}.candidate-review-status{min-height:1.4em;margin:0;color:#66573f;font-size:13px}.candidate-review-status.is-error{color:var(--red)}
 .section-block{padding:clamp(48px,6vw,78px) clamp(24px,7vw,108px)}
 .section-heading{margin-bottom:26px;padding-bottom:17px;border-color:var(--line)}
 .section-heading h2{color:var(--ink);font-family:var(--serif);font-size:clamp(34px,4.3vw,56px);font-weight:400;letter-spacing:-.035em}
@@ -783,6 +793,7 @@ ABOUT_CSS = r"""
 .about-source{margin:0;padding:clamp(48px,6vw,78px) clamp(24px,7vw,108px);border:0;background:var(--black)}.about-source h2{margin:10px 0 12px;font:400 clamp(36px,4vw,54px) var(--serif)}.about-source p{max-width:900px}.about-source a{display:inline-block;margin-top:12px;color:#e5d6b7}
 @media(max-width:1180px){.engine-flow{grid-template-columns:repeat(3,minmax(0,1fr))}.engine-flow li{border-bottom:1px solid var(--line)}.engine-flow li:nth-child(3){border-right:0}.engine-flow li:nth-child(3):after{display:none}.engine-flow li:nth-child(n+4){border-bottom:0}.pass-map{grid-template-columns:repeat(2,minmax(0,1fr))}.pass-column{min-height:0;border-bottom:1px solid var(--line)}.pass-column:nth-child(2),.pass-column:nth-child(4){border-right:0}.pass-column:nth-child(2):after,.pass-column:nth-child(4):after{display:none}.pass-column:last-child{grid-column:1/-1;border-bottom:0}}
 @media(max-width:820px){.about-section-head{grid-template-columns:1fr;gap:16px}.engine-inputs{grid-template-columns:1fr 1fr}.engine-inputs span{border-bottom:1px solid var(--line)}.engine-inputs span:last-child{grid-column:1/-1}.role-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.memory-stack article,.memory-stack article:nth-child(n){grid-template-columns:50px minmax(0,1fr);margin:0}.memory-stack article>strong{grid-column:2;text-align:left}}
+@media(max-width:820px){.candidate-review{grid-template-columns:1fr}}
 @media(max-width:620px){.topbar nav a:not(:last-child){display:none!important}.about-head:after{display:none}.about-head,.about-section,.about-source{max-width:100%;overflow:hidden}.about-head>*,.about-section *{min-width:0}.about-head p,.about-section p{overflow-wrap:anywhere}.about-section{padding-right:20px;padding-left:20px}.engine-inputs{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.engine-flow,.pass-map,.role-grid{grid-template-columns:minmax(0,1fr)}.engine-flow li{min-height:290px;border-right:0;border-bottom:1px solid var(--line)!important}.engine-flow li:last-child{border-bottom:0!important}.engine-flow li:not(:last-child):after,.pass-column:not(:last-child):after{content:"↓";right:auto;top:auto;bottom:-13px;left:24px;width:24px;height:24px;border:1px solid var(--line);background:var(--paper);transform:none;text-align:center}.pass-column,.pass-column:nth-child(n){grid-column:auto;border-right:0;border-bottom:1px solid var(--line)}.pass-column:last-child{border-bottom:0}.role-grid article{min-height:270px}.memory-stack article{grid-template-columns:42px minmax(0,1fr);gap:14px;padding:18px 14px}.memory-index{width:38px;height:38px}.gate-flow li{grid-template-columns:42px minmax(0,1fr);gap:10px}.status-legend{display:grid;grid-template-columns:1fr 1fr}}
 """
 
@@ -881,11 +892,57 @@ SITE_JS = r"""
   document.querySelectorAll("[data-live-lane]").forEach(updateClock);
   setInterval(() => document.querySelectorAll("[data-live-lane]").forEach(updateClock), 1000);
   refresh(); setInterval(refresh, 30000);
+
+  document.querySelectorAll("[data-candidate-review]").forEach(panel => {
+    const form = panel.querySelector("[data-candidate-review-form]");
+    const status = panel.querySelector("[data-candidate-review-status]");
+    const button = form?.querySelector('button[type="submit"]');
+    const attemptId = panel.dataset.attemptId;
+    const setStatus = (message, error = false) => { status.textContent = message; status.classList.toggle("is-error", error); };
+    const poll = async () => {
+      for (let count = 0; count < 30; count += 1) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        const response = await fetch(`/api/reviews/status?attempt_id=${encodeURIComponent(attemptId)}`, {cache:"no-store"});
+        if (!response.ok) continue;
+        const data = await response.json();
+        if (data.status === "approved") { setStatus("Approved. Refreshing the signed ledger…"); window.location.reload(); return; }
+        if (data.status === "error") { setStatus(data.message || "Approval could not be recorded.", true); button.disabled = false; return; }
+      }
+      setStatus("Approval is queued. The public ledger will update shortly."); button.disabled = false;
+    };
+    form?.addEventListener("submit", async event => {
+      event.preventDefault(); button.disabled = true; setStatus("Checking approval…");
+      const fields = new FormData(form);
+      try {
+        const response = await fetch("/api/reviews", {method:"POST",headers:{"content-type":"application/json","accept":"application/json"},body:JSON.stringify({attempt_id:attemptId,note:fields.get("note"),password:fields.get("password")})});
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) { setStatus(data.error || "Approval could not be queued.", true); button.disabled = false; return; }
+        form.querySelector('[name="password"]').value = ""; setStatus("Approval queued. Waiting for the signed review ledger…"); poll();
+      } catch (_) { setStatus("Network error. Please try again.", true); button.disabled = false; }
+    });
+  });
 })();
 """
 
 
 WORKER_JS = r"""
+const json = (body, status = 200) => new Response(JSON.stringify(body), {
+  status, headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}
+});
+const safeAttempt = value => typeof value === "string" && /^[A-Za-z0-9._-]{1,200}$/.test(value);
+const sameOrigin = request => {
+  const origin = request.headers.get("origin");
+  return origin && origin === new URL(request.url).origin;
+};
+const equalSecret = async (left, right) => {
+  if (typeof left !== "string" || typeof right !== "string") return false;
+  const encode = value => crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  const [a, b] = await Promise.all([encode(left), encode(right)]);
+  const aa = new Uint8Array(a), bb = new Uint8Array(b);
+  let diff = aa.length ^ bb.length;
+  for (let i = 0; i < Math.max(aa.length, bb.length); i += 1) diff |= (aa[i] || 0) ^ (bb[i] || 0);
+  return diff === 0;
+};
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -895,6 +952,31 @@ export default {
         status: value ? 200 : 503,
         headers: {"content-type":"application/json; charset=utf-8","cache-control":"no-store"}
       });
+    }
+    if (url.pathname === "/api/reviews/status" && request.method === "GET") {
+      const attemptId = url.searchParams.get("attempt_id");
+      if (!safeAttempt(attemptId)) return json({error:"Invalid attempt."}, 400);
+      const value = env.PROOF_RUNTIME ? await env.PROOF_RUNTIME.get(`review-status:${attemptId}`) : null;
+      return value ? new Response(value, {headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}}) : json({status:"pending"});
+    }
+    if (url.pathname === "/api/reviews" && request.method === "POST") {
+      if (!sameOrigin(request)) return json({error:"Approval must come from this site."}, 403);
+      if (!env.PROOF_RUNTIME || !env.PROOF_REVIEW_PASSWORD) return json({error:"Approval service is unavailable."}, 503);
+      const length = Number(request.headers.get("content-length") || 0);
+      if (length > 4096) return json({error:"Request is too large."}, 413);
+      let body;
+      try {
+        const raw = await request.text();
+        if (new TextEncoder().encode(raw).length > 4096) return json({error:"Request is too large."}, 413);
+        body = JSON.parse(raw);
+      } catch (_) { return json({error:"Invalid request."}, 400); }
+      if (!safeAttempt(body.attempt_id) || typeof body.note !== "string" || !body.note.trim() || body.note.length > 1000) return json({error:"Attempt and review note are required."}, 400);
+      if (!await equalSecret(body.password, env.PROOF_REVIEW_PASSWORD)) return json({error:"Password incorrect."}, 401);
+      const key = `review-request:${body.attempt_id}`;
+      const existing = await env.PROOF_RUNTIME.get(key);
+      if (!existing) await env.PROOF_RUNTIME.put(key, JSON.stringify({schema_version:1,attempt_id:body.attempt_id,decision:"accept",note:body.note.trim(),reviewer:"Charlie Krug",release:false,requested_at:new Date().toISOString(),source:"site-ui"}), {expirationTtl:604800});
+      await env.PROOF_RUNTIME.put(`review-status:${body.attempt_id}`, JSON.stringify({status:"queued",attempt_id:body.attempt_id}), {expirationTtl:604800});
+      return json({status:"queued",attempt_id:body.attempt_id}, 202);
     }
     return env.ASSETS.fetch(request);
   }

@@ -1,0 +1,11 @@
+[Unit]
+Description=Proof Factory - check for candidate reviews every 15 seconds
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=15s
+AccuracySec=3s
+Unit=proof-factory-review-inbox.service
+
+[Install]
+WantedBy=timers.target

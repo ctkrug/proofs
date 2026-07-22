@@ -105,7 +105,7 @@ def get_https_url(name: str, default: str = "", *, allow_empty: bool = False) ->
 
 
 VALIDATION_PROFILES = frozenset({
-    "all", "capacity", "intake", "lab", "lane", "publish", "runtime", "scout", "strategy", "watchdog",
+    "all", "capacity", "intake", "lab", "lane", "publish", "review", "runtime", "scout", "strategy", "watchdog",
 })
 
 
@@ -151,7 +151,7 @@ def validate_environment(profile: str = "all") -> None:
         get_text("PROOF_REPO_GIT_NAME", "ctkrug")
         get_text("PROOF_REPO_GIT_EMAIL", "ctkrug4501@gmail.com")
         get_int("PROOF_REPO_MAX_FILE_BYTES", 50 * 1024 * 1024, minimum=1024, maximum=10 * 1024**3)
-    if profile in {"all", "runtime"}:
+    if profile in {"all", "review", "runtime"}:
         namespace = get_text("PROOF_RUNTIME_KV_NAMESPACE_ID", "", allow_empty=True)
         if namespace and not _HEX_32.fullmatch(namespace):
             raise ConfigurationError("PROOF_RUNTIME_KV_NAMESPACE_ID must be a 32-digit hexadecimal id")

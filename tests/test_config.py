@@ -97,6 +97,7 @@ class SystemdConfigurationTests(unittest.TestCase):
             "proof-factory-easy.service",
             "proof-factory-hard.service",
             "proof-factory-publish.service",
+            "proof-factory-review-inbox.service",
             "proof-factory-runtime-sync.service",
         })
 

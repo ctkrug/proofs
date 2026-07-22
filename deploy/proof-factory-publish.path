@@ -3,6 +3,7 @@ Description=Proof Factory - publish after a durable research attempt
 
 [Path]
 PathChanged=/root/proof-factory/data/attempts.jsonl
+PathChanged=/root/proof-factory/data/reviews.json
 Unit=proof-factory-publish.service
 
 [Install]

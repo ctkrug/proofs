@@ -118,6 +118,30 @@ class HTMLTemplateTests(unittest.TestCase):
         self.assertIn('href="https://example.test/pull/18"', output)
         self.assertIn("submitted ↗", output)
 
+    def test_candidate_problem_has_password_gated_review_form(self) -> None:
+        output = render._problem_page(
+            {
+                "id": "candidate-one", "title": "Candidate", "status": "candidate",
+                "candidate_attempt_id": "attempt-safe-1",
+            },
+            [],
+            {"strategies": [], "ruled_out": [], "open_leads": []},
+            [],
+        )
+
+        self.assertIn('data-candidate-review', output)
+        self.assertIn('data-attempt-id="attempt-safe-1"', output)
+        self.assertIn('type="password"', output)
+        self.assertIn("Approval records your human review", output)
+
+    def test_verified_problem_has_no_review_form(self) -> None:
+        output = render._problem_page(
+            {"id": "verified-one", "title": "Verified", "status": "verified"},
+            [], {"strategies": [], "ruled_out": [], "open_leads": []}, [],
+        )
+
+        self.assertNotIn('data-candidate-review', output)
+
 
 if __name__ == "__main__":
     unittest.main()
