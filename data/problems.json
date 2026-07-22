@@ -1405,27 +1405,28 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "attempted",
+    "status": "candidate",
     "automation_eligible": true,
     "priority": 94,
-    "attempt_count": 1,
-    "research_attempt_count": 1,
+    "attempt_count": 2,
+    "research_attempt_count": 2,
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
     "intake_source": "independent Google DeepMind repository audit",
-    "campaign_state": "active",
+    "campaign_state": "review",
     "campaign_started_at": "2026-07-22T20:30:01.116582+00:00",
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
-    "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-22T20:52:23.905088+00:00",
+    "campaign_decision": "candidate awaiting review",
+    "last_attempt_at": "2026-07-22T21:02:53.797050+00:00",
     "campaign_last_assessment": {
-      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-205223-8244a2",
+      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
       "decision": "continue",
-      "close_signal": "A one-line patch, upstream-style regression, failing-before/passing-after reproduction, 45-test focused pass, and independent six-profile NumPy validation are complete.",
-      "reason": "The recognized target is technically resolved as a local candidate; the next bounded tranche is external review rather than further implementation search."
-    }
+      "close_signal": "The one-line patch, repository regression, pristine failure, patched replays, focused suite, independent six-profile checker, and hash-bound completion receipt are all present.",
+      "reason": "The local technical contribution is candidate-complete; one bounded continuation for human review and upstream CI has high value, while further unsourced parameter sweeps do not."
+    },
+    "candidate_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4"
   },
   {
     "id": "deepmind-synthid-text-26-device-guard",

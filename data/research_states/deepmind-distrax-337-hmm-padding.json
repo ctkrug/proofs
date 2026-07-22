@@ -10,31 +10,250 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 1,
-  "last_updated": "2026-07-22T20:52:23.905088+00:00",
+  "epoch_count": 2,
+  "last_updated": "2026-07-22T21:02:53.797050+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A review-ready patch changes the padded backward branch from zeros_like(beta_prev) to beta_prev and adds a regression comparing padded and sliced outputs for alpha, beta, posterior, and log-likelihood at L=1, 3, and 5. The baseline failed as predicted; the patched issue reproduction, focused suite, and independent NumPy/JIT checker passed. This is a candidate for human review, not an accepted upstream fix.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "synthesis_summary": "A review-ready patch changes padded HMM backward steps from a zero carry to beta_prev and adds a regression comparing padded and sliced alpha, beta, posterior, and log-likelihood for L=1, 3, and 5. The pristine baseline failed as predicted; the patched issue reproduction, focused suite, repository regression, and independent NumPy/JIT checker passed. Evidence was repackaged without workspace virtualenv symlinks and bound by a checksum manifest.",
+  "established_facts": [
+    {
+      "claim": "Upstream main and the pinned checkout were both 6701435c2b0796ec2d6dddf11bae0df615a62017 during the 2026-07-22 closeout.",
+      "evidence": "git ls-remote and local rev-parse recorded in artifacts/run2-validation.md.",
+      "scope": "google-deepmind/distrax refs/heads/main at the status-check time.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim": "The zero-carry implementation fails the issue's padded-prefix beta invariant.",
+      "evidence": ".proof-experiments/20260722-203956-645239/stderr.txt.",
+      "scope": "The sourced two-state Gaussian HMM, five observations, valid length 3.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim": "The carry-preservation patch satisfies padded-versus-sliced equality in the added regression.",
+      "evidence": ".proof-experiments/20260722-205741-bec817/stdout.txt.",
+      "scope": "Valid lengths 1, 3, and 5 across nine variants available on the single-device host.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim": "Patched results agree with a separate NumPy recurrence.",
+      "evidence": ".proof-experiments/20260722-205707-d2f290/stdout.txt.",
+      "scope": "Two fixed HMM parameterizations at valid lengths 1, 3, and 5.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim": "The decisive evidence set is hash-consistent.",
+      "evidence": "sha256sum -c artifacts/run2-evidence.sha256 returned OK for every entry.",
+      "scope": "The 15 immutable paths listed in artifacts/run2-evidence.sha256.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-hmm-backward-padding-carry-v1",
+      "family": "local invariant-preserving carry correction",
+      "fingerprint": "hmm-backward-padding-carry-v1",
+      "title": "Replace the padded HMM backward-scan zero carry with beta_prev, add a Chex padded-prefix regression, and validate through failing-before/passing-after reproduction plus an independent NumPy recurrence.",
+      "mechanism": "Freeze the reverse-scan carry during padded suffix steps so the terminal all-ones beta reaches the final valid timestep unchanged.",
+      "status": "promising",
+      "hypothesis": "Preserving beta_prev when t > length makes forward_backward(obs, length=L) equal forward_backward(obs[:L]) on valid alpha, beta, posterior, and log-likelihood without regressing existing forward-backward behavior.",
+      "discriminating_test": "Run the issue's two-state, five-observation witness before and after the one-line change, then compare patched results with sliced inference and a separately implemented NumPy recurrence at L=1, 3, and 5.",
+      "blocker": "Only external authority and infrastructure remain: isolated human review, an authorized fork/PR, full upstream CI, multi-device execution, and maintainer acceptance.",
+      "reopen_condition": "Reopen implementation research only if upstream source changes, CI fails, a maintainer rejects the carry semantics, or a reproducible counterexample violates valid-prefix equality.",
+      "reopen_evidence": "",
+      "last_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-22T21:02:53.797050+00:00",
+      "route_evaluation": {
+        "gate_proximity": 1.0,
+        "contribution_value": 0.9,
+        "decisiveness": 1.0,
+        "novelty_confidence": 0.8,
+        "novelty_risk": 0.2,
+        "scope": 0.95,
+        "reuse_value": 0.8,
+        "model_cost": 0.25,
+        "cpu_cost": 0.15
+      }
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Upstream pull request and CI validation.",
+      "rationale": "This is the acceptance path for the completed local candidate.",
+      "next_experiment": "Verify artifacts/run2-evidence.sha256, apply the patch in an authorized fork, and run upstream CI.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-5a2070e6c8",
+      "strategy_id": "strategy-hmm-backward-padding-carry-v1",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "description": "Multi-device pmap validation.",
+      "rationale": "Fifteen complete-selection and three regression-only pmap variants skipped because the host exposes one device.",
+      "next_experiment": "Run the focused regression on a host exposing multiple JAX devices.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-02a17d271a",
+      "strategy_id": "strategy-hmm-backward-padding-carry-v1",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Replacing the reverse-scan carry with zeros during suffix padding preserves valid-prefix marginals.",
+      "scope": "Issue #337's two-state reproduction at valid length 3.",
+      "reason": "Every valid padded beta entry becomes zero and differs from sliced inference.",
+      "evidence": ".proof-experiments/20260722-203956-645239/stderr.txt",
+      "reopen_condition": "A documented API contract explicitly rejecting padded-versus-sliced valid-prefix equivalence.",
+      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim_or_route": "Likelihood equality alone is sufficient to validate the padding fix.",
+      "scope": "The issue reproduction.",
+      "reason": "The baseline likelihood already matches while beta and posterior are wrong.",
+      "evidence": "Issue #337 and .proof-experiments/20260722-203956-645239/stderr.txt",
+      "reopen_condition": "None; future checks must include beta and posterior, with alpha retained as a regression control.",
+      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    },
+    {
+      "claim_or_route": "A workspace-local virtualenv can be included in the immutable evidence receipt.",
+      "scope": "The prior receipt deepmind-distrax-337-hmm-padding-20260722-205223-8244a2.",
+      "reason": "Four virtualenv symlinks invalidated the receipt despite matching decisive artifact hashes.",
+      "evidence": "evidence/deepmind-distrax-337-hmm-padding-20260722-205223-8244a2/evidence-receipt.json",
+      "reopen_condition": "A receipt format that explicitly permits and safely resolves external toolchain symlinks.",
+      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+      "updated_at": "2026-07-22T21:02:53.797050+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
+  "next_session": {
+    "recommended_strategy_id": "strategy-hmm-backward-padding-carry-v1",
+    "objective": "Obtain independent human review and upstream validation of the completed candidate.",
+    "first_action": "Run `sha256sum -c artifacts/run2-evidence.sha256`, then review artifacts/run2-validation.md and patches/0001-preserve-hmm-backward-carry.patch.",
+    "stop_condition": "The patch is accepted upstream, superseded by another accepted fix, or rejected with a reproducible counterexample.",
+    "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4"
+  },
   "recent_attempt_ids": [
-    "deepmind-distrax-337-hmm-padding-20260722-205223-8244a2"
+    "deepmind-distrax-337-hmm-padding-20260722-205223-8244a2",
+    "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4"
   ],
   "tactical_memory": {
-    "current_bottleneck": "",
-    "failure_signatures": [],
-    "reusable_assets": [],
-    "constraints_learned": [],
-    "decision_history": [],
-    "reduction_ledger": [],
-    "prior_art_decisions": []
+    "current_bottleneck": "The mechanism and local patch are complete; remaining uncertainty is external review, full CI, and multi-device validation.",
+    "failure_signatures": [
+      {
+        "id": "d40041b6a24c",
+        "signature": "Replacing a reverse-scan carry with zeros during suffix padding poisons every earlier valid beta and posterior value.",
+        "count": 1,
+        "last_strategy_id": "strategy-hmm-backward-padding-carry-v1",
+        "last_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "Issue discriminator",
+        "use": "Fast failing-before/passing-after replay for issue #337.",
+        "evidence": "artifacts/hmm_padding_discriminator.py; SHA-256 dd5fa1ef0530448a3b811d5ef31630994b15f51960cd880d5e09348708c46683",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      },
+      {
+        "name": "Independent NumPy/JIT checker",
+        "use": "Validate padded, sliced, and independently implemented recurrences.",
+        "evidence": "artifacts/check_hmm_padding_numpy.py and .proof-experiments/20260722-205707-d2f290/stdout.txt",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      },
+      {
+        "name": "Hash-bound review packet",
+        "use": "Permit isolated reproduction and human review without the removed workspace virtualenv.",
+        "evidence": "artifacts/run2-validation.md and artifacts/run2-evidence.sha256",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "The carry must be preserved only for t > length; using t >= length would skip the recurrence required immediately before the last valid state.",
+        "scope": "Distrax HMM.backward reverse indexing.",
+        "evidence": "The L=1 and L=3 padded-versus-sliced regression cases pass with the strict inequality.",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      },
+      {
+        "constraint": "The independent oracle must reproduce Distrax's 1e-15 normalization-floor semantics to avoid mistaking cross-dtype underflow for padding behavior.",
+        "scope": "NumPy comparisons involving extreme Gaussian observations.",
+        "evidence": "artifacts/check_hmm_padding_numpy.py and preserved negative experiments 20260722-204627-b87c9f and 20260722-204707-dec573",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "strategy_id": "strategy-hmm-backward-padding-carry-v1",
+        "decision": "continue",
+        "prediction": "The pristine implementation will fail at beta, while preserving beta_prev will make all valid-prefix comparisons pass for L=1, 3, and T.",
+        "observation": "The baseline produced zeros for all six valid beta entries. The patched issue replay, nine available regression variants, and all six NumPy/JIT profiles passed.",
+        "surprise": "The prior run's only contribution-gate failure was evidence packaging from four workspace-local virtualenv symlinks; the decisive artifact hashes were valid.",
+        "next_discriminator": "Human review followed by upstream CI; rerun mechanism discovery only if review or CI supplies a counterexample.",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "All finite-state HMM parameters, observation sequences, sequence lengths, dtypes, and JAX execution environments.",
+        "represented_space_before": "Unbounded; one sourced two-state counterexample at L=3.",
+        "eliminated_or_quotiented": "No global family was eliminated. The verification surface was partitioned into boundary L=1, interior L=3, and unpadded L=T profiles.",
+        "represented_space_after": "Two fixed HMM parameterizations at L=1, 3, and 5, plus the repository's focused forward-backward cases on one CPU device.",
+        "reduction_factor": "none",
+        "measurement_status": "not_applicable",
+        "unit": "not applicable",
+        "coverage_scope": "The issue reproduction, one three-state control, lengths 1/3/5, eager/JIT/device variants available on a single-device host, and existing forward-backward tests.",
+        "soundness_basis": "Direct equality with sliced inference and an independent NumPy implementation using Distrax's normalization-floor semantics.",
+        "remaining_unknown": "Full repository CI, multi-device pmap behavior, additional dtypes or distributions, and maintainer acceptance.",
+        "next_bulk_elimination": "Run upstream CI and the skipped multi-device variants; no further local parameter sweep is justified before review.",
+        "source_attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "strategy_id": "strategy-hmm-backward-padding-carry-v1",
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-210253-6fe0d4",
+        "strategy_id": "strategy-hmm-backward-padding-carry-v1",
+        "nearest_method_ids": [
+          "none-found"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "Issue #337 identifies the defect and suggests preserving the carry. This contribution supplies the exact patch, repository regression over alpha/beta/posterior/log-likelihood and L=1/3/5, independent NumPy/JIT checker, pinned dependencies, and hash-recorded results.",
+        "duplicate_risk": "An unlinked or newly opened upstream pull request could independently implement the same one-line fix.",
+        "comparison_test": "Repository-scoped GitHub pull-request search for 337 plus issue-event inspection, followed by byte comparison with current upstream main.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/google-deepmind/distrax/issues/337",
+          "https://github.com/google-deepmind/distrax/pulls?q=is%3Apr+337",
+          "https://api.github.com/repos/google-deepmind/distrax/issues/337/events"
+        ],
+        "updated_at": "2026-07-22T21:02:53.797050+00:00"
+      }
+    ]
   }
 }
