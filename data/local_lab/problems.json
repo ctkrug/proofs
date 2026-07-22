@@ -5,7 +5,7 @@
   "lane": "local-lab",
   "status": "active",
   "problem_state": "open",
-  "statement": "Find a covering design C(13,6,4) with fewer than 66 blocks: a set of 6-element subsets of a 13-element set such that every 4-element subset is contained in at least one block. Published bounds: 63 <= C(13,6,4) <= 66. Lab best so far: verified cover with 79 blocks.",
+  "statement": "Find a covering design C(13,6,4) with fewer than 66 blocks: a set of 6-element subsets of a 13-element set such that every 4-element subset is contained in at least one block. Published bounds: 63 <= C(13,6,4) <= 66. Lab best so far: verified cover with 76 blocks.",
   "source_url": "https://ljcr.dmgordon.org/show_cover.php?v=13&k=6&t=4",
   "source_name": "La Jolla Covering Repository",
   "verifiability": "exact",
@@ -15,7 +15,7 @@
    "randomized search",
    "exact verification"
   ],
-  "attempt_count": 1,
+  "attempt_count": 2,
   "created_at": "2026-07-22T00:00:00+00:00",
   "accepted_result": false,
   "priority": "normal",
