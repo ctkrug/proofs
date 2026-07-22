@@ -50,7 +50,7 @@ SPEC_FIELDS = (
     "segment", "pilot_segments", "review_every_segments", "checkpoint_path", "progress_path",
     "continuation_thresholds", "submitted_at", "workspace_git_commit", "input_sha256",
 )
-OPTIONAL_SPEC_FIELDS = ("mutable_argv_paths", "mutable_argv_initial_sha256")
+OPTIONAL_SPEC_FIELDS = ("mutable_argv_paths", "mutable_argv_initial_sha256", "progress_baseline")
 
 
 def _workspace(problem_id: str) -> Path:
@@ -279,6 +279,38 @@ def _validate_mutable_initial_hashes(value: Any, paths: list[str], *, kind: str)
     return dict(sorted(value.items()))
 
 
+def _validate_progress_baseline(value: Any, *, kind: str) -> dict[str, float | int]:
+    if not isinstance(value, dict):
+        raise schemas.SchemaError(f"{kind}.progress_baseline must be an object")
+    completed = value.get("completed_units")
+    artifact_bytes = value.get("reported_artifact_bytes")
+    if (
+        isinstance(completed, bool) or not isinstance(completed, (int, float))
+        or not math.isfinite(float(completed)) or float(completed) < 0
+    ):
+        raise schemas.SchemaError(f"{kind}.progress_baseline.completed_units must be finite and nonnegative")
+    if isinstance(artifact_bytes, bool) or not isinstance(artifact_bytes, int) or artifact_bytes < 0:
+        raise schemas.SchemaError(f"{kind}.progress_baseline.reported_artifact_bytes must be a nonnegative int")
+    return {
+        "completed_units": float(completed),
+        "reported_artifact_bytes": artifact_bytes,
+        "artifact_bytes": artifact_bytes,
+    }
+
+
+def _capture_progress_baseline(workspace: Path, relative: str) -> dict[str, float | int]:
+    if not relative:
+        return {"completed_units": 0.0, "reported_artifact_bytes": 0, "artifact_bytes": 0}
+    path = workspace / relative
+    if not path.is_file():
+        return {"completed_units": 0.0, "reported_artifact_bytes": 0, "artifact_bytes": 0}
+    value = schemas.load_json_object(path, kind="lab initial progress record")
+    return _validate_progress_baseline({
+        "completed_units": value.get("completed_units"),
+        "reported_artifact_bytes": value.get("artifact_bytes"),
+    }, kind="lab spec")
+
+
 def _validate_efficiency(value: Any, *, substantial: bool) -> dict[str, Any]:
     if not substantial and not value:
         return {}
@@ -336,6 +368,7 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
     explicit_input_hashes = spec.get("input_sha256")
     automatic_input_hashes = _input_identity(workspace, command, excluded=mutable_set)
     mutable_initial: dict[str, str] = {}
+    progress_baseline: dict[str, float | int] = {}
     if mutable_paths:
         if not isinstance(explicit_input_hashes, dict):
             raise ValueError(
@@ -368,13 +401,19 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
         if source_path is None:
             if "mutable_argv_initial_sha256" in spec:
                 raise ValueError("mutable_argv_initial_sha256 is engine-generated and may not be supplied")
+            if "progress_baseline" in spec:
+                raise ValueError("progress_baseline is engine-generated and may not be supplied")
             mutable_initial = _mutable_identity(workspace, mutable_paths)
+            progress_baseline = _capture_progress_baseline(
+                workspace, str(spec.get("progress_path") or "").strip(),
+            )
         else:
             mutable_initial = _validate_mutable_initial_hashes(
                 spec.get("mutable_argv_initial_sha256"), mutable_paths, kind="lab persisted spec",
             )
-    elif "mutable_argv_initial_sha256" in spec:
-        raise ValueError("mutable_argv_initial_sha256 requires mutable_argv_paths")
+            progress_baseline = _validate_progress_baseline(spec.get("progress_baseline"), kind="lab persisted spec")
+    elif "mutable_argv_initial_sha256" in spec or "progress_baseline" in spec:
+        raise ValueError("mutable argv initial state requires mutable_argv_paths")
 
     segment_seconds = int(spec.get("segment_seconds") or 3600)
     memory_mb = int(spec.get("memory_mb") or 512)
@@ -445,6 +484,7 @@ def _validate(spec: dict[str, Any], *, source_path: Path | None = None) -> dict[
     if mutable_paths:
         normalized["mutable_argv_paths"] = mutable_paths
         normalized["mutable_argv_initial_sha256"] = mutable_initial
+        normalized["progress_baseline"] = progress_baseline
     if not normalized["name"] or not normalized["hypothesis"] or not normalized["expected_signal"]:
         raise ValueError("name, hypothesis, and expected_signal are required")
     if not _SAFE_JOB_ID.fullmatch(normalized["id"]):
@@ -829,7 +869,10 @@ def worker_once() -> dict[str, Any]:
             duration = max(0.0, (finished - started).total_seconds()) if started and finished else 0.0
             checkpoint_path = workspace / spec["checkpoint_path"] if spec["checkpoint_path"] else None
             checkpoint_exists = bool(checkpoint_path and checkpoint_path.is_file())
-            previous = state.get("segments", [])[-1].get("progress", {}) if state.get("segments") else {}
+            previous = (
+                state.get("segments", [])[-1].get("progress", {})
+                if state.get("segments") else spec.get("progress_baseline", {})
+            )
             measured_growth = max(0, _tree_bytes(workspace) - workspace_bytes_before)
             progress, threshold_failures = _progress(
                 workspace, spec, previous, duration, measured_growth_bytes=measured_growth,

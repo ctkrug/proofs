@@ -300,6 +300,55 @@ class SchemaCompatibilityTests(unittest.TestCase):
                         },
                     })
 
+    def test_resumed_lab_uses_existing_progress_as_first_segment_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            workspace = root / "research" / "p" / "workspace"
+            data = root / "data"
+            data.mkdir()
+            workspace.mkdir(parents=True)
+            (data / "problems.json").write_text(json.dumps([{"id": "p"}]))
+            worker = workspace / "worker.py"
+            worker.write_text("print('fixture')\n")
+            checkpoint = workspace / "checkpoint.json"
+            checkpoint.write_text("{}")
+            progress = workspace / "progress.json"
+            progress.write_text(json.dumps({
+                "completed_units": 254, "total_units": 656, "complete": False,
+                "correctness_checks_passed": True, "decision_value_active": True,
+                "artifact_bytes": 220000,
+            }))
+            with patch.multiple(
+                store,
+                ROOT=root,
+                DATA=data,
+                RESEARCH=root / "research",
+                PROBLEMS_FILE=data / "problems.json",
+                ATTEMPTS_FILE=data / "attempts.jsonl",
+            ):
+                spec = lab._validate({
+                    "problem_id": "p", "name": "resume", "hypothesis": "advance one",
+                    "expected_signal": "255", "command": ["python3", "worker.py", "checkpoint.json", "progress.json"],
+                    "input_sha256": {"worker.py": hashlib.sha256(worker.read_bytes()).hexdigest()},
+                    "mutable_argv_paths": ["checkpoint.json", "progress.json"],
+                    "checkpoint_path": "checkpoint.json", "progress_path": "progress.json",
+                    "segment_seconds": 60, "memory_mb": 128,
+                })
+                self.assertEqual(spec["progress_baseline"]["completed_units"], 254.0)
+                self.assertEqual(spec["progress_baseline"]["reported_artifact_bytes"], 220000)
+                progress.write_text(json.dumps({
+                    "completed_units": 255, "total_units": 656, "complete": False,
+                    "correctness_checks_passed": True, "decision_value_active": True,
+                    "artifact_bytes": 220500,
+                }))
+                measured, failures = lab._progress(
+                    workspace, spec, spec["progress_baseline"], 20.0, measured_growth_bytes=500,
+                )
+                self.assertEqual(measured["delta_units"], 1.0)
+                self.assertEqual(measured["throughput_per_second"], 0.05)
+                self.assertEqual(measured["artifact_growth_bytes"], 500)
+                self.assertEqual(failures, [])
+
     def test_lab_interrupted_mutable_segment_gets_a_recovery_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
