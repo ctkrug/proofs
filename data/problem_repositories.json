@@ -14,7 +14,7 @@
       "repository": "ctkrug/proofs-covering-c1264",
       "url": "https://github.com/ctkrug/proofs-covering-c1264",
       "visibility": "PUBLIC",
-      "commit": "348807ac4b0d48ee6e55bc37f93cd099b373d0ed"
+      "commit": "96938cf0b473675f3e5fdd5596d7f98b06924ae4"
     },
     {
       "problem_id": "erdos-307",
@@ -180,7 +180,7 @@
     },
     {
       "problem_id": "deepmind-distrax-337-hmm-padding",
-      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/deepmind-distrax-337-hmm-padding/workspace: merge: origin/main - not something we can merge"
+      "error": "RuntimeError: working tree is dirty for deepmind-distrax-337-hmm-padding; refusing repository sync"
     },
     {
       "problem_id": "deepmind-synthid-text-26-device-guard",

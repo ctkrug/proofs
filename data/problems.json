@@ -1405,11 +1405,11 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "attempted",
     "automation_eligible": true,
     "priority": 94,
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-22T16:30:00Z",
     "source_checked_at": "2026-07-22T16:30:00Z",
@@ -1418,7 +1418,14 @@
     "campaign_started_at": "2026-07-22T20:30:01.116582+00:00",
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
-    "campaign_decision": "continue through the minimum campaign"
+    "campaign_decision": "continue through run 25",
+    "last_attempt_at": "2026-07-22T20:52:23.905088+00:00",
+    "campaign_last_assessment": {
+      "attempt_id": "deepmind-distrax-337-hmm-padding-20260722-205223-8244a2",
+      "decision": "continue",
+      "close_signal": "A one-line patch, upstream-style regression, failing-before/passing-after reproduction, 45-test focused pass, and independent six-profile NumPy validation are complete.",
+      "reason": "The recognized target is technically resolved as a local candidate; the next bounded tranche is external review rather than further implementation search."
+    }
   },
   {
     "id": "deepmind-synthid-text-26-device-guard",

@@ -1,0 +1,40 @@
+{
+  "schema_version": 5,
+  "problem_id": "deepmind-distrax-337-hmm-padding",
+  "objective": "Fix `HMM.backward` so padded suffix scan steps preserve `beta_prev` rather than replacing the backward carry with zeros, then add a regression proving that `forward_backward(obs, length=L)` matches `forward_backward(obs[:L])` on the valid prefix and log-likelihood.",
+  "completion_criteria": [
+    "Run the issue's deterministic two-state HMM reproduction and compare padded versus sliced observations for the first L alpha, beta, and posterior values plus log-likelihood. Add edge cases for full length and a one-step valid prefix and run the focused HMM test suite."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-22T20:52:23.905088+00:00",
+  "baseline_review": {
+    "status": "required",
+    "reviewed_at": null,
+    "source_attempt_id": null,
+    "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
+  },
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A review-ready patch changes the padded backward branch from zeros_like(beta_prev) to beta_prev and adds a regression comparing padded and sliced outputs for alpha, beta, posterior, and log-likelihood at L=1, 3, and 5. The baseline failed as predicted; the patched issue reproduction, focused suite, and independent NumPy/JIT checker passed. This is a candidate for human review, not an accepted upstream fix.",
+  "established_facts": [],
+  "strategies": [],
+  "open_leads": [],
+  "ruled_out": [],
+  "unresolved_questions": [],
+  "next_session": {},
+  "recent_attempt_ids": [
+    "deepmind-distrax-337-hmm-padding-20260722-205223-8244a2"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "",
+    "failure_signatures": [],
+    "reusable_assets": [],
+    "constraints_learned": [],
+    "decision_history": [],
+    "reduction_ledger": [],
+    "prior_art_decisions": []
+  }
+}
