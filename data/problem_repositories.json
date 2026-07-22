@@ -14,7 +14,7 @@
       "repository": "ctkrug/proofs-covering-c1264",
       "url": "https://github.com/ctkrug/proofs-covering-c1264",
       "visibility": "PUBLIC",
-      "commit": "955ffcc0adbea16b268fd79cb985339a868a74a3"
+      "commit": "70188fb37b6a9e3084423fe8251cb7f618553877"
     },
     {
       "problem_id": "erdos-307",
@@ -156,7 +156,7 @@
     },
     {
       "problem_id": "iris-lean-127-simp-to-model",
-      "error": "RuntimeError: git merge --ff-only origin/main failed in /root/proof-factory/research/iris-lean-127-simp-to-model/workspace: merge: origin/main - not something we can merge"
+      "error": "RuntimeError: working tree is dirty for iris-lean-127-simp-to-model; refusing repository sync"
     },
     {
       "problem_id": "leanbridge-56-totally-positive",

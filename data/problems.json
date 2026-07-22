@@ -1067,15 +1067,27 @@
       "proof refactoring"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "attempted",
     "automation_eligible": true,
     "priority": 85,
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-22T15:02:47Z",
     "source_checked_at": "2026-07-22T15:02:47Z",
-    "intake_source": "independent recognized-repository audit"
+    "intake_source": "independent recognized-repository audit",
+    "campaign_state": "active",
+    "campaign_started_at": "2026-07-22T22:09:52.241440+00:00",
+    "campaign_start_research_attempt_count": 0,
+    "campaign_min_runs": 25,
+    "campaign_decision": "continue through run 25",
+    "last_attempt_at": "2026-07-22T22:33:26.318612+00:00",
+    "campaign_last_assessment": {
+      "attempt_id": "iris-lean-127-simp-to-model-20260722-223326-810dbc",
+      "decision": "continue",
+      "close_signal": "The residual goal and identical capability tables localize the next pass to one model theorem plus one tactic registration.",
+      "reason": "This is run 1, the recognized target remains unresolved, and a bounded upstream discriminator has a direct replay test."
+    }
   },
   {
     "id": "leanbridge-56-totally-positive",
