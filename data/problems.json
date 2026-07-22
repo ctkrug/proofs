@@ -510,8 +510,8 @@
     "lane": "easy",
     "status": "active",
     "priority": 40,
-    "attempt_count": 7,
-    "research_attempt_count": 7,
+    "attempt_count": 8,
+    "research_attempt_count": 8,
     "accepted_result": false,
     "added_at": "2026-07-20T17:25:05.376727+00:00",
     "source_checked_at": "2026-07-20T17:25:05.376753+00:00",
@@ -523,17 +523,17 @@
       "output_tokens": 2010,
       "reasoning_output_tokens": 1031
     },
-    "last_attempt_at": "2026-07-22T08:36:36.152588+00:00",
+    "last_attempt_at": "2026-07-22T10:36:23.102218+00:00",
     "campaign_state": "active",
     "campaign_started_at": "2026-07-21T15:14:41.303998+00:00",
     "campaign_start_research_attempt_count": 1,
     "campaign_min_runs": 25,
     "campaign_decision": "continue through run 25",
     "campaign_last_assessment": {
-      "attempt_id": "scout-bdf77f43574b-20260722-083636-48022a",
+      "attempt_id": "scout-bdf77f43574b-20260722-103623-04157b",
       "decision": "continue",
       "close_signal": "",
-      "reason": "Run 6 is before the mandatory run-25 review point. Continue with bounded status and coordination checks while preserving the verified artifact and avoiding duplicate submissions."
+      "reason": "Run 7 is before the mandatory run-25 review point. Continue with one bounded status discriminator per epoch while preserving the verified artifact and avoiding duplicate submissions."
     }
   },
   {
