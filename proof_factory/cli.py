@@ -14,7 +14,7 @@ from . import brain, capacity, config, contribution_gate, events, intake, lab, p
 
 EXTERNAL_STATES = {
     "expert-confirmed", "repository-accepted", "venue-accepted", "peer-reviewed",
-    "duplicate", "rejected", "corrected",
+    "submitted", "duplicate", "rejected", "corrected",
 }
 
 
@@ -161,6 +161,7 @@ def _external_validation(attempt_id: str, state: str, source_url: str, note: str
         problem["external_validation_url"] = source_url
         problem["accepted_result"] = state in positive
         store.save_problems(problems)
+        publication.record_external_validation(problem, attempt, record)
     render.build()
     return record
 

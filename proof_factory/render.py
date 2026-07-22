@@ -238,6 +238,12 @@ def _problem_page(
     ruled = list(reversed(state.get("ruled_out", [])[-10:]))
     leads = [row for row in state.get("open_leads", [])[-10:] if row.get("status", "open") == "open"]
     checkpoint = state.get("next_session", {})
+    external_state = h(problem.get("external_validation_state") or "none")
+    external_url = problem.get("external_validation_url")
+    external_tracking = (
+        f'<a href="{h(external_url)}" rel="noopener">{external_state} ↗</a>'
+        if external_url else external_state
+    )
     research_map = f"""
 <section class="research-map">
   <div class="section-heading"><div><span class="overline">Resumable campaign memory</span><h2>Research map</h2></div><span>{h(state.get('epoch_count', 0))} epochs · {counts['promising']} promising · {counts['blocked']} blocked · {counts['ruled_out']} ruled out</span></div>
@@ -260,7 +266,7 @@ def _problem_page(
 <section class="dossier-grid">
   <article><span class="overline">Why this problem</span><p>{h(problem.get('rationale'))}</p></article>
   <article><span class="overline">Verification contract</span><p>{h(problem.get('verifiability'))}</p></article>
-  <article><span class="overline">Tracking</span><dl><dt>Difficulty</dt><dd>{h(problem.get('difficulty'))}/10</dd><dt>Attempts</dt><dd>{h(problem.get('attempt_count',0))}</dd><dt>Last attempt</dt><dd>{h(_time(problem.get('last_attempt_at')))}</dd><dt>Source status</dt><dd>{h(problem.get('problem_state'))}</dd><dt>External validation</dt><dd>{h(problem.get('external_validation_state') or 'none')}</dd></dl></article>
+  <article><span class="overline">Tracking</span><dl><dt>Difficulty</dt><dd>{h(problem.get('difficulty'))}/10</dd><dt>Attempts</dt><dd>{h(problem.get('attempt_count',0))}</dd><dt>Last attempt</dt><dd>{h(_time(problem.get('last_attempt_at')))}</dd><dt>Source status</dt><dd>{h(problem.get('problem_state'))}</dd><dt>External validation</dt><dd>{external_tracking}</dd></dl></article>
 </section>
 <section class="techniques"><span class="overline">Techniques and harnesses</span><div>{technique_tags}</div></section>
 {research_map}

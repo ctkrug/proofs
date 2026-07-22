@@ -103,6 +103,21 @@ class HTMLTemplateTests(unittest.TestCase):
 
         self.assertEqual(href, "#ongoing")
 
+    def test_problem_page_links_external_submission(self) -> None:
+        output = render._problem_page(
+            {
+                "id": "candidate-one", "title": "Candidate", "status": "published",
+                "external_validation_state": "submitted",
+                "external_validation_url": "https://example.test/pull/18",
+            },
+            [],
+            {"strategies": [], "ruled_out": [], "open_leads": []},
+            [],
+        )
+
+        self.assertIn('href="https://example.test/pull/18"', output)
+        self.assertIn("submitted ↗", output)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -937,6 +937,21 @@ class ProofFactoryTests(unittest.TestCase):
                 self.assertIn(artifact_hash, (root / "publications" / "a" / "MANIFEST.sha256").read_text())
                 self.assertEqual((root / "publications" / "a" / "artifacts" / "proof.txt").read_text(), "certificate\n")
                 cli._external_validation(
+                    "a", "submitted", "https://example.test/pull/18", "The pull request is open."
+                )
+                submitted = store.load_problems()[0]
+                self.assertFalse(submitted["accepted_result"])
+                self.assertEqual(submitted["external_validation_state"], "submitted")
+                self.assertIn(
+                    "https://example.test/pull/18", (root / "publications" / "a" / "README.md").read_text()
+                )
+                self.assertIn(
+                    "https://example.test/pull/18",
+                    (root / "publications" / "a" / "EXTERNAL-VALIDATION.md").read_text(),
+                )
+                metadata = json.loads((root / "publications" / "a" / "metadata.json").read_text())
+                self.assertEqual(metadata["external_validation_history"][-1]["state"], "submitted")
+                cli._external_validation(
                     "a", "expert-confirmed", "https://example.test/review", "The source expert confirmed it."
                 )
                 self.assertTrue(store.load_problems()[0]["accepted_result"])

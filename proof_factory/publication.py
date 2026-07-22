@@ -174,3 +174,31 @@ The website and GitHub release are provenance artifacts, not external scholarly 
 """
     (packet / "EXTERNAL-VALIDATION.md").write_text(venue_plan)
     return packet
+
+
+def record_external_validation(
+    problem: dict[str, Any], attempt: dict[str, Any], record: dict[str, Any]
+) -> None:
+    """Mirror an external submission or verdict into its released packet."""
+    packet_name = str(problem.get("publication_packet") or f"publications/{attempt['id']}")
+    packet = store.ROOT / packet_name
+    if not packet.is_dir():
+        return
+
+    state = str(record.get("state") or "external record")
+    source_url = str(record.get("source_url") or "")
+    note = str(record.get("note") or "")
+    recorded_at = str(record.get("recorded_at") or "")
+    link = f"[{source_url}]({source_url})" if source_url else "No public URL recorded."
+    entry = f"\n## External record — {state}\n\n- Recorded: {recorded_at}\n- Source: {link}\n- Note: {note}\n"
+
+    readme = packet / "README.md"
+    readme.write_text(readme.read_text() + entry)
+    validation = packet / "EXTERNAL-VALIDATION.md"
+    validation.write_text(validation.read_text() + entry)
+
+    metadata_path = packet / "metadata.json"
+    metadata = json.loads(metadata_path.read_text())
+    history = metadata.setdefault("external_validation_history", [])
+    history.append(record)
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n")
