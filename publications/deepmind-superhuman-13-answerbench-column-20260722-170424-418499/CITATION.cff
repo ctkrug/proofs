@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite it using this metadata."
+title: "Restore the missing short answer in IMO AnswerBench algebra problem 036"
+type: software
+authors:
+  - family-names: "Krug"
+    given-names: "Charlie"
+date-released: "2026-07-22"
+repository-code: "https://github.com/ctkrug/proofs"
+url: "https://proofs.charliekrug.com/publications/deepmind-superhuman-13-answerbench-column-20260722-170424-418499/"

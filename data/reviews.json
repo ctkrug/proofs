@@ -7,5 +7,14 @@
     "reviewed_at": "2026-07-20T18:38:37.389531+00:00",
     "reviewer": "Proof Factory contribution gate",
     "display_status": "internal_result"
+  },
+  {
+    "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "problem_id": "deepmind-superhuman-13-answerbench-column",
+    "decision": "accept",
+    "note": "Charlie reviewed the candidate record and approves release of the exact one-byte AnswerBench CSV correction for upstream submission.",
+    "reviewed_at": "2026-07-22T17:42:37.502176+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
   }
 ]

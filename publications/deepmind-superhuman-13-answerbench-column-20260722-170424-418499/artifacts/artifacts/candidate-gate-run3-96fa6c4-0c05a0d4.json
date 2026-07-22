@@ -1,0 +1,49 @@
+{
+  "baseline_bytes": 169537,
+  "baseline_sha256": "275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+  "baseline_width_counts": {
+    "5": 1,
+    "6": 399
+  },
+  "controls": {
+    "malformed_baseline_rejected": {
+      "output": "FAIL: non-six-column data rows: [(37, 5)]",
+      "returncode": 1
+    },
+    "materialized_candidate_accepted": {
+      "output": [
+        "PASS: imobench/answerbench_v2.csv: 400 data rows, all six columns; imo-bench-algebra-036 is repaired",
+        "PASS: candidate differs from reference by only the required quote insertion"
+      ],
+      "returncode": 0
+    },
+    "one_byte_repair_accepted": {
+      "output": [
+        "PASS: <temporary-directory>/repaired.csv: 400 data rows, all six columns; imo-bench-algebra-036 is repaired",
+        "PASS: candidate differs from reference by only the required quote insertion"
+      ],
+      "returncode": 0
+    },
+    "unrelated_edit": {
+      "semantic_only_returncode": 0,
+      "with_reference_output": "PASS: <temporary-directory>/unrelated-edit.csv: 400 data rows, all six columns; imo-bench-algebra-036 is repaired\nFAIL: candidate is not exactly the one-byte quote insertion at algebra-036",
+      "with_reference_returncode": 1
+    },
+    "wrong_answer_rejected": {
+      "output": "FAIL: target short-answer/category tail is wrong: ['$Y(x)=A+\\\\frac{C}{x}-x$', 'Algebra', 'Functional Equation', 'Iran 2002']",
+      "returncode": 1
+    }
+  },
+  "data_rows": 400,
+  "inserted_quote_offset": 13618,
+  "malformed_problem_id": "imo-bench-algebra-036",
+  "materialized_candidate": "imobench/answerbench_v2.csv",
+  "materialized_candidate_sha256": "0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16",
+  "repaired_all_six_columns": true,
+  "repaired_bytes": 169538,
+  "repaired_sha256": "0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16",
+  "repaired_target_short_answer": "$Y(x)=A+\\frac{B}{x}-x$",
+  "scope": "the 400 data records in the pinned upstream CSV only",
+  "source_commit": "96fa6c4cc3a9bb7450ee7b6773b659d3a030dace",
+  "strict_baseline_error": "',' expected after '\"'"
+}

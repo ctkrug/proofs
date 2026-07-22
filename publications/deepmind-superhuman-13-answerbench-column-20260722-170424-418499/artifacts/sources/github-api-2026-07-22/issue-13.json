@@ -1,0 +1,82 @@
+{
+  "url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13",
+  "repository_url": "https://api.github.com/repos/google-deepmind/superhuman",
+  "labels_url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13/labels{/name}",
+  "comments_url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13/comments",
+  "events_url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13/events",
+  "html_url": "https://github.com/google-deepmind/superhuman/issues/13",
+  "id": 4019944543,
+  "node_id": "I_kwDOQLoTO87vm3xf",
+  "number": 13,
+  "title": "[Bug] Data misalignment in imo-bench-algebra-036 in Answerbench_v2",
+  "user": {
+    "login": "chenwxOggai",
+    "id": 57489026,
+    "node_id": "MDQ6VXNlcjU3NDg5MDI2",
+    "avatar_url": "https://avatars.githubusercontent.com/u/57489026?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/chenwxOggai",
+    "html_url": "https://github.com/chenwxOggai",
+    "followers_url": "https://api.github.com/users/chenwxOggai/followers",
+    "following_url": "https://api.github.com/users/chenwxOggai/following{/other_user}",
+    "gists_url": "https://api.github.com/users/chenwxOggai/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/chenwxOggai/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/chenwxOggai/subscriptions",
+    "organizations_url": "https://api.github.com/users/chenwxOggai/orgs",
+    "repos_url": "https://api.github.com/users/chenwxOggai/repos",
+    "events_url": "https://api.github.com/users/chenwxOggai/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/chenwxOggai/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "labels": [
+
+  ],
+  "state": "open",
+  "locked": false,
+  "assignees": [
+
+  ],
+  "milestone": null,
+  "comments": 0,
+  "created_at": "2026-03-04T04:22:04Z",
+  "updated_at": "2026-03-04T04:22:04Z",
+  "closed_at": null,
+  "assignee": null,
+  "author_association": "NONE",
+  "issue_field_values": [
+
+  ],
+  "type": null,
+  "active_lock_reason": null,
+  "sub_issues_summary": {
+    "total": 0,
+    "completed": 0,
+    "percent_completed": 0
+  },
+  "issue_dependencies_summary": {
+    "blocked_by": 0,
+    "total_blocked_by": 0,
+    "blocking": 0,
+    "total_blocking": 0
+  },
+  "body": "## Description\nI found a data formatting issue in the Answerbench_v2 dataset. Specifically, in the file answerbench_v2.csv, data: **imo-bench-algebra-036**, the columns are misaligned. The ``Problem`` and ``Short Answer`` fields appear to be merged into a single column, causing a missing column in the dataset structure.\n\n## Details\n```\nimo-bench-algebra-036,\"Find all functions $Y: \\mathbb{R} \\backslash\\{0\\} \\rightarrow \\mathbb{R}$ such that for any non-zero real numbers $a, b$ with $ab \\neq -1$, the following equation holds:\n\\[\na Y\\left(a+\\frac{1}{b}\\right)+b Y(b)+\\frac{a}{b}=b Y\\left(b+\\frac{1}{a}\\right)+a Y(a)+\\frac{b}{a}\n\\] [Bug here]\n,\"$Y(x)=A+\\frac{B}{x}-x$\",Algebra,Functional Equation,Iran 2002\n```",
+  "closed_by": null,
+  "reactions": {
+    "url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13/reactions",
+    "total_count": 0,
+    "+1": 0,
+    "-1": 0,
+    "laugh": 0,
+    "hooray": 0,
+    "confused": 0,
+    "heart": 0,
+    "rocket": 0,
+    "eyes": 0
+  },
+  "timeline_url": "https://api.github.com/repos/google-deepmind/superhuman/issues/13/timeline",
+  "performed_via_github_app": null,
+  "state_reason": null,
+  "pinned_comment": null
+}

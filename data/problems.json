@@ -945,7 +945,7 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "candidate",
+    "status": "published",
     "automation_eligible": true,
     "priority": 100,
     "attempt_count": 3,
@@ -966,7 +966,12 @@
       "close_signal": "The actual one-byte correction, checked patch, full adversarial harness, and materially separate deterministic checker all exist and pass against unchanged upstream main.",
       "reason": "This is a completed local candidate at run 3; only bounded owner authorization and upstream review remain."
     },
-    "candidate_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499"
+    "candidate_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "human_approved": true,
+    "approved_packet": "publications/deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "publication_attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "publication_packet": "publications/deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "publication_state": "public research note"
   },
   {
     "id": "deepmind-superhuman-16-faithfulness",

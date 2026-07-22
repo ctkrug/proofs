@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "20260722-165537-7895ed",
+  "name": "candidate-gate-run3",
+  "hypothesis": "Against unchanged upstream commit 96fa6c4, the materialized one-byte candidate is the unique scoped repair: it strict-parses to six columns for all 400 data rows, restores the exact algebra-036 short answer, and differs from the baseline only by the required quote insertion.",
+  "expected_signal": "Baseline rejected; candidate accepted; exact one-byte gate passes; wrong-answer and unrelated-edit controls rejected.",
+  "command": [
+    "python3",
+    "tools/baseline_answerbench_036.py",
+    "sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv",
+    "tools/check_answerbench_036.py",
+    "--candidate",
+    "imobench/answerbench_v2.csv",
+    "--result",
+    "artifacts/candidate-gate-run3-96fa6c4-0c05a0d4.json"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace",
+  "seed": 0,
+  "timeout_seconds": 120,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T16:55:37.644232+00:00",
+  "finished_at": "2026-07-22T16:55:38.232468+00:00",
+  "duration_seconds": 0.588,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "19853e31bf4357374a50db0c8177b1874422c89b",
+  "source_urls": [
+    "https://github.com/google-deepmind/superhuman/issues/13"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace/tools/baseline_answerbench_036.py": "a26872cba88a5cf4c5b68b260bb30b40bdfded550618b12ead25baaf0d2e0088",
+    "/root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace/sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv": "275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+    "/root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace/tools/check_answerbench_036.py": "2f4ec24de997ce40514f139d55329b319a57910fbb9942097048104c86b723bb",
+    "/root/proof-factory/research/deepmind-superhuman-13-answerbench-column/workspace/imobench/answerbench_v2.csv": "0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16"
+  },
+  "peak_child_memory_rusage": 19448,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "a0617c7f3c4068c170948a594cdd38cbf8636de671a2d154a8faed74549d63cf",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

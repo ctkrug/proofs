@@ -1,0 +1,19 @@
+{
+  "id": "deepmind-superhuman-13-answerbench-column-20260722-165700-run3",
+  "problem_id": "deepmind-superhuman-13-answerbench-column",
+  "started_at": "2026-07-22T16:52:50+00:00",
+  "finished_at": "2026-07-22T16:57:00+00:00",
+  "phase": "technical",
+  "lane": "easy",
+  "model": "gpt-5.6-sol",
+  "outcome": "candidate",
+  "strategy_id": "strategy-csv-width+strict-parse+target-literal+one-byte-diff-v1",
+  "proof_result": "records/attempts/0003-candidate-gate/proof_result.json",
+  "audit": "records/attempts/0003-candidate-gate/audit.md",
+  "experiments": [
+    ".proof-experiments/20260722-165537-7895ed/experiment.json",
+    ".proof-experiments/20260722-165635-489734/experiment.json"
+  ],
+  "summary": "Fresh source checks found no stop condition; the full harness and materially separate checker passed; a directly applicable one-byte patch was reverse-checked against the candidate.",
+  "external_action": "none"
+}

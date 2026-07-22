@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "title": "Restore the missing short answer in IMO AnswerBench algebra problem 036",
+  "problem_id": "deepmind-superhuman-13-answerbench-column",
+  "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+  "contribution_type": "dataset correction",
+  "status": "public-research-note",
+  "peer_reviewed": false,
+  "expert_confirmed": false,
+  "created_at": "2026-07-22T17:42:37.502176+00:00",
+  "creator": "Charlie Krug",
+  "ai_assistance_disclosed": true,
+  "source_url": "https://github.com/google-deepmind/superhuman/issues/13",
+  "claims": [
+    "For candidate SHA-256 0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16, Python 3.12.3 csv.reader(strict=True) parses the header and all 400 data records with exactly six fields.",
+    "The unique imo-bench-algebra-036 record has Short Answer exactly $Y(x)=A+\\frac{B}{x}-x$.",
+    "The candidate equals pinned baseline SHA-256 275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9 plus one inserted byte 0x22 at zero-based offset 13,618.",
+    "At the run-3 refresh, upstream main remained 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, issue #13 was open, and both target-specific PR searches returned zero."
+  ],
+  "evidence": [
+    "Full harness experiment 20260722-165537-7895ed returned 0.",
+    "Standalone checker experiment 20260722-165635-489734 returned 0.",
+    "git apply --check --reverse artifacts/answerbench-036-one-byte.patch returned 0.",
+    "git ls-remote returned upstream main 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace."
+  ],
+  "independent_checker": "tools/check_answerbench_036.py is materially separate from tools/baseline_answerbench_036.py: it constructs the only allowed full byte sequence from a unique malformed separator and checks the complete target Problem/tail, while the harness derives the edit from the unique answer token, reparses independently, and generates mutations.",
+  "citations": [
+    "https://github.com/google-deepmind/superhuman/issues/13",
+    "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/answerbench_v2.csv#L150",
+    "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/CONTRIBUTING.md",
+    "https://github.com/google-deepmind/superhuman/pulls?q=is%3Apr+answerbench_v2"
+  ],
+  "artifact_hashes": {
+    "artifacts/.delegates/20260722-165250-b6f474/source-discriminator/memo.md": "4d59c3b8eb71f15a5fa9fe5b04ecf524cad8fdaab2847e9e8edb1008584a9f9a",
+    "artifacts/.proof-experiments/20260722-165537-7895ed/experiment.json": "7bfbcf659cf0dd1356868de9e609231e4dd273894f02fd3e6b7d338a05f7ddfc",
+    "artifacts/.proof-experiments/20260722-165537-7895ed/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-165537-7895ed/stdout.txt": "a0617c7f3c4068c170948a594cdd38cbf8636de671a2d154a8faed74549d63cf",
+    "artifacts/.proof-experiments/20260722-165635-489734/experiment.json": "f636824d528e4a95c18b23596fe98c1999c34a0639d4f5328f438401cfbad17f",
+    "artifacts/.proof-experiments/20260722-165635-489734/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-165635-489734/stdout.txt": "679db763b28c7cbeed38d0bcc1709a4ec0d3e0540fde685cf4e7db221890dac9",
+    "artifacts/artifacts/answerbench-036-one-byte.patch": "6a8ba6c4e653f46791a15ec523360b076ca93bee9a3e0cb23377e1f9e4761cd3",
+    "artifacts/artifacts/candidate-gate-run3-96fa6c4-0c05a0d4.json": "abf28d9059714adcdd63c1a92a79dd61ff4db0f3dbb924f043662cc56c67ce1a",
+    "artifacts/imobench/answerbench_v2.csv": "0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16",
+    "artifacts/records/attempts/0003-candidate-gate/audit.md": "ab3cc3768bcf479394b3491c3dc8d1e3ccc3b41af3eb93ce722e26b7e476a40c",
+    "artifacts/records/attempts/0003-candidate-gate/proof_result.json": "6b26787763778b8c2cd19336ab1a683e11d9e3a0abfde0696ffe65477dd34e1a",
+    "artifacts/records/attempts/deepmind-superhuman-13-answerbench-column-20260722-165700-run3.json": "31d4b5e4b9777d9ffe58f8e895438e540c44669ec163366036b22852080115a6",
+    "artifacts/records/attempts/deepmind-superhuman-13-answerbench-column-20260722-165700-run3.md": "813ec8f2824535ced7e2937202190b3be702eba7f0b2a5f79a7813852b98936a",
+    "artifacts/sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv": "275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9",
+    "artifacts/sources/github-api-2026-07-22/issue-13.json": "037bb11f5f8de831ee4ec15c636ef34747a3b906094a4cd6c95fdfb7dd6d16cd",
+    "artifacts/sources/github-api-2026-07-22/pr-search-algebra-036.json": "840185ac69ff01c964c2bfead7f7b8a5a7764c3814155124f82ebe285189a90f",
+    "artifacts/sources/github-api-2026-07-22/pr-search-answerbench-v2.json": "840185ac69ff01c964c2bfead7f7b8a5a7764c3814155124f82ebe285189a90f",
+    "artifacts/tools/baseline_answerbench_036.py": "a26872cba88a5cf4c5b68b260bb30b40bdfded550618b12ead25baaf0d2e0088",
+    "artifacts/tools/check_answerbench_036.py": "2f4ec24de997ce40514f139d55329b319a57910fbb9942097048104c86b723bb"
+  },
+  "review": {
+    "attempt_id": "deepmind-superhuman-13-answerbench-column-20260722-170424-418499",
+    "problem_id": "deepmind-superhuman-13-answerbench-column",
+    "decision": "accept",
+    "note": "Charlie reviewed the candidate record and approves release of the exact one-byte AnswerBench CSV correction for upstream submission.",
+    "reviewed_at": "2026-07-22T17:42:37.502176+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
+  }
+}

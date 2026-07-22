@@ -1,0 +1,354 @@
+{
+  "outcome": "candidate",
+  "approach": "Replay the hash-pinned one-byte repair through a standards-library CSV harness, adversarial controls, a materially separate exact-diff checker, and a directly applicable patch check after refreshing upstream status.",
+  "strategy": {
+    "family": "CSV structural validation and minimal-patch certification",
+    "fingerprint": "csv-width+strict-parse+target-literal+one-byte-diff-v1",
+    "mechanism": "The issue-supplied answer token fixes the malformed boundary; a strict CSV harness reconstructs and attacks the candidate, while a separate checker enforces exact schema, target fields, and baseline-plus-one-byte equality.",
+    "parent_ids": [],
+    "route_evaluation": {
+      "gate_proximity": 1.0,
+      "contribution_value": 0.9,
+      "decisiveness": 1.0,
+      "novelty_confidence": 0.9,
+      "novelty_risk": 0.1,
+      "scope": 1.0,
+      "reuse_value": 0.8,
+      "model_cost": 0.1,
+      "cpu_cost": 0.01
+    }
+  },
+  "hypothesis": "Against unchanged upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, the materialized candidate is exactly the required one-byte quote insertion, strict-parses as 400 six-field data rows, restores the exact algebra-036 Short Answer, and rejects wrong-answer and collateral-edit controls.",
+  "discriminating_test": "Refresh upstream main, issue #13, and target-specific PR searches; if unchanged, run the recorded full harness and standalone checker against the pinned baseline and require all predeclared positive and negative signals.",
+  "search_efficiency": {
+    "naive_space": "43,401,728 single-byte insertions: 169,538 positions times 256 byte values; dominant cost would be reparsing the 169,537-byte CSV per candidate.",
+    "reductions_considered": [
+      "quotienting by equivalent parse boundaries",
+      "unique-token localization",
+      "local CSV grammar pruning",
+      "batching candidate parses",
+      "incremental byte-diff evaluation",
+      "full-file hash reuse"
+    ],
+    "chosen_mechanism": "Use the unique issue-specified answer token, its preceding comma, and the required closing-quote grammar to derive one candidate; perform one strict parse and one exact byte comparison.",
+    "estimated_or_measured_savings": "Exactly 43,401,727 of 43,401,728 single-byte insertions eliminated before full validation; both run-3 validations completed in under one second each.",
+    "soundness_guard": "The harness derives the edit from the unique answer token and attacks it with mutations; the separate checker derives the expected bytes from the unique malformed separator and compares the entire file."
+  },
+  "space_reduction": {
+    "ambient_space": "All single-byte insertions into the pinned 169,537-byte CSV: 169,538 positions times 256 byte values",
+    "represented_space_before": "43,401,728 candidate edit scripts",
+    "eliminated_or_quotiented": "43,401,727 candidates eliminated by the unique answer token, preceding comma, closing-quote requirement, and issue-specified target",
+    "represented_space_after": "1 candidate: insert 0x22 at zero-based offset 13,618",
+    "reduction_factor": "43,401,728 exactly within the stated single-byte insertion model",
+    "measurement_status": "exact",
+    "unit": "families",
+    "coverage_scope": "Single-byte insertion repairs of the pinned upstream CSV only",
+    "soundness_basis": "Unique token count, local byte inspection, strict parsing of all 400 repaired records, exact target assertion, and two full-file byte constructions",
+    "remaining_unknown": "Arbitrary multi-byte rewrites were not classified; upstream acceptance is external.",
+    "next_bulk_elimination": "None; the scoped technical edit space is exhausted."
+  },
+  "tactical_learning": {
+    "prediction": "The live source gate would remain unchanged and both recorded validations would reproduce all prior PASS/rejection signals.",
+    "observation": "Main remained 96fa6c4, issue #13 remained open, both PR searches returned zero, the full harness returned 0 in 0.588 seconds, and the standalone checker returned 0 in 0.123 seconds.",
+    "surprise": "None.",
+    "failure_signature": "Semantic-only validation accepts the tested unrelated equal-length edit, so exact baseline comparison is mandatory.",
+    "bottleneck_update": "Technical uncertainty is closed for the pinned source; owner authorization, CLA readiness, and maintainer review are limiting.",
+    "reusable_assets": [
+      {
+        "name": "candidate gate harness",
+        "use": "Reconstruct the repair and replay positive and adversarial controls",
+        "evidence": "tools/baseline_answerbench_036.py SHA-256 a26872cba88a5cf4c5b68b260bb30b40bdfded550618b12ead25baaf0d2e0088; experiment 20260722-165537-7895ed"
+      },
+      {
+        "name": "standalone exact-diff checker",
+        "use": "Independently gate schema, target literal, and whole-file scope",
+        "evidence": "tools/check_answerbench_036.py SHA-256 2f4ec24de997ce40514f139d55329b319a57910fbb9942097048104c86b723bb; experiment 20260722-165635-489734"
+      },
+      {
+        "name": "review-ready patch",
+        "use": "Apply or review the single-byte upstream change",
+        "evidence": "artifacts/answerbench-036-one-byte.patch SHA-256 6a8ba6c4e653f46791a15ec523360b076ca93bee9a3e0cb23377e1f9e4761cd3; git apply --check --reverse returned 0 against the candidate"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "Any accepted candidate must equal the pinned baseline plus one 0x22 byte at offset 13,618.",
+        "scope": "Candidate derived from upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace",
+        "evidence": "candidate gate result and standalone exact-diff checker"
+      },
+      {
+        "constraint": "Refresh upstream source and PR status immediately before external submission.",
+        "scope": "Future upstream action",
+        "evidence": "The certificate is hash-bound to baseline SHA-256 275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9."
+      }
+    ],
+    "route_decision": "continue",
+    "next_discriminator": "After explicit owner authorization, repeat the live source gate and standalone checker once; proceed to the minimal PR only if all remain unchanged."
+  },
+  "prior_art_check": {
+    "nearest_method_ids": [
+      "google-deepmind/superhuman#13"
+    ],
+    "classification": "material_modification",
+    "exact_delta": "Issue #13 reports the malformed fields and intended literal. This contribution supplies the corrected dataset bytes, directly applicable patch, strict full-file validation, independent exact-diff checker, recorded resource-bounded runs, and adversarial controls.",
+    "duplicate_risk": "A repair could appear after the refresh or under text absent from the two repository PR searches.",
+    "comparison_test": "Resolve current main and query repository PRs for algebra-036 and answerbench_v2.csv immediately before submission.",
+    "decision": "proceed",
+    "source_urls": [
+      "https://github.com/google-deepmind/superhuman/issues/13",
+      "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/answerbench_v2.csv#L150",
+      "https://github.com/google-deepmind/superhuman/commit/ea72dda6e4aa615d940cf84713b142bcb0aa75b5"
+    ]
+  },
+  "field_progress_assessment": {
+    "status": "met",
+    "gate_id": "Use the sourced contribution and verification contract.",
+    "contribution_class": "dataset correction candidate",
+    "closest_prior_result": "Open issue #13 identifies the merge and intended value but provides no corrected file or executable certificate.",
+    "measurable_improvement": "The unique five-field record becomes a strict six-field record; all 400 data records now have six fields, with one inserted byte and no other difference.",
+    "independent_validation": "Standalone deterministic checker experiment 20260722-165635-489734 returned 0 and emitted both expected PASS lines; no third party or maintainer has reviewed it.",
+    "external_audience": "google-deepmind/superhuman maintainers via a PR linked to issue #13",
+    "remains_unproved": "Upstream acceptance and merge remain external, and upstream state may change after this audit.",
+    "route_recommendation": "continue only through owner authorization and upstream review; close technical edit search"
+  },
+  "lab_review": {
+    "job_id": "",
+    "decision": "none",
+    "reason": "No lab job was needed; both deterministic checks completed in under one second.",
+    "evidence": [
+      ".proof-experiments/20260722-165537-7895ed/experiment.json",
+      ".proof-experiments/20260722-165635-489734/experiment.json"
+    ]
+  },
+  "strategy_status": "promising",
+  "summary": "Run 3 refreshed the official source state, replayed the complete candidate gate and a materially separate checker, and added a checked one-byte patch artifact. The candidate exactly repairs algebra-036 and satisfies the full local verification contract. No external action was taken.",
+  "rationale": "The decisive result is reproducible and independently encoded: both implementations require the same exact target semantics and whole-file one-byte scope, while the harness additionally rejects malformed, wrong-answer, and collateral-edit controls.",
+  "claims": [
+    "For candidate SHA-256 0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16, Python 3.12.3 csv.reader(strict=True) parses the header and all 400 data records with exactly six fields.",
+    "The unique imo-bench-algebra-036 record has Short Answer exactly $Y(x)=A+\\frac{B}{x}-x$.",
+    "The candidate equals pinned baseline SHA-256 275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9 plus one inserted byte 0x22 at zero-based offset 13,618.",
+    "At the run-3 refresh, upstream main remained 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, issue #13 was open, and both target-specific PR searches returned zero."
+  ],
+  "evidence": [
+    "python3 /root/proof-factory/skills/computational-researcher/scripts/run_experiment.py ... tools/baseline_answerbench_036.py ... returned 0 as experiment 20260722-165537-7895ed",
+    "python3 /root/proof-factory/skills/computational-researcher/scripts/run_experiment.py ... tools/check_answerbench_036.py ... returned 0 as experiment 20260722-165635-489734",
+    "git apply --check --reverse artifacts/answerbench-036-one-byte.patch returned 0 against the materialized candidate",
+    "git ls-remote https://github.com/google-deepmind/superhuman.git refs/heads/main returned 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace"
+  ],
+  "evidence_files": [
+    "imobench/answerbench_v2.csv",
+    "sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv",
+    "sources/github-api-2026-07-22/issue-13.json",
+    "sources/github-api-2026-07-22/pr-search-algebra-036.json",
+    "sources/github-api-2026-07-22/pr-search-answerbench-v2.json",
+    "tools/baseline_answerbench_036.py",
+    "tools/check_answerbench_036.py",
+    "artifacts/answerbench-036-one-byte.patch",
+    "artifacts/candidate-gate-run3-96fa6c4-0c05a0d4.json",
+    ".proof-experiments/20260722-165537-7895ed/experiment.json",
+    ".proof-experiments/20260722-165537-7895ed/stdout.txt",
+    ".proof-experiments/20260722-165635-489734/experiment.json",
+    ".proof-experiments/20260722-165635-489734/stdout.txt"
+  ],
+  "next_steps": [
+    "Obtain Charlie's explicit authorization and confirm Google CLA readiness.",
+    "Immediately before submission, refresh upstream main, issue state, and competing PR searches, then rerun the standalone checker.",
+    "If unchanged, submit only the one-byte dataset patch linked to issue #13; offer a generic schema guard separately only if maintainers request it."
+  ],
+  "citations": [
+    "https://github.com/google-deepmind/superhuman/issues/13",
+    "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/imobench/answerbench_v2.csv#L150",
+    "https://github.com/google-deepmind/superhuman/blob/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/CONTRIBUTING.md",
+    "https://github.com/google-deepmind/superhuman/pulls?q=is%3Apr+answerbench_v2"
+  ],
+  "techniques": [
+    "strict standard-library CSV parsing",
+    "exact target-field assertion",
+    "full-file byte-diff certification",
+    "negative mutation controls",
+    "hash-bound experiment recording"
+  ],
+  "research_mode": "computational",
+  "experiments": [
+    ".proof-experiments/20260722-165537-7895ed: full harness returned 0; baseline, wrong answer, and collateral edit were rejected; candidate passed",
+    ".proof-experiments/20260722-165635-489734: standalone checker returned 0 and printed both required PASS lines"
+  ],
+  "independent_checker": "tools/check_answerbench_036.py is materially separate from tools/baseline_answerbench_036.py: it constructs the only allowed full byte sequence from a unique malformed separator and checks the complete target Problem/tail, while the harness derives the edit from the unique answer token, reparses independently, and generates mutations.",
+  "transfer_insights": [],
+  "established_facts": [
+    {
+      "claim": "The pinned upstream baseline has 399 six-field and one five-field data record under tolerant parsing; the malformed record is algebra-036.",
+      "evidence": "artifacts/candidate-gate-run3-96fa6c4-0c05a0d4.json",
+      "scope": "Upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace only",
+      "status": "computed"
+    },
+    {
+      "claim": "The one-byte candidate has 400 strict-parsed six-field records and the exact reported algebra-036 Short Answer.",
+      "evidence": "Experiments 20260722-165537-7895ed and 20260722-165635-489734",
+      "scope": "Candidate SHA-256 0c05a0d4af9cbe3e70413b250d6c9cac1bfe4d848f6c196f83ed61ebef9ced16",
+      "status": "computed"
+    },
+    {
+      "claim": "The candidate differs from the pinned baseline only by insertion of 0x22 at offset 13,618.",
+      "evidence": "Standalone checker and candidate gate result",
+      "scope": "The two named SHA-256 byte streams",
+      "status": "computed"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Use semantic-only CSV validation as the complete certificate",
+      "scope": "Candidates derived from the pinned baseline",
+      "reason": "It accepts the tested unrelated equal-length problem-ID mutation.",
+      "evidence": "unrelated_edit control in artifacts/candidate-gate-run3-96fa6c4-0c05a0d4.json",
+      "reopen_condition": "A different exact mechanism proves no collateral byte changes."
+    },
+    {
+      "claim_or_route": "Search alternative one-byte insertions",
+      "scope": "All 43,401,728 single-byte insertion scripts for the pinned CSV",
+      "reason": "The unique target token and CSV boundary derive exactly one candidate, which passes the entire contract.",
+      "evidence": "Both run-3 experiments and the exact patch",
+      "reopen_condition": "Upstream bytes or the authoritative answer literal change."
+    },
+    {
+      "claim_or_route": "Re-derive the functional-equation solution before fixing the CSV",
+      "scope": "This source-defined dataset correction",
+      "reason": "The authoritative issue and existing raw token already specify the exact literal; the defect is only a missing CSV quote.",
+      "evidence": "Issue #13 and pinned baseline bytes",
+      "reopen_condition": "The authoritative source retracts or disputes the literal."
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Submit the minimal correction upstream after owner authorization.",
+      "rationale": "All technical gates pass; maintainer review is the remaining acceptance path.",
+      "next_experiment": "Refresh live source state and rerun experiment 20260722-165635-489734's command immediately before submission.",
+      "priority": "high",
+      "status": "open"
+    },
+    {
+      "description": "Offer a generic CSV schema regression guard only if maintainers request preventive scope.",
+      "rationale": "It could prevent recurrence but is not necessary for the smallest correction.",
+      "next_experiment": "Run the proposed guard on the pinned and repaired trees; require one failure before and zero after.",
+      "priority": "low",
+      "status": "open"
+    }
+  ],
+  "blocker": "No technical blocker remains. External submission requires human-owner authorization, Google CLA readiness, and maintainer review.",
+  "reopen_condition": "Reopen technical work only if upstream main, issue status, competing PR status, target bytes, or maintainer-requested scope changes.",
+  "reopen_evidence": "Run-3 live checks showed no upstream movement or competing PR and both technical gates reproduced successfully.",
+  "continuation": {
+    "objective": "Move the certified one-byte correction through authorized upstream review without expanding scope.",
+    "first_action": "python3 tools/check_answerbench_036.py imobench/answerbench_v2.csv --reference sources/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace/answerbench_v2.csv",
+    "stop_condition": "Stop or redirect on upstream movement, a competing repair, checker failure, owner rejection, CLA blocker, or maintainer scope change."
+  },
+  "campaign_assessment": {
+    "decision": "continue",
+    "close_signal": "The actual one-byte correction, checked patch, full adversarial harness, and materially separate deterministic checker all exist and pass against unchanged upstream main.",
+    "reason": "This is a completed local candidate at run 3; only bounded owner authorization and upstream review remain."
+  },
+  "resolution_portfolio": {
+    "current_uncertainty": "Whether the owner authorizes submission and upstream maintainers accept the already validated one-byte dataset correction.",
+    "active_routes_and_scores": [
+      {
+        "route": "Minimal one-byte upstream correction",
+        "score": "Highest marginal value: technical success is complete at sub-second replay cost; external acceptance is the only useful remaining signal.",
+        "success_certificate": "Merged upstream PR whose diff is exactly artifacts/answerbench-036-one-byte.patch and whose pre-submit checker passes.",
+        "smallest_decisive_experiment": "Refresh main/issue/PR state and run the standalone checker once.",
+        "switch_condition": "Any upstream movement, competing fix, owner rejection, or maintainer request changes the route immediately."
+      },
+      {
+        "route": "Repository-wide schema regression guard",
+        "score": "Lower marginal value: potentially reusable but expands scope and is unnecessary to settle issue #13.",
+        "success_certificate": "Maintainer-requested test that fails only on the malformed baseline and passes the repaired tree.",
+        "smallest_decisive_experiment": "Prototype against pinned and repaired snapshots.",
+        "switch_condition": "Promote only if maintainers request preventive coverage."
+      }
+    ],
+    "what_changed_this_turn": "Fresh source checks found no movement; the full gate and independent checker reproduced; a reverse-checked one-byte patch artifact was added.",
+    "net_new_validated_progress": "Run-3 hash-bound replay and a directly applicable patch check independently confirm the existing candidate; no new mathematical claim was added.",
+    "cheapest_next_experiment_for_each_route": [
+      {
+        "route": "Minimal one-byte upstream correction",
+        "experiment": "Repeat live source checks and the standalone 0.123-second checker after authorization."
+      },
+      {
+        "route": "Repository-wide schema regression guard",
+        "experiment": "Ask maintainers whether they want this expanded scope before writing it."
+      }
+    ],
+    "why_selected_next_route_has_best_expected_value": "The minimal route already has complete technical evidence and directly settles the reported defect; every broader or mathematical route adds cost without reducing the remaining acceptance uncertainty.",
+    "immediate_route_switch_conditions": [
+      "upstream main changes",
+      "issue #13 closes",
+      "a competing target-specific PR appears",
+      "the checker fails",
+      "the owner declines submission",
+      "maintainers request broader validation"
+    ]
+  },
+  "strategy_proposals": [
+    {
+      "family": "Repository-wide CSV schema regression guard",
+      "mechanism": "Parse maintained benchmark CSVs with the standard library and assert each row width equals its header width.",
+      "hypothesis": "A generic guard fails uniquely on the pinned malformed file and passes after repair.",
+      "discriminating_test": "Run it on the pinned and repaired trees; require one failure before and zero after.",
+      "rationale": "Potential preventive value, but only worth the scope expansion if maintainers request it."
+    }
+  ],
+  "synthesis_candidates": [],
+  "candidate_profile": {
+    "contribution_class": "research_artifact",
+    "scholarly_question": "Can the specific AnswerBench v2 column-misalignment defect reported in issue #13 be repaired without changing any unrelated dataset byte?",
+    "meaningful_delta": "Supplies the corrected CSV, a one-byte-only patch and certificate, strict validation of all 400 data rows, negative mutation controls, and a separate deterministic checker.",
+    "acceptance_test": "A strict standards-library reader sees six fields in every row, algebra-036 has the exact reported Short Answer, exact-diff validation passes, and upstream maintainers accept the one-byte patch.",
+    "closest_prior_work": [
+      {
+        "url": "https://github.com/google-deepmind/superhuman/issues/13",
+        "difference": "Reports the merge and intended value but provides no corrected file, executable checker, or certificate."
+      },
+      {
+        "url": "https://github.com/google-deepmind/superhuman/commit/ea72dda6e4aa615d940cf84713b142bcb0aa75b5",
+        "difference": "Introduces AnswerBench v2; this candidate corrects one malformed field boundary in that dataset."
+      }
+    ],
+    "novelty_searches": [
+      {
+        "source": "GitHub repository pull-request index",
+        "query": "repo:google-deepmind/superhuman is:pr algebra-036",
+        "url": "https://github.com/google-deepmind/superhuman/pulls?q=is%3Apr+algebra-036",
+        "finding": "Fresh API search returned zero matching pull requests."
+      },
+      {
+        "source": "GitHub repository pull-request index",
+        "query": "repo:google-deepmind/superhuman is:pr answerbench_v2.csv",
+        "url": "https://github.com/google-deepmind/superhuman/pulls?q=is%3Apr+answerbench_v2.csv",
+        "finding": "Fresh API search returned zero matching pull requests."
+      }
+    ],
+    "external_channel": {
+      "recipient": "google-deepmind/superhuman maintainers",
+      "url": "https://github.com/google-deepmind/superhuman/pulls",
+      "acceptance_path": "After explicit owner authorization and CLA readiness, submit the minimal patch linked to issue #13 and obtain maintainer merge."
+    },
+    "independent_validations": [
+      {
+        "type": "deterministic_checker",
+        "validator": "Python 3.12.3 standalone tools/check_answerbench_036.py under the hash-recording experiment runner",
+        "result": "Return code 0; all 400 data records have six columns, the exact target field is restored, and the candidate is exactly the required one-byte insertion.",
+        "artifact": ".proof-experiments/20260722-165635-489734/experiment.json",
+        "evidence_url": ""
+      }
+    ],
+    "relevance": {
+      "settles_exact_open_target": false,
+      "improves_best_known_result": false,
+      "source_explicitly_requests_result": true,
+      "expert_interest_confirmed": false,
+      "new_structural_result": false,
+      "evidence_url": "https://github.com/google-deepmind/superhuman/issues/13"
+    },
+    "arbitrary_cutoff_extension": false
+  },
+  "tool_disclosure": "OpenAI Codex acted as the Sol principal in the campaign's GPT-5.6 role; a GPT-5.6 Terra source-discriminator memo was treated only as advisory and every relied-on claim was independently rechecked. Deterministic evidence used Python 3.12.3 standard-library csv/hash/subprocess code, the supplied experiment recorder, git 2.x, curl/GitHub API reads, and git apply --check. No CAS, proof assistant, SAT/SMT solver, or external publishing tool was used."
+}
