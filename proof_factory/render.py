@@ -265,18 +265,75 @@ def _problem_page(
 def _about_page() -> str:
     body = """
 <section class="method-head about-head">
-  <span class="overline">ABOUT THE PROJECT</span>
-  <h1>Seeking useful<br><em>mathematics.</em></h1>
-  <p>Proof Factory is an AI-assisted research project seeking to make real mathematical contributions, no matter how small or large.</p>
+  <span class="overline">SYSTEM MAP / ABOUT THE PROJECT</span>
+  <h1>A proof engine<br><em>that remembers.</em></h1>
+  <p>Proof Factory is an AI-assisted research system for making useful mathematical contributions, no matter how small or large, while pursuing hard finite problems without losing the evidence, failures, or context between passes.</p>
+  <nav class="about-jump" aria-label="About page sections"><a href="#engine">Engine</a><a href="#passes">Research passes</a><a href="#memory">Memory</a><a href="#roles">Roles</a><a href="#gates">Publication gates</a></nav>
 </section>
-<section class="about-grid">
-  <article><span class="overline">The aim</span><h2>Contribute something useful.</h2><p>A correction, verified computation, dataset, research tool, formalization, narrow lemma, improved bound, counterexample, or complete proof can all matter.</p></article>
-  <article><span class="overline">The work</span><h2>Research in bounded steps.</h2><p>The system studies prior work, records what is known, runs reproducible experiments, and carries promising directions into the next research pass.</p></article>
-  <article><span class="overline">The standard</span><h2>Be precise about the result.</h2><p>An attempt is not a discovery. Any claim must be scoped, reproducible, checked independently, and compared with existing literature before it is presented as a contribution.</p></article>
+
+<section id="engine" class="about-section engine-section">
+  <div class="about-section-head"><div><span class="overline">01 / END-TO-END ARCHITECTURE</span><h2>One evidence loop</h2></div><p>Every pass begins from current source material and durable state. It ends by changing that state only when the evidence survives its gates.</p></div>
+  <div class="engine-inputs" aria-label="Engine inputs"><span>Primary sources</span><span>Problem registry</span><span>Prior-art register</span><span>Research memory</span><span>Lab events</span></div>
+  <ol class="engine-flow" aria-label="Proof Factory process">
+    <li><span class="step-no">01</span><span class="overline">Scout + intake</span><h3>Find a real opening</h3><p>Audit a current, recognized source; check comments, claims, active work, acceptance path, and whether a compact certificate is possible.</p><strong>Output · exact target</strong></li>
+    <li><span class="step-no">02</span><span class="overline">Baseline</span><h3>Map what is known</h3><p>Read primary literature, capture established facts, datasets, live methods, exclusions, novelty risks, and verification tools.</p><strong>Output · sourced research map</strong></li>
+    <li><span class="step-no">03</span><span class="overline">Strategy</span><h3>Choose a discriminator</h3><p>Compare witness, impossibility certificate, structural reduction, alternative formalism, and adjacent-field transfer by decision value per cost.</p><strong>Output · prediction + stop rule</strong></li>
+    <li><span class="step-no">04</span><span class="overline">Research + lab</span><h3>Run the bounded test</h3><p>Reason in a research pass; move long deterministic work to a resource-capped lab with immutable inputs, checkpoints, manifests, and logs.</p><strong>Output · artifact + receipt</strong></li>
+    <li><span class="step-no">05</span><span class="overline">Adversarial verification</span><h3>Try to break it</h3><p>Replay cleanly, check scope and quantifiers, use an independent implementation or formal kernel, and repeat the novelty search.</p><strong>Output · verified scope</strong></li>
+    <li><span class="step-no">06</span><span class="overline">Decision</span><h3>Learn, redirect, or release</h3><p>Record the exact delta. Continue, hold, redirect, or close the route. Candidate work still waits for contribution, skeptic, and human gates.</p><strong>Output · next state</strong></li>
+  </ol>
+  <div class="engine-return"><span>↳</span><p><strong>Feedback, not amnesia.</strong> Facts, failures, route scores, artifacts, and the next first action return to the next epoch. A failed search narrows only its recorded scope.</p></div>
 </section>
-<section class="about-source"><p>All repositories and research records are public. Commits are attributed to Charlie Krug; AI and computational assistance are disclosed.</p><a href="https://github.com/ctkrug/proofs">View source and repositories →</a></section>
+
+<section id="passes" class="about-section pass-section">
+  <div class="about-section-head"><div><span class="overline">02 / RESEARCH ORCHESTRATION</span><h2>How a pass thinks</h2></div><p>Model agreement is never treated as validation. Reconnaissance diversifies the search; the principal chooses and audits one concrete test.</p></div>
+  <div class="pass-map" aria-label="Research and laboratory pass architecture">
+    <div class="pass-column pass-start"><span class="overline">Admitting evidence</span><h3>Canonical route brief</h3><p>Statement, source status, research map, tactical incumbent, challenger, roadmap, prior art, and any completed lab event.</p></div>
+    <div class="pass-column pass-delegates"><span class="overline">Terra reconnaissance</span><div class="mini-role"><strong>Source discriminator</strong><span>Exact status, smallest executable test, outside acceptance path</span></div><div class="mini-role"><strong>Prior-art challenger</strong><span>Overlap, missing premise, genuinely different route</span></div><div class="mini-role"><strong>Experiment verifier</strong><span>Controls, failure modes, stop conditions, independent check</span></div><small>Roles are admitted only when their evidence can change the route.</small></div>
+    <div class="pass-column pass-principal"><span class="overline">Sol principal</span><h3>Select one bounded discriminator</h3><ul><li>Audit delegate claims</li><li>Predeclare success and failure</li><li>Reject duplicated mechanisms</li><li>Update the five-route portfolio</li></ul><strong>Reasoning stays accountable to artifacts.</strong></div>
+    <div class="pass-column pass-execution"><span class="overline">Execution split</span><div class="execution-route"><strong>≤ 2 minutes</strong><span>Run inside the research pass with hashes, seed, limits, logs, and measured output.</span></div><div class="execution-route"><strong>&gt; 2 minutes</strong><span>Submit a shell-free lab job with pilot, immutable inputs, checkpoints, resource caps, and durable completion events.</span></div></div>
+    <div class="pass-column pass-review"><span class="overline">Review return</span><h3>Prediction → observation</h3><p>Record surprise, reusable assets, constraints learned, failure signature, bottleneck update, and the cheapest next discriminator.</p><div class="decision-tags"><span>Continue</span><span>Validate</span><span>Redirect</span><span>Promote</span></div></div>
+  </div>
+</section>
+
+<section id="memory" class="about-section memory-section">
+  <div class="about-section-head"><div><span class="overline">03 / KNOWLEDGE + STATE</span><h2>What the engine remembers</h2></div><p>Different stores answer different questions. Mutable projections make the next pass efficient; append-only records and hashed artifacts preserve what actually happened.</p></div>
+  <div class="memory-stack">
+    <article><span class="memory-index">L1</span><div><span class="overline">Selection state</span><h3>Problem registry + source audits</h3><p>Exact statements, lanes, priority, recognition, current status, verification contract, and external acceptance route.</p></div><strong>Chooses what may run</strong></article>
+    <article><span class="memory-index">L2</span><div><span class="overline">Working memory</span><h3>Research map + tactical memory</h3><p>Established facts, scoped exclusions, open leads, strategies, route fingerprints, prediction/observation learning, and next-session checkpoint.</p></div><strong>Lets the next pass resume</strong></article>
+    <article><span class="memory-index">L3</span><div><span class="overline">Anti-rediscovery layer</span><h3>Prior art + cross-problem brain</h3><p>Nearest historical mechanisms, required material delta, source URLs, shared concepts, reusable methods, and explicit transfer hypotheses.</p></div><strong>Stops renamed repetition</strong></article>
+    <article><span class="memory-index">L4</span><div><span class="overline">Immutable evidence</span><h3>Attempts + experiment receipts</h3><p>Claims, citations, hashes, commands, seeds, limits, logs, manifests, certificates, checker results, failures, and human adjudications.</p></div><strong>Records what happened</strong></article>
+    <article><span class="memory-index">L5</span><div><span class="overline">Provenance + projection</span><h3>Per-problem Git repos + public ledger</h3><p>Readable checkpoints, ordinary-sized artifacts, AI/tool disclosure, publication packets, limits, and the public distinction between attempt and accepted result.</p></div><strong>Makes the trail inspectable</strong></article>
+  </div>
+</section>
+
+<section id="roles" class="about-section roles-section">
+  <div class="about-section-head"><div><span class="overline">04 / PERSONAS</span><h2>Six roles, separate powers</h2></div><p>The names describe responsibilities, not claims of personhood. Separation keeps discovery, verification, and publication from collapsing into one optimistic voice.</p></div>
+  <div class="role-grid">
+    <article><span class="role-glyph">S</span><span class="overline">Scout</span><h3>Finds legitimate openings</h3><p>Checks live source status, upstream work, recognition, tractability, certificate shape, and a real external recipient.</p><strong>Cannot lower the intake bar</strong></article>
+    <article><span class="role-glyph">R</span><span class="overline">Reconnaissance delegates</span><h3>Challenge before committing</h3><p>Source, prior-art, and experiment specialists produce compact memos with falsifiers and stop conditions.</p><strong>Memos are leads, not evidence</strong></article>
+    <article><span class="role-glyph">P</span><span class="overline">Principal investigator</span><h3>Owns the research decision</h3><p>Selects one route, audits every inherited claim, executes bounded reasoning, and leaves structured state for the next epoch.</p><strong>Cannot self-promote a result</strong></article>
+    <article><span class="role-glyph">L</span><span class="overline">Lab worker</span><h3>Runs deterministic compute</h3><p>Executes argv without a shell, under CPU, memory, time, workspace, checkpoint, and artifact-growth controls.</p><strong>Queueing compute is not evidence</strong></article>
+    <article><span class="role-glyph">V</span><span class="overline">Skeptic + verifier</span><h3>Starts from the artifact</h3><p>Checks the statement, scope, certificate, independent replay, and novelty without inheriting the researcher's conclusion.</p><strong>Model agreement does not count</strong></article>
+    <article><span class="role-glyph">H</span><span class="overline">Human steward</span><h3>Accepts responsibility</h3><p>Charlie reviews the bounded release packet and explicitly approves publication. Outside experts or maintainers determine external acceptance.</p><strong>Approval is not peer review</strong></article>
+  </div>
+</section>
+
+<section id="gates" class="about-section gate-section">
+  <div class="about-section-head"><div><span class="overline">05 / CLAIM CONTROL</span><h2>The publication firewall</h2></div><p>A correct computation can still be unoriginal, irrelevant, or too narrowly scoped. Each gate asks a different question and fails closed.</p></div>
+  <ol class="gate-flow">
+    <li><span>01</span><div><strong>Contribution gate</strong><p>Is there a meaningful delta, recognized contribution class, reproducible novelty search, independent validation, and real acceptance path?</p></div></li>
+    <li><span>02</span><div><strong>Isolated skeptic</strong><p>Does the claim survive statement, scope, certificate, adversarial, and literature checks without relying on the research transcript?</p></div></li>
+    <li><span>03</span><div><strong>Charlie approval</strong><p>Is the bounded packet honest, useful, appropriately disclosed, and ready to put his name behind?</p></div></li>
+    <li><span>04</span><div><strong>Mechanical release</strong><p>Publish the artifacts, manifest, citations, limitations, AI disclosure, validation plan, and public classification.</p></div></li>
+    <li><span>05</span><div><strong>External acceptance</strong><p>Repository merge, expert confirmation, venue review, or another sourced outside event. Self-publication alone scores zero.</p></div></li>
+  </ol>
+  <div class="status-legend" aria-label="Public result classifications"><span><i class="status-dot attempt"></i>Attempt</span><span><i class="status-dot candidate"></i>Candidate</span><span><i class="status-dot verified"></i>Computationally verified</span><span><i class="status-dot reviewed"></i>Independently reviewed</span><span><i class="status-dot published"></i>Published / accepted</span></div>
+</section>
+
+<section class="about-source"><span class="overline">OPEN RESEARCH RECORD</span><h2>Inspect the machinery.</h2><p>All engine code, public problem repositories, research records, limitations, and tool disclosures are inspectable. Commits establish provenance; certificates, checkers, and outside review establish mathematical confidence.</p><a href="https://github.com/ctkrug/proofs">View source and repositories →</a></section>
 """
-    return _layout("About", body, description="About Proof Factory and its goal of contributing useful mathematics at any scale.")
+    return _layout("How it works", body, description="Architecture, research process, roles, memory, verification, and publication gates inside Proof Factory.")
 
 
 def _attempt_page(attempt: dict[str, Any], problem: dict[str, Any], reviews: list[dict[str, Any]]) -> str:
@@ -663,6 +720,60 @@ footer{background:var(--black);color:#acb4b0;border-color:var(--black)}footer a{
 """
 
 
+ABOUT_CSS = r"""
+/* Proof engine architecture / about */
+.about-head{position:relative;overflow:hidden;padding-bottom:52px}
+.about-head:after{content:"SOURCE → STATE → TEST → EVIDENCE → REVIEW";position:absolute;right:5vw;bottom:28px;color:rgba(124,47,54,.09);font:700 clamp(18px,2.8vw,42px) var(--mono);letter-spacing:-.03em;white-space:nowrap}
+.about-head>p{max-width:900px;color:#46514e;font-size:clamp(18px,2vw,25px)}
+.about-jump{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:8px;margin-top:34px}
+.about-jump a{padding:8px 11px;border:1px solid var(--line);background:rgba(251,250,245,.7);color:var(--ink);font:650 9px var(--mono);letter-spacing:.1em;text-decoration:none;text-transform:uppercase}
+.about-jump a:hover{border-color:var(--red);color:var(--red)}
+.about-section{padding:clamp(54px,7vw,92px) clamp(24px,7vw,108px);border-bottom:1px solid var(--line)}
+.about-section:nth-of-type(odd){background:#eeeae0}
+.about-section-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.7fr);align-items:end;gap:50px;margin-bottom:36px}
+.about-section-head h2{margin:8px 0 0;color:var(--ink);font:400 clamp(38px,5vw,64px)/.98 var(--serif);letter-spacing:-.04em}
+.about-section-head>p{max-width:520px;margin:0;color:#525c59;font-size:15px}
+.engine-inputs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-bottom:0;background:#e5e0d5}
+.engine-inputs span{padding:10px 12px;border-right:1px solid var(--line);color:var(--muted);font:650 9px var(--mono);letter-spacing:.09em;text-align:center;text-transform:uppercase}
+.engine-inputs span:last-child{border-right:0}
+.engine-flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin:0;padding:0;border:1px solid var(--line);list-style:none;background:var(--card)}
+.engine-flow li{position:relative;min-width:0;min-height:330px;padding:22px 18px 18px;border-right:1px solid var(--line)}
+.engine-flow li:last-child{border-right:0}
+.engine-flow li:not(:last-child):after{content:"→";position:absolute;z-index:2;right:-13px;top:52px;width:24px;height:24px;border:1px solid var(--line);background:var(--paper);color:var(--red);font:700 15px/22px var(--mono);text-align:center}
+.step-no{display:block;margin-bottom:25px;color:var(--red);font:500 30px/1 var(--mono)}
+.engine-flow h3{min-height:60px;margin:10px 0 12px;color:var(--ink);font:400 22px/1.08 var(--serif)}
+.engine-flow p{margin:0;color:#56605e;font-size:13px;line-height:1.55}
+.engine-flow strong{position:absolute;right:18px;bottom:18px;left:18px;padding-top:11px;border-top:1px solid var(--line);color:var(--blue);font:650 8px var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.engine-return{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:16px;padding:15px 20px;border:1px solid var(--line);border-top:0;background:var(--black);color:#f3f0e8}
+.engine-return>span{color:#d8c49e;font:400 32px var(--mono)}.engine-return p{margin:0;color:#d3d7d2;font-size:13px}.engine-return strong{color:#fff}
+.pass-section{background:#f4f1e8!important}
+.pass-map{display:grid;grid-template-columns:1fr 1.12fr 1.12fr 1fr 1fr;gap:0;border:1px solid var(--line);background:var(--card)}
+.pass-column{position:relative;min-width:0;min-height:390px;padding:22px;border-right:1px solid var(--line)}.pass-column:last-child{border-right:0}
+.pass-column:not(:last-child):after{content:"";position:absolute;z-index:2;right:-5px;top:49px;width:9px;height:9px;border-top:2px solid var(--red);border-right:2px solid var(--red);background:var(--card);transform:rotate(45deg)}
+.pass-column h3{margin:24px 0 12px;color:var(--ink);font:400 26px/1.08 var(--serif)}.pass-column p,.pass-column li{color:#56605e;font-size:13px}.pass-column ul{padding-left:18px}
+.pass-column>strong{display:block;margin-top:22px;color:var(--red);font:650 9px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.pass-start{background:#f0eee7}.pass-principal{background:#e8ece7}.pass-review{background:#f1e8e4}
+.mini-role,.execution-route{margin-top:14px;padding:12px;border-left:2px solid var(--blue);background:#f0eee7}.mini-role strong,.mini-role span,.execution-route strong,.execution-route span{display:block}.mini-role strong,.execution-route strong{color:var(--ink);font-size:13px}.mini-role span,.execution-route span{margin-top:3px;color:#5c6663;font-size:11.5px;line-height:1.45}
+.pass-delegates small{display:block;margin-top:15px;color:var(--muted);font:600 8px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.execution-route{border-color:var(--green)}.execution-route+ .execution-route{border-color:var(--red)}
+.decision-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:22px}.decision-tags span{padding:5px 7px;border:1px solid #bd9692;color:var(--red);font:650 8px var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.memory-section{background:#e8e4da!important}
+.memory-stack{max-width:1120px;margin:0 auto}.memory-stack article{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(150px,.28fr);align-items:center;gap:24px;min-height:128px;padding:20px 24px;border:1px solid var(--line);border-bottom:0;background:var(--card)}.memory-stack article:last-child{border-bottom:1px solid var(--line)}
+.memory-stack article:nth-child(2){margin:0 18px}.memory-stack article:nth-child(3){margin:0 36px}.memory-stack article:nth-child(4){margin:0 54px}.memory-stack article:nth-child(5){margin:0 72px}
+.memory-index{display:grid;width:50px;height:50px;place-items:center;border:1px solid var(--red);border-radius:50%;color:var(--red);font:650 12px var(--mono)}
+.memory-stack h3{margin:6px 0 4px;color:var(--ink);font:400 23px var(--serif)}.memory-stack p{margin:0;color:#56605e;font-size:13px}.memory-stack article>strong{color:var(--blue);font:650 8px/1.5 var(--mono);letter-spacing:.07em;text-align:right;text-transform:uppercase}
+.roles-section{background:#f4f1e8!important}.role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.role-grid article{position:relative;min-height:290px;padding:25px;border:1px solid var(--line);background:var(--card)}
+.role-glyph{display:grid;width:42px;height:42px;margin-bottom:27px;place-items:center;border:1px solid var(--ink);border-radius:50%;color:var(--ink);font:650 11px var(--mono)}
+.role-grid h3{margin:9px 0 11px;color:var(--ink);font:400 27px/1.08 var(--serif)}.role-grid p{color:#56605e;font-size:13px}.role-grid strong{position:absolute;right:25px;bottom:22px;left:25px;padding-top:11px;border-top:1px solid var(--line);color:var(--red);font:650 8px var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.gate-section{background:#eeeae0!important}.gate-flow{margin:0;padding:0;border-top:1px solid var(--line);list-style:none}.gate-flow li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:22px;padding:22px 0;border-bottom:1px solid var(--line)}.gate-flow li>span{color:var(--red);font:500 24px var(--mono)}.gate-flow strong{color:var(--ink);font:400 24px var(--serif)}.gate-flow p{max-width:890px;margin:4px 0 0;color:#56605e;font-size:13px}
+.status-legend{display:flex;flex-wrap:wrap;gap:18px;margin-top:24px;color:var(--muted);font:650 8px var(--mono);letter-spacing:.07em;text-transform:uppercase}.status-legend span{display:flex;align-items:center;gap:7px}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}.status-dot.candidate{background:var(--amber)}.status-dot.verified{background:var(--blue)}.status-dot.reviewed{background:var(--violet)}.status-dot.published{background:var(--green)}
+.about-source{margin:0;padding:clamp(48px,6vw,78px) clamp(24px,7vw,108px);border:0;background:var(--black)}.about-source h2{margin:10px 0 12px;font:400 clamp(36px,4vw,54px) var(--serif)}.about-source p{max-width:900px}.about-source a{display:inline-block;margin-top:12px;color:#e5d6b7}
+@media(max-width:1180px){.engine-flow{grid-template-columns:repeat(3,minmax(0,1fr))}.engine-flow li{border-bottom:1px solid var(--line)}.engine-flow li:nth-child(3){border-right:0}.engine-flow li:nth-child(3):after{display:none}.engine-flow li:nth-child(n+4){border-bottom:0}.pass-map{grid-template-columns:repeat(2,minmax(0,1fr))}.pass-column{min-height:0;border-bottom:1px solid var(--line)}.pass-column:nth-child(2),.pass-column:nth-child(4){border-right:0}.pass-column:nth-child(2):after,.pass-column:nth-child(4):after{display:none}.pass-column:last-child{grid-column:1/-1;border-bottom:0}}
+@media(max-width:820px){.about-section-head{grid-template-columns:1fr;gap:16px}.engine-inputs{grid-template-columns:1fr 1fr}.engine-inputs span{border-bottom:1px solid var(--line)}.engine-inputs span:last-child{grid-column:1/-1}.role-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.memory-stack article,.memory-stack article:nth-child(n){grid-template-columns:50px minmax(0,1fr);margin:0}.memory-stack article>strong{grid-column:2;text-align:left}}
+@media(max-width:620px){.topbar nav a:not(:last-child){display:none!important}.about-head:after{display:none}.about-head,.about-section,.about-source{max-width:100%;overflow:hidden}.about-head>*,.about-section *{min-width:0}.about-head p,.about-section p{overflow-wrap:anywhere}.about-section{padding-right:20px;padding-left:20px}.engine-inputs{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.engine-flow,.pass-map,.role-grid{grid-template-columns:minmax(0,1fr)}.engine-flow li{min-height:290px;border-right:0;border-bottom:1px solid var(--line)!important}.engine-flow li:last-child{border-bottom:0!important}.engine-flow li:not(:last-child):after,.pass-column:not(:last-child):after{content:"↓";right:auto;top:auto;bottom:-13px;left:24px;width:24px;height:24px;border:1px solid var(--line);background:var(--paper);transform:none;text-align:center}.pass-column,.pass-column:nth-child(n){grid-column:auto;border-right:0;border-bottom:1px solid var(--line)}.pass-column:last-child{border-bottom:0}.role-grid article{min-height:270px}.memory-stack article{grid-template-columns:42px minmax(0,1fr);gap:14px;padding:18px 14px}.memory-index{width:38px;height:38px}.gate-flow li{grid-template-columns:42px minmax(0,1fr);gap:10px}.status-legend{display:grid;grid-template-columns:1fr 1fr}}
+"""
+
+
 SITE_JS = r"""
 (() => {
   const labels = {
@@ -798,7 +909,7 @@ def _build_unlocked() -> Path:
             else:
                 child.unlink()
     (store.SITE / "assets").mkdir(parents=True, exist_ok=True)
-    _write(store.SITE / "assets" / "site-v4.css", CSS + ACADEMIC_CSS)
+    _write(store.SITE / "assets" / "site-v4.css", CSS + ACADEMIC_CSS + ABOUT_CSS)
     _write(store.SITE / "assets" / "site-v4.js", SITE_JS)
     _write(store.SITE / "_worker.js", WORKER_JS)
     _write(store.SITE / "index.html", _index(problems, attempts, runtime, reviews))

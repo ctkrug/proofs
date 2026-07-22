@@ -81,6 +81,18 @@ class HTMLTemplateTests(unittest.TestCase):
         self.assertNotIn("<script>summary()", output)
         self.assertNotIn("<script>concept()", output)
 
+    def test_about_page_explains_the_engine_and_its_claim_gates(self) -> None:
+        output = render._about_page()
+
+        self.assertIn("One evidence loop", output)
+        self.assertIn("How a pass thinks", output)
+        self.assertIn("What the engine remembers", output)
+        self.assertIn("Six roles, separate powers", output)
+        self.assertIn("The publication firewall", output)
+        self.assertIn('aria-label="Proof Factory process"', output)
+        self.assertIn('id="memory"', output)
+        self.assertIn("How it works · Proof Factory", output)
+
 
 if __name__ == "__main__":
     unittest.main()
