@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -293,6 +295,22 @@ class SchemaCompatibilityTests(unittest.TestCase):
         with patch.object(lab, "_read_state", return_value=stopped):
             with self.assertRaisesRegex(ValueError, "stopped lab job cannot continue"):
                 lab.apply_review("job", "continue", reason="model suggested retry")
+
+    def test_lab_live_monitor_terminates_segment_at_growth_limit(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            workspace = Path(raw)
+            before = lab._tree_bytes(workspace)
+            proc, failure = lab._run_monitored_segment(
+                ["python3", "-c", "import pathlib,time; pathlib.Path('large.bin').write_bytes(b'x'*2000000); time.sleep(10)"],
+                workspace=workspace,
+                env={"PATH": os.environ.get("PATH", "")},
+                timeout_seconds=30,
+                workspace_bytes_before=before,
+                filesystem_used_before=shutil.disk_usage(workspace).used,
+                max_growth_bytes=1024,
+            )
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertIn("artifact growth exceeded", failure)
 
     def test_evidence_loaders_accept_generated_records_and_reject_legacy_schema(self) -> None:
         with tempfile.TemporaryDirectory() as raw:

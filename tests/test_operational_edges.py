@@ -100,6 +100,19 @@ class RepositorySyncTests(unittest.TestCase):
         self.assertNotIn("created", registry["repositories"][0])
         self.assertNotIn("created", registry["repositories"][1])
 
+    def test_failed_lab_projection_is_durable_and_retried(self) -> None:
+        with tempfile.TemporaryDirectory() as raw, patch.object(store, "STATE", Path(raw)):
+            queued = repositories.queue_lab_projection(
+                "p", "validated", {"id": "job"}, error="repository offline",
+            )
+            with patch.object(repositories, "record_lab", return_value={"commit": "a" * 40}) as record:
+                result = repositories.retry_lab_projections()
+            self.assertEqual(result["retried"], 1)
+            self.assertEqual(result["remaining"], 0)
+            record.assert_called_once_with("p", "validated", {"id": "job"})
+            self.assertEqual((Path(raw) / "repository_projection_queue.jsonl").read_text(), "")
+            self.assertEqual(len(queued["id"]), 64)
+
     def test_mismatched_existing_origin_fails_without_push(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             repo = Path(raw)

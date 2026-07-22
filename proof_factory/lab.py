@@ -5,9 +5,11 @@ import json
 import math
 import os
 import re
+import signal
 import shutil
 import subprocess
 import sys
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -504,6 +506,62 @@ def _emit_segment_event(spec: dict[str, Any], status: str, record: dict[str, Any
     )
 
 
+def _run_monitored_segment(
+    command: list[str],
+    *,
+    workspace: Path,
+    env: dict[str, str],
+    timeout_seconds: int,
+    workspace_bytes_before: int,
+    filesystem_used_before: int,
+    max_growth_bytes: int,
+) -> tuple[subprocess.CompletedProcess[str], str]:
+    """Run one segment while enforcing live root-reserve and declared growth gates."""
+    proc = subprocess.Popen(
+        command,
+        cwd=workspace,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    deadline = time.monotonic() + timeout_seconds
+    monitor_failure = ""
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            monitor_failure = "segment wrapper exceeded its wall-clock envelope"
+        try:
+            stdout, stderr = proc.communicate(timeout=max(0.1, min(5.0, remaining)))
+            return subprocess.CompletedProcess(command, proc.returncode, stdout, stderr), monitor_failure
+        except subprocess.TimeoutExpired:
+            # Filesystem allocation is an O(1), producer-independent live
+            # signal. It conservatively charges concurrent growth on the same
+            # filesystem rather than trusting an experiment-authored counter.
+            growth = max(
+                0,
+                shutil.disk_usage(workspace).used - filesystem_used_before,
+                _tree_bytes(workspace) - workspace_bytes_before,
+            )
+            if capacity._free_bytes(Path("/")) < capacity.ROOT_MIN_FREE_BYTES:
+                monitor_failure = "root free space fell below the live reserve during the segment"
+            elif max_growth_bytes and growth > max_growth_bytes:
+                monitor_failure = "measured artifact growth exceeded the declared threshold during the segment"
+            elif remaining > 0:
+                continue
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+            stdout, stderr = proc.communicate(timeout=10)
+        except (ProcessLookupError, subprocess.TimeoutExpired):
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            stdout, stderr = proc.communicate()
+        return subprocess.CompletedProcess(command, proc.returncode or 124, stdout, stderr), monitor_failure
+
+
 def worker_once() -> dict[str, Any]:
     with store.lock("lab-worker", nonblocking=True) as acquired:
         if not acquired:
@@ -561,9 +619,17 @@ def worker_once() -> dict[str, Any]:
             }}
             env["PROOF_EXPERIMENT_MAX_SECONDS"] = str(MAX_SEGMENT_SECONDS)
             workspace_bytes_before = _tree_bytes(workspace)
+            filesystem_used_before = shutil.disk_usage(workspace).used
             started = store.parse_iso(store.now_iso())
-            proc = subprocess.run(command, cwd=workspace, env=env, text=True, capture_output=True,
-                                  timeout=spec["segment_seconds"] + 120)
+            proc, monitor_failure = _run_monitored_segment(
+                command,
+                workspace=workspace,
+                env=env,
+                timeout_seconds=spec["segment_seconds"] + 120,
+                workspace_bytes_before=workspace_bytes_before,
+                filesystem_used_before=filesystem_used_before,
+                max_growth_bytes=spec["continuation_thresholds"]["max_artifact_growth_bytes"],
+            )
             finished = store.parse_iso(store.now_iso())
             duration = max(0.0, (finished - started).total_seconds()) if started and finished else 0.0
             checkpoint_path = workspace / spec["checkpoint_path"] if spec["checkpoint_path"] else None
@@ -573,6 +639,8 @@ def worker_once() -> dict[str, Any]:
             progress, threshold_failures = _progress(
                 workspace, spec, previous, duration, measured_growth_bytes=measured_growth,
             )
+            if monitor_failure:
+                threshold_failures.append(monitor_failure)
             if spec["checkpoint_path"] and not checkpoint_exists and not progress.get("complete"):
                 threshold_failures.append("checkpoint file missing")
             record = {
@@ -705,7 +773,11 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
     schemas.require_fields(receipt, frozenset({
         "schema_version", "job_id", "segment", "progress_sha256", "result", "validator",
         "checker_path", "checker_sha256", "checked_artifacts", "independence_basis", "created_at",
+        "checker_command", "checker_exit_code", "checker_stdout_sha256", "checker_result_path",
+        "checker_result_sha256", "execution_record_path", "execution_record_sha256",
     }), kind="lab validation receipt")
+    if isinstance(receipt["segment"], bool) or not isinstance(receipt["segment"], int):
+        raise schemas.SchemaError("lab validation receipt.segment must be int")
     if receipt["job_id"] != state["id"] or receipt["segment"] != state["segment"]:
         raise schemas.SchemaError("lab validation receipt is not bound to the completed job segment")
     if receipt["result"] != "passed":
@@ -746,6 +818,54 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
     if receipt["checker_sha256"] in set(state.get("input_sha256", {}).values()):
         raise schemas.SchemaError("lab validation checker must differ from the experiment inputs")
 
+    checker_command = receipt["checker_command"]
+    if (
+        not isinstance(checker_command, list) or not checker_command
+        or not all(isinstance(item, str) and item for item in checker_command)
+        or checker_relative not in checker_command
+    ):
+        raise schemas.SchemaError("lab validation receipt.checker_command must name the checker exactly")
+    if isinstance(receipt["checker_exit_code"], bool) or receipt["checker_exit_code"] != 0:
+        raise schemas.SchemaError("lab validation checker exit code must be integer zero")
+
+    execution_relative = receipt["execution_record_path"]
+    if not isinstance(execution_relative, str):
+        raise schemas.SchemaError("lab validation receipt.execution_record_path must be a relative path")
+    execution_path = (workspace / execution_relative).resolve()
+    if (
+        Path(execution_relative).is_absolute() or ".." in Path(execution_relative).parts
+        or not _inside(execution_path, workspace) or not execution_path.is_file() or execution_path.is_symlink()
+        or receipt["execution_record_sha256"] != _sha256(execution_path)
+    ):
+        raise schemas.SchemaError("lab validation execution record is absent or hash-mismatched")
+    execution = schemas.load_json_object(execution_path, kind="lab validation execution record")
+    schemas.require_current_version(execution, kind="lab validation execution record", current=1)
+    if (
+        execution.get("command") != checker_command
+        or isinstance(execution.get("returncode"), bool) or execution.get("returncode") != 0
+        or execution.get("timed_out") is not False
+    ):
+        raise schemas.SchemaError("lab validation execution record did not run the declared checker successfully")
+    stdout = execution_path.parent / "stdout.txt"
+    execution_artifacts = execution.get("artifacts") if isinstance(execution.get("artifacts"), dict) else {}
+    if (
+        not stdout.is_file() or stdout.is_symlink()
+        or receipt["checker_stdout_sha256"] != _sha256(stdout)
+        or execution_artifacts.get("stdout.txt") != receipt["checker_stdout_sha256"]
+    ):
+        raise schemas.SchemaError("lab validation stdout is absent or hash-mismatched")
+
+    result_relative = receipt["checker_result_path"]
+    if not isinstance(result_relative, str):
+        raise schemas.SchemaError("lab validation receipt.checker_result_path must be a relative path")
+    result_path = (workspace / result_relative).resolve()
+    if (
+        Path(result_relative).is_absolute() or ".." in Path(result_relative).parts
+        or not _inside(result_path, workspace) or not result_path.is_file() or result_path.is_symlink()
+        or receipt["checker_result_sha256"] != _sha256(result_path)
+    ):
+        raise schemas.SchemaError("lab validation checker result is absent or hash-mismatched")
+
     artifacts = receipt["checked_artifacts"]
     if not isinstance(artifacts, dict) or not artifacts:
         raise schemas.SchemaError("lab validation receipt.checked_artifacts must be a nonempty object")
@@ -761,6 +881,8 @@ def _validated_lab_receipt(state: dict[str, Any], relative: str) -> tuple[dict[s
             raise schemas.SchemaError(f"invalid lab validation artifact: {artifact_relative!r}")
         if _sha256(artifact) != expected:
             raise schemas.SchemaError(f"lab validation artifact hash mismatch: {artifact_relative}")
+    if artifacts.get(result_relative) != receipt["checker_result_sha256"]:
+        raise schemas.SchemaError("lab validation checker result must be included among checked artifacts")
     return receipt, _sha256(path)
 
 
@@ -789,6 +911,7 @@ def apply_review(
         review["independent_validator"] = receipt["validator"]
     state.setdefault("reviews", []).append(review)
     workspace = _workspace(str(state["problem_id"]))
+    queued_spec: dict[str, Any] | None = None
     if decision == "continue":
         if state.get("status") != "completed_awaiting_review":
             raise ValueError("a stopped lab job cannot continue; submit a new audited job or redirect it")
@@ -806,12 +929,11 @@ def apply_review(
         state["segment"] = int(state.get("segment") or 1) + 1
         if state.get("max_segments") and state["segment"] > int(state["max_segments"]):
             state["max_segments"] = state["segment"] + int(state.get("review_every_segments") or 1) - 1
-        state["status"] = "queued"
+        # Remain truthfully checkpointed until the next executable queue item is
+        # atomically published after the authoritative review ledger is durable.
+        state["status"] = "checkpointed"
         state["spec_sha256"] = _spec_sha256(state)
-        queue = workspace / "lab-queue"
-        queue.mkdir(parents=True, exist_ok=True)
-        spec = {key: state[key] for key in (*SPEC_FIELDS, "spec_sha256")}
-        store.write_json_atomic(queue / f"{job_id}.json", spec)
+        queued_spec = {key: state[key] for key in (*SPEC_FIELDS, "spec_sha256")}
     elif decision in {"validate", "promote"}:
         if not state.get("latest_progress", {}).get("complete"):
             raise ValueError("only a complete experiment can be validated or promoted")
@@ -823,8 +945,43 @@ def apply_review(
     _write_state(state)
     _append_record({"recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
                     "status": state["status"], "review": review})
-    repositories.record_lab(str(state["problem_id"]), state["status"], {"id": job_id, "review": review})
-    return {"status": state["status"], "job_id": job_id, "review": review}
+    if queued_spec is not None:
+        queue = workspace / "lab-queue"
+        queue.mkdir(parents=True, exist_ok=True)
+        try:
+            store.write_json_atomic(queue / f"{job_id}.json", queued_spec)
+        except Exception as exc:
+            state["status"] = "stopped_with_reason"
+            state["stop_reason"] = f"review accepted but continuation queue publication failed: {type(exc).__name__}: {exc}"
+            _write_state(state)
+            _append_record({
+                "recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
+                "status": state["status"], "error": state["stop_reason"],
+            })
+            raise
+        state["status"] = "queued"
+        _write_state(state)
+        _append_record({
+            "recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
+            "status": "queued", "transition": "reviewed checkpoint published for continuation",
+        })
+    projection_warning = ""
+    try:
+        repositories.record_lab(str(state["problem_id"]), state["status"], {"id": job_id, "review": review})
+    except Exception as exc:
+        projection_warning = f"{type(exc).__name__}: {exc}"
+        repositories.queue_lab_projection(
+            str(state["problem_id"]), state["status"], {"id": job_id, "review": review},
+            error=projection_warning,
+        )
+        _append_record({
+            "recorded_at": store.now_iso(), "job_id": job_id, "problem_id": state["problem_id"],
+            "status": "repository_projection_pending", "error": projection_warning,
+        })
+    return {
+        "status": state["status"], "job_id": job_id, "review": review,
+        **({"repository_projection_warning": projection_warning} if projection_warning else {}),
+    }
 
 
 def retune_review_interval(job_id: str, review_every_segments: int, *, reason: str,

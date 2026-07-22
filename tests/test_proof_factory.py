@@ -616,7 +616,11 @@ class ProofFactoryTests(unittest.TestCase):
                 )
                 self.assertEqual(retuned["configuration_change"]["old"], 1)
                 self.assertEqual(retuned["configuration_change"]["new"], 8)
-                self.assertEqual(lab.apply_review(submitted["id"], "continue", reason="pilot passed")["status"], "queued")
+                with patch.object(lab.repositories, "record_lab", side_effect=RuntimeError("projection offline")):
+                    continued = lab.apply_review(submitted["id"], "continue", reason="pilot passed")
+                self.assertEqual(continued["status"], "queued")
+                self.assertIn("projection offline", continued["repository_projection_warning"])
+                self.assertTrue((state / "repository_projection_queue.jsonl").is_file())
                 queued_spec = json.loads(
                     (research / "p" / "workspace" / "lab-queue" / f"{submitted['id']}.json").read_text()
                 )
@@ -629,6 +633,25 @@ class ProofFactoryTests(unittest.TestCase):
                 checker = workspace / "independent-checker.py"
                 checker.write_text("# independent fixture checker\n")
                 artifact = workspace / "checkpoint.json"
+                checker_result = workspace / "validation-result.json"
+                checker_result.write_text('{"valid":true}\n')
+                checker_command = [
+                    "python3", "independent-checker.py", "checkpoint.json", "validation-result.json",
+                ]
+                execution_dir = workspace / "validation-run"
+                execution_dir.mkdir()
+                validation_stdout = execution_dir / "stdout.txt"
+                validation_stdout.write_text("validation passed\n")
+                execution_record = execution_dir / "experiment.json"
+                execution_record.write_text(json.dumps({
+                    "schema_version": 1,
+                    "command": checker_command,
+                    "returncode": 0,
+                    "timed_out": False,
+                    "artifacts": {
+                        "stdout.txt": hashlib.sha256(validation_stdout.read_bytes()).hexdigest(),
+                    },
+                }))
                 final_state = lab._read_state(submitted["id"])
                 receipt_path = workspace / "validation-receipt.json"
                 receipt_path.write_text(json.dumps({
@@ -640,8 +663,16 @@ class ProofFactoryTests(unittest.TestCase):
                     "validator": "independent fixture checker",
                     "checker_path": "independent-checker.py",
                     "checker_sha256": hashlib.sha256(checker.read_bytes()).hexdigest(),
+                    "checker_command": checker_command,
+                    "checker_exit_code": 0,
+                    "checker_stdout_sha256": hashlib.sha256(validation_stdout.read_bytes()).hexdigest(),
+                    "checker_result_path": "validation-result.json",
+                    "checker_result_sha256": hashlib.sha256(checker_result.read_bytes()).hexdigest(),
+                    "execution_record_path": "validation-run/experiment.json",
+                    "execution_record_sha256": hashlib.sha256(execution_record.read_bytes()).hexdigest(),
                     "checked_artifacts": {
                         "checkpoint.json": hashlib.sha256(artifact.read_bytes()).hexdigest(),
+                        "validation-result.json": hashlib.sha256(checker_result.read_bytes()).hexdigest(),
                     },
                     "independence_basis": "separate checker code reads only the final artifact",
                     "created_at": store.now_iso(),

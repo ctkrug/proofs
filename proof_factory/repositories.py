@@ -400,6 +400,77 @@ def record_lab(problem_id: str, event: str, payload: dict[str, Any]) -> dict[str
     return {"problem_id": problem_id, "job_id": job_id, "event": event, "commit": head}
 
 
+def queue_lab_projection(problem_id: str, event: str, payload: dict[str, Any], *, error: str) -> dict[str, Any]:
+    """Durably queue a failed mutable repository projection for repo-sync retry."""
+    record = {
+        "schema_version": 1,
+        "id": hashlib.sha256(json.dumps(
+            [problem_id, event, payload], sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        ).encode()).hexdigest(),
+        "problem_id": problem_id,
+        "event": event,
+        "payload": payload,
+        "error": str(error)[:4000],
+        "queued_at": store.now_iso(),
+    }
+    queue = store.STATE / "repository_projection_queue.jsonl"
+    queue.parent.mkdir(parents=True, exist_ok=True)
+    with store.lock("repository-projection-queue") as acquired:
+        if not acquired:
+            raise RuntimeError("repository projection queue lock unavailable")
+        existing_ids: set[str] = set()
+        if queue.is_file():
+            for line in queue.read_text().splitlines():
+                try:
+                    value = json.loads(line)
+                    if isinstance(value, dict):
+                        existing_ids.add(str(value.get("id") or ""))
+                except json.JSONDecodeError:
+                    continue
+        if record["id"] not in existing_ids:
+            with queue.open("a") as handle:
+                handle.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+    return record
+
+
+def retry_lab_projections() -> dict[str, Any]:
+    queue = store.STATE / "repository_projection_queue.jsonl"
+    if not queue.is_file():
+        return {"retried": 0, "remaining": 0, "errors": []}
+    with store.lock("repository-projection-queue") as acquired:
+        if not acquired:
+            return {"retried": 0, "remaining": 0, "errors": ["projection queue lock unavailable"]}
+        pending: list[dict[str, Any]] = []
+        for line in queue.read_text().splitlines():
+            try:
+                value = json.loads(line)
+                if isinstance(value, dict):
+                    pending.append(value)
+            except json.JSONDecodeError:
+                continue
+        remaining: list[dict[str, Any]] = []
+        errors: list[str] = []
+        retried = 0
+        for row in pending:
+            try:
+                record_lab(str(row["problem_id"]), str(row["event"]), dict(row["payload"]))
+                retried += 1
+            except Exception as exc:
+                row["error"] = f"{type(exc).__name__}: {exc}"[:4000]
+                remaining.append(row)
+                errors.append(row["error"])
+        temporary = queue.with_name(queue.name + ".tmp")
+        with temporary.open("w") as handle:
+            for row in remaining:
+                handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, queue)
+    return {"retried": retried, "remaining": len(remaining), "errors": errors}
+
+
 def _gh(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
     proc = subprocess.run(["gh", *args], text=True, capture_output=True, timeout=300)
     if check and proc.returncode != 0:
@@ -441,6 +512,7 @@ def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
 
 
 def sync_all() -> dict[str, Any]:
+    projection_retry = retry_lab_projections()
     synced: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
     for problem in store.load_problems():
@@ -453,9 +525,13 @@ def sync_all() -> dict[str, Any]:
         "visibility_policy": "public-research-history",
         "repositories": [{key: value for key, value in row.items() if key != "created"} for row in synced],
         "errors": errors,
+        "projection_retry": projection_retry,
     }
     store.write_json_atomic(store.DATA / "problem_repositories.json", registry)
-    return {"synced": len(synced), "errors": errors, "repositories": synced}
+    return {
+        "synced": len(synced), "errors": errors, "repositories": synced,
+        "projection_retry": projection_retry,
+    }
 
 
 def status() -> dict[str, Any]:
