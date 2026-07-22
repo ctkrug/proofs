@@ -1,0 +1,247 @@
+{
+  "schema_version": 5,
+  "problem_id": "deepmind-superhuman-14-geometry-answer",
+  "objective": "In `imobench/answerbench_v2.csv`, replace the corrupted Short Answer value `45752` for `imo-bench-geometry-004` with `4, 5`, preserving the six-column CSV schema. Do not change `imo-bench-number_theory-048`: an independent derivation confirms that version 2's `ab ≤ e³` answer is correct despite the issue's second suggestion.",
+  "completion_criteria": [
+    "Parse both AnswerBench CSVs with a standards-compliant reader, assert six fields per row, assert that geometry problem 004 has the exact short answer `4, 5`, and cite the official 2009 Sharygin Geometry Olympiad solution. Add a focused regression check if the repository has an accepted test location."
+  ],
+  "non_results": [
+    "Finite computation outside its stated range is not a proof of a universal claim.",
+    "A candidate is not a solution until independent and human review are recorded.",
+    "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
+  ],
+  "epoch_count": 1,
+  "last_updated": "2026-07-22T19:25:33.362161+00:00",
+  "baseline_review": {
+    "status": "required",
+    "reviewed_at": null,
+    "source_attempt_id": null,
+    "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
+  },
+  "synthesis_summary": "Corrected imo-bench-geometry-004 from 45752 to the quoted CSV field 4, 5. Pinned v1, the official Sharygin solution, a complete semantic comparison, a separate byte checker, four negative controls, and a clean-upstream patch replay all agree. number_theory-048 and every unrelated byte remain unchanged.",
+  "established_facts": [
+    {
+      "claim": "The official 2009 Sharygin final-round solution gives n=4 or n=5.",
+      "evidence": "https://geometry.ru/olimp/2009/finseng.pdf, PDF page 10.",
+      "scope": "The source problem represented by imo-bench-geometry-004.",
+      "status": "proved",
+      "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    },
+    {
+      "claim": "Pinned AnswerBench v1 stores geometry-004 Short Answer as 4, 5.",
+      "evidence": "Standards-compliant parse of SHA-256 37aeca686ce677f93580821cfe16a0c0e45872479a502df43272e099da37d8fa.",
+      "scope": "Upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    },
+    {
+      "claim": "Pinned AnswerBench v2 stores the corrupted answer 45752.",
+      "evidence": "Standards-compliant parse of SHA-256 275877a9d988d85278fad3a5f8a41d7f83393a60bf259531ec0a5161e6b21cf9.",
+      "scope": "Upstream commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    },
+    {
+      "claim": "The candidate differs from pinned v2 only by the approved geometry-004 answer replacement.",
+      "evidence": "Semantic and byte checkers plus clean-checkout patch replay.",
+      "scope": "All 400 records and all candidate bytes.",
+      "status": "computed",
+      "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+      "family": "hash-bound one-cell dataset correction",
+      "fingerprint": "answerbench-geometry-004-semantic-plus-byte-guard",
+      "title": "Applied the exact one-cell AnswerBench v2 correction, compared it with commit-pinned v1/v2 sources, and validated it through independent semantic-CSV and raw-byte encodings.",
+      "mechanism": "Full-file semantic identity outside one approved CSV cell, independently reinforced by a unique context-bound byte replacement.",
+      "status": "promising",
+      "hypothesis": "The candidate differs from pinned AnswerBench v2 only by changing imo-bench-geometry-004 Short Answer from 45752 to the quoted field 4, 5, agrees with v1 and the official solution, preserves the released schema profile, and leaves imo-bench-number_theory-048 unchanged.",
+      "discriminating_test": "Parse pinned v1, pinned v2, and candidate v2 with Python's standard CSV reader, compare every parsed cell and row arity, then independently require exact byte-stream equality after one unique replacement.",
+      "blocker": "External submission requires human authorization, Google's CLA process, and maintainer review.",
+      "reopen_condition": "Reopen technical work only if upstream main changes the target row or schema, a checker fails on the refreshed baseline, or maintainers request additional evidence.",
+      "reopen_evidence": "",
+      "last_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-22T19:25:33.362161+00:00",
+      "route_evaluation": {
+        "gate_proximity": 1.0,
+        "contribution_value": 0.9,
+        "decisiveness": 1.0,
+        "novelty_confidence": 0.95,
+        "novelty_risk": 0.05,
+        "scope": 1.0,
+        "reuse_value": 0.8,
+        "model_cost": 0.15,
+        "cpu_cost": 0.01
+      }
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Submit the clean one-cell patch upstream.",
+      "rationale": "All technical acceptance criteria are satisfied; maintainer review is the remaining path to external usefulness.",
+      "next_experiment": "Refetch current main and replay the two checkers before submission.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-fc82ae8c5d",
+      "strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Change imo-bench-number_theory-048 as part of issue 14.",
+      "scope": "This dataset-correction patch.",
+      "reason": "The task's independent derivation confirms the v2 answer; the scoped correction explicitly protects it.",
+      "evidence": "Semantic checker and exact byte checker preserve the row.",
+      "reopen_condition": "A separate rigorous derivation finding an error in the current v2 value and an independently scoped correction request.",
+      "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    },
+    {
+      "claim_or_route": "Normalize every v2 record to six fields.",
+      "scope": "The geometry-004 correction.",
+      "reason": "That would alter unrelated pre-existing algebra-036 data and violate the one-cell repair contract.",
+      "evidence": "Pinned v2 and candidate each have exactly one five-field record, imo-bench-algebra-036.",
+      "reopen_condition": "A separately sourced request to repair algebra-036.",
+      "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    },
+    {
+      "claim_or_route": "Use an unquoted replacement 4, 5.",
+      "scope": "The target CSV field.",
+      "reason": "It parses as two fields and corrupts target-row arity.",
+      "evidence": "The malformed-comma adversarial control was rejected.",
+      "reopen_condition": "None; standards-compliant CSV requires quoting.",
+      "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "updated_at": "2026-07-22T19:25:33.362161+00:00"
+    }
+  ],
+  "unresolved_questions": [],
+  "next_session": {
+    "recommended_strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+    "objective": "Convert the validated local candidate into an upstream-reviewed correction.",
+    "first_action": "Fetch current google-deepmind/superhuman main, compare its commit and target row with 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace, then replay the patch and checkers.",
+    "stop_condition": "Stop if the correction is already present; otherwise stop the technical phase after a one-cell pull request is prepared for authorized submission.",
+    "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889"
+  },
+  "recent_attempt_ids": [
+    "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889"
+  ],
+  "tactical_memory": {
+    "current_bottleneck": "Technical validation is complete; external review authorization is now the only bottleneck.",
+    "failure_signatures": [
+      {
+        "id": "4f255e45b9cd",
+        "signature": "A blanket assertion that every v2 record has six fields incorrectly rejects the released baseline and risks an unrelated normalization change.",
+        "count": 1,
+        "last_strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+        "last_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "semantic CSV checker",
+        "use": "Verify v1 provenance, complete semantic identity, schema profile, and protected number-theory value.",
+        "evidence": "checkers/verify_answerbench_geometry_004.py, SHA-256 d8a18250cf68a519d48c5285bb2fd64e28ac8bef5152caf4c90e96541651ee88",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      },
+      {
+        "name": "independent byte checker",
+        "use": "Reject every non-approved byte mutation without relying on CSV parsing.",
+        "evidence": "checkers/check_exact_geometry_004_patch_bytes.py, SHA-256 05ec3c3b4e2f6dec0645ae5374e8baa186cf9a4c8c6c563780149892b3e24903",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      },
+      {
+        "name": "review-ready upstream patch",
+        "use": "Apply the correction to a clean DeepMind checkout.",
+        "evidence": "artifacts/answerbench-v2-geometry-004.patch, SHA-256 1830069867cdd91033c9fcdff34b042fd4ba649fd41d33286d69a69239ea35ad",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "The corrected comma must be CSV-quoted as \"4, 5\".",
+        "scope": "imo-bench-geometry-004 Short Answer.",
+        "evidence": "Semantic checker confirms the target remains a six-field record.",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      },
+      {
+        "constraint": "imo-bench-number_theory-048 must remain exactly unchanged.",
+        "scope": "This correction and review patch.",
+        "evidence": "Semantic comparison and full-byte identity outside geometry-004.",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      },
+      {
+        "constraint": "imo-bench-algebra-036 remains the sole five-field v2 record.",
+        "scope": "Pinned v2 and candidate v2 schema profiles.",
+        "evidence": "Complete standards-compliant parse of all 400 records.",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+        "decision": "close",
+        "prediction": "Both validation encodings would accept the one-cell candidate and reject unchanged, number-theory-tampered, formatting-tampered, and malformed-comma controls.",
+        "observation": "Both encodings passed; all four adversarial controls were rejected.",
+        "surprise": "Pinned v2 has one unrelated pre-existing five-field record despite its six-field header.",
+        "next_discriminator": "Immediately before submission, refetch upstream main and replay the patch and both checkers; redirect only if the upstream row or schema changed.",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "The six-column header and 400 released v2 records, comprising 2,399 parsed data cells plus six header fields.",
+        "represented_space_before": "Any semantic or formatting mutation of the pinned v2 file.",
+        "eliminated_or_quotiented": "All mutations except the unique geometry-004 Short Answer replacement were rejected.",
+        "represented_space_after": "One fixed candidate byte stream with SHA-256 a56cee7c31412a6d851af03263d305b65baa173f455bd092837c476c5a975cdc.",
+        "reduction_factor": "2,399:1 for possible semantic change locations, followed by exact fixation of the permitted value.",
+        "measurement_status": "exact",
+        "unit": "labelled assignments",
+        "coverage_scope": "All 400 records and every byte of pinned AnswerBench v2 commit 96fa6c4cc3a9bb7450ee7b6773b659d3a030dace.",
+        "soundness_basis": "Standards-compliant CSV comparison plus independent raw-byte equality checking.",
+        "remaining_unknown": "Only upstream maintainer acceptance, CLA processing, and merge status; the unrelated pre-existing five-field algebra-036 record remains intentionally untouched.",
+        "next_bulk_elimination": "Not applicable; technical uncertainty is exhausted for the scoped patch.",
+        "source_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+        "strategy_id": "strategy-answerbench-geometry-004-semantic-plus-byte-guard",
+        "nearest_method_ids": [
+          "none-found"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "Version 1 and the official solution already contain the correct answer; this contribution repairs the corrupted v2 field while adding complete-file semantic and independent byte-level regression guards.",
+        "duplicate_risk": "Another contributor or maintainer could repair the still-open issue after the 2026-07-22 status check.",
+        "comparison_test": "Refetch upstream main, inspect issue 14 development metadata, and compare the target row before opening a pull request.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/google-deepmind/superhuman/issues/14",
+          "https://github.com/google-deepmind/superhuman/commit/96fa6c4cc3a9bb7450ee7b6773b659d3a030dace",
+          "https://geometry.ru/olimp/2009/finseng.pdf"
+        ],
+        "updated_at": "2026-07-22T19:25:33.362161+00:00"
+      }
+    ]
+  }
+}

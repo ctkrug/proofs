@@ -1170,20 +1170,28 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "queued",
+    "status": "candidate",
     "automation_eligible": true,
     "priority": 95,
-    "attempt_count": 0,
-    "research_attempt_count": 0,
+    "attempt_count": 1,
+    "research_attempt_count": 1,
     "accepted_result": false,
     "added_at": "2026-07-22T15:39:30Z",
     "source_checked_at": "2026-07-22T15:39:30Z",
     "intake_source": "independent recognized-repository audit",
-    "campaign_state": "superseded",
-    "campaign_started_at": "2026-07-22T18:12:04.309162+00:00",
+    "campaign_state": "review",
+    "campaign_started_at": "2026-07-22T19:12:37.543959+00:00",
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
-    "campaign_decision": "superseded by a newer persisted campaign"
+    "campaign_decision": "candidate awaiting review",
+    "last_attempt_at": "2026-07-22T19:25:33.362161+00:00",
+    "campaign_last_assessment": {
+      "attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889",
+      "decision": "hold",
+      "close_signal": "The exact candidate, independent checker, adversarial controls, and clean-upstream application receipt all pass; only external human review remains.",
+      "reason": "Another computational epoch would repeat completed validation rather than reduce uncertainty."
+    },
+    "candidate_attempt_id": "deepmind-superhuman-14-geometry-answer-20260722-192533-af3889"
   },
   {
     "id": "rocq-16807-identref-time-printer",
