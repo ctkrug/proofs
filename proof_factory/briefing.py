@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from . import events, lab, prior_art, research_state, roadmap, tactics
+from . import events, lab, prior_art, research_state, resolution_policy, roadmap, tactics
 
 
 def _trim(value: Any, limit: int = 500) -> str:
@@ -102,6 +102,12 @@ def build(problem: dict[str, Any]) -> dict[str, Any]:
             "closed_route_ids": [row.get("strategy_id") for row in tactical.get("closed_routes", [])[:8]],
         },
         "active_roadmap_phase": active_roadmap.get("active_phase"),
+        "roadmap_policy": {
+            key: active_roadmap.get(key)
+            for key in ("configured", "operating_rule", "selection_policy", "portfolio_rule")
+            if active_roadmap.get(key) is not None
+        },
+        "resolution_policy": resolution_policy.load(),
         "research_events": events.pending(str(problem.get("id")))[:10],
         "lab_experiments": lab_jobs,
         "prior_art": compact_methods[:14],
@@ -139,6 +145,15 @@ def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000,
                 "required_artifact": _trim(phase.get("required_artifact"), 700),
                 "promote_if": _trim(phase.get("promote_if"), 700),
             }
+        policy = payload.get("resolution_policy")
+        if isinstance(policy, dict):
+            payload["resolution_policy"] = {
+                key: policy.get(key) for key in (
+                    "configured", "objective", "standing_question", "required_resolution_paths",
+                    "selection_rule", "switch_rule", "experiment_rule", "verification_rule",
+                    "required_turn_report",
+                )
+            }
         text = json.dumps(payload, indent=2, ensure_ascii=False)
     if len(text) > max_chars:
         phase = payload.get("active_roadmap_phase")
@@ -171,6 +186,8 @@ def compact_for_prompt(problem: dict[str, Any], *, max_chars: int = 24000,
             },
             "tactics": payload.get("tactics", {}),
             "active_roadmap_phase": phase,
+            "roadmap_policy": payload.get("roadmap_policy", {}),
+            "resolution_policy": payload.get("resolution_policy", {}),
             "research_events": [{
                 "id": row.get("id"), "kind": row.get("kind"), "created_at": row.get("created_at"),
                 "evidence": _trim(row.get("evidence"), 600), "source": _trim(row.get("source"), 300),

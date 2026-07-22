@@ -570,6 +570,22 @@ class ProofFactoryTests(unittest.TestCase):
         self.assertEqual(selected["incumbent_fingerprint"], "b")
         self.assertEqual(selected["active_phase"]["id"], "second")
 
+    def test_brief_injects_global_and_campaign_selection_policy(self) -> None:
+        problem = {"id": "p", "title": "P", "statement": "Find x."}
+        with patch.object(briefing.research_state, "load", return_value={}), \
+                patch.object(briefing.tactics, "build", return_value={}), \
+                patch.object(briefing.roadmap, "current", return_value={
+                    "configured": True, "operating_rule": "adaptive", "selection_policy": ["compare routes"],
+                    "portfolio_rule": "mixed certificates", "active_phase": {"id": "portfolio"},
+                }), patch.object(briefing.resolution_policy, "load", return_value={
+                    "configured": True, "objective": "settle cheaply", "required_resolution_paths": ["constructive"]
+                }), patch.object(briefing.prior_art, "load", return_value={"methods": []}), \
+                patch.object(briefing.events, "pending", return_value=[]), \
+                patch.object(briefing.lab, "status", return_value={"jobs": []}):
+            packet = briefing.build(problem)
+        self.assertEqual(packet["roadmap_policy"]["portfolio_rule"], "mixed certificates")
+        self.assertEqual(packet["resolution_policy"]["objective"], "settle cheaply")
+
     def test_prior_art_registry_is_machine_readable(self) -> None:
         problem = {"id": "p"}
         value = {"schema_version": 1, "problem_id": "p", "methods": [{"id": "known-route"}]}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-07-22",
+  "scope": "all Proof Factory targets",
+  "objective": "Maximize the probability of a valid resolution or externally useful contribution per unit of compute and model effort; do not optimize for activity, one method's closure rate, or the elegance of one route.",
+  "standing_question": "What is the easiest honest path to settle or materially advance this exact problem now?",
+  "required_resolution_paths": [
+    "constructive witness search",
+    "impossibility or exhaustive certificate search",
+    "structural lemma or reduction shrinking either route",
+    "alternative encodings, solvers, or formalisms",
+    "relevant transfer methods from adjacent fields"
+  ],
+  "required_path_assessment": [
+    "exact success certificate",
+    "necessary assumptions and verification plan",
+    "smallest decisive experiment",
+    "expected cost",
+    "probability of a useful signal",
+    "whether success directly settles the target",
+    "new information supplied by failure"
+  ],
+  "selection_rule": "At selection and after every substantive result, score all materially distinct paths by expected marginal value. Give constructive and negative routes symmetric consideration, retain comparable routes, alternate near-tied families, and allocate the next bounded tranche to the route expected to remove the most remaining uncertainty per CPU-hour and model effort.",
+  "switch_rule": "Stop, hold, or demote a route when current evidence makes another materially superior. Momentum, prior engineering investment, and artifact volume are not reasons to continue.",
+  "experiment_rule": "Use short, predeclared, cheap discriminators before scale-up. A method remains eligible when it creates net-new validated progress; it need not dominate every case.",
+  "verification_rule": "Directly and independently validate witnesses; reconstruct and replay UNSAT claims; maintain a hash-bound uncertainty or frontier manifest; distinguish local results from global theorems; and recheck prior art and novelty before promotion.",
+  "required_turn_report": [
+    "current_uncertainty",
+    "active_routes_and_scores",
+    "what_changed_this_turn",
+    "net_new_validated_progress",
+    "cheapest_next_experiment_for_each_route",
+    "why_selected_next_route_has_best_expected_value",
+    "immediate_route_switch_conditions"
+  ]
+}

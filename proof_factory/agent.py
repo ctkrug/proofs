@@ -79,6 +79,7 @@ RESULT_SCHEMA: dict[str, dict[str, Any]] = {
     "continuation": {"kind": "object", "default": {}, "projection": _object_projection()},
     "candidate_profile": {"kind": "object", "default": {}, "projection": _object_projection()},
     "campaign_assessment": {"kind": "object", "default": {}, "projection": _object_projection()},
+    "resolution_portfolio": {"kind": "object", "default": {}, "projection": _object_projection()},
     "search_efficiency": {
         "kind": "object", "required": True, "default": {},
         "required_nonempty": ("naive_space", "chosen_mechanism", "estimated_or_measured_savings", "soundness_guard"),
@@ -257,7 +258,7 @@ SCHEMA CONTRACT
 - claims, evidence, evidence_files, next_steps, citations, techniques, experiments, transfer_insights,
   established_facts, ruled_out, open_leads, strategy_proposals, and synthesis_candidates are arrays.
 - strategy, continuation, candidate_profile, campaign_assessment, search_efficiency, space_reduction,
-  tactical_learning, prior_art_check, field_progress_assessment, and lab_review are objects.
+  tactical_learning, prior_art_check, field_progress_assessment, lab_review, and resolution_portfolio are objects.
 - prior_art_check.classification and field_progress_assessment.status must remain exactly their original values.
 - Fill only structurally missing JSON fields with neutral empty/default values; never invent evidence or a stronger class.
 
@@ -682,7 +683,7 @@ TERRA DELEGATE MEMOS
 {json.dumps(delegated, indent=2, ensure_ascii=False)[:12000] if delegated else '(No delegate memo survived; proceed, but record the orchestration failure.)'}
 
 CANONICAL ROUTE BRIEF
-{canonical_brief if canonical_brief is not None else briefing.compact_for_prompt(problem)}
+{canonical_brief if canonical_brief is not None else briefing.compact_for_prompt(problem, max_chars=22000)}
 
 DURABLE RESEARCH STATE
 Summarized in the canonical route brief; load the versioned state file only for a selected fact.
@@ -694,7 +695,13 @@ DETERMINISTIC TACTICAL BRIEF
 Summarized in the canonical route brief.
 
 AUTOMATED CAMPAIGN ROADMAP
-The active phase is included in the canonical route brief.
+The active phase and campaign policy are included in the canonical route brief.
+
+GLOBAL RESOLUTION POLICY
+The canonical route brief contains the standing policy for all targets. At selection and after every substantive result,
+compare constructive witnesses, exhaustive/impossibility certificates, structural reductions, alternative formalisms,
+and adjacent-field transfers. Give constructive and negative routes symmetric consideration. Select by expected marginal
+validated uncertainty reduction per compute and model effort; momentum and sunk engineering are not evidence.
 
 PRIOR-ART ANTI-REDISCOVERY REGISTER
 The compact current registry is included in the canonical route brief; open the full JSON before a novelty claim.
@@ -718,6 +725,9 @@ STRATEGY PORTFOLIO RULES
 10. The current portfolio is an evidence-backed working set, not an exhaustive ontology. You may propose one genuinely
    new or composite mechanism from this problem, another problem, or another field when it has a concrete transfer
    hypothesis and a cheap falsifier. Do not force a synthesis: an empty list is correct when no candidate clears that bar.
+11. Obey the global resolution policy and any campaign certificate-portfolio policy in the canonical brief. Preserve fixed
+   experiment protocols, but do not turn a method-comparison threshold into a campaign-wide veto. Mixed-method coverage is
+   valid only when every component certificate and the final union are independently checked.
 
 WORK RULES
 1. Read the official source and its cited/original references before relying on the statement. Search for newer literature and preserve direct URLs.
@@ -805,6 +815,7 @@ WORK RULES
   "reopen_evidence": "new evidence satisfying the prior reopen condition, or blank",
   "continuation": {{"objective":"next epoch objective","first_action":"exact command/lemma/source to start with","stop_condition":"evidence that ends or redirects it"}},
   "campaign_assessment": {{"decision":"continue|hold","close_signal":"concrete evidence of nearness, or blank when holding","reason":"why another bounded pass is or is not worth its compute"}},
+  "resolution_portfolio": {{"current_uncertainty":"exact unresolved target state","active_routes_and_scores":[{{"route":"materially distinct route","score":"expected marginal value with cost and useful-signal basis","success_certificate":"exact accepted artifact","smallest_decisive_experiment":"bounded test","switch_condition":"evidence causing immediate reroute"}}],"what_changed_this_turn":"evidence delta","net_new_validated_progress":"only independently validated progress","cheapest_next_experiment_for_each_route":[{{"route":"route name","experiment":"smallest decisive test"}}],"why_selected_next_route_has_best_expected_value":"comparison across routes","immediate_route_switch_conditions":["specific evidence-triggered switch"]}},
   "strategy_proposals": [{{"family":"different family","mechanism":"concrete mechanism","hypothesis":"testable claim","discriminating_test":"cheap test","rationale":"why it may outperform current routes"}}],
   "synthesis_candidates": [{{"family":"stable composite family","mechanism":"how the inputs combine into a new information-generating mechanism","parent_strategy_ids":["strategy-id", "strategy-id"],"source_inputs":["specific current strategy, other problem, or external field"],"transfer_hypothesis":"why this structure should transfer to this exact problem","discriminating_test":"cheapest bounded test before scale-up","falsification_signal":"observation that rejects the transfer","rationale":"why this is not a renamed existing route"}}],
   "candidate_profile": {{
@@ -873,7 +884,7 @@ def run(problem: dict[str, Any], lane: str, *, phase: str = "technical",
     )
     brief_payload = briefing.build(problem)
     delegate_brief = briefing.compact_for_prompt(problem, max_chars=18000, payload=brief_payload)
-    principal_brief = briefing.compact_for_prompt(problem, payload=brief_payload)
+    principal_brief = briefing.compact_for_prompt(problem, max_chars=22000, payload=brief_payload)
 
     def run_delegate(role: str) -> dict[str, Any]:
         delegate_workspace = delegate_root / role

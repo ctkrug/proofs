@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "problem_id": "covering-c1264",
+  "created_at": "2026-07-22",
+  "updated_at": "2026-07-22",
+  "default_phase": "adaptive_resolution_portfolio",
+  "operating_rule": "Maintain constructive and exclusion routes concurrently. Preserve the running fixed 20-leaf benchmark as the first certificate-portfolio measurement, then allocate each bounded tranche by expected reduction of the remaining global uncertainty rather than incumbent momentum.",
+  "portfolio_rule": "A method is eligible when it yields net-new independently validated progress within a fixed budget. A 40-block witness settles C(12,6,4)=40 after independent direct verification. Otherwise, a mixed-method union may settle C(12,6,4)=41 only after all 47 canonical frontier nodes have replayable certificates and independent global coverage validation.",
+  "selection_policy": [
+    "Give the forced-matching exact-degree 40-block witness search and the 47-node certified exclusion route symmetric active consideration.",
+    "Do not interrupt or modify cardinality-encoding-20-leaf-20260722; retain its original comparison hypothesis and fixed budget.",
+    "After each result, compare constructive search, certificate search, structural reduction, alternative formulations, and transfer methods by expected marginal validated uncertainty reduction.",
+    "Scale only after a cheap semantic-equivalence or direct-witness gate, and avoid duplicating closures except for assigned independent validation.",
+    "Treat solver status as provisional: directly verify SAT witnesses and reconstruct, replay, and independently audit every UNSAT leaf."
+  ],
+  "phases": [
+    {
+      "id": "adaptive_resolution_portfolio",
+      "strategy_fingerprints": [],
+      "objective": "Settle the 40-versus-41 uncertainty by the cheapest honest combination of a validated 40-block witness or exhaustive certified exclusion.",
+      "cheapest_discriminator": "Complete the immutable 20-leaf encoding benchmark while independently running a short forced-matching exact-degree 40-block witness discriminator under a predeclared direct-validation gate.",
+      "required_artifact": "A hash-bound uncertainty/frontier manifest, per-route scores and bounded receipts, direct witness validation for SAT, replayable proof plus independent audit for UNSAT leaves, and an independent final coverage check.",
+      "promote_if": "A directly and independently validated 40-block cover is found, or the certificate portfolio reaches 47/47 valid closures and the global canonical partition is independently checked.",
+      "kill_if": "Never kill the target from one method's poor average result; demote only the specific route whose expected marginal value has fallen below a materially better alternative.",
+      "fallback": "Rescore all five resolution-path families and assign the cheapest discriminator to the highest-value remaining uncertainty."
+    }
+  ],
+  "sources": [
+    "https://ljcr.dmgordon.org/cover/table.html"
+  ]
+}
