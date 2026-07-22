@@ -188,6 +188,27 @@ class RepositorySyncTests(unittest.TestCase):
 
         self.assertFalse(any(args.args[1:2] == ("push",) for args in git.call_args_list))
 
+    def test_dirty_repository_fails_before_merge_or_push(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw)
+
+            def fake_git(_repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+                if args == ("remote", "get-url", "origin"):
+                    return _completed(args, stdout=f"{self.remote_url}\n")
+                if args == ("status", "--porcelain"):
+                    return _completed(args, stdout=" M evidence.json\n")
+                return _completed(args)
+
+            with patch.object(repositories, "ensure", return_value={"path": str(repo)}), \
+                    patch.object(repositories, "_gh", return_value=_completed(
+                        ["gh"], stdout=json.dumps({"url": self.remote_url, "visibility": "PUBLIC"}),
+                    )), patch.object(repositories, "_git", side_effect=fake_git) as git:
+                with self.assertRaisesRegex(RuntimeError, "working tree is dirty"):
+                    repositories._sync_problem(self.problem)
+
+        self.assertIn(call(repo, "fetch", "origin"), git.call_args_list)
+        self.assertFalse(any(args.args[1:2] in (("merge",), ("push",)) for args in git.call_args_list))
+
 
 class ResourceBootstrapTests(unittest.TestCase):
     body = b"record-one\nrecord-two\n"

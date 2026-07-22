@@ -515,6 +515,13 @@ def _sync_problem(problem: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeError(f"origin already points elsewhere for {problem['id']}: {existing.stdout.strip()}")
     if existing.returncode != 0:
         _git(repo, "remote", "add", "origin", url)
+    # Research hosts may checkpoint between publisher runs. Reconcile a clean stale clone by
+    # fast-forward only; dirty or divergent work still fails closed instead of being overwritten.
+    _git(repo, "fetch", "origin")
+    dirty = _git(repo, "status", "--porcelain").stdout.strip()
+    if dirty:
+        raise RuntimeError(f"working tree is dirty for {problem['id']}; refusing repository sync")
+    _git(repo, "merge", "--ff-only", "origin/main")
     _git(repo, "push", "--set-upstream", "origin", "main")
     return {
         "problem_id": problem["id"], "repository": full_name, "url": url, "visibility": "PUBLIC",
