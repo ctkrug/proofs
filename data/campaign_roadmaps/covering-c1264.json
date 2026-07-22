@@ -5,21 +5,21 @@
   "updated_at": "2026-07-22",
   "default_phase": "adaptive_resolution_portfolio",
   "operating_rule": "Maintain constructive and exclusion routes concurrently. Preserve the running fixed 20-leaf benchmark as the first certificate-portfolio measurement, then allocate each bounded tranche by expected reduction of the remaining global uncertainty rather than incumbent momentum.",
-  "portfolio_rule": "Use a staged strategy tournament: maintain 100 materially distinct operational method signatures; admit each only after a semantic or direct-witness gate; screen admitted candidates for five search-seconds on each of eight frozen stratified leaves or seeds; retain any method with net-new independently validated coverage; stop zero-new-coverage methods after the screen except frozen protocols and assigned validation controls; then assign at most three retained methods per unresolved structural class. A 40-block witness settles C(12,6,4)=40 after independent direct verification. Otherwise, a mixed-method union may settle C(12,6,4)=41 only after all 47 canonical frontier nodes have replayable certificates and independent global coverage validation.",
+  "portfolio_rule": "Use family-champion successive halving: maintain 100 materially distinct operational signatures as a reservoir, but validate and screen one champion from each of ten families before expanding variants inside a winning family. Admit each only after a semantic or direct-witness gate; screen admitted champions for five search-seconds on each of eight frozen stratified leaves or seeds; retain net-new independently validated coverage. Zero coverage demotes a method for the matched tested class rather than globally eliminating its family. A 40-block witness settles C(12,6,4)=40 after independent direct verification. Otherwise, a mixed-method union may settle C(12,6,4)=41 only after all 47 canonical frontier nodes have replayable certificates and independent global coverage validation.",
   "selection_policy": [
     "Give the forced-matching exact-degree 40-block witness search and the 47-node certified exclusion route symmetric active consideration.",
     "Do not interrupt or modify cardinality-encoding-20-leaf-20260722; retain its original comparison hypothesis and fixed budget.",
     "After each result, compare constructive search, certificate search, structural reduction, alternative formulations, and transfer methods by expected marginal validated uncertainty reduction.",
     "Scale only after a cheap semantic-equivalence or direct-witness gate, and avoid duplicating closures except for assigned independent validation.",
     "Treat solver status as provisional: directly verify SAT witnesses and reconstruct, replay, and independently audit every UNSAT leaf.",
-    "Run no more than one search concurrently on the current 4 GB shared host; reassess from measured hardware before every tranche."
+    "Run no more than one search concurrently on the current 4 GB shared host; up to two constructive searches may run on the separate local workstation without changing the live benchmark; reassess before every tranche."
   ],
   "phases": [
     {
       "id": "adaptive_resolution_portfolio",
       "strategy_fingerprints": [],
       "objective": "Settle the 40-versus-41 uncertainty by the cheapest honest combination of a validated 40-block witness or exhaustive certified exclusion.",
-      "cheapest_discriminator": "Complete the immutable 20-leaf encoding benchmark without concurrent tournament search. Then validate tournament formulations once, screen admitted candidates on the frozen 4-secondary/4-tertiary sample (or eight constructive seeds), retain net-new coverage, and recompute leaf-specific assignments.",
+      "cheapest_discriminator": "Finish the immutable 20-leaf benchmark alone on the live host while separately running the validated constructive champions locally. Use published-41-cover deletion warm starts, direct repair, and exact-core repair; then validate only the remaining family champions. Expand variants only after a champion supplies unique coverage or a materially better near-witness signal.",
       "required_artifact": "A hash-bound uncertainty/frontier manifest, per-route scores and bounded receipts, direct witness validation for SAT, replayable proof plus independent audit for UNSAT leaves, and an independent final coverage check.",
       "promote_if": "A directly and independently validated 40-block cover is found, or the certificate portfolio reaches 47/47 valid closures and the global canonical partition is independently checked.",
       "kill_if": "Never kill the target from one method's poor average result; demote only the specific route whose expected marginal value has fallen below a materially better alternative.",
