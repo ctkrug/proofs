@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "title": "Correct the transformer-block LayerNorm parameter count in DeepMind AI Foundations",
+  "problem_id": "deepmind-ai-foundations-37-layernorm-count",
+  "attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d",
+  "contribution_type": "academic courseware correction",
+  "status": "public-research-note",
+  "peer_reviewed": false,
+  "expert_confirmed": false,
+  "created_at": "2026-07-22T18:50:31.485332+00:00",
+  "creator": "Charlie Krug",
+  "ai_assistance_disclosed": true,
+  "source_url": "https://github.com/google-deepmind/ai-foundations/issues/37",
+  "claims": [
+    "At upstream e37bc994, both unmodified transformer-block references produce 460928 instead of 461440 for embedding_dim=256 and mlp_dim=384.",
+    "The run-2 patch changes both references to count two complete LayerNorm components.",
+    "The run-2 patch passes the focused two-copy regression at embedding dimensions 1, 128, and 256.",
+    "The separate checker passes fixed totals 461440 and 198272."
+  ],
+  "evidence": [
+    "python3 scripts/audit_upstream_status.py returned 0 with issue state open, main e37bc994, and two zero-result PR searches.",
+    "python3 scripts/replay_current_head.py --expected-commit e37bc99485767ebe68d8ff4db438721daa7ab966 --patch patches/issue-37-layernorm-count-run2.patch --checker checkers/layernorm_count_discriminator.py returned 0.",
+    "The replayed diff SHA-256 equaled the saved patch SHA-256 e1d238c6fc02230734bd8161209b8b5afeb0954d93e66acf6fe74dab8ef94891.",
+    "The repository unittest and independent checker both returned 0."
+  ],
+  "independent_checker": "checkers/layernorm_count_discriminator.py independently extracts both references and checks fixed totals 461440 and 198272; experiment 20260722-184123-54410d reports PASS.",
+  "citations": [
+    "https://github.com/google-deepmind/ai-foundations/issues/37",
+    "https://github.com/google-deepmind/ai-foundations/commit/e37bc99485767ebe68d8ff4db438721daa7ab966",
+    "https://github.com/google-deepmind/ai-foundations/pulls?q=is%3Apr+37",
+    "https://github.com/google-deepmind/ai-foundations/pulls?q=is%3Apr+parameter_count_layer_norm"
+  ],
+  "artifact_hashes": {
+    "artifacts/.delegates/20260722-183311-eba269/source-discriminator/memo.md": "c4a90eaaa45d1c7f92ebe14239c568d4df76c51d03ff693e3d19fa34dc3f9f1a",
+    "artifacts/.proof-experiments/20260722-183552-c97125/experiment.json": "f1ada1ddc79a699e29d46b902ff8a3704b61206ac935fd4332be0e9fe4962cd4",
+    "artifacts/.proof-experiments/20260722-183552-c97125/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-183552-c97125/stdout.txt": "5f3bc2dc95801db5f17148ccd19e60802b45e051a76b82ff97bd3a5a120f41df",
+    "artifacts/.proof-experiments/20260722-183654-eb0ae2/experiment.json": "10e979f0275d22988ae1bfe103463ca48c07f2b5a97edb13790025a7292a3395",
+    "artifacts/.proof-experiments/20260722-183654-eb0ae2/stderr.txt": "32ed8f76ea30026e0e7fde96c9dab9dbc249f42fc9c3e813b4361fac38629c8b",
+    "artifacts/.proof-experiments/20260722-183654-eb0ae2/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-183745-6922b1/experiment.json": "cd0d869ebc89c46268ddde388cd66201c410d0b70adda8e09f6d1848fe711b6c",
+    "artifacts/.proof-experiments/20260722-183745-6922b1/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-183745-6922b1/stdout.txt": "c048d628ae58795633d947fa6d58ddc842d9d157476ea2dcee82cc9f6ba65aa8",
+    "artifacts/.proof-experiments/20260722-183927-e6c75a/experiment.json": "25ee37b5d3b7e7564b40cd4080234bf10717236a5c99781d671754d6fbe711f7",
+    "artifacts/.proof-experiments/20260722-183927-e6c75a/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-183927-e6c75a/stdout.txt": "03ce6e17106fdb6661a06d5d57f43a1f486b21e50c1c2f4b5ee1d64c3ad78394",
+    "artifacts/.proof-experiments/20260722-184123-54410d/experiment.json": "d035db0c14822011efb580854233492787aca829c0092734c98bfc55e7d0845d",
+    "artifacts/.proof-experiments/20260722-184123-54410d/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/.proof-experiments/20260722-184123-54410d/stdout.txt": "69cd086a417cf75fab2f9e358c2ea257047430f4c22dcd67b7254bc831802abb",
+    "artifacts/artifacts/issue-37-review-packet-20260722-run2.json": "4d65d28d00b84e14c3d192cdfc161553d2d22576d89e273158c4c06abe7b1f5f",
+    "artifacts/checkers/layernorm_count_discriminator.py": "6f137fef658817c3bcaf7cfa7e516c0593e38c1723f3df1202d8b2e81b225885",
+    "artifacts/patches/issue-37-layernorm-count-run2.patch": "e1d238c6fc02230734bd8161209b8b5afeb0954d93e66acf6fe74dab8ef94891",
+    "artifacts/records/attempts/2026-07-22-run-2.json": "33708e00cce61b427e2eefc07eeb286c567b2375fb746cb5056fb3f2fe357eaf",
+    "artifacts/scripts/audit_upstream_status.py": "44156cd131b2df4d652c27994403e45f97697559bbed75b1f8d3212570bddf5d",
+    "artifacts/scripts/replay_current_head.py": "1012dd552ac5e914f2604b78613adfa135f89b82a304da7b5b2497e6167b8bfa"
+  },
+  "review": {
+    "attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d",
+    "problem_id": "deepmind-ai-foundations-37-layernorm-count",
+    "decision": "accept",
+    "note": "Charlie reviewed the current-head patch, two-copy regression, independent checker, baseline controls, and novelty searches and approves this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T18:50:31.485332+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
+  }
+}

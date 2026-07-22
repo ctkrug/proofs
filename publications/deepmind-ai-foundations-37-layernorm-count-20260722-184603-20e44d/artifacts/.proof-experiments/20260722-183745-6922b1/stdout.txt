@@ -1,0 +1,44 @@
+{
+  "baseline_negative_control": {
+    "returncode": 1,
+    "stderr": [
+      "FAIL: Python feedback reference: {'embedding_dim': 256, 'mlp_dim': 384} produced 460928; expected 461440 (attention + MLP + two gamma/beta LayerNorms)",
+      "FAIL: notebook typed reference solution: {'embedding_dim': 256, 'mlp_dim': 384} produced 460928; expected 461440 (attention + MLP + two gamma/beta LayerNorms)"
+    ]
+  },
+  "checker": {
+    "path": "checkers/layernorm_count_discriminator.py",
+    "sha256": "6f137fef658817c3bcaf7cfa7e516c0593e38c1723f3df1202d8b2e81b225885"
+  },
+  "expected_commit": "e37bc99485767ebe68d8ff4db438721daa7ab966",
+  "independent_checker": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "PASS: both references count two complete LayerNorm components"
+  },
+  "observed_commit": "e37bc99485767ebe68d8ff4db438721daa7ab966",
+  "patch": {
+    "path": "patches/issue-37-layernorm-count.patch",
+    "sha256": "0ed94094267e43601cbfecbebf67f3660f4124b8af57ae3ad147132a09ffc836"
+  },
+  "regression_test": {
+    "returncode": 0,
+    "stderr": [
+      ".",
+      "----------------------------------------------------------------------",
+      "Ran 1 test in 0.015s",
+      "",
+      "OK"
+    ],
+    "stdout": ""
+  },
+  "replayed_diff_sha256": "0ed94094267e43601cbfecbebf67f3660f4124b8af57ae3ad147132a09ffc836",
+  "static_checks": {
+    "exact_patch_identity": "pass",
+    "git_apply_check": "pass",
+    "git_diff_check": "pass",
+    "notebook_json": "pass",
+    "python_compile": "pass",
+    "reverse_apply_check": "pass"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "issue": {
+    "comments": 0,
+    "response_sha256": "b5e246e449db70953a8db514a01c8e735886e09bc3364087cf3b25b95d4a1834",
+    "state": "open",
+    "title": "Wrong number of parameters for the normalization layers in the transformer block",
+    "updated_at": "2026-07-10T09:10:31Z",
+    "url": "https://github.com/google-deepmind/ai-foundations/issues/37"
+  },
+  "main_commit": "e37bc99485767ebe68d8ff4db438721daa7ab966",
+  "pull_request_searches": [
+    {
+      "matches": [],
+      "query": "repo:google-deepmind/ai-foundations is:pr 37 in:title,body",
+      "response_sha256": "c9938edecb99d754b2d039ac9eec320a94c769b6a6417921e2dcbef9e2fe01a0",
+      "total_count": 0,
+      "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fai-foundations+is%3Apr+37+in%3Atitle%2Cbody"
+    },
+    {
+      "matches": [],
+      "query": "repo:google-deepmind/ai-foundations is:pr parameter_count_layer_norm",
+      "response_sha256": "c9938edecb99d754b2d039ac9eec320a94c769b6a6417921e2dcbef9e2fe01a0",
+      "total_count": 0,
+      "url": "https://api.github.com/search/issues?q=repo%3Agoogle-deepmind%2Fai-foundations+is%3Apr+parameter_count_layer_norm"
+    }
+  ],
+  "repository": "https://github.com/google-deepmind/ai-foundations"
+}

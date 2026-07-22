@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite it using this metadata."
+title: "Correct the transformer-block LayerNorm parameter count in DeepMind AI Foundations"
+type: software
+authors:
+  - family-names: "Krug"
+    given-names: "Charlie"
+date-released: "2026-07-22"
+repository-code: "https://github.com/ctkrug/proofs"
+url: "https://proofs.charliekrug.com/publications/deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d/"

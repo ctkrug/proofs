@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "20260722-183927-e6c75a",
+  "name": "issue37-current-head-final-replay-run2",
+  "hypothesis": "At current upstream main, the unpatched two-source checker fails, while the final issue-37 patch applies exactly and makes both the focused repository regression test and independent fixed-oracle checker pass.",
+  "expected_signal": "Baseline exits 1 with both source labels; exact final patch replay at e37bc994 exits 0 for the three-size regression and separate two-fixture checker, with clean diff, valid notebook JSON, compiled Python, and no overlong lines in the new test.",
+  "command": [
+    "python3",
+    "scripts/replay_current_head.py",
+    "--expected-commit",
+    "e37bc99485767ebe68d8ff4db438721daa7ab966",
+    "--patch",
+    "patches/issue-37-layernorm-count.patch",
+    "--checker",
+    "checkers/layernorm_count_discriminator.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace",
+  "seed": 0,
+  "timeout_seconds": 180,
+  "memory_limit_mb": 512,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T18:39:27.492934+00:00",
+  "finished_at": "2026-07-22T18:39:28.674875+00:00",
+  "duration_seconds": 1.182,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "cd3117b2e13ad52ba68e27a834de9855e178b2ed",
+  "source_urls": [
+    "https://github.com/google-deepmind/ai-foundations/commit/e37bc99485767ebe68d8ff4db438721daa7ab966"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/scripts/replay_current_head.py": "1012dd552ac5e914f2604b78613adfa135f89b82a304da7b5b2497e6167b8bfa",
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/patches/issue-37-layernorm-count.patch": "e1d238c6fc02230734bd8161209b8b5afeb0954d93e66acf6fe74dab8ef94891",
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/checkers/layernorm_count_discriminator.py": "6f137fef658817c3bcaf7cfa7e516c0593e38c1723f3df1202d8b2e81b225885"
+  },
+  "peak_child_memory_rusage": 19008,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "03ce6e17106fdb6661a06d5d57f43a1f486b21e50c1c2f4b5ee1d64c3ad78394",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

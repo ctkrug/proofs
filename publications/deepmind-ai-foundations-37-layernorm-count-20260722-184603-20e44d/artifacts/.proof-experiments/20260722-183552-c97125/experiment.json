@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "20260722-183552-c97125",
+  "name": "issue37-live-status-run2",
+  "hypothesis": "Issue 37 remains open, upstream main remains patch-compatible, and no matching pull request exists.",
+  "expected_signal": "Exit 0 with issue state open and both matching-PR searches at total_count zero.",
+  "command": [
+    "python3",
+    "scripts/audit_upstream_status.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace",
+  "seed": 0,
+  "timeout_seconds": 90,
+  "memory_limit_mb": 256,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T18:35:52.691542+00:00",
+  "finished_at": "2026-07-22T18:35:53.921677+00:00",
+  "duration_seconds": 1.23,
+  "returncode": 0,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "cd3117b2e13ad52ba68e27a834de9855e178b2ed",
+  "source_urls": [
+    "https://github.com/google-deepmind/ai-foundations/issues/37"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/scripts/audit_upstream_status.py": "44156cd131b2df4d652c27994403e45f97697559bbed75b1f8d3212570bddf5d"
+  },
+  "peak_child_memory_rusage": 22528,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "5f3bc2dc95801db5f17148ccd19e60802b45e051a76b82ff97bd3a5a120f41df",
+    "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

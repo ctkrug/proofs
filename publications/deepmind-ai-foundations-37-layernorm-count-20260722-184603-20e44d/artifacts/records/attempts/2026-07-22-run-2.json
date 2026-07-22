@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "run": 2,
+  "date": "2026-07-22",
+  "outcome": "candidate",
+  "approach": "Current-head status audit and clean replay of a style-hardened, versioned two-copy arithmetic repair with a focused repository test and independent fixed-oracle checker.",
+  "upstream_commit": "e37bc99485767ebe68d8ff4db438721daa7ab966",
+  "claim": "The run-2 patch makes both shipped references equal attention + MLP + 2 * LayerNorm and adds a direct-oracle regression over embedding dimensions 1, 128, and 256.",
+  "patch": "patches/issue-37-layernorm-count-run2.patch",
+  "verification_receipt": "artifacts/issue-37-review-packet-20260722-run2.json",
+  "independent_checker": "checkers/layernorm_count_discriminator.py",
+  "status_experiment": ".proof-experiments/20260722-183552-c97125",
+  "final_replay_experiment": ".proof-experiments/20260722-184123-54410d",
+  "failed_control": ".proof-experiments/20260722-183654-eb0ae2",
+  "limits": "Eligible for isolated human review only; not submitted, externally reviewed, accepted, or merged.",
+  "next_action": "Human owner reviews the run-2 patch and, if authorized after another fail-closed live-status audit, submits it upstream."
+}

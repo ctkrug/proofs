@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "20260722-183654-eb0ae2",
+  "name": "issue37-current-head-replay-run2",
+  "hypothesis": "At current upstream main, the unpatched two-source checker fails, while the exact issue-37 patch applies and makes both the repository regression test and independent fixed-oracle checker pass.",
+  "expected_signal": "Baseline exits 1 with both source labels; exact patch replay at e37bc994 exits 0 for the three-size regression and the separate two-fixture checker.",
+  "command": [
+    "python3",
+    "scripts/replay_current_head.py",
+    "--expected-commit",
+    "e37bc99485767ebe68d8ff4db438721daa7ab966",
+    "--patch",
+    "patches/issue-37-layernorm-count.patch",
+    "--checker",
+    "checkers/layernorm_count_discriminator.py"
+  ],
+  "cwd": "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace",
+  "seed": 0,
+  "timeout_seconds": 180,
+  "memory_limit_mb": 512,
+  "memory_limit_enforced": true,
+  "started_at": "2026-07-22T18:36:54.892981+00:00",
+  "finished_at": "2026-07-22T18:36:55.922517+00:00",
+  "duration_seconds": 1.03,
+  "returncode": 1,
+  "timed_out": false,
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-124-generic-x86_64-with-glibc2.39",
+  "git_commit": "cd3117b2e13ad52ba68e27a834de9855e178b2ed",
+  "source_urls": [
+    "https://github.com/google-deepmind/ai-foundations/commit/e37bc99485767ebe68d8ff4db438721daa7ab966"
+  ],
+  "input_artifacts": {
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/scripts/replay_current_head.py": "459f21de0605fc9935ca2c49cfe9073265afab56aa4f3dda8086f8f4567632ce",
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/patches/issue-37-layernorm-count.patch": "0ed94094267e43601cbfecbebf67f3660f4124b8af57ae3ad147132a09ffc836",
+    "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/checkers/layernorm_count_discriminator.py": "6f137fef658817c3bcaf7cfa7e516c0593e38c1723f3df1202d8b2e81b225885"
+  },
+  "peak_child_memory_rusage": 18176,
+  "peak_child_memory_unit": "kilobytes",
+  "artifacts": {
+    "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr.txt": "32ed8f76ea30026e0e7fde96c9dab9dbc249f42fc9c3e813b4361fac38629c8b"
+  }
+}

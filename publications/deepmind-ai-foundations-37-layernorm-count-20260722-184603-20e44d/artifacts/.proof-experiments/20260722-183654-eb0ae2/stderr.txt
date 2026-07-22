@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/scripts/replay_current_head.py", line 119, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/root/proof-factory/research/deepmind-ai-foundations-37-layernorm-count/workspace/scripts/replay_current_head.py", line 73, in main
+    raise AssertionError(
+AssertionError: replayed diff differs from patch: diff=4713e62b07ddcfdf1190fdec6e1ae7403bf601d2c249573b2c36c2a5fe1473cf patch=0ed94094267e43601cbfecbebf67f3660f4124b8af57ae3ad147132a09ffc836

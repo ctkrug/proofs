@@ -1328,7 +1328,7 @@
       "regression testing"
     ],
     "lane": "easy",
-    "status": "candidate",
+    "status": "verified",
     "automation_eligible": true,
     "priority": 96,
     "attempt_count": 2,
@@ -1349,7 +1349,9 @@
       "close_signal": "",
       "reason": "The bounded technical contribution is complete and candidate-ready; another technical epoch has low information value until human review or upstream change."
     },
-    "candidate_attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d"
+    "candidate_attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d",
+    "human_approved": true,
+    "approved_packet": "publications/deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d"
   },
   {
     "id": "deepmind-distrax-337-hmm-padding",

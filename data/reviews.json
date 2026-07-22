@@ -16,5 +16,14 @@
     "reviewed_at": "2026-07-22T17:42:37.502176+00:00",
     "reviewer": "Charlie Krug",
     "display_status": "candidate"
+  },
+  {
+    "attempt_id": "deepmind-ai-foundations-37-layernorm-count-20260722-184603-20e44d",
+    "problem_id": "deepmind-ai-foundations-37-layernorm-count",
+    "decision": "accept",
+    "note": "Charlie reviewed the current-head patch, two-copy regression, independent checker, baseline controls, and novelty searches and approves this candidate for the next external contribution step.",
+    "reviewed_at": "2026-07-22T18:50:31.485332+00:00",
+    "reviewer": "Charlie Krug",
+    "display_status": "candidate"
   }
 ]

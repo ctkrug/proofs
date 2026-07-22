@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-22T18:41:24Z",
+  "contribution_status": "candidate_for_isolated_human_review",
+  "target": {
+    "repository": "https://github.com/google-deepmind/ai-foundations",
+    "issue": "https://github.com/google-deepmind/ai-foundations/issues/37",
+    "upstream_commit": "e37bc99485767ebe68d8ff4db438721daa7ab966",
+    "issue_state": "open",
+    "issue_comments": 0,
+    "matching_pull_requests_by_issue_number": 0,
+    "matching_pull_requests_by_symbol": 0
+  },
+  "claim": "The versioned patch corrects both Course 4 Lab 4.5 transformer-block references to count two complete LayerNorms and adds a focused two-source, three-size regression test.",
+  "formula": {
+    "one_layer_norm": "gamma + beta = 2 * embedding_dim",
+    "two_layer_norms": "2 * parameter_count_layer_norm(hyperparams) = 4 * embedding_dim",
+    "transformer_block": "attention + MLP + 2 * LayerNorm"
+  },
+  "artifacts": {
+    "patch": {
+      "path": "patches/issue-37-layernorm-count-run2.patch",
+      "sha256": "e1d238c6fc02230734bd8161209b8b5afeb0954d93e66acf6fe74dab8ef94891"
+    },
+    "independent_checker": {
+      "path": "checkers/layernorm_count_discriminator.py",
+      "sha256": "6f137fef658817c3bcaf7cfa7e516c0593e38c1723f3df1202d8b2e81b225885"
+    },
+    "live_status_auditor": {
+      "path": "scripts/audit_upstream_status.py",
+      "sha256": "44156cd131b2df4d652c27994403e45f97697559bbed75b1f8d3212570bddf5d"
+    },
+    "clean_replay_harness": {
+      "path": "scripts/replay_current_head.py",
+      "sha256": "1012dd552ac5e914f2604b78613adfa135f89b82a304da7b5b2497e6167b8bfa"
+    }
+  },
+  "experiments": [
+    {
+      "id": "20260722-183552-c97125",
+      "role": "live primary-source status and novelty audit",
+      "returncode": 0,
+      "observation": "Issue #37 was open with zero comments; main was e37bc994; both pull-request searches returned zero matches.",
+      "experiment_json_sha256": "f1ada1ddc79a699e29d46b902ff8a3704b61206ac935fd4332be0e9fe4962cd4",
+      "stdout_sha256": "5f3bc2dc95801db5f17148ccd19e60802b45e051a76b82ff97bd3a5a120f41df"
+    },
+    {
+      "id": "20260722-183654-eb0ae2",
+      "role": "failed replay-harness control",
+      "returncode": 1,
+      "observation": "The first byte-identity check omitted the new untracked test because plain git diff excludes untracked files; no patch validation result was promoted from this run.",
+      "experiment_json_sha256": "10e979f0275d22988ae1bfe103463ca48c07f2b5a97edb13790025a7292a3395",
+      "stderr_sha256": "32ed8f76ea30026e0e7fde96c9dab9dbc249f42fc9c3e813b4361fac38629c8b"
+    },
+    {
+      "id": "20260722-184123-54410d",
+      "role": "current-head negative control, exact patch replay, focused regression, and independent check",
+      "returncode": 0,
+      "observation": "Both unpatched copies failed at 460928 versus 461440; the exact run-2 patch then passed the repository test and separate checker, with clean diff, valid notebook JSON, compiled Python, and an 80-column new test.",
+      "experiment_json_sha256": "d035db0c14822011efb580854233492787aca829c0092734c98bfc55e7d0845d",
+      "stdout_sha256": "69cd086a417cf75fab2f9e358c2ea257047430f4c22dcd67b7254bc831802abb"
+    }
+  ],
+  "scope_limits": [
+    "This validates the two reference formulas and the focused regression, not end-to-end Colab execution.",
+    "The independent checker is deterministic but locally authored; external maintainer review has not occurred.",
+    "The patch has not been submitted, accepted, or merged, and live upstream state can change."
+  ],
+  "tool_disclosure": "GPT-5 Codex acted as Sol principal. A supplied GPT-5.6 Terra memo was treated only as an advisory lead and independently rechecked. Python 3.12.3, unittest, ast, json, urllib, Git 2.43.0, SHA-256, and the Proof Factory experiment harness were used. No CAS, solver, proof assistant, external publishing, or system modification was used."
+}

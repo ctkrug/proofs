@@ -1,0 +1,158 @@
+diff --git a/ai_foundations/feedback/course_4/counting_parameters/reference_implementations.py b/ai_foundations/feedback/course_4/counting_parameters/reference_implementations.py
+index 2f0caccb17244dd8488c084e4cb9d72f7eccd77f..ab11280f2e2566f35e897b55f4f5bcd4ff5f29ac 100644
+--- a/ai_foundations/feedback/course_4/counting_parameters/reference_implementations.py
++++ b/ai_foundations/feedback/course_4/counting_parameters/reference_implementations.py
+@@ -158,8 +158,6 @@ def parameter_count_transformer_block(hyperparams: Dict[str, int]) -> int:
+     Total number of trainable parameters for one transformer block.
+   """
+ 
+-  embedding_dim = hyperparams["embedding_dim"]
+-
+   # Parameters for multi-head attention mechanism.
+   mha_parameter_count = parameter_count_attention(hyperparams)
+ 
+@@ -167,7 +165,7 @@ def parameter_count_transformer_block(hyperparams: Dict[str, int]) -> int:
+   mlp_parameter_count = parameter_count_mlp(hyperparams)
+ 
+   # Parameters for two layer norm components.
+-  layer_norm_parameter_count = 2 * embedding_dim
++  layer_norm_parameter_count = 2 * parameter_count_layer_norm(hyperparams)
+ 
+   parameter_count = (
+       mha_parameter_count + mlp_parameter_count + layer_norm_parameter_count
+diff --git a/ai_foundations/feedback/course_4/counting_parameters/test_reference_implementations.py b/ai_foundations/feedback/course_4/counting_parameters/test_reference_implementations.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..a5aaa34fa20651838576c559235cabd578d5689c
+--- /dev/null
++++ b/ai_foundations/feedback/course_4/counting_parameters/test_reference_implementations.py
+@@ -0,0 +1,108 @@
++# Copyright 2026 Google LLC
++#
++# Licensed under the Apache License, Version 2.0 (the "License");
++# you may not use this file except in compliance with the License.
++# You may obtain a copy of the License at
++#
++#    http://www.apache.org/licenses/LICENSE-2.0
++#
++# Unless required by applicable law or agreed to in writing, software
++# distributed under the License is distributed on an "AS IS" BASIS,
++# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++# See the License for the specific language governing permissions and
++# limitations under the License.
++# ==============================================================================
++
++"""Regression tests for the Course 4 parameter-count references."""
++
++import ast
++import json
++from pathlib import Path
++import runpy
++import unittest
++
++
++_PROJECT_ROOT = Path(__file__).resolve().parents[4]
++_NOTEBOOK = (
++    _PROJECT_ROOT
++    / "course_4/gdm_lab_4_5_reflection_on_trainable_parameters.ipynb"
++)
++_REFERENCE_IMPLEMENTATION = Path(__file__).with_name(
++    "reference_implementations.py"
++)
++_FUNCTION_NAMES = (
++    "parameter_count_layer_norm",
++    "parameter_count_attention",
++    "parameter_count_mlp",
++    "parameter_count_transformer_block",
++)
++_TEST_HYPERPARAMETERS = (
++    {"embedding_dim": 1, "mlp_dim": 1},
++    {"embedding_dim": 128, "mlp_dim": 512},
++    {"embedding_dim": 256, "mlp_dim": 384},
++)
++
++
++def _notebook_reference_functions() -> dict[str, object]:
++  """Loads only the typed reference-solution functions from the notebook."""
++  cells = json.loads(_NOTEBOOK.read_text(encoding="utf-8"))["cells"]
++  namespace = {}
++  for name in _FUNCTION_NAMES:
++    marker = f"def {name}(hyperparams: dict[str, int])"
++    matches = []
++    for cell in cells:
++      source = "".join(cell.get("source", []))
++      if (
++          cell.get("cell_type") == "code"
++          and marker in source
++          and "parameter_count = ..." not in source
++      ):
++        matches.append(source)
++    if len(matches) != 1:
++      raise AssertionError(
++          f"expected one typed notebook reference for {name}, "
++          f"found {len(matches)}"
++      )
++
++    function_nodes = [
++        node
++        for node in ast.parse(matches[0]).body
++        if isinstance(node, ast.FunctionDef) and node.name == name
++    ]
++    if len(function_nodes) != 1:
++      raise AssertionError(f"expected one function definition for {name}")
++    module = ast.Module(body=function_nodes, type_ignores=[])
++    exec(
++        compile(ast.fix_missing_locations(module), str(_NOTEBOOK), "exec"),
++        namespace,
++    )
++  return namespace
++
++
++class ReferenceImplementationsTest(unittest.TestCase):
++
++  def test_transformer_block_counts_two_complete_layer_norms(self):
++    references = {
++        "packaged feedback": runpy.run_path(str(_REFERENCE_IMPLEMENTATION)),
++        "notebook": _notebook_reference_functions(),
++    }
++    for label, namespace in references.items():
++      for hyperparams in _TEST_HYPERPARAMETERS:
++        with self.subTest(reference=label, hyperparams=hyperparams):
++          embedding_dim = hyperparams["embedding_dim"]
++          mlp_dim = hyperparams["mlp_dim"]
++          layer_norm = 2 * embedding_dim  # gamma and beta vectors.
++          attention = 4 * (embedding_dim + 1) * embedding_dim
++          mlp = (embedding_dim + 1) * mlp_dim + (mlp_dim + 1) * embedding_dim
++
++          self.assertEqual(
++              namespace["parameter_count_layer_norm"](hyperparams), layer_norm
++          )
++          self.assertEqual(
++              namespace["parameter_count_transformer_block"](hyperparams),
++              attention + mlp + 2 * layer_norm,
++          )
++
++
++if __name__ == "__main__":
++  unittest.main()
+diff --git a/course_4/gdm_lab_4_5_reflection_on_trainable_parameters.ipynb b/course_4/gdm_lab_4_5_reflection_on_trainable_parameters.ipynb
+index 899c63be182ba585c5e9702b326aa3b56279f90f..dd32086876ac63eaf29187742906875d45d53ced 100644
+--- a/course_4/gdm_lab_4_5_reflection_on_trainable_parameters.ipynb
++++ b/course_4/gdm_lab_4_5_reflection_on_trainable_parameters.ipynb
+@@ -1681,8 +1681,6 @@
+         "      Total number of trainable parameters for one transformer block.\n",
+         "    \"\"\"\n",
+         "\n",
+-        "    embedding_dim = hyperparams[\"embedding_dim\"]\n",
+-        "\n",
+         "    # Parameters for multi-head attention mechanism.\n",
+         "    mha_parameter_count = parameter_count_attention(hyperparams)\n",
+         "\n",
+@@ -1690,7 +1688,7 @@
+         "    mlp_parameter_count = parameter_count_mlp(hyperparams)\n",
+         "\n",
+         "    # Parameters for two layer norm components.\n",
+-        "    layer_norm_parameter_count = 2 * embedding_dim\n",
++        "    layer_norm_parameter_count = 2 * parameter_count_layer_norm(hyperparams)\n",
+         "\n",
+         "    parameter_count = (\n",
+         "        mha_parameter_count + mlp_parameter_count + layer_norm_parameter_count\n",
