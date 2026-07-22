@@ -10,8 +10,8 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 5,
-  "last_updated": "2026-07-22T04:42:04.473121+00:00",
+  "epoch_count": 6,
+  "last_updated": "2026-07-22T06:39:44.502663+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-20T19:52:51.807779+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The failed API-refactor lab was audited. Its only reported source diagnostic was an unsolved {0,1,2} control caused by passing IsSidon arguments in the removed legacy predicate's order. The call was repaired to (0,1,2,1), producing candidate SHA-256 3ff7038c…e8466 and driver SHA-256 ea7486e0…9a1. An unchanged semantic-audit retry timed out at 120 seconds with no diagnostics, so it was not counted as validation. The repaired exact-target build was submitted as lab-scout-bdf77f43574b-135f90912547. No proof, successful build, CI result, or upstream formalization is claimed.",
+  "synthesis_summary": "The repaired scoped declaration is kernel-valid for its exact source hash. A fresh primary-source audit then found an older open reviewed PR for the same formalization, contradicting the supplied novelty baseline. No helper relocation or external submission was performed.",
   "established_facts": [
     {
       "claim": "The two exact finite Sidon encodings agree on every subset of {-4,...,4}.",
@@ -103,6 +103,30 @@
       "status": "computed",
       "source_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
       "updated_at": "2026-07-22T04:42:04.473121+00:00"
+    },
+    {
+      "claim": "The repaired exact target is warning-clean for source hash 3ff7038c3c08f48408f48d53c4503182944cfd8c51b549cbab570a3b062e8466.",
+      "evidence": "Validated lab 135f90912547, return code 0, empty stderr, and hashed OLean.",
+      "scope": "Pinned Formal Conjectures checkout 8f6e745798379104379da0b5c28c25315489890f with Lean 4.27.0.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
+    },
+    {
+      "claim": "The discarded local Sidon predicate and project IsSidon agree on every Finset ℝ.",
+      "evidence": "Kernel-checked theorem legacyFinsetIsSidon_iff_projectIsSidon in checks/Erdos530SemanticAudit.lean.",
+      "scope": "All finite sets of real numbers.",
+      "status": "proved",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
+    },
+    {
+      "claim": "PR 4044 is a same-target open upstream formalization.",
+      "evidence": "Hash-recorded GitHub API output in experiment 20260722-063653-310bb7.",
+      "scope": "Repository status observed on 2026-07-22.",
+      "status": "computed",
+      "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
     }
   ],
   "strategies": [
@@ -129,31 +153,47 @@
       "id": "strategy-7603cdb38bd3",
       "family": "isolated adversarial reconstruction",
       "fingerprint": "7603cdb38bd3",
-      "title": "Audited the failed API-refactored Lean target, repaired the single adversarial-control argument-order mismatch, hash-locked the repaired source, and escalated its warning-fatal target build to the checkpointed lab.",
-      "mechanism": "Compare the candidate with the repository's actual IsSidon API, use an independently compiled equivalence/control file to guard semantics, and let the pinned Lean kernel discriminate exact source hashes.",
-      "status": "promising",
-      "hypothesis": "Changing the project-IsSidon control invocation from legacy order (0,2,1,1) to project order (0,1,2,1) removes the only observed elaboration failure without changing the formal conjecture or its extremal API.",
-      "discriminating_test": "Run the hash-locked exact Problem 530 target with lake --wfail and require exit 0 plus a nonempty newly hashed 530.olean.",
-      "blocker": "Repaired source hash 3ff7038c…e8466 has no completed target-build receipt, and its reusable extremal helpers are not yet placed as required by the contribution guide.",
-      "reopen_condition": "Not applicable; the strategy remains active and continues when the queued target lab produces an immutable completion record.",
+      "title": "Reviewed the completed hash-bound Lean target lab, then performed a reproducible matched prior-art audit against the official problem, Formal Conjectures issue 773, and open PR 4044.",
+      "mechanism": "Use the pinned Lean kernel to validate exact source hashes, independently audit Sidon semantics, and fail closed when a live primary-source search reveals overlapping upstream work.",
+      "status": "blocked",
+      "hypothesis": "The repaired source kernel-checks on current pinned main, but it cannot qualify as a novel independent formalization if live upstream records contain a same-target reviewed pull request.",
+      "discriminating_test": "Validate the completed warning-fatal target receipt and query the official page plus GitHub issue, pull-request, comment, and review APIs for a same-target active contribution.",
+      "blocker": "A same-target reviewed upstream PR already exists; proceeding requires human coordination or explicit maintainer authorization, followed by helper placement, clean-checkout build, full CI, and acceptance.",
+      "reopen_condition": "Documented coordination with PR 4044's author or Formal Conjectures maintainers, or explicit approval for a replacement after PR 4044 is closed or abandoned.",
       "reopen_evidence": "",
-      "last_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
-      "attempts": 2,
+      "last_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "attempts": 3,
       "parent_ids": [
         "strategy-formal-premise-retrieval"
       ],
-      "updated_at": "2026-07-22T04:42:04.473121+00:00",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00",
       "route_evaluation": {
-        "gate_proximity": 0.62,
-        "contribution_value": 0.55,
-        "decisiveness": 0.82,
-        "novelty_confidence": 0.45,
-        "novelty_risk": 0.35,
+        "gate_proximity": 0.48,
+        "contribution_value": 0.35,
+        "decisiveness": 0.95,
+        "novelty_confidence": 0.05,
+        "novelty_risk": 0.95,
         "scope": 0.65,
-        "reuse_value": 0.72,
+        "reuse_value": 0.78,
         "model_cost": 1.0,
         "cpu_cost": 1.0
       }
+    },
+    {
+      "family": "coordinated upstream patch repair",
+      "mechanism": "Offer the kernel-validated IsSidon reuse and narrowed statement as a patch to the existing author or a maintainer-approved branch.",
+      "hypothesis": "The local cleanup resolves the main maintainer API objection while retaining the mathematically approved target.",
+      "discriminating_test": "Obtain explicit coordination, apply only the reviewed delta, and run warning-fatal target plus repository CI.",
+      "rationale": "This changes the acceptance mechanism from competing reconstruction to assistance on the existing scholarly contribution.",
+      "id": "strategy-ddb7727d56f5",
+      "fingerprint": "ddb7727d56f5",
+      "status": "proposed",
+      "title": "Offer the kernel-validated IsSidon reuse and narrowed statement as a patch to the existing author or a maintainer-approved branch.",
+      "attempts": 0,
+      "parent_ids": [
+        "strategy-7603cdb38bd3"
+      ],
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
     }
   ],
   "open_leads": [
@@ -198,50 +238,84 @@
       "rationale": "It is the cheapest decisive check of the current source hash.",
       "next_experiment": "Inspect the completed record, hashes, stdout, stderr, and OLean for lab-scout-bdf77f43574b-03d1a8ffc4cf.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-0b0ebd8990",
       "strategy_id": "strategy-7603cdb38bd3",
-      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      "updated_at": "2026-07-21T22:39:58.314769+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
     },
     {
       "description": "Resolve placement of extremal helper definitions.",
       "rationale": "The contribution guide may require definitions needed for the conjecture in FormalConjecturesForMathlib.",
       "next_experiment": "Compare accepted nearby extremal-function files and request maintainer review of the two possible layouts.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-68c18e8ba9",
       "strategy_id": "strategy-7603cdb38bd3",
-      "updated_at": "2026-07-21T22:39:58.314769+00:00"
+      "updated_at": "2026-07-21T22:39:58.314769+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
     },
     {
       "description": "Review the repaired exact-target lab.",
       "rationale": "It is the cheapest decisive check of the current source hash.",
       "next_experiment": "Inspect records and content-addressed outputs for lab-scout-bdf77f43574b-135f90912547.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-99f022dc3c",
       "strategy_id": "strategy-7603cdb38bd3",
-      "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      "updated_at": "2026-07-22T04:42:04.473121+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
     },
     {
       "description": "Relocate and index extremal helpers.",
       "rationale": "The repository contribution guide explicitly requires conjecture-supporting definitions and results in FormalConjecturesForMathlib.",
       "next_experiment": "After the current hash passes, create one helper module, update FormalConjecturesForMathlib.lean, import it from 530.lean, and rebuild the named target.",
       "priority": "high",
-      "status": "open",
+      "status": "closed",
       "id": "lead-c50cc3761d",
       "strategy_id": "strategy-7603cdb38bd3",
-      "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      "updated_at": "2026-07-22T04:42:04.473121+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
     },
     {
       "description": "Clean-checkout and full-CI reproduction.",
       "rationale": "These remain explicit verification-contract gates after interface placement stabilizes.",
       "next_experiment": "Apply only the stabilized patch to a clean pinned checkout, run the exact target, then submit the full warning-fatal build to the lab.",
       "priority": "normal",
-      "status": "open",
+      "status": "closed",
       "id": "lead-53c31ee37c",
       "strategy_id": "strategy-7603cdb38bd3",
-      "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      "updated_at": "2026-07-22T04:42:04.473121+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
+    },
+    {
+      "description": "Coordinate the verified IsSidon-reusing cleanup with PR 4044.",
+      "rationale": "It directly addresses the maintainer's principal semantic/API comment and preserves the current-main kernel receipt.",
+      "next_experiment": "After human authorization, apply the smallest approved delta to the designated branch and run the hash-bound exact target.",
+      "priority": "high",
+      "status": "closed",
+      "id": "lead-89e158a4a7",
+      "strategy_id": "strategy-7603cdb38bd3",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
+    },
+    {
+      "description": "Monitor PR 4044 status.",
+      "rationale": "Its author activity and maintainer disposition determine whether any further local implementation is legitimate.",
+      "next_experiment": "Run checks/audit_erdos530_live_status.sh and compare state, head SHA, label, and review threads.",
+      "priority": "normal",
+      "status": "closed",
+      "id": "lead-7f4778c4fd",
+      "strategy_id": "strategy-7603cdb38bd3",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00",
+      "closure_reason": "terminal_strategy",
+      "closed_at": "2026-07-22T06:39:44.502663+00:00"
     }
   ],
   "ruled_out": [
@@ -343,25 +417,44 @@
       "reopen_condition": "A measured dependency-graph comparison against the full build.",
       "attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
       "updated_at": "2026-07-22T04:42:04.473121+00:00"
+    },
+    {
+      "claim_or_route": "Treat the local candidate as the first or only existing formalization effort.",
+      "scope": "Novelty and upstream-submission claims as of 2026-07-22.",
+      "reason": "Open reviewed PR 4044 predates this run and formalizes the same extremal function and asymptotic.",
+      "evidence": ".proof-experiments/20260722-063653-310bb7/stdout.txt",
+      "reopen_condition": "None; historical priority cannot be restored.",
+      "attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
+    },
+    {
+      "claim_or_route": "Open an independent competing PR immediately.",
+      "scope": "Current Formal Conjectures contribution route.",
+      "reason": "The same target has an active author and reviewed pull request, creating unacceptable duplicate/spam risk.",
+      "evidence": "PR 4044 status, review, and awaiting-author label.",
+      "reopen_condition": "Explicit coordination with the existing author/maintainer, or closure/abandonment followed by maintainer approval for a replacement.",
+      "attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+      "updated_at": "2026-07-22T06:39:44.502663+00:00"
     }
   ],
   "unresolved_questions": [],
   "next_session": {
-    "recommended_strategy_id": "strategy-7603cdb38bd3",
-    "objective": "Convert the repaired API-reusing declaration into a kernel-checked and repository-layout-compliant contribution.",
-    "first_action": "Inspect records/labs and lab-runs for lab-scout-bdf77f43574b-135f90912547; do not resubmit it.",
-    "stop_condition": "Redirect on the first build diagnostic; if it passes, stop editing the current file until the helper-module relocation is designed and hash-bound.",
-    "source_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81"
+    "recommended_strategy_id": "strategy-ddb7727d56f5",
+    "objective": "Preserve the verified local cleanup while avoiding duplicate submission and detect whether a coordinated acceptance path opens.",
+    "first_action": "Run checks/audit_erdos530_live_status.sh and compare PR 4044 state, head SHA, awaiting-author label, and review threads.",
+    "stop_condition": "Stop source work if PR 4044 remains active without coordination; redirect to a coordinated patch if authorization is documented.",
+    "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057"
   },
   "recent_attempt_ids": [
     "scout-bdf77f43574b-20260720-195251-a9f2d4",
     "scout-bdf77f43574b-20260721-185748-323167",
     "scout-bdf77f43574b-20260721-220806-a12504",
     "scout-bdf77f43574b-20260721-223958-e0f52b",
-    "scout-bdf77f43574b-20260722-044204-213e81"
+    "scout-bdf77f43574b-20260722-044204-213e81",
+    "scout-bdf77f43574b-20260722-063944-5d5057"
   ],
   "tactical_memory": {
-    "current_bottleneck": "The immediate blocker is the checkpointed kernel build of repaired hash 3ff7038c…e8466; the next acceptance blocker is mandatory helper placement under FormalConjecturesForMathlib.",
+    "current_bottleneck": "The limiting uncertainty is now human coordination and upstream ownership, not Lean elaboration or helper design.",
     "failure_signatures": [
       {
         "id": "c817046b8ac8",
@@ -378,6 +471,14 @@
         "last_strategy_id": "strategy-7603cdb38bd3",
         "last_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "id": "8c2ffb2de26c",
+        "signature": "A technically valid formalization selected from stale repository-status metadata can duplicate an active contribution.",
+        "count": 1,
+        "last_strategy_id": "strategy-7603cdb38bd3",
+        "last_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ],
     "reusable_assets": [
@@ -401,6 +502,27 @@
         "evidence": "checks/run_erdos530_lean_build.sh; SHA-256 ea7486e083994d8727f76eef3d928a584c8a325f241a1ad962382fca4b5789a1; bash -n passed.",
         "source_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "name": "Warning-fatal Problem 530 source and lab receipt",
+        "use": "Current-main kernel baseline for a coordinated patch",
+        "evidence": "Source SHA-256 3ff7038c3c08f48408f48d53c4503182944cfd8c51b549cbab570a3b062e8466; OLean SHA-256 0ba42a02ee4fd1fed5b19d584dbae21cb4f8dde7cffc8b2c432f4cb0befdcb37.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
+      },
+      {
+        "name": "Live prior-art audit",
+        "use": "Fail-closed status recheck in future epochs",
+        "evidence": "checks/audit_erdos530_live_status.sh SHA-256 045275026c11e0538acf115ae6ddfecdb576c494539300cade2e9988cae91c56; experiment 20260722-063653-310bb7.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
+      },
+      {
+        "name": "Semantic equivalence checker",
+        "use": "Verify reuse of project IsSidon against the discarded finite-set predicate",
+        "evidence": "checks/Erdos530SemanticAudit.lean SHA-256 d9766dd56de50bc1617d545147436aaf18a0992a118931efda65cc3f621f5bf9; prior Lean run returned 0.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ],
     "constraints_learned": [
@@ -438,6 +560,20 @@
         "evidence": "https://github.com/google-deepmind/formal-conjectures/blob/main/CONTRIBUTING.md",
         "source_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "constraint": "Do not redefine IsSidon; cast the Finset to Set and reuse the project predicate.",
+        "scope": "Formal Conjectures Problem 530 contribution",
+        "evidence": "Maintainer review comment 3312344627 and the locally checked API refactor.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
+      },
+      {
+        "constraint": "Do not open a competing independent PR while PR 4044 remains active without coordination.",
+        "scope": "Upstream submission and novelty claim",
+        "evidence": "PR 4044 is open, reviewed, unmerged, and labelled awaiting-author.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ],
     "decision_history": [
@@ -460,6 +596,16 @@
         "surprise": "The unchanged audit, previously completed in 10.082 seconds, exceeded 120 seconds in this environment; this is a resource/cold-cache result rather than semantic evidence.",
         "next_discriminator": "Inspect lab-scout-bdf77f43574b-135f90912547 and validate or redirect at its first diagnostic.",
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "decision": "redirect",
+        "prediction": "The repaired local source would pass the exact target and could then advance to helper relocation.",
+        "observation": "The source passed warning-fatally with a nonempty OLean, but a live audit found same-target open PR 4044 and invalidated the no-PR novelty premise.",
+        "surprise": "The injected baseline and Terra memo said there was no branch or PR, although PR 4044 had existed since 2026-05-26 and had maintainer review.",
+        "next_discriminator": "Run checks/audit_erdos530_live_status.sh read-only; resume edits only after documented coordination or explicit maintainer authorization.",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ],
     "reduction_ledger": [
@@ -494,6 +640,22 @@
         "source_attempt_id": "scout-bdf77f43574b-20260722-044204-213e81",
         "strategy_id": "strategy-7603cdb38bd3",
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "ambient_space": "Potential acceptance routes for a purportedly unformalized Erdős Problem 530 statement.",
+        "represented_space_before": "One local warning-clean candidate believed to have no competing branch or pull request.",
+        "eliminated_or_quotiented": "The independent-new-PR route was eliminated after identifying open reviewed PR 4044 with the same extremal function and asymptotic target.",
+        "represented_space_after": "One coordination-dependent route: offer the verified cleanup to the existing author or proceed only after explicit maintainer authorization for a replacement.",
+        "reduction_factor": "Independent submission route reduced from one live route to zero; one coordinated route remains.",
+        "measurement_status": "exact",
+        "unit": "families",
+        "coverage_scope": "Upstream Formal Conjectures acceptance route for Erdős Problem 530 as checked on 2026-07-22.",
+        "soundness_basis": "GitHub API reports PR 4044 open, unmerged, head e9caf02a19d55dff055d89d441b45272e1fa134b, labelled awaiting-author, with a maintainer review saying it looks good mathematically.",
+        "remaining_unknown": "Whether the existing author will resume, whether maintainers want assistance or a replacement, and whether a coordinated final patch would pass clean-checkout CI and semantic review.",
+        "next_bulk_elimination": "Recheck PR 4044 state and unresolved review threads before any further source modification.",
+        "source_attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -533,6 +695,25 @@
           "https://github.com/google-deepmind/formal-conjectures/blob/8f6e745798379104379da0b5c28c25315489890f/FormalConjecturesForMathlib/Combinatorics/Basic.lean"
         ],
         "updated_at": "2026-07-22T04:42:04.473121+00:00"
+      },
+      {
+        "attempt_id": "scout-bdf77f43574b-20260722-063944-5d5057",
+        "strategy_id": "strategy-7603cdb38bd3",
+        "nearest_method_ids": [
+          "github-pr-4044"
+        ],
+        "classification": "material_modification",
+        "exact_delta": "Both versions define the universal Sidon-subset extremum with Nat.findGreatest and state ell(N) ~ sqrt(N). The local version reuses project IsSidon, deletes the extra solved-order and cover conjectures, adds proved extremal API, and has a current-main warning-fatal kernel receipt.",
+        "duplicate_risk": "Submitting the local file independently could duplicate an active reviewed contribution and compete with its author.",
+        "comparison_test": "Compare definitions, theorem scope, and maintainer comments at PR head e9caf02a19d55dff055d89d441b45272e1fa134b against local source hash 3ff7038c3c08f48408f48d53c4503182944cfd8c51b549cbab570a3b062e8466.",
+        "decision": "stop",
+        "source_urls": [
+          "https://www.erdosproblems.com/530",
+          "https://github.com/google-deepmind/formal-conjectures/issues/773",
+          "https://github.com/google-deepmind/formal-conjectures/pull/4044",
+          "https://github.com/google-deepmind/formal-conjectures/pull/4044#pullrequestreview-4374243173"
+        ],
+        "updated_at": "2026-07-22T06:39:44.502663+00:00"
       }
     ]
   }
