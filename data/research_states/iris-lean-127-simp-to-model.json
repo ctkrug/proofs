@@ -10,15 +10,15 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 6,
-  "last_updated": "2026-07-23T13:20:18.864352+00:00",
+  "epoch_count": 7,
+  "last_updated": "2026-07-23T21:51:42.497298+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The paired patch is statically review-ready, but this epoch does not claim proof success. It converted an inherited false-negative guard into genuine Stage1 compilation, isolated and repaired two compiler-packaging defects, and launched a hash-bound native continuation. The active job had not reached the semantic fixture at the safety checkpoint.",
+  "synthesis_summary": "The pass did not produce a valid research result: FileNotFoundError: [Errno 2] No such file or directory: 'codex'",
   "established_facts": [
     {
       "claim": "Pinned Lean v4.32.0 has no pre-existing mergeWith entry in simp_to_model's modification map.",
@@ -73,6 +73,23 @@
         "model_cost": 0.3,
         "cpu_cost": 0.82
       }
+    },
+    {
+      "id": "strategy-0d0ea8626daf",
+      "family": "unspecified",
+      "fingerprint": "0d0ea8626daf",
+      "title": "Headless research pass",
+      "mechanism": "Headless research pass",
+      "status": "active",
+      "hypothesis": "",
+      "discriminating_test": "",
+      "blocker": "",
+      "reopen_condition": "",
+      "reopen_evidence": "",
+      "last_attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-23T21:51:42.497298+00:00"
     }
   ],
   "open_leads": [
@@ -119,11 +136,11 @@
   ],
   "unresolved_questions": [],
   "next_session": {
-    "recommended_strategy_id": "strategy-0219ad7fc31f",
-    "objective": "Obtain a hash-bound native completion receipt for the paired Lean/Iris patches.",
-    "first_action": "Inspect records/labs and lab-runs outputs for lab-iris-lean-127-simp-to-model-ec16acc0a37a; do not infer success from queue or progress state alone.",
-    "stop_condition": "Promote only when native fixture, focused checker, and full Iris build all exit zero; redirect immediately if the native fixture retains the mergeWith model goal.",
-    "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e"
+    "recommended_strategy_id": "strategy-0d0ea8626daf",
+    "objective": "Repair the failed pass and rerun.",
+    "first_action": "Repair the failed pass and rerun.",
+    "stop_condition": "",
+    "source_attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26"
   },
   "recent_attempt_ids": [
     "iris-lean-127-simp-to-model-20260722-223326-810dbc",
@@ -131,10 +148,11 @@
     "iris-lean-127-simp-to-model-20260723-052301-5a467e",
     "iris-lean-127-simp-to-model-20260723-064559-a6057e",
     "iris-lean-127-simp-to-model-20260723-084958-103b2e",
-    "iris-lean-127-simp-to-model-20260723-132018-f1fbe5"
+    "iris-lean-127-simp-to-model-20260723-132018-f1fbe5",
+    "iris-lean-127-simp-to-model-20260723-215142-060c26"
   ],
   "tactical_memory": {
-    "current_bottleneck": "Native Stage1 completion with its cache explicitly reconfigured to Lean v4.32.0's bundled Clang.",
+    "current_bottleneck": "repair the epoch failure before further research",
     "failure_signatures": [
       {
         "id": "d4629c5714e7",
@@ -143,6 +161,14 @@
         "last_strategy_id": "strategy-0219ad7fc31f",
         "last_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
         "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "id": "46be77344b9b",
+        "signature": "FileNotFoundError: invalid epoch output",
+        "count": 1,
+        "last_strategy_id": "strategy-0d0ea8626daf",
+        "last_attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26",
+        "updated_at": "2026-07-23T21:51:42.497298+00:00"
       }
     ],
     "reusable_assets": [
@@ -194,6 +220,16 @@
         "surprise": "The retained Stage1 configure stamp preserved /usr/bin/cc, so changing only the outer CMake compiler would not regenerate stdlib.make.",
         "next_discriminator": "Review lab-iris-lean-127-simp-to-model-ec16acc0a37a and require native_compile_checked true before full-build credit.",
         "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26",
+        "strategy_id": "strategy-0d0ea8626daf",
+        "decision": "hold",
+        "prediction": "produce a valid bounded epoch",
+        "observation": "output contract or infrastructure failure",
+        "surprise": "the epoch failed before evaluation",
+        "next_discriminator": "rerun the smallest valid output-contract control",
+        "updated_at": "2026-07-23T21:51:42.497298+00:00"
       }
     ],
     "reduction_ledger": [
@@ -212,6 +248,22 @@
         "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
         "strategy_id": "strategy-0219ad7fc31f",
         "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "ambient_space": "research epoch",
+        "represented_space_before": "not reached",
+        "eliminated_or_quotiented": "none",
+        "represented_space_after": "unchanged",
+        "reduction_factor": "none",
+        "measurement_status": "not_applicable",
+        "unit": "not applicable",
+        "coverage_scope": "no mathematical search completed",
+        "soundness_basis": "no claim accepted",
+        "remaining_unknown": "the full target",
+        "next_bulk_elimination": "repair the epoch before search",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26",
+        "strategy_id": "strategy-0d0ea8626daf",
+        "updated_at": "2026-07-23T21:51:42.497298+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -231,6 +283,22 @@
           "https://github.com/leanprover/lean4/blob/v4.32.0/src/Std/Data/DTreeMap/Internal/Lemmas.lean"
         ],
         "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260723-215142-060c26",
+        "strategy_id": "strategy-0d0ea8626daf",
+        "nearest_method_ids": [
+          "not-applicable"
+        ],
+        "classification": "replication_control",
+        "exact_delta": "none; the epoch failed before comparison",
+        "duplicate_risk": "unknown",
+        "comparison_test": "repair and rerun the smallest output-contract control",
+        "decision": "stop",
+        "source_urls": [
+          "https://github.com/leanprover-community/iris-lean/issues/127"
+        ],
+        "updated_at": "2026-07-23T21:51:42.497298+00:00"
       }
     ]
   }
