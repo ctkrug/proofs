@@ -13,6 +13,7 @@ from proof_factory import cli, config, store
 
 PREFIX = "review-request:"
 STATUS_PREFIX = "review-status:"
+INDEX_KEY = "review-request-index"
 
 
 def validate_request(payload: Any) -> dict[str, Any]:
@@ -63,21 +64,40 @@ class KVClient:
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 return response.read()
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return b""
+            raise RuntimeError(f"Cloudflare KV request failed: {exc}") from exc
         except (urllib.error.URLError, TimeoutError) as exc:
             raise RuntimeError(f"Cloudflare KV request failed: {exc}") from exc
 
-    def list_requests(self) -> list[str]:
-        body = json.loads(self._request(f"/keys?prefix={urllib.parse.quote(PREFIX)}"))
-        if not body.get("success"):
-            raise RuntimeError("Cloudflare KV key listing failed")
-        return [row["name"] for row in body.get("result", []) if isinstance(row, dict) and str(row.get("name", "")).startswith(PREFIX)]
+    def _read_index(self) -> list[str]:
+        raw = self._request(f"/values/{urllib.parse.quote(INDEX_KEY, safe='')}")
+        if not raw:
+            return []
+        try:
+            ids = json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+        return [value for value in ids if isinstance(value, str)] if isinstance(ids, list) else []
+
+    def pending_ids(self) -> list[str]:
+        return self._read_index()
+
+    def remove_pending(self, processed: set[str]) -> None:
+        if not processed:
+            return
+        remaining = [value for value in self._read_index() if value not in processed]
+        self.put_json(INDEX_KEY, remaining, ttl=None)
 
     def get_json(self, key: str) -> Any:
-        return json.loads(self._request(f"/values/{urllib.parse.quote(key, safe='')}"))
+        raw = self._request(f"/values/{urllib.parse.quote(key, safe='')}")
+        return json.loads(raw) if raw else None
 
-    def put_json(self, key: str, value: Any) -> None:
+    def put_json(self, key: str, value: Any, *, ttl: int | None = 604800) -> None:
+        suffix = f"?expiration_ttl={ttl}" if ttl else ""
         self._request(
-            f"/values/{urllib.parse.quote(key, safe='')}?expiration_ttl=604800",
+            f"/values/{urllib.parse.quote(key, safe='')}{suffix}",
             method="PUT",
             data=json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode(),
         )
@@ -88,10 +108,15 @@ class KVClient:
 
 def process(client: KVClient) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
-    for key in client.list_requests():
-        attempt_id = key.removeprefix(PREFIX)
+    processed: set[str] = set()
+    for attempt_id in client.pending_ids():
+        key = PREFIX + attempt_id
+        payload = client.get_json(key)
+        if payload is None:
+            processed.add(attempt_id)
+            continue
         try:
-            request = validate_request(client.get_json(key))
+            request = validate_request(payload)
             if request["attempt_id"] != attempt_id:
                 raise ValueError("request key does not match attempt id")
             if not already_approved(attempt_id):
@@ -101,7 +126,9 @@ def process(client: KVClient) -> list[dict[str, Any]]:
             status = {"status": "error", "attempt_id": attempt_id, "message": str(exc)}
         client.put_json(STATUS_PREFIX + attempt_id, status)
         client.delete(key)
+        processed.add(attempt_id)
         results.append(status)
+    client.remove_pending(processed)
     return results
 
 

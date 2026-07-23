@@ -975,7 +975,15 @@ export default {
       if (!await equalSecret(body.password, env.PROOF_REVIEW_PASSWORD)) return json({error:"Password incorrect."}, 401);
       const key = `review-request:${body.attempt_id}`;
       const existing = await env.PROOF_RUNTIME.get(key);
-      if (!existing) await env.PROOF_RUNTIME.put(key, JSON.stringify({schema_version:1,attempt_id:body.attempt_id,decision:"accept",note:body.note.trim(),reviewer:"Charlie Krug",release:false,requested_at:new Date().toISOString(),source:"site-ui"}), {expirationTtl:604800});
+      if (!existing) {
+        await env.PROOF_RUNTIME.put(key, JSON.stringify({schema_version:1,attempt_id:body.attempt_id,decision:"accept",note:body.note.trim(),reviewer:"Charlie Krug",release:false,requested_at:new Date().toISOString(),source:"site-ui"}), {expirationTtl:604800});
+        const indexRaw = await env.PROOF_RUNTIME.get("review-request-index");
+        let index;
+        try { index = JSON.parse(indexRaw || "[]"); } catch (_) { index = []; }
+        if (!Array.isArray(index)) index = [];
+        if (!index.includes(body.attempt_id)) index.push(body.attempt_id);
+        await env.PROOF_RUNTIME.put("review-request-index", JSON.stringify(index));
+      }
       await env.PROOF_RUNTIME.put(`review-status:${body.attempt_id}`, JSON.stringify({status:"queued",attempt_id:body.attempt_id}), {expirationTtl:604800});
       return json({status:"queued",attempt_id:body.attempt_id}, 202);
     }
