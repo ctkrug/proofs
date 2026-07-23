@@ -11,7 +11,7 @@
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-23T11:36:00+00:00",
+  "last_updated": "2026-07-23T11:46:00+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-22T13:15:09.478653+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. Frozen weighted scale segment 000 completed exactly 256 cases: all 256 produced exact weighted-cover contradictions, all 256 residual domains and certificates passed independent checking, no case remained open, and median LP time was 0.038625 seconds. Exact margins range from 1.241027 to 2.499952 blocks. The weighted depth-two semantic ledger is now 358 cubes, but no containing formula, fifth leaf, fourth parent, ordinary classification, or global ledger entry closes. Segment 001 is held because observed compact artifacts project to 16,489,923 bytes including safety, 36.25% above the predeclared 12,102,474-byte estimate despite remaining below the absolute 50 MB cap.",
+  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The compact-v2 storage audit bound all 256 segment-000 results and rechecked all arithmetic certificates; its full-package projection is 6,209,365 bytes with safety, below the 12,102,474-byte gate. Frozen segment 001 then completed exactly 256 cases: 256/256 exact weighted contradictions passed independent domain reconstruction and arithmetic checking, with zero SAT/open cases, median LP time 0.037394 seconds, and margins 1.337956 to 2.018232 blocks. The weighted depth-two semantic ledger is now 614/4,402 cubes. No containing formula, fifth leaf, fourth parent, ordinary classification, or global ledger entry closes yet.",
   "established_facts": [
     {
       "claim": "The preserved 41-block witness covers all 495 four-subsets.",
@@ -534,9 +534,9 @@
   "unresolved_questions": [],
   "next_session": {
     "recommended_strategy_id": "strategy-ordinary-c1153-fourth-inventory-audit-v1",
-    "objective": "Resolve the segment-000 storage-projection variance without rerunning any of its 256 certified LP cases.",
-    "first_action": "Build a versioned compact-v2 package over the immutable segment-000 artifacts only: retain every exact certificate once, replace repeated case metadata in receipts and duplicated case lists in protocol/assignment with frozen-manifest row indices and hash bindings, then independently bind all 256 v2 receipts to v1 receipts, reconstruct all domains, and recheck all arithmetic certificates.",
-    "stop_condition": "Do no new LP, SAT, PB, or segment-001 work. Stop after the compact-v2 audit. Authorize later scale only if all 256 bindings/checks pass and the complete-package projection including 10% safety is at or below the predeclared 12,102,474 bytes.",
+    "objective": "Continue the audited arithmetic collapse of the 4,402-cube paired hard-tail partition without changing the frozen route.",
+    "first_action": "Run only frozen weighted-scale-segment-002 in compact-v2 form: 256 cases, one-second continuous-LP cap, sequential cloud execution, then independent exact residual reconstruction and integer-weight checking for every certificate.",
+    "stop_condition": "Stop after exactly segment 002 or any audit/resource failure. Do not run segment 003 in the same tranche. Continue only if at least 240/256 certify, checker success is 100%, median LP time stays below 0.5 seconds, and storage remains within the compact-v2 projection gate.",
     "source_attempt_id": "covering-c1264-20260723-042600-a864b7"
   },
   "recent_attempt_ids": [
