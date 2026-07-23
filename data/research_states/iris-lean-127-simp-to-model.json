@@ -10,15 +10,15 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 5,
-  "last_updated": "2026-07-23T08:49:58.894005+00:00",
+  "epoch_count": 6,
+  "last_updated": "2026-07-23T13:20:18.864352+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The staged paired patch passed its structural checker, and a clean workspace-local CMake preflight removed the stale cross-mount cache defect. Native validation is still running/queued and no proof success is claimed. The first job has an over-specific provenance guard that is expected to stop after building Stage0; corrected v2 job lab-iris-lean-127-simp-to-model-8369649cc70f is queued to reuse that cache and execute the complete gate.",
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The paired patch is statically review-ready, but this epoch does not claim proof success. It converted an inherited false-negative guard into genuine Stage1 compilation, isolated and repaired two compiler-packaging defects, and launched a hash-bound native continuation. The active job had not reached the semantic fixture at the safety checkpoint.",
   "established_facts": [
     {
       "claim": "Pinned Lean v4.32.0 has no pre-existing mergeWith entry in simp_to_model's modification map.",
@@ -130,7 +130,8 @@
     "iris-lean-127-simp-to-model-20260722-234149-4304e5",
     "iris-lean-127-simp-to-model-20260723-052301-5a467e",
     "iris-lean-127-simp-to-model-20260723-064559-a6057e",
-    "iris-lean-127-simp-to-model-20260723-084958-103b2e"
+    "iris-lean-127-simp-to-model-20260723-084958-103b2e",
+    "iris-lean-127-simp-to-model-20260723-132018-f1fbe5"
   ],
   "tactical_memory": {
     "current_bottleneck": "Native Stage1 completion with its cache explicitly reconfigured to Lean v4.32.0's bundled Clang.",
