@@ -11,7 +11,7 @@
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-23T11:46:00+00:00",
+  "last_updated": "2026-07-23T12:36:50+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-22T13:15:09.478653+00:00",
@@ -22,8 +22,16 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The compact-v2 storage audit bound all 256 segment-000 results and rechecked all arithmetic certificates; its full-package projection is 6,209,365 bytes with safety, below the 12,102,474-byte gate. Frozen segment 001 then completed exactly 256 cases: 256/256 exact weighted contradictions passed independent domain reconstruction and arithmetic checking, with zero SAT/open cases, median LP time 0.037394 seconds, and margins 1.337956 to 2.018232 blocks. The weighted depth-two semantic ledger is now 614/4,402 cubes. No containing formula, fifth leaf, fourth parent, ordinary classification, or global ledger entry closes yet.",
+  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The complete weighted-arithmetic route is now finished: all 4,402 exact depth-two cubes have independently checked arithmetic contradictions, with zero SAT, zero certificate gaps, and exact immutable receipts across the six-case pilot, 96-case generalization, and 17 scale segments. A separate child-by-child aggregation audit proves that all 12 selected second-live formulas are closed. This does not yet close their larger target children, any fifth leaf or fourth parent, the ordinary classification, or a global C(12,6,4) extension case. The next route tests the same exact weighted obstruction at the shallowest unresolved second-live formulas before generalizing the partition.",
   "established_facts": [
+    {
+      "claim": "Every one of the 4,402 exact depth-two cubes in the audited paired multi-deficit partition has an independently checked weighted-cover arithmetic contradiction, and exhaustive child-by-child aggregation closes the 12 selected second-live formulas.",
+      "evidence": "Campaign commit 198cb0c7; structural manifest SHA-256 79cf5b0dfeecffd1aa558efda5b65b8ff5dd67ffb0cbc25c0a9a23cd895399ef; aggregation summary SHA-256 bcfd2b06636b41d95ad09df976794295e942a688e50656a42a2b52e6015e36d4",
+      "scope": "The exact 4,402-cube paired partition and its 12 selected second-live formulas only; no target-child or higher ancestor closure follows.",
+      "status": "computed",
+      "source_attempt_id": "covering-c1264-weighted-complete-aggregation-20260723",
+      "updated_at": "2026-07-23T12:36:50+00:00"
+    },
     {
       "claim": "The preserved 41-block witness covers all 495 four-subsets.",
       "evidence": "producer and independent bitmask checker; witness sha256 395bc870e7eb9e84a472873db97de553afc34afdb666545824944e89047913e5",
