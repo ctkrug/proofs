@@ -11,7 +11,7 @@
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-23T08:05:00+00:00",
+  "last_updated": "2026-07-23T09:12:00+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-22T13:15:09.478653+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The frozen six-case exact-cover gate produced an independently checked weighted arithmetic obstruction for every sampled hard depth-two cube: each cube has only 11 remaining block slots, while exact rational dual weights prove lower bounds from 12.741287 through 13.717837. The independent checker validated all six base certificates and all 48 probe certificates, for 54/54 exact arithmetic checks; there was no SAT result and no ancestor, parent, classification, or global-ledger closure. This is the first compact structural explanation of the hard tail: global overlap constraints, not merely local propagation depth, make these exact cubes impossible.",
+  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The frozen weighted-cover generalization gate independently certified all 96/96 sampled hard depth-two cubes across all 12 formula strata, with exact arithmetic margins of 1.192891 to 2.491624 blocks and median LP time 0.029242 seconds; no SAT appeared. Together with the six pilot cubes, 102 exact depth-two cubes now have semantic arithmetic contradictions, but no containing formula, fifth leaf, fourth parent, ordinary classification, or global ledger entry closes. The declared scale gate did not pass because the current duplicated receipt layout projects to 164.5 MB before the duplicated aggregate summary, above the 50 MB cap; the certificate payload alone projects to 42.8 MB.",
   "established_facts": [
     {
       "claim": "The preserved 41-block witness covers all 495 four-subsets.",
@@ -534,9 +534,9 @@
   "unresolved_questions": [],
   "next_session": {
     "recommended_strategy_id": "strategy-ordinary-c1153-fourth-inventory-audit-v1",
-    "objective": "Measure whether the exact weighted-cover obstruction generalizes across the audited 4,402-cube hard-tail partition before any solver scale-up.",
-    "first_action": "Freeze exactly 96 previously unmeasured cubes: eight deterministic quantile-spaced cubes from each of the 12 audited formulas, excluding the six newly certified cubes and all 24 prior timeout samples. Run only the continuous residual set-cover LP, round its dual downward into an exact integer-weight certificate, and check every certificate independently; do not run binary probes, CaDiCaL, or deeper branching.",
-    "stop_condition": "Scale the arithmetic-certificate route only if at least 90/96 cubes receive exact independently checked certificates, audit success is 100%, median runtime is below 0.5 seconds, and projected total storage is below 50 MB. A failed certificate remains open; stop immediately on SAT, hash/checker disagreement, or resource degradation.",
+    "objective": "Remove the artifact-layout bottleneck without changing or rerunning the 96 certified weighted-cover cases.",
+    "first_action": "Build a non-destructive compact receipt package over the existing 96 immutable results: retain each exact certificate once; replace embedded certificate and LP-dual payloads with content hashes and scalar measurements; replace aggregate outcome duplication with case-id/status/hash rows. Independently bind every compact receipt to its full source artifact and rerun all 96 exact arithmetic checks.",
+    "stop_condition": "Proceed toward a segmented 4,300-open-cube scale only if all 96 compact receipts bind byte-exactly, all arithmetic checks pass, and the measured full-4,402 projection including certificates, receipts, indices, and safety margin is below 50 MB. Otherwise preserve the 102 exact cube closures and redesign the certificate representation itself.",
     "source_attempt_id": "covering-c1264-20260723-042600-a864b7"
   },
   "recent_attempt_ids": [
@@ -548,7 +548,7 @@
     "covering-c1264-20260723-042600-a864b7"
   ],
   "tactical_memory": {
-    "current_bottleneck": "Six representative hard depth-two cubes now have exact independently checked weighted-cover obstructions: the remaining budget is 11 blocks, while rational dual weights prove requirements from 12.741287 to 13.717837. The bottleneck is no longer finding a structural explanation, but measuring whether this compact global-overlap certificate generalizes across the full 4,402-cube partition without creating a new proof-storage or checker bottleneck.",
+    "current_bottleneck": "The weighted obstruction generalized perfectly: 96/96 sampled cubes certified across all strata in 0.029 seconds median. The blocker is now purely artifact layout: duplicated certificate and LP payloads project to 164.5 MB before aggregate-summary duplication, versus the 50 MB scale cap, while the exact certificate payload alone projects to 42.8 MB.",
     "failure_signatures": [
       {
         "id": "4d2fbff3c2cc",
