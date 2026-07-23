@@ -11,7 +11,7 @@
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-23T05:05:22+00:00",
+  "last_updated": "2026-07-23T05:54:44+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-22T13:15:09.478653+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification now has 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. An independently audited second-live-triple gate compressed 3,446,341 generic seventh branches to 173,880 children over 13,549 exact targets (94.954649%), but its frozen 48-case five-second sample produced 48 timeouts and no SAT or UNSAT. Unchanged short-cap scale is stopped; the next route is a sound multi-deficit exact-cover propagation or forced-structure discriminator.",
+  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. A deterministic paired multi-deficit pilot on 12 frozen timeout formulas reduced 3,714 generic next branches to 234 exact first-step branches and 1,015,494 naive two-block literal extensions to 4,402 exhaustive depth-two cubes. Independent local and cloud audits pass. It found zero semantic contradictions and zero candidates, so no closure is added.",
   "established_facts": [
     {
       "claim": "The preserved 41-block witness covers all 495 four-subsets.",
@@ -534,9 +534,9 @@
   "unresolved_questions": [],
   "next_session": {
     "recommended_strategy_id": "strategy-ordinary-c1153-fourth-inventory-audit-v1",
-    "objective": "Collapse the remaining ordinary-classification hard tail with a complete, independently audited structural reduction rather than scaling the timed-out second-live sample.",
-    "first_action": "Build a bounded complete multi-deficit exact-cover propagation tree on the audited second-live targets, preserving exact parent-CNF bindings and emitting either semantic contradictions or an exhaustive disjoint residual partition.",
-    "stop_condition": "Any domain, hash, disjointness, or reconstruction mismatch; weak global reduction at the bounded review gate; or discovery of a directly valid nonisomorphic ordinary cover.",
+    "objective": "Measure whether the audited multi-deficit cubes actually convert the prior five-second hard tail into replayable closures before generalizing the partition.",
+    "first_action": "Freeze exactly 24 cloud solver cases: the lexicographically first and last depth-two frontier cube from each of the 12 audited paired formulas, with the unchanged five-second cap, four workers, exact CNF reconstruction, and full external replay for every UNSAT.",
+    "stop_condition": "Stop after exactly 24 results, or immediately on SAT, hash/reconstruction/replay disagreement, resource degradation, or zero useful closure signal; use an ILP/PB forced-substructure discriminator if the compressed cubes remain uniformly hard.",
     "source_attempt_id": "covering-c1264-20260723-042600-a864b7"
   },
   "recent_attempt_ids": [
@@ -548,7 +548,7 @@
     "covering-c1264-20260723-042600-a864b7"
   ],
   "tactical_memory": {
-    "current_bottleneck": "The second-live-triple partition is structurally strong but its entire frozen 48-case five-second discriminator timed out. The bottleneck is deriving complete multi-deficit propagation or another checked forced-substructure partition that makes the 13,549 exact hard targets proof-search tractable.",
+    "current_bottleneck": "The exact multi-deficit pilot gives a 93.70% first-step and 99.57% depth-two branch reduction but no semantic contradiction. The unresolved question is whether its 4,402 audited cubes are genuinely proof-search easier than the 12 parent formulas or merely smaller descriptions of the same hard core.",
     "failure_signatures": [
       {
         "id": "4d2fbff3c2cc",
