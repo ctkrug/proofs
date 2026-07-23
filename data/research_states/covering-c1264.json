@@ -11,7 +11,7 @@
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
   "epoch_count": 6,
-  "last_updated": "2026-07-23T06:58:00+00:00",
+  "last_updated": "2026-07-23T08:05:00+00:00",
   "baseline_review": {
     "status": "complete",
     "reviewed_at": "2026-07-22T13:15:09.478653+00:00",
@@ -22,7 +22,7 @@
     "leads_recorded": 3,
     "requirement": "Repeat when the authoritative status changes materially or the baseline is explicitly invalidated."
   },
-  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The frozen 24-case cloud discriminator tested the lexicographically first and last exact depth-two cube from each of the 12 audited paired formulas at the unchanged five-second cap. Independent exact-CNF reconstruction passes, but all 24 cases timed out: zero SAT, zero UNSAT, and no closure. The 4,402-cube multi-deficit route must not be scaled unchanged; the next bounded route is a six-case ILP/PB-derived forced-substructure discriminator.",
+  "synthesis_summary": "The maintained bound remains 40 <= C(12,6,4) <= 41 and the global extension ledger remains 33/47. Ordinary classification remains at 32,611 replay-certified fifth leaves, 8,476 audited semantic zero-child contradictions, and 216/384 independently aggregated fourth-level parents closed. The frozen six-case exact-cover gate produced an independently checked weighted arithmetic obstruction for every sampled hard depth-two cube: each cube has only 11 remaining block slots, while exact rational dual weights prove lower bounds from 12.741287 through 13.717837. The independent checker validated all six base certificates and all 48 probe certificates, for 54/54 exact arithmetic checks; there was no SAT result and no ancestor, parent, classification, or global-ledger closure. This is the first compact structural explanation of the hard tail: global overlap constraints, not merely local propagation depth, make these exact cubes impossible.",
   "established_facts": [
     {
       "claim": "The preserved 41-block witness covers all 495 four-subsets.",
@@ -534,9 +534,9 @@
   "unresolved_questions": [],
   "next_session": {
     "recommended_strategy_id": "strategy-ordinary-c1153-fourth-inventory-audit-v1",
-    "objective": "Test whether global exact-20 and overlapping-triple coupling, rather than missing local propagation depth, exposes a small auditable forced substructure in the hard tail.",
-    "first_action": "Freeze exactly six cloud cases: the lexicographically first depth-two cube in each root-class by rank-zero/q3/q4 cell. Build each exact binary covering model and use CBC only to propose forced literals or a compact infeasible subconfiguration. Validate every proposed forced literal by an opposite-assumption exact CNF with replayable DRAT; never treat CBC status alone as a certificate.",
-    "stop_condition": "Stop after the six-case structural gate, or immediately on SAT, hash/reconstruction/replay disagreement, or resource degradation. Continue only if at least one independently certified forced literal or compact infeasible subconfiguration yields a sound smaller partition or closure path.",
+    "objective": "Measure whether the exact weighted-cover obstruction generalizes across the audited 4,402-cube hard-tail partition before any solver scale-up.",
+    "first_action": "Freeze exactly 96 previously unmeasured cubes: eight deterministic quantile-spaced cubes from each of the 12 audited formulas, excluding the six newly certified cubes and all 24 prior timeout samples. Run only the continuous residual set-cover LP, round its dual downward into an exact integer-weight certificate, and check every certificate independently; do not run binary probes, CaDiCaL, or deeper branching.",
+    "stop_condition": "Scale the arithmetic-certificate route only if at least 90/96 cubes receive exact independently checked certificates, audit success is 100%, median runtime is below 0.5 seconds, and projected total storage is below 50 MB. A failed certificate remains open; stop immediately on SAT, hash/checker disagreement, or resource degradation.",
     "source_attempt_id": "covering-c1264-20260723-042600-a864b7"
   },
   "recent_attempt_ids": [
@@ -548,7 +548,7 @@
     "covering-c1264-20260723-042600-a864b7"
   ],
   "tactical_memory": {
-    "current_bottleneck": "The exact multi-deficit pilot gives a 93.70% first-step and 99.57% depth-two branch reduction but no semantic contradiction, and all 24 frozen first/last depth-two cubes timed out at five seconds. This strongly indicates that local propagation depth is only redescribing the same hard core. The next question is whether integer/PB presolve can expose a small global forced substructure that is then certifiable in the exact CNF.",
+    "current_bottleneck": "Six representative hard depth-two cubes now have exact independently checked weighted-cover obstructions: the remaining budget is 11 blocks, while rational dual weights prove requirements from 12.741287 to 13.717837. The bottleneck is no longer finding a structural explanation, but measuring whether this compact global-overlap certificate generalizes across the full 4,402-cube partition without creating a new proof-storage or checker bottleneck.",
     "failure_signatures": [
       {
         "id": "4d2fbff3c2cc",
