@@ -1067,11 +1067,11 @@
       "proof refactoring"
     ],
     "lane": "easy",
-    "status": "attempted",
+    "status": "active",
     "automation_eligible": true,
     "priority": 85,
-    "attempt_count": 3,
-    "research_attempt_count": 2,
+    "attempt_count": 4,
+    "research_attempt_count": 3,
     "accepted_result": false,
     "added_at": "2026-07-22T15:02:47Z",
     "source_checked_at": "2026-07-22T15:02:47Z",
@@ -1081,12 +1081,12 @@
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
     "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-23T05:23:01.581896+00:00",
+    "last_attempt_at": "2026-07-23T06:45:59.786575+00:00",
     "campaign_last_assessment": {
-      "attempt_id": "iris-lean-127-simp-to-model-20260723-052301-5a467e",
+      "attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
       "decision": "continue",
-      "close_signal": "The theorem, focused build, full 259-job build, and independent checker all pass; only one precisely identified automation-coverage gap remains.",
-      "reason": "Run 2 is below the minimum review point and the next bounded pass has a concrete path to the exact robustness requirement."
+      "close_signal": "The exact paired patch passes its static contract, the stock-runtime negative control has the predicted signature, and the remaining discriminator is one corrected native Stage1 replay.",
+      "reason": "This is run 3, below the minimum review point, and the unresolved target has a concrete, bounded, high-decision-value continuation."
     }
   },
   {

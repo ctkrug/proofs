@@ -10,33 +10,226 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 3,
-  "last_updated": "2026-07-23T05:23:01.581896+00:00",
+  "epoch_count": 4,
+  "last_updated": "2026-07-23T06:45:59.786575+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A compiling refactor removed the old Option helpers and most implementation-specific proof machinery. The focused file, full 259-job build, and independent checker pass. Promotion is withheld because pinned simp_to_model cannot model Const.mergeWith directly, leaving a private fold-model lemma.",
-  "established_facts": [],
-  "strategies": [],
-  "open_leads": [],
-  "ruled_out": [],
+  "synthesis_summary": "The paired Lean/Iris refactor is staged and passes a fail-closed structural checker. A negative control confirmed that stock-native overlay replay cannot validate the changed tactic. Native attempts had not falsified the proof; they failed because Stage1 retained GCC while Lean expected a Clang-compatible target-triple query. A corrected checkpointed job was submitted, but queued compute is not counted as validation.",
+  "established_facts": [
+    {
+      "claim": "Pinned Lean v4.32.0 has no pre-existing mergeWith entry in simp_to_model's modification map.",
+      "evidence": "scripts/check_mergewith_blocker.py and the pinned Lean source snapshot.",
+      "scope": "Lean v4.32.0 DTreeMap internal tactic implementation.",
+      "status": "computed",
+      "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    },
+    {
+      "claim": "The paired source state satisfies the static theorem-header and escape-hatch contract.",
+      "evidence": ".proof-experiments/20260723-063511-46f5ab.",
+      "scope": "The four patched source files at the hashes emitted by check_upstream_bridge.py.",
+      "status": "computed",
+      "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    },
+    {
+      "claim": "Stock-native overlay replay leaves the mergeWith model goal unchanged.",
+      "evidence": ".proof-experiments/20260723-063823-7333d5.",
+      "scope": "Lean v4.32.0 stock executable with artifacts/lean-overlay.",
+      "status": "computed",
+      "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    }
+  ],
+  "strategies": [
+    {
+      "id": "strategy-0219ad7fc31f",
+      "family": "upstream model bridge plus native tactic replay",
+      "fingerprint": "0219ad7fc31f",
+      "title": "Add an upstream Lean Std list-model bridge and simp_to_model registration for Const.mergeWith, then replace Iris's bespoke TreeMap fold proof with a direct tactic proof.",
+      "mechanism": "Model Const.mergeWith as a distinct-key-preserving list fold, register that model transformation with simp_to_model, and test the resulting imported metaprogram using a freshly built native Lean runtime.",
+      "status": "active",
+      "hypothesis": "Pinned Lean v4.32.0 with the proposed Const.mergeWith model bridge will make simp_to_model close the unchanged Iris getElem?_mergeWith' theorem without a private fold lemma.",
+      "discriminating_test": "Build patched Lean Stage1 natively, compile experiments/SimpToModelMergeWith.lean, then run check_upstream_bridge.py with that executable before attempting the full Iris build.",
+      "blocker": "The corrected native Stage1 job and consequent focused/full Iris receipts have not completed.",
+      "reopen_condition": "If native Stage1 leaves mergeWith untransformed, retry this strategy only with an expression trace identifying the actual constant head or a materially different tactic-extension mechanism.",
+      "reopen_evidence": "",
+      "last_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "attempts": 1,
+      "parent_ids": [],
+      "updated_at": "2026-07-23T06:45:59.786575+00:00",
+      "route_evaluation": {
+        "gate_proximity": 0.72,
+        "contribution_value": 0.78,
+        "decisiveness": 0.9,
+        "novelty_confidence": 0.68,
+        "novelty_risk": 0.28,
+        "scope": 0.84,
+        "reuse_value": 0.8,
+        "model_cost": 0.3,
+        "cpu_cost": 0.82
+      }
+    }
+  ],
+  "open_leads": [
+    {
+      "description": "Complete native Stage1 validation of the upstream mergeWith bridge.",
+      "rationale": "It is the only remaining test that directly distinguishes a valid tactic registration from the expected stock-runtime failure.",
+      "next_experiment": "Review lab-iris-lean-127-simp-to-model-ec16acc0a37a and inspect its built Lean invocation and checker output.",
+      "priority": "high",
+      "status": "open",
+      "id": "lead-5809661697",
+      "strategy_id": "strategy-0219ad7fc31f",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    },
+    {
+      "description": "If native registration fails, isolate whether the unresolved constant name is Const.mergeWith, its fully qualified implementation name, or mergeWith!.",
+      "rationale": "A single trace of the transformed expression can select the exact modifyMap entry without another full Iris build.",
+      "next_experiment": "Instrument a bounded local copy of simp_to_model's expression traversal in the standalone fixture.",
+      "priority": "normal",
+      "status": "open",
+      "id": "lead-29dd724b3a",
+      "strategy_id": "strategy-0219ad7fc31f",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    }
+  ],
+  "ruled_out": [
+    {
+      "claim_or_route": "Treating patched overlay oleans with the stock native executable as decisive validation.",
+      "scope": "The imported simp_to_model mergeWith registration on Lean v4.32.0.",
+      "reason": "The native runtime executed the old mapping and left mergeWith untransformed.",
+      "evidence": ".proof-experiments/20260723-063823-7333d5",
+      "reopen_condition": "A demonstrated Lean invocation mode that interprets the changed imported metaprogram rather than dispatching to the stock native implementation.",
+      "attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    },
+    {
+      "claim_or_route": "Promoting the Iris-local private fold lemma as resolution of issue #127.",
+      "scope": "The previously compiling Const.get?_foldl_merge fallback.",
+      "reason": "It retains an implementation-specific fold proof and therefore does not satisfy the requested robustness mechanism.",
+      "evidence": "The prior fallback diff summarized in findings/epoch-003-native-stage1-discriminator.md.",
+      "reopen_condition": "Maintainer confirmation that a private implementation-model lemma satisfies issue #127 despite the absence of direct mergeWith automation.",
+      "attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+      "updated_at": "2026-07-23T06:45:59.786575+00:00"
+    }
+  ],
   "unresolved_questions": [],
-  "next_session": {},
+  "next_session": {
+    "recommended_strategy_id": "strategy-0219ad7fc31f",
+    "objective": "Obtain a hash-bound native completion receipt for the paired Lean/Iris patches.",
+    "first_action": "Inspect records/labs and lab-runs outputs for lab-iris-lean-127-simp-to-model-ec16acc0a37a; do not infer success from queue or progress state alone.",
+    "stop_condition": "Promote only when native fixture, focused checker, and full Iris build all exit zero; redirect immediately if the native fixture retains the mergeWith model goal.",
+    "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e"
+  },
   "recent_attempt_ids": [
     "iris-lean-127-simp-to-model-20260722-223326-810dbc",
     "iris-lean-127-simp-to-model-20260722-234149-4304e5",
-    "iris-lean-127-simp-to-model-20260723-052301-5a467e"
+    "iris-lean-127-simp-to-model-20260723-052301-5a467e",
+    "iris-lean-127-simp-to-model-20260723-064559-a6057e"
   ],
   "tactical_memory": {
-    "current_bottleneck": "",
-    "failure_signatures": [],
-    "reusable_assets": [],
-    "constraints_learned": [],
-    "decision_history": [],
-    "reduction_ledger": [],
-    "prior_art_decisions": []
+    "current_bottleneck": "Native Stage1 completion with its cache explicitly reconfigured to Lean v4.32.0's bundled Clang.",
+    "failure_signatures": [
+      {
+        "id": "d4629c5714e7",
+        "signature": "Lean Stage1 invokes the configured compiler with --print-target-triple; a stale GCC cache produces 'cc: error: unrecognized command-line option --print-target-triple'.",
+        "count": 1,
+        "last_strategy_id": "strategy-0219ad7fc31f",
+        "last_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ],
+    "reusable_assets": [
+      {
+        "name": "Lean mergeWith bridge patch",
+        "use": "Apply the list model, permutation lemmas, model bridge, and tactic registration.",
+        "evidence": "artifacts/patches/lean4-mergewith-simp-to-model.patch; SHA-256 c28f231364ae239a9577b6a5b73b6fafca40f465b1d2e0dca9468a1875427185",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "name": "Iris direct tactic patch",
+        "use": "Replace the bespoke TreeMap helpers with the direct simp_to_model proof.",
+        "evidence": "artifacts/patches/iris-127-simp-to-model.patch; SHA-256 c94fc8d34dfcff1069186a210c1975b80a38368da0d8f40de6ece0564340fdd6",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "name": "Native fixture and checker",
+        "use": "Fail-fast validation of the imported tactic mapping and public Iris theorem.",
+        "evidence": "experiments/SimpToModelMergeWith.lean SHA-256 49c9ad241a4014b2bdc05525f0bf549f10761fd4441788de57f4b415930fe26f; scripts/check_upstream_bridge.py SHA-256 6ccc6c8789f9545c147fdb082fd615456934203f23eaee1d520ae79b00d019fd",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ],
+    "constraints_learned": [
+      {
+        "constraint": "Overlay oleans cannot validate this changed imported metaprogram against the stock native runtime.",
+        "scope": "Lean v4.32.0 simp_to_model mergeWith registration.",
+        "evidence": ".proof-experiments/20260723-063823-7333d5 exited 1 with the unchanged mergeWith model goal.",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      },
+      {
+        "constraint": "The retained Stage1 directory must itself be reconfigured with bundled Clang.",
+        "scope": "The checkpointed native build at source/lean4-v4.32.0/build/release/stage1.",
+        "evidence": "CMakeCache.txt named /usr/bin/cc and stdlib.make exported LEAN_CC=/usr/bin/cc despite an existing configure stamp.",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ],
+    "decision_history": [
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "strategy_id": "strategy-0219ad7fc31f",
+        "decision": "continue",
+        "prediction": "The paired patches would pass structural checks, while an overlay replay using the stock native runtime would leave mergeWith untransformed.",
+        "observation": "The structural checker passed. Stock-native overlay replay exited 1 at the predicted untransformed mergeWith model goal. Prior native retries failed operationally before reaching this proof.",
+        "surprise": "The retained Stage1 configure stamp preserved /usr/bin/cc, so changing only the outer CMake compiler would not regenerate stdlib.make.",
+        "next_discriminator": "Review lab-iris-lean-127-simp-to-model-ec16acc0a37a and require native_compile_checked true before full-build credit.",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ],
+    "reduction_ledger": [
+      {
+        "ambient_space": "The single Iris TreeMap merge theorem plus the missing Lean Std Const.mergeWith model transformation.",
+        "represented_space_before": "Three bespoke Iris fold/model helpers and a 130-line theorem-region diff, with no Std mergeWith tactic mapping.",
+        "eliminated_or_quotiented": "The paired bridge reduces the Iris change to one local instance and one direct simp_to_model proof; native failures are filtered before the 259-job Iris build.",
+        "represented_space_after": "An 8-addition, 122-deletion Iris diff and a 111-line Lean Std bridge, pending native validation.",
+        "reduction_factor": "Iris theorem-region additions/deletions: 130 changed lines to 8 added proof lines; no global search-space factor applies.",
+        "measurement_status": "exact",
+        "unit": "proof states",
+        "coverage_scope": "Pinned Lean v4.32.0 and iris-lean commit 3e2b759dd3e928f4a31535afd07ea571325f0b8a.",
+        "soundness_basis": "git diff statistics, unchanged-header comparison, and the fail-closed structural checker.",
+        "remaining_unknown": "Whether the newly built native tactic runtime accepts the registration and whether focused and full Iris builds pass.",
+        "next_bulk_elimination": "Use the native fixture to reject the entire bridge design before any full Iris build if mergeWith remains unmodeled.",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "strategy_id": "strategy-0219ad7fc31f",
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ],
+    "prior_art_decisions": [
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260723-064559-a6057e",
+        "strategy_id": "strategy-0219ad7fc31f",
+        "nearest_method_ids": [
+          "none-found"
+        ],
+        "classification": "genuinely_different",
+        "exact_delta": "Current Lean Std models many TreeMap operations but lacks a Const.mergeWith list model and tactic mapping. The patch supplies that missing semantic bridge; the Iris change then removes its private fold simulation.",
+        "duplicate_risk": "An unindexed or newly opened Lean PR could independently add mergeWith support; issue #127 currently has no linked development or assignee.",
+        "comparison_test": "Search current Lean source for toListModel_mergeWith and the simp_to_model modify map, then compare the direct Iris theorem proof against its current bespoke implementation.",
+        "decision": "proceed",
+        "source_urls": [
+          "https://github.com/leanprover-community/iris-lean/issues/127",
+          "https://github.com/leanprover/lean4/blob/v4.32.0/src/Std/Data/DTreeMap/Internal/Lemmas.lean"
+        ],
+        "updated_at": "2026-07-23T06:45:59.786575+00:00"
+      }
+    ]
   }
 }
