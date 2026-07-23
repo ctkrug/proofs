@@ -10,15 +10,15 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 2,
-  "last_updated": "2026-07-22T23:41:49.858324+00:00",
+  "epoch_count": 3,
+  "last_updated": "2026-07-23T05:23:01.581896+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The pass did not produce a valid research result: TimeoutExpired: Command '['/root/.local/bin/codex', 'exec', '--ephemeral', '--json', '--sandbox', 'danger-full-access', '-c', 'approval_policy=\"never\"', '-c', 'forced_login_method=\"chatgpt\"', '-c', 'model_reasoning_effort=\"high\"', '--ignore-user-config', '--ignore-rules', '--model', 'gpt-5.6-sol', '-']' timed out after 3600 seconds",
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: A compiling refactor removed the old Option helpers and most implementation-specific proof machinery. The focused file, full 259-job build, and independent checker pass. Promotion is withheld because pinned simp_to_model cannot model Const.mergeWith directly, leaving a private fold-model lemma.",
   "established_facts": [],
   "strategies": [],
   "open_leads": [],
@@ -27,7 +27,8 @@
   "next_session": {},
   "recent_attempt_ids": [
     "iris-lean-127-simp-to-model-20260722-223326-810dbc",
-    "iris-lean-127-simp-to-model-20260722-234149-4304e5"
+    "iris-lean-127-simp-to-model-20260722-234149-4304e5",
+    "iris-lean-127-simp-to-model-20260723-052301-5a467e"
   ],
   "tactical_memory": {
     "current_bottleneck": "",

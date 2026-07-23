@@ -1070,8 +1070,8 @@
     "status": "attempted",
     "automation_eligible": true,
     "priority": 85,
-    "attempt_count": 2,
-    "research_attempt_count": 1,
+    "attempt_count": 3,
+    "research_attempt_count": 2,
     "accepted_result": false,
     "added_at": "2026-07-22T15:02:47Z",
     "source_checked_at": "2026-07-22T15:02:47Z",
@@ -1081,12 +1081,12 @@
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
     "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-22T23:41:49.858324+00:00",
+    "last_attempt_at": "2026-07-23T05:23:01.581896+00:00",
     "campaign_last_assessment": {
-      "attempt_id": "iris-lean-127-simp-to-model-20260722-223326-810dbc",
+      "attempt_id": "iris-lean-127-simp-to-model-20260723-052301-5a467e",
       "decision": "continue",
-      "close_signal": "The residual goal and identical capability tables localize the next pass to one model theorem plus one tactic registration.",
-      "reason": "This is run 1, the recognized target remains unresolved, and a bounded upstream discriminator has a direct replay test."
+      "close_signal": "The theorem, focused build, full 259-job build, and independent checker all pass; only one precisely identified automation-coverage gap remains.",
+      "reason": "Run 2 is below the minimum review point and the next bounded pass has a concrete path to the exact robustness requirement."
     }
   },
   {
