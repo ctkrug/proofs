@@ -10,15 +10,15 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 8,
-  "last_updated": "2026-07-23T21:57:31.389815+00:00",
+  "epoch_count": 9,
+  "last_updated": "2026-07-23T22:53:00.867811+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "The pass did not produce a valid research result: FileNotFoundError: [Errno 2] No such file or directory: 'codex'",
+  "synthesis_summary": "Attempt retained without durable claim projection because its evidence receipt did not validate: The exact Lean PR compiler successfully discharged the standalone mergeWith simp_to_model proof. Exact Iris focused/full validation failed before HeapInstances or the independent checker because Iris #532 pins Lean/Qq/Batteries 4.32.1 while Lean #14526 is 4.34.0-pre. The verification contract is therefore unmet. The superseded generated v4.32 build cache was removed to satisfy storage reserves; its sources and immutable receipts remain, and it is reproducible from the saved scripts.",
   "established_facts": [
     {
       "claim": "Pinned Lean v4.32.0 has no pre-existing mergeWith entry in simp_to_model's modification map.",
@@ -151,7 +151,8 @@
     "iris-lean-127-simp-to-model-20260723-084958-103b2e",
     "iris-lean-127-simp-to-model-20260723-132018-f1fbe5",
     "iris-lean-127-simp-to-model-20260723-215142-060c26",
-    "iris-lean-127-simp-to-model-20260723-215731-7805ba"
+    "iris-lean-127-simp-to-model-20260723-215731-7805ba",
+    "iris-lean-127-simp-to-model-20260723-225300-934337"
   ],
   "tactical_memory": {
     "current_bottleneck": "repair the epoch failure before further research",
