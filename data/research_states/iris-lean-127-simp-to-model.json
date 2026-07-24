@@ -10,15 +10,15 @@
     "A candidate is not a solution until independent and human review are recorded.",
     "Restating a known reduction, checking examples, or giving an unproved key lemma is not terminal success."
   ],
-  "epoch_count": 12,
-  "last_updated": "2026-07-24T04:31:19.859170+00:00",
+  "epoch_count": 13,
+  "last_updated": "2026-07-24T06:31:38.350139+00:00",
   "baseline_review": {
     "status": "required",
     "reviewed_at": null,
     "source_attempt_id": null,
     "requirement": "Audit exact statement/status, prior work, established facts, ruled-out routes, open leads, tools, and acceptance path before technical research."
   },
-  "synthesis_summary": "The pass did not produce a valid research result: RuntimeError: Codex gpt-5.6-sol failed rc=1: {\"type\":\"thread.started\",\"thread_id\":\"019f9264-5bc2-7c51-bbd2-98c2e55de8f3\"} {\"type\":\"turn.started\"} {\"type\":\"error\",\"message\":\"You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Jul 28th, 2026 5:02 PM.\"} {\"type\":\"turn.failed\",\"error\":{\"message\":\"You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Jul 28th, 2026 5:02 PM.\"}}",
+  "synthesis_summary": "The pass did not produce a valid research result: RuntimeError: Codex gpt-5.6-sol failed rc=1: {\"type\":\"thread.started\",\"thread_id\":\"019f92d2-7722-7d90-942f-9a3e7b89c938\"} {\"type\":\"turn.started\"} {\"type\":\"error\",\"message\":\"You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Jul 28th, 2026 5:02 PM.\"} {\"type\":\"turn.failed\",\"error\":{\"message\":\"You've hit your usage limit. Visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Jul 28th, 2026 5:02 PM.\"}}",
   "established_facts": [
     {
       "claim": "Pinned Lean v4.32.0 has no pre-existing mergeWith entry in simp_to_model's modification map.",
@@ -86,10 +86,10 @@
       "blocker": "",
       "reopen_condition": "",
       "reopen_evidence": "",
-      "last_attempt_id": "iris-lean-127-simp-to-model-20260724-043119-69c4e4",
-      "attempts": 5,
+      "last_attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7",
+      "attempts": 6,
       "parent_ids": [],
-      "updated_at": "2026-07-24T04:31:19.859170+00:00",
+      "updated_at": "2026-07-24T06:31:38.350139+00:00",
       "route_evaluation": null
     }
   ],
@@ -141,7 +141,7 @@
     "objective": "Repair the failed pass and rerun.",
     "first_action": "Repair the failed pass and rerun.",
     "stop_condition": "",
-    "source_attempt_id": "iris-lean-127-simp-to-model-20260724-043119-69c4e4"
+    "source_attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7"
   },
   "recent_attempt_ids": [
     "iris-lean-127-simp-to-model-20260722-223326-810dbc",
@@ -155,7 +155,8 @@
     "iris-lean-127-simp-to-model-20260723-225300-934337",
     "iris-lean-127-simp-to-model-20260724-003127-bb803d",
     "iris-lean-127-simp-to-model-20260724-023200-f7e30d",
-    "iris-lean-127-simp-to-model-20260724-043119-69c4e4"
+    "iris-lean-127-simp-to-model-20260724-043119-69c4e4",
+    "iris-lean-127-simp-to-model-20260724-063138-a2d5e7"
   ],
   "tactical_memory": {
     "current_bottleneck": "repair the epoch failure before further research",
@@ -179,10 +180,10 @@
       {
         "id": "0d4accc03908",
         "signature": "RuntimeError: invalid epoch output",
-        "count": 3,
+        "count": 4,
         "last_strategy_id": "strategy-0d0ea8626daf",
-        "last_attempt_id": "iris-lean-127-simp-to-model-20260724-043119-69c4e4",
-        "updated_at": "2026-07-24T04:31:19.859170+00:00"
+        "last_attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7",
+        "updated_at": "2026-07-24T06:31:38.350139+00:00"
       }
     ],
     "reusable_assets": [
@@ -284,6 +285,16 @@
         "surprise": "the epoch failed before evaluation",
         "next_discriminator": "rerun the smallest valid output-contract control",
         "updated_at": "2026-07-24T04:31:19.859170+00:00"
+      },
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7",
+        "strategy_id": "strategy-0d0ea8626daf",
+        "decision": "hold",
+        "prediction": "produce a valid bounded epoch",
+        "observation": "output contract or infrastructure failure",
+        "surprise": "the epoch failed before evaluation",
+        "next_discriminator": "rerun the smallest valid output-contract control",
+        "updated_at": "2026-07-24T06:31:38.350139+00:00"
       }
     ],
     "reduction_ledger": [
@@ -315,9 +326,9 @@
         "soundness_basis": "no claim accepted",
         "remaining_unknown": "the full target",
         "next_bulk_elimination": "repair the epoch before search",
-        "source_attempt_id": "iris-lean-127-simp-to-model-20260724-043119-69c4e4",
+        "source_attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7",
         "strategy_id": "strategy-0d0ea8626daf",
-        "updated_at": "2026-07-24T04:31:19.859170+00:00"
+        "updated_at": "2026-07-24T06:31:38.350139+00:00"
       }
     ],
     "prior_art_decisions": [
@@ -417,6 +428,22 @@
           "https://github.com/leanprover-community/iris-lean/issues/127"
         ],
         "updated_at": "2026-07-24T04:31:19.859170+00:00"
+      },
+      {
+        "attempt_id": "iris-lean-127-simp-to-model-20260724-063138-a2d5e7",
+        "strategy_id": "strategy-0d0ea8626daf",
+        "nearest_method_ids": [
+          "not-applicable"
+        ],
+        "classification": "replication_control",
+        "exact_delta": "none; the epoch failed before comparison",
+        "duplicate_risk": "unknown",
+        "comparison_test": "repair and rerun the smallest output-contract control",
+        "decision": "stop",
+        "source_urls": [
+          "https://github.com/leanprover-community/iris-lean/issues/127"
+        ],
+        "updated_at": "2026-07-24T06:31:38.350139+00:00"
       }
     ]
   }
