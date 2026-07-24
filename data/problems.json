@@ -1070,7 +1070,7 @@
     "status": "attempted",
     "automation_eligible": true,
     "priority": 85,
-    "attempt_count": 16,
+    "attempt_count": 17,
     "research_attempt_count": 6,
     "accepted_result": false,
     "added_at": "2026-07-22T15:02:47Z",
@@ -1081,7 +1081,7 @@
     "campaign_start_research_attempt_count": 0,
     "campaign_min_runs": 25,
     "campaign_decision": "continue through run 25",
-    "last_attempt_at": "2026-07-24T12:31:37.755055+00:00",
+    "last_attempt_at": "2026-07-24T14:31:42.202096+00:00",
     "campaign_last_assessment": {
       "attempt_id": "iris-lean-127-simp-to-model-20260723-225300-934337",
       "decision": "continue",
