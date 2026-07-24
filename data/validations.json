@@ -7,5 +7,23 @@
     "note": "Draft pull request #18 opened against google-deepmind/superhuman main with the approved one-byte CSV correction.",
     "recorded_at": "2026-07-22T17:51:15.303442+00:00",
     "recorded_by": "Charlie Krug"
+  },
+  {
+    "attempt_id": "iris-lean-127-simp-to-model-20260723-225300-934337",
+    "problem_id": "iris-lean-127-simp-to-model",
+    "state": "submitted",
+    "source_url": "https://github.com/leanprover/lean4/pull/14526",
+    "note": "Submitted the prerequisite Lean Std mergeWith simp_to_model model bridge; upstream CI is green and the PR is non-draft and mergeable.",
+    "recorded_at": "2026-07-24T00:23:58.243530+00:00",
+    "recorded_by": "Charlie Krug"
+  },
+  {
+    "attempt_id": "iris-lean-127-simp-to-model-20260723-225300-934337",
+    "problem_id": "iris-lean-127-simp-to-model",
+    "state": "submitted",
+    "source_url": "https://github.com/leanprover-community/iris-lean/pull/532",
+    "note": "Submitted the dependent Iris-Lean proof refactor as a draft pending Lean PR #14526; GitHub reports it mergeable.",
+    "recorded_at": "2026-07-24T00:23:59.174873+00:00",
+    "recorded_by": "Charlie Krug"
   }
 ]

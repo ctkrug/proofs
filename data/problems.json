@@ -1087,7 +1087,9 @@
       "decision": "continue",
       "close_signal": "The exact upstream compiler passes the decisive TreeMap fixture, the downstream patch is exact, and the remaining failures are localized to a version mismatch with a concrete v4.32.1 backport/release route.",
       "reason": "This is run 6, before the minimum review point, and a bounded version-paired pass can still produce the required reproducible receipt."
-    }
+    },
+    "external_validation_state": "submitted",
+    "external_validation_url": "https://github.com/leanprover-community/iris-lean/pull/532"
   },
   {
     "id": "leanbridge-56-totally-positive",
